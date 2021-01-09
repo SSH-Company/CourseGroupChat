@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        /* Basic options */
+        "target": "ES6",
+        "module": "commonjs",
+        "removeComments": true,
+        "importHelpers": true,
+
+        /* Module resolution options */
+        "moduleResolution": "node",
+        "baseUrl": "./",
+        "typeRoots": ["node_modules/@types"],
+        "types": ["node"],
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+
+        /* Experimental options */
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+
+        /* Advanced options */
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true
+    },
+    "include": ["./src/**/*.ts"],
+    "exclude": ["./src/public"]
+}
