@@ -11,7 +11,7 @@ Open 2 terminals. One terminal will run the client app, while the other runs the
 Change directory into **CourseGroupChat/client**.  
 Run `expo start`.  
 
-In Terminal 2:
+**In Terminal 2:**
 Change directory into **CourseGroupChat/server**.  
 Run `npm run start-dev`.  
 
