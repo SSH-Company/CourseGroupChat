@@ -9,7 +9,7 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Main">
+      <Stack.Navigator initialRouteName="Main" screenOptions={{headerShown: false}}>
         <Stack.Screen name="Main" component={Main}/>
         <Stack.Screen name="Chat" component={Chat}/>
       </Stack.Navigator>
