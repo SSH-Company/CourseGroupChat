@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useState, useCallback, useEffect } from 'react'
 import { GiftedChat, IMessage } from 'react-native-gifted-chat'
-import Message from '../components/Message'
+import Message from './components/Message'
 
 const Chat:FunctionComponent = () => {
   const [messages, setMessages] = useState<IMessage[]>([]);
