@@ -1,11 +1,11 @@
 import React, { FunctionComponent } from 'react';
-import { View, ScrollView } from 'react-native';
-import { ListItem, Avatar, Header, SearchBar, Text } from 'react-native-elements';
+import { View, ScrollView, Platform } from 'react-native';
+import { ListItem, Avatar, Header, SearchBar, Text, Button } from 'react-native-elements';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { exampleList } from './exampleList';
 
 // landing page.
-const Main = () => {
+const Main = ({ navigation }) => {
   // search bar.
   const [search, setSearch] = React.useState('')
 
@@ -20,14 +20,14 @@ const Main = () => {
       />
       <ScrollView contentOffset={{x: 0, y: 76}}>
         <SearchBar
-          platform="ios"
+          platform={Platform.OS === 'android' ? 'android' : 'ios'}
           placeholder="Search messages"
           onChangeText={() => setSearch(search)}
           value={search}
         />
         {
           exampleList.map((l, i) => (
-            <ListItem key={i} bottomDivider>
+            <ListItem key={i} bottomDivider onPress={() => navigation.navigate('Chat')}>
               <Avatar rounded size="medium" source={{uri: l.avatar_url}} />
               <ListItem.Content>
                 <ListItem.Title>{l.name}</ListItem.Title>
