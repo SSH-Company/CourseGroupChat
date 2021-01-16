@@ -4,7 +4,7 @@ import { ListItem, Avatar, Header, SearchBar } from 'react-native-elements';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { exampleList } from './exampleList';
 
-type exam = {
+type listtype = {
   name: string,
   avatar_url: string,
   subtitle: string
@@ -15,8 +15,8 @@ const Main = ({ navigation }) => {
   // search bar.
   const [search, setSearch] = React.useState('');
   // data arrays.
-  const [filteredList, setFilteredList] = React.useState<exam[]>(exampleList);
-  const [fullList, setFullList] = React.useState<exam[]>(exampleList);
+  const [filteredList, setFilteredList] = React.useState<listtype[]>(exampleList);
+  const [fullList, setFullList] = React.useState<listtype[]>(exampleList);
 
   const searchFunction = (input) => {
     if (input) {
