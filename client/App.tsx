@@ -1,11 +1,8 @@
-import React from 'react'
-import Chat from "./src/Chat/Chat"
+import React, {useState, useEffect} from 'react';
+import Main from './src/Main/Main'
 
-function App() {
-
+export default function App() {
   return (
-    <Chat />
-  );
-}
-
-export default App
+    <Main />
+  )
+};
