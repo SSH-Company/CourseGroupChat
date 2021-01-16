@@ -10,7 +10,7 @@ const Main = () => {
   const [search, setSearch] = React.useState('')
 
   return (
-    <View>
+    <View style={{flex:1}}>
       <Header
         placement="center"
         backgroundColor="#ccccff"
@@ -18,24 +18,24 @@ const Main = () => {
         centerComponent={{ text: 'Chat', style: { color: '#734f96', fontSize: 20, fontWeight: 'bold' }}}
         rightComponent= {<FontAwesome5 name={'comments'} color='#734f96' size={20} light/>}
       />
-      <ScrollView>
-      <SearchBar
-        platform="ios"
-        placeholder="Search messages"
-        onChangeText={() => setSearch(search)}
-        value={search}
-      />
-      {
-        exampleList.map((l, i) => (
-          <ListItem key={i} bottomDivider>
-            <Avatar rounded size="medium" source={{uri: l.avatar_url}} />
-            <ListItem.Content>
-              <ListItem.Title>{l.name}</ListItem.Title>
-              <ListItem.Subtitle>{l.subtitle}</ListItem.Subtitle>
-            </ListItem.Content>
-          </ListItem>
-        ))
-      }
+      <ScrollView contentOffset={{x: 0, y: 76}}>
+        <SearchBar
+          platform="ios"
+          placeholder="Search messages"
+          onChangeText={() => setSearch(search)}
+          value={search}
+        />
+        {
+          exampleList.map((l, i) => (
+            <ListItem key={i} bottomDivider>
+              <Avatar rounded size="medium" source={{uri: l.avatar_url}} />
+              <ListItem.Content>
+                <ListItem.Title>{l.name}</ListItem.Title>
+                <ListItem.Subtitle>{l.subtitle}</ListItem.Subtitle>
+              </ListItem.Content>
+            </ListItem>
+          ))
+        }
       </ScrollView>
     </View>
   );
