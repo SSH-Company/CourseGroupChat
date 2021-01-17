@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useState, useCallback, useEffect } from 'react'
 import { GiftedChat, IMessage } from 'react-native-gifted-chat'
-import Message from './components/Message'
+import { Message, CustomToolbar } from './components'
 
 const Chat:FunctionComponent = () => {
   const [messages, setMessages] = useState<IMessage[]>([]);
@@ -24,21 +24,28 @@ const Chat:FunctionComponent = () => {
     setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
   }, [])
 
-  const renderMessage = (message: any) => {
-    const currentMessage = message.currentMessage
+  const renderMessage = (props: any) => {
+    const currentMessage = props.currentMessage
     const isCurrentUser = Object.keys(currentMessage.user).length === 0
     if (currentMessage) {
         return (
-            <Message {...message.currentMessage} isCurrentUser={isCurrentUser}/>
+            <Message {...currentMessage} isCurrentUser={isCurrentUser}/>
         )
     }
+  }
+
+  const renderInputToolbar = (props: any) => {
+    return (
+      <CustomToolbar {...props} />
+    )    
   }
 
   return (
     <GiftedChat
         messages={messages}
         onSend={messages => onSend(messages)}
-        renderMessage={message => renderMessage(message)}
+        renderMessage={props => renderMessage(props)}
+        renderInputToolbar={props => renderInputToolbar(props)}
     />
   )
 }
