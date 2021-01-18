@@ -21,17 +21,13 @@ const style = StyleSheet.create({
         alignItems: 'center',
         borderRadius: 30,
         marginLeft: 10,
-        maxWidth: '94%'
+        width: '95%'
     },
     //button icons
-    uploadIcon: {
+    actionIcon: {
         marginLeft: 10,
         marginRight: 12,
         alignSelf: 'center',
-    },
-    micIcon: {
-        justifyContent: 'flex-end',
-        marginLeft: 380
     }
 })
 
@@ -43,7 +39,10 @@ const CustomToolbar:FunctionComponent = (props) => {
             containerStyle={style.inputbar} 
             renderActions={() => {
                 return (
-                    <AntDesign name={'pluscircle'} color='#734f96' size={20} style={style.uploadIcon}/>
+                    <>
+                    <FontAwesome name={'microphone'} color='#734f96' size={20} style={style.actionIcon}/>
+                    <AntDesign name={'pluscircle'} color='#734f96' size={20} style={style.actionIcon}/>
+                    </>
                 )}}
             renderSend={() => {
                 return (
@@ -53,7 +52,6 @@ const CustomToolbar:FunctionComponent = (props) => {
                 )
             }}
             />
-            <FontAwesome name={'microphone'} color='#734f96' size={20} style={style.micIcon}/>
         </View>
     )
 }

@@ -1,11 +1,7 @@
 import React, { FunctionComponent } from 'react'
 import { View, StyleSheet, Text } from 'react-native'
 import { Avatar } from 'react-native-elements'
-import { IMessage } from 'react-native-gifted-chat'
-
-interface MessageProps extends IMessage {
-    isCurrentUser: boolean
-}
+import { Message } from 'react-native-gifted-chat'
 
 //style sheet
 const styles = StyleSheet.create({
@@ -35,8 +31,7 @@ const styles = StyleSheet.create({
     },
 })
 
-const Message:FunctionComponent<MessageProps> = (props) => {
-    let { isCurrentUser } = props
+const CustomMessage:FunctionComponent = (props) => {
 
     //TODO: rendering avatar
     const renderAvatar = (avatarProps: any) => {
@@ -55,12 +50,22 @@ const Message:FunctionComponent<MessageProps> = (props) => {
     }
 
     return (
-        <View style={[styles.item, isCurrentUser ? styles.itemOut: styles.itemIn]}>
-            <View style={[styles.balloon, {backgroundColor: isCurrentUser ? '#f5f9ff' : '#7c80ee'}]}>
-            <Text style={{paddingTop: 5, color:  isCurrentUser ? 'black' : 'white'}}>{props.text}</Text>
-            </View>
-        </View>
+        <Message 
+            {...props}
+            key={`user-key-${props['user']['_id']}`}
+            renderBubble={() => {
+                const currentMessage = props['currentMessage']
+                const isCurrentUser = Object.keys(currentMessage.user).length === 0
+                return (
+                    <View style={[styles.item]}>
+                        <View style={[styles.balloon, {backgroundColor: isCurrentUser ? '#f5f9ff' : '#7c80ee'}]}>
+                        <Text style={{paddingTop: 5, color:  isCurrentUser ? 'black' : 'white'}}>{currentMessage.text}</Text>
+                        </View>
+                    </View>
+                )
+            }}
+        />
     )
 }
 
-export default Message
+export default CustomMessage

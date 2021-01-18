@@ -1,7 +1,7 @@
-import Message from './Message'
+import CustomMessage from './CustomMessage'
 import CustomToolbar from './CustomToolbar'
 
 export {
-    Message,
+    CustomMessage,
     CustomToolbar
 }
