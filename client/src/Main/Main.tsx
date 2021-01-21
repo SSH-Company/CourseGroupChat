@@ -57,7 +57,7 @@ const Main = ({ navigation }) => {
       />  
         {
           filteredList.map((l, i) => (
-            <ListItem key={i} bottomDivider onPress={() => navigation.navigate('Chat')}>
+            <ListItem key={i} topDivider bottomDivider onPress={() => navigation.navigate('Chat')}>
               <Avatar rounded size="medium" source={{uri: l.avatar_url}} />
               <ListItem.Content>
                 <ListItem.Title>{l.name}</ListItem.Title>

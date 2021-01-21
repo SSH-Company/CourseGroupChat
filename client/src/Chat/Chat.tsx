@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useState, useCallback, useEffect } from 'react'
-import { View, Dimensions } from 'react-native'
+import { View, Dimensions, Platform } from 'react-native'
 import { GiftedChat, IMessage } from 'react-native-gifted-chat'
-import DrawerLayout from 'react-native-gesture-handler/DrawerLayout'
+import { DrawerLayout } from 'react-native-gesture-handler';
 import { CustomMessage, CustomToolbar, ChatSettings } from './components'
 
 const Chat:FunctionComponent = () => {
@@ -34,9 +34,10 @@ const Chat:FunctionComponent = () => {
         <DrawerLayout
             drawerWidth={deviceWidth}
             drawerPosition={'right'}
-            drawerType={'slide'}
+            drawerType={'front'}
             drawerBackgroundColor="#ffffff"
             renderNavigationView={ChatSettings}
+            contentContainerStyle={{}}
         >
             <GiftedChat
                 messages={messages}
