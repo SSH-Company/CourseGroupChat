@@ -1,37 +1,52 @@
 import React, { FunctionComponent, useState, useCallback, useEffect } from 'react'
+import { View, Dimensions } from 'react-native'
 import { GiftedChat, IMessage } from 'react-native-gifted-chat'
-import { CustomMessage, CustomToolbar } from './components'
+import DrawerLayout from 'react-native-gesture-handler/DrawerLayout'
+import { CustomMessage, CustomToolbar, ChatSettings } from './components'
 
 const Chat:FunctionComponent = () => {
-  const [messages, setMessages] = useState<IMessage[]>([]);
+    const [messages, setMessages] = useState<IMessage[]>([]);
 
-  useEffect(() => {
+    //Device width
+    let deviceWidth = Dimensions.get('window').width
+
+    useEffect(() => {
     setMessages([
-      {
-        _id: 1,
-        text: 'Hello developer',
-        createdAt: new Date(),
-        user: {
-          _id: 2,
-          name: 'React Native',
-          avatar: 'https://placeimg.com/140/138/any',
+        {
+            _id: 1,
+            text: 'Hello developer',
+            createdAt: new Date(),
+            user: {
+            _id: 2,
+            name: 'React Native',
+            avatar: 'https://placeimg.com/140/138/any',
+            },
         },
-      },
-    ])
-  }, [])
+      ])
+    }, [])
 
-  const onSend = useCallback((messages = []) => {
-    setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
-  }, [])
+    const onSend = useCallback((messages = []) => {
+        setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
+    }, [])
 
-  return (
-    <GiftedChat
-        messages={messages}
-        onSend={messages => onSend(messages)}
-        renderMessage={props => { return ( <CustomMessage {...props} /> ) }}
-        renderInputToolbar={props => { return ( <CustomToolbar {...props} /> ) }}
-    />
-  )
+    return (
+    <View style={{flex: 1}}>
+        <DrawerLayout
+            drawerWidth={deviceWidth}
+            drawerPosition={'right'}
+            drawerType={'slide'}
+            drawerBackgroundColor="#ffffff"
+            renderNavigationView={ChatSettings}
+        >
+            <GiftedChat
+                messages={messages}
+                onSend={messages => onSend(messages)}
+                renderMessage={props => { return ( <CustomMessage {...props} /> ) }}
+                renderInputToolbar={props => { return ( <CustomToolbar {...props} /> ) }}
+            />
+        </DrawerLayout>
+    </View>
+    )
 }
 
 export default Chat
