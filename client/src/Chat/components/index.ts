@@ -1,11 +1,11 @@
 import CustomMessage from './CustomMessage'
 import CustomToolbar from './CustomToolbar'
-import ChatSettings from './ChatSettings'
+import InboxSettings from './InboxSettings'
 
 export {
     CustomMessage,
     CustomToolbar,
-    ChatSettings
+    InboxSettings
 }
 
 

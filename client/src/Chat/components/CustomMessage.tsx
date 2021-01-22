@@ -1,7 +1,11 @@
 import React, { FunctionComponent } from 'react'
 import { View, StyleSheet, Text } from 'react-native'
-import { Avatar } from 'react-native-elements'
+import { Avatar, Image } from 'react-native-elements'
 import { Message } from 'react-native-gifted-chat'
+
+type CustomMessageProps = {
+    uniqueUserId: number
+}
 
 //style sheet
 const styles = StyleSheet.create({
@@ -31,7 +35,7 @@ const styles = StyleSheet.create({
     },
 })
 
-const CustomMessage:FunctionComponent = (props) => {
+const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
 
     //TODO: rendering avatar
     const renderAvatar = (avatarProps: any) => {
@@ -55,7 +59,7 @@ const CustomMessage:FunctionComponent = (props) => {
             key={`user-key-${props['user']['_id']}`}
             renderBubble={() => {
                 const currentMessage = props['currentMessage']
-                const isCurrentUser = Object.keys(currentMessage.user).length === 0
+                const isCurrentUser = currentMessage.user._id === props.uniqueUserId
                 return (
                     <View style={[styles.item]}>
                         <View style={[styles.balloon, {backgroundColor: isCurrentUser ? '#f5f9ff' : '#7c80ee'}]}>
