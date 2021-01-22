@@ -95,3 +95,4 @@ const InboxSettings = () => {
 }
 
 export default InboxSettings
+
