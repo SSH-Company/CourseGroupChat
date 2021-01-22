@@ -16,11 +16,10 @@ const Main = ({ navigation }) => {
   const [search, setSearch] = React.useState('');
   // data arrays.
   const [filteredList, setFilteredList] = React.useState<listtype[]>(exampleList);
-  const [fullList, setFullList] = React.useState<listtype[]>(exampleList);
 
   const searchFunction = (input) => {
     if (input) {
-      const newList = fullList.filter((item) => {
+      const newList = exampleList.filter((item) => {
         const itemInfo = item.name
         ? item.name.toUpperCase()
         : ''.toUpperCase();
@@ -31,7 +30,7 @@ const Main = ({ navigation }) => {
       setSearch(input);
     }
     else {
-      setFilteredList(fullList);
+      setFilteredList(exampleList);
       setSearch(input);
     }
   }
@@ -57,7 +56,7 @@ const Main = ({ navigation }) => {
       />  
         {
           filteredList.map((l, i) => (
-            <ListItem key={i} bottomDivider onPress={() => navigation.navigate('Chat')}>
+            <ListItem key={i} topDivider bottomDivider onPress={() => navigation.navigate('Chat')}>
               <Avatar rounded size="medium" source={{uri: l.avatar_url}} />
               <ListItem.Content>
                 <ListItem.Title>{l.name}</ListItem.Title>
