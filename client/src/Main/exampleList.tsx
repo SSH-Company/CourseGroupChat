@@ -56,12 +56,12 @@ export const exampleList =
     subtitle: 'Nono'
   },
   {
-    name: 'Amy Farha',
+    name: 'Amy Hosen',
     avatar_url: 'https://placeimg.com/140/140/any',
     subtitle: 'Vice President'
   },
   {
-    name: 'Chris Jackson',
+    name: 'Chris Dikksi',
     avatar_url: 'https://placeimg.com/140/140/any',
     subtitle: 'Vice Chairman'
   }, 
