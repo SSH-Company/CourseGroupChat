@@ -6,17 +6,18 @@ import {
     Text,
     View 
 } from 'react-native'
+import BASE_URL from '../../BaseUrl'
 import axios from 'axios'
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: "center"
+        justifyContent: "center",
+        alignItems: 'center'
     },
     horizontal: {
         flexDirection: "row",
-        justifyContent: "space-around",
-        padding: 10
+        justifyContent: "space-around"
     }
 });
 
@@ -42,8 +43,9 @@ const LogIn = ({ navigation }) => {
 
     const checkLogIn = async () => {
         const token = await AsyncStorage.getItem('token');
+        // const token = 'ACCESS_TOKEN';
         if (token) {
-            axios.post('/api/login/', { userToken: token })
+            axios.post(`${BASE_URL}/api/login/`, { userToken: token })
                 .then(async res => {
                     const user = res.data 
                     await AsyncStorage.setItem('token', token)
@@ -68,7 +70,9 @@ const LogIn = ({ navigation }) => {
                 <Text>Loggin in...</Text>
             </View>
         )
-    }    
+    } else {
+        return null
+    }
 }
 
 export default LogIn

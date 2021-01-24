@@ -38,7 +38,7 @@ export class Database {
 
                 try {
                     const res = await client.query(cleanedStmt, params);
-                    resolve(res);
+                    resolve(res.rows);
                     return;
 
                 } catch(err) {

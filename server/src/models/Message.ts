@@ -19,7 +19,7 @@ export class UserModel implements MessageInterface {
     }
 
     static insert(user: MessageInterface): Promise<void> {
-        const query = `INSERT INTO RT."MESSAGE" ("CREATOR_ID", "MESSAGE_BODY", "CREATE_DATE") 
+        const query = `INSERT INTO RT.MESSAGE ("CREATOR_ID", "MESSAGE_BODY", "CREATE_DATE") 
         VALUES (?, ?, CURRENT_TIMESTAMP);`
         const params = [user.CREATOR_ID, user.MESSAGE_BODY];
         

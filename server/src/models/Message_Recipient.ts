@@ -21,7 +21,7 @@ export class UserModel implements MessageRecipientInterface {
     }
 
     static insert(user: MessageRecipientInterface): Promise<void> {
-        const query = `INSERT INTO RT."MESSAGE_RECIPIENT" ("RECIPIENT_ID", "MESSAGE_ID", "IS_READ") 
+        const query = `INSERT INTO RT.MESSAGE_RECIPIENT ("RECIPIENT_ID", "MESSAGE_ID", "IS_READ") 
         VALUES (?, ?, ?);`
         const params = [user.RECIPIENT_ID, user.MESSAGE_ID, user.IS_READ];
         
