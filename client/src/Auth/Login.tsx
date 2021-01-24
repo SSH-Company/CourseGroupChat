@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { 
     ActivityIndicator, 
     AsyncStorage, 
@@ -35,8 +35,6 @@ const LogIn = ({ navigation }) => {
         The user isn't logged in, redirect to Auth Screen
     */
 
-    const [loginSuccess, setLoginSuccess] = useState(false);
-
     useEffect(() => {
         checkLogIn()
     }, [])
@@ -50,7 +48,6 @@ const LogIn = ({ navigation }) => {
                     const user = res.data 
                     await AsyncStorage.setItem('token', token)
                     await AsyncStorage.setItem('user', JSON.stringify(user))
-                    setLoginSuccess(true)
                     //redirect to Main
                     navigation.navigate('Main')
                 })
@@ -63,16 +60,12 @@ const LogIn = ({ navigation }) => {
         }
     }  
 
-    if (!loginSuccess) {
-        return (
-            <View style={[styles.container, styles.horizontal]}>
-                <ActivityIndicator size="small"/>
-                <Text>Loggin in...</Text>
-            </View>
-        )
-    } else {
-        return null
-    }
+    return (
+        <View style={[styles.container, styles.horizontal]}>
+            <ActivityIndicator size="small"/>
+            <Text>Loggin in...</Text>
+        </View>
+    )
 }
 
 export default LogIn
