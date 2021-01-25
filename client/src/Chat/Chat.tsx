@@ -2,7 +2,9 @@ import React, { FunctionComponent, useState, useCallback, useEffect } from 'reac
 import { View, Dimensions } from 'react-native'
 import { GiftedChat, IMessage, User } from 'react-native-gifted-chat'
 import { DrawerLayout } from 'react-native-gesture-handler';
-import { CustomMessage, CustomToolbar, InboxSettings } from './components'
+import { CustomMessage, CustomToolbar, InboxSettings } from './components';
+import BASE_URL from '../../BaseUrl';
+import axios from 'axios';
 
 const Chat:FunctionComponent = () => {
 
@@ -39,6 +41,8 @@ const Chat:FunctionComponent = () => {
 
     const onSend = useCallback((messages = []) => {
         setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
+        //submit message to queue
+        axios.post(`${BASE_URL}/api/message`, { message: messages }).catch(err => console.error(err))
     }, [])
 
     return (
