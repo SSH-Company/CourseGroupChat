@@ -1,6 +1,6 @@
-import React, { FunctionComponent, useState, useCallback, useEffect } from 'react'
-import { View, Dimensions } from 'react-native'
-import { GiftedChat, IMessage, User } from 'react-native-gifted-chat'
+import React, { FunctionComponent, useState, useCallback, useEffect } from 'react';
+import { View, Dimensions } from 'react-native';
+import { GiftedChat, IMessage, User } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import { CustomMessage, CustomToolbar, InboxSettings } from './components';
 import BASE_URL from '../../BaseUrl';
@@ -8,16 +8,34 @@ import axios from 'axios';
 
 const Chat:FunctionComponent = () => {
 
+    useEffect(() => {
+        requestData()
+        websocketConnect()
+    }, [])
+
+    //WebSocket connection
+    const websocketConnect = () => {
+        const socket = new WebSocket('ws://192.168.0.124:3000');
+        
+        socket.onopen = () => {
+            socket.send('something');
+        }
+
+        socket.onmessage = (e: any) => {
+            console.log(e.data)
+        }
+        
+        socket.onerror = (e: any) => {
+            console.log(e.message);
+        }
+    }
+
     const UNIQUE_USER_ID = 250;
     const [user, setUser] = useState<User>();
     const [messages, setMessages] = useState<IMessage[]>([]);
 
     //Device width
     let deviceWidth = Dimensions.get('window').width
-
-    useEffect(() => {
-        requestData()
-    }, [])
 
     const requestData = () => {
         setMessages([

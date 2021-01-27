@@ -1,5 +1,7 @@
-import ACWServer from './Server';
+import CGCServer from './Server';
+import WSServer from './WSServer';
 
-const server = new ACWServer();
 const port = 3000;
-server.start(port);
+const server = new CGCServer();
+const wsServer = new WSServer(server.start(port));
+
