@@ -68,6 +68,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                     </View>
                 )
             }}
+            
         />
     )
 }

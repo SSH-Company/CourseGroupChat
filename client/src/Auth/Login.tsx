@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react'
 import { 
-    ActivityIndicator, 
     AsyncStorage, 
     StyleSheet,
     Text,
@@ -41,7 +40,7 @@ const LogIn = ({ navigation }) => {
 
     const checkLogIn = async () => {
         const token = await AsyncStorage.getItem('token');
-        // const token = 'ACCESS_TOKEN';
+        // const token = 'TOKEN_TWO';
         if (token) {
             axios.post(`${BASE_URL}/api/login/`, { userToken: token })
                 .then(async res => {
@@ -62,7 +61,6 @@ const LogIn = ({ navigation }) => {
 
     return (
         <View style={[styles.container, styles.horizontal]}>
-            <ActivityIndicator size="small"/>
             <Text>Loggin in...</Text>
         </View>
     )

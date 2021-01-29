@@ -9,7 +9,11 @@ export function verifyToken(token: string): Promise<string> {
             resolve(cache.get(token))
         } else {
             //Send request to uoft auth INTRO url
-            const uid = '1'
+            const tokenMap = {
+                'TOKEN_ONE': 1,
+                'TOKEN_TWO': 2
+            }
+            const uid = tokenMap[token]
             cache.set(token, uid)
             resolve(uid)
         }

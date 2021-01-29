@@ -33,7 +33,7 @@ class CGCServer extends Server {
         });
         this.app.use(express.static(path.join(__dirname, 'public/client')))
         this.app.get('*', (req, res) => { res.sendFile(path.join(__dirname, '/public/client/index.html')) })
-        this.app.listen(port, () => { Logger.Imp(this.SERVER_STARTED + port) });
+        return this.app.listen(port, () => { Logger.Imp(this.SERVER_STARTED + port) });
     }
 }
 
