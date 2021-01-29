@@ -25,8 +25,9 @@ export class MessageController {
         const allMessages:any[] = messages.messages
         const recipientID = messages.recipientID
         for (const message of allMessages) {
+            const queueName = `message-queue-${recipientID.id}`
             const queueData = { ...message, recipientID: recipientID }
-            await this.publishToQueue(config.rabbit.queue, JSON.stringify(queueData));
+            await this.publishToQueue(queueName, JSON.stringify(queueData));
         }
         res.status(STATUS.OK).json();
     }
