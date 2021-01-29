@@ -9,15 +9,6 @@ class Queue {
         this.consumeQueue(name);
     }
 
-    private sendMessage = (json) => {
-        // const messageContent = JSON.parse(json.content.toString())
-        this.connection.sendUTF(json.content)
-        // const recipientID = messageContent.recipientID
-        // if (recipientID.id in connections) {
-        //     connections[recipientID.id].sendUTF(json.content);
-        // }
-    }
-    
     private consumeQueue = async (queue = config.rabbit.queue, isNoAck = false, durable = false, prefetch = null) => {
     
         const cluster = await amqp.connect(config.rabbit.connectionString);
@@ -35,7 +26,7 @@ class Queue {
             channel.consume(queue, message => {
             if (message !== null) {
                 channel.ack(message);
-                this.sendMessage(message);
+                this.connection.sendUTF(message.content)
                 return null;
             } else {
                 console.log(message, 'Queue is empty!')
@@ -46,6 +37,24 @@ class Queue {
             console.log(error, 'Failed to consume messages from Queue!')
             cluster.close(); 
         }
+    }
+}
+
+//general function for publishing by queue name
+export const publishToQueue = async (queue, message, durable = false) => {
+    try {
+        const cluster = await amqp.connect(config.rabbit.connectionString);
+        const channel = await cluster.createChannel();
+    
+        await channel.assertQueue(queue, durable= durable);
+        await channel.sendToQueue(queue, Buffer.from(message));
+      
+        console.info(' [x] Sending message to queue', queue, message);
+            
+    } catch (error) {
+        // handle error response
+        console.error(error, 'Unable to connect to cluster!');  
+        process.exit(1);
     }
 }
 
