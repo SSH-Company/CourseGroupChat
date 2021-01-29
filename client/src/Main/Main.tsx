@@ -1,10 +1,11 @@
-import React from 'react';
-import { View, ScrollView, Platform } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { AsyncStorage, View, ScrollView, Platform } from 'react-native';
 import { ListItem, Avatar, Header, SearchBar } from 'react-native-elements';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { exampleList } from './exampleList';
 
 type listtype = {
+  id: number,
   name: string,
   avatar_url: string,
   subtitle: string
@@ -12,6 +13,17 @@ type listtype = {
 
 // landing page.
 const Main = ({ navigation }) => {
+
+  const [userID, setUserID] = useState();
+
+  //get user credentials once logged in
+  useEffect(() => {
+    AsyncStorage.getItem('user') 
+      .then(user => setUserID(JSON.parse(user).user.ID))
+      .catch(err => console.log(err))
+  }, [])
+
+
   // search bar.
   const [search, setSearch] = React.useState('');
   // data arrays.
@@ -56,7 +68,8 @@ const Main = ({ navigation }) => {
       />  
         {
           filteredList.map((l, i) => (
-            <ListItem key={i} topDivider bottomDivider onPress={() => navigation.navigate('Chat')}>
+            <ListItem key={i} topDivider bottomDivider 
+              onPress={() => navigation.navigate('Chat', { userID: userID, recipientID: { id: l.id, name: l.name, avatar: l.avatar_url } })}>
               <Avatar rounded size="medium" source={{uri: l.avatar_url}} />
               <ListItem.Content>
                 <ListItem.Title>{l.name}</ListItem.Title>

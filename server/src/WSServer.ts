@@ -2,13 +2,10 @@ import Websocket from 'websocket';
 import amqp from 'amqplib';
 import { config } from '../config/rabbitMq';
 
-const connections = [];
+const connections = {};
 
 class WSServer {
     private readonly wsServer;
-
-    //all active clients
-    private clients = {};
 
     constructor(server: any) {
         this.wsServer = new Websocket.server({ httpServer: server })
@@ -22,32 +19,30 @@ class WSServer {
             
             var connection = request.accept('', request.origin);
             console.log((new Date()) + ' Connection accepted.');
-            connections.push(connection);
-
-            // connection.on('message', function(message) {
-            //     if (message.type === 'utf8') {
-            //         console.log('Received Message: ' + message.utf8Data);
-            //         connection.sendUTF(message.utf8Data);
-            //     }
-            //     else if (message.type === 'binary') {
-            //         console.log('Received Binary Message of ' + message.binaryData.length + ' bytes');
-            //         connection.sendBytes(message.binaryData);
-            //     }
-            // });
-            // connection.on('close', function(reasonCode, description) {
-            //     console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
-            // });
+            connection.on('message', function(message) {
+                if (message.type === 'utf8') {
+                    const userID = JSON.parse(message.utf8Data).userID
+                    connections[userID] = connection
+                }
+                else if (message.type === 'binary') {
+                    console.log('Received Binary Message of ' + message.binaryData.length + ' bytes');
+                    connection.sendBytes(message.binaryData);
+                }
+            });
+            connection.on('close', function(reasonCode, description) {
+                console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
+            });
         });
         this.consumeQueue() 
     }
 
 
     private sendMessage = (json) => {
-        // We are sending the current data to all connected clients
-        // Object.keys(this.clients).map((client) => {
-        //     this.clients[client].sendUTF(json);
-        // });
-        connections[0].sendUTF(json);
+        const messageContent = JSON.parse(json.content.toString())
+        const recipientID = messageContent.recipientID
+        if (recipientID.id in connections) {
+            connections[recipientID.id].sendUTF(json.content);
+        }
     }
 
     public consumeQueue = async (queue = config.rabbit.queue, isNoAck = false, durable = false, prefetch = null) => {
@@ -66,8 +61,6 @@ class WSServer {
         try {
             channel.consume(queue, message => {
             if (message !== null) {
-                console.log(this.clients)
-                console.log(' [x] Received', message.content.toString());
                 channel.ack(message);
                 this.sendMessage(message);
                 return null;
@@ -86,13 +79,6 @@ class WSServer {
         // TODO: put logic here to detect whether the specified origin is allowed.
         return true;
     }
-
-    // public static getSocket(): WSServer {
-    //     if (!WSServer.instance) {
-    //         WSServer.instance = new WSServer()
-    //     }
-    //     return WSServer.instance;
-    // }
 }
 
 export default WSServer

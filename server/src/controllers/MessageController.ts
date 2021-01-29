@@ -9,10 +9,25 @@ import { config } from '../../config/rabbitMq'
 
 @Controller('message')
 export class MessageController {
+    
+    /*
+        Expected body type
+        message: array of IMEssages [],
+        recipientID: {
+            id: number,
+            name: string,
+            avatar: string (url)
+        }
+    */
     @Post('')
     private async submitMessage(req: Request, res: Response) {
-        const message = req.body.message;
-        await this.publishToQueue(config.rabbit.queue, message[0].text);
+        const messages = req.body.message;
+        const allMessages:any[] = messages.messages
+        const recipientID = messages.recipientID
+        for (const message of allMessages) {
+            const queueData = { ...message, recipientID: recipientID }
+            await this.publishToQueue(config.rabbit.queue, JSON.stringify(queueData));
+        }
         res.status(STATUS.OK).json();
     }
     
