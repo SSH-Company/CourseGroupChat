@@ -61,7 +61,7 @@ const LogIn = ({ navigation }) => {
 
     return (
         <View style={[styles.container, styles.horizontal]}>
-            <Text>Loggin in...</Text>
+            <Text>Logging in...</Text>
         </View>
     )
 }

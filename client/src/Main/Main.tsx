@@ -23,7 +23,6 @@ const Main = ({ navigation }) => {
       .catch(err => console.log(err))
   }, [])
 
-
   // search bar.
   const [search, setSearch] = React.useState('');
   // data arrays.
