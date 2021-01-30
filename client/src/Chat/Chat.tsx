@@ -1,14 +1,14 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useContext } from 'react';
 import { View, Dimensions } from 'react-native';
 import { GiftedChat, IMessage, User } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import { CustomMessage, CustomToolbar, InboxSettings } from './components';
 import { Socket } from '../Util/WebSocket';
+import { UserContext } from '../Auth/Login';
 import BASE_URL from '../../BaseUrl';
 import axios from 'axios';
 
 type ChatProps = {
-    userID: number,
     recipientID: {
         id: number,
         name: string,
@@ -18,7 +18,8 @@ type ChatProps = {
 
 const Chat = ({ route, navigation }) => {
 
-    const { userID, recipientID } = route.params as ChatProps;
+    const userID = useContext(UserContext)
+    const { recipientID } = route.params as ChatProps;
     const [user, setUser] = useState<User>();
     const [messages, setMessages] = useState<IMessage[]>([]);
 

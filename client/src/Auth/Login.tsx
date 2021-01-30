@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState, createContext } from 'react'
 import { 
     AsyncStorage, 
     StyleSheet,
     Text,
     View 
 } from 'react-native'
+import SignUp from './SignUp'
 import BASE_URL from '../../BaseUrl'
 import axios from 'axios'
 
@@ -20,7 +21,13 @@ const styles = StyleSheet.create({
     }
 });
 
-const LogIn = ({ navigation }) => {
+export const UserContext = createContext(-1)
+
+const LogIn = ({ children }) => {
+    const [loading, setLoading] = useState(true)
+    const [newUser, setNewUser] = useState(false)
+    const [userID, setUserID] = useState(-1)
+
     /*
         How it works:
         The access token is first extracted from Async Storage.
@@ -48,22 +55,39 @@ const LogIn = ({ navigation }) => {
                     await AsyncStorage.setItem('token', token)
                     await AsyncStorage.setItem('user', JSON.stringify(user))
                     //redirect to Main
-                    navigation.navigate('Main')
+                    setLoading(false)
+                    setUserID(user.user.ID)
                 })
                 .catch(e => {
                     console.log('login error:', e.response.data)
                 })
         } else {
             //not logged in
-            navigation.navigate('SignIn')
+            setLoading(false)
+            setNewUser(true)
         }
     }  
 
-    return (
-        <View style={[styles.container, styles.horizontal]}>
-            <Text>Logging in...</Text>
-        </View>
-    )
+
+    if (loading) {
+        return (
+            <View style={[styles.container, styles.horizontal]}>
+                <Text>Logging in...</Text>
+            </View>
+        )
+    } else {
+        if (newUser) {
+            return (
+                <SignUp />
+            )
+        } else {
+            return (
+                <UserContext.Provider value={userID}>
+                    {children}
+                </UserContext.Provider>
+            )
+        }
+    }
 }
 
 export default LogIn
