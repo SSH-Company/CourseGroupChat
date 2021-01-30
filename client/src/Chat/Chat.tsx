@@ -3,8 +3,8 @@ import { View, Dimensions } from 'react-native';
 import { GiftedChat, IMessage, User } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import { CustomMessage, CustomToolbar, InboxSettings } from './components';
-import { Socket } from '../Util/WebSocket';
 import { UserContext } from '../Auth/Login';
+import { Socket } from '../Util/WebSocket';
 import BASE_URL from '../../BaseUrl';
 import axios from 'axios';
 
@@ -13,69 +13,34 @@ type ChatProps = {
         id: number,
         name: string,
         avatar: string
-    }
+    },
+    queuedMessages: string
 }
 
 const Chat = ({ route, navigation }) => {
 
     const userID = useContext(UserContext)
-    const { recipientID } = route.params as ChatProps;
+    const { recipientID, queuedMessages } = route.params as ChatProps;
     const [user, setUser] = useState<User>();
     const [messages, setMessages] = useState<IMessage[]>([]);
 
     useEffect(() => {
-        requestData()
-        websocketConnect()
-    }, [])
-
-    //WebSocket connection
-    const websocketConnect = () => {
-        const socket = Socket.getSocket(userID).socket
-
-        socket.onmessage = (e: any) => {
-            const data = JSON.parse(e.data)
-            if (userID !== recipientID.id) {
-                const newMessage:any = [{
-                    _id: data._id,
-                    text: data.text,
-                    createdAt: new Date(),
-                    user: {
-                        _id: recipientID.id,
-                        name: recipientID.name,
-                        avatar: recipientID.avatar
-                    }
-                }]
-                setMessages(prevMessage => newMessage.concat(prevMessage))
-            }
-        }
-
-        return () => {
-            socket.close();
-        }
-    }
-
-    //Device width
-    let deviceWidth = Dimensions.get('window').width
-
-    const requestData = () => {
-        setMessages([
-            {
-                _id: 2000,
-                text: 'Hello developer',
-                createdAt: new Date(),
-                user: {
-                    _id: recipientID.id,
-                    name: recipientID.name,
-                    avatar: recipientID.avatar,
-                },
-            },
-        ])
         setUser({
             _id: userID,
             name: 'Test Developer',
             avatar: 'https://placeimg.com/140/140/any'
         })
-    }
+    }, [])
+
+    useEffect(() => {
+        if (queuedMessages) {
+            const newMessages = JSON.parse(queuedMessages)
+            setMessages(prevMessage => {
+                if (prevMessage) return newMessages.concat(prevMessage)
+                else return newMessages
+            })
+        }
+    }, [queuedMessages])
 
     const onSend = useCallback((messages = []) => {
         setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
@@ -88,7 +53,7 @@ const Chat = ({ route, navigation }) => {
     return (
     <View style={{flex: 1}}>
         <DrawerLayout
-            drawerWidth={deviceWidth}
+            drawerWidth={Dimensions.get('window').width}
             drawerPosition={'right'}
             drawerType={'front'}
             drawerBackgroundColor="#ffffff"
@@ -99,7 +64,7 @@ const Chat = ({ route, navigation }) => {
                 user={user}
                 messages={messages}
                 onSend={messages => onSend(messages)}
-                renderMessage={props => { return ( <CustomMessage {...props} uniqueUserId={userID}/> ) }}
+                renderMessage={props => { return ( <CustomMessage {...props} /> ) }}
                 renderInputToolbar={props => { return ( <CustomToolbar {...props} /> ) }}
             />
         </DrawerLayout>
