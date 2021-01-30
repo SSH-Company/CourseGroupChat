@@ -14,12 +14,12 @@ const styles = StyleSheet.create({
     }
 });
 
-const SignIn = () => {
+const SignUp = () => {
     return (
         <View style={[styles.container, styles.horizontal]}>
-            <Text>Sign In Page!</Text>
+            <Text>Sign Up Page!</Text>
         </View>
     )
 }
 
-export default SignIn
+export default SignUp

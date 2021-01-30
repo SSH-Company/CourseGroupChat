@@ -1,7 +1,7 @@
 import LogIn from './Login'
-import SignIn from './SignIn'
+import SignUp from './SignUp'
 
 export {
     LogIn,
-    SignIn
+    SignUp
 }

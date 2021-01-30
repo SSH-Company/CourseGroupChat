@@ -1,11 +1,8 @@
-import React, { FunctionComponent } from 'react'
+import React, { FunctionComponent, useContext } from 'react'
 import { View, StyleSheet, Text } from 'react-native'
 import { Avatar, Image } from 'react-native-elements'
 import { Message } from 'react-native-gifted-chat'
-
-type CustomMessageProps = {
-    uniqueUserId: number
-}
+import { UserContext } from '../../Auth/Login'
 
 //style sheet
 const styles = StyleSheet.create({
@@ -35,8 +32,10 @@ const styles = StyleSheet.create({
     },
 })
 
-const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
-
+const CustomMessage:FunctionComponent = (props) => {
+    
+    const userID = useContext(UserContext)
+    
     //TODO: rendering avatar
     const renderAvatar = (avatarProps: any) => {
         const user = avatarProps.user
@@ -59,7 +58,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
             key={`user-key-${props['user']['_id']}`}
             renderBubble={() => {
                 const currentMessage = props['currentMessage']
-                const isCurrentUser = currentMessage.user._id === props.uniqueUserId
+                const isCurrentUser = currentMessage.user._id === userID
                 return (
                     <View style={[styles.item]}>
                         <View style={[styles.balloon, {backgroundColor: isCurrentUser ? '#f5f9ff' : '#7c80ee'}]}>

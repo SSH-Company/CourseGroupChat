@@ -1,13 +1,14 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useContext } from 'react';
 import { View, Dimensions } from 'react-native';
 import { GiftedChat, IMessage, User } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import { CustomMessage, CustomToolbar, InboxSettings } from './components';
+import { Socket } from '../Util/WebSocket';
+import { UserContext } from '../Auth/Login';
 import BASE_URL from '../../BaseUrl';
 import axios from 'axios';
 
 type ChatProps = {
-    userID: number,
     recipientID: {
         id: number,
         name: string,
@@ -17,7 +18,8 @@ type ChatProps = {
 
 const Chat = ({ route, navigation }) => {
 
-    const { userID, recipientID } = route.params as ChatProps;
+    const userID = useContext(UserContext)
+    const { recipientID } = route.params as ChatProps;
     const [user, setUser] = useState<User>();
     const [messages, setMessages] = useState<IMessage[]>([]);
 
@@ -28,11 +30,7 @@ const Chat = ({ route, navigation }) => {
 
     //WebSocket connection
     const websocketConnect = () => {
-        const socket = new WebSocket('ws://192.168.0.124:3000');
-        
-        socket.onopen = () => {
-            socket.send(JSON.stringify({userID: userID}));
-        }
+        const socket = Socket.getSocket(userID).socket
 
         socket.onmessage = (e: any) => {
             const data = JSON.parse(e.data)
@@ -50,9 +48,9 @@ const Chat = ({ route, navigation }) => {
                 setMessages(prevMessage => newMessage.concat(prevMessage))
             }
         }
-        
-        socket.onerror = (e: any) => {
-            console.log(e.message);
+
+        return () => {
+            socket.close();
         }
     }
 
