@@ -34,7 +34,7 @@ const Chat = ({ route, navigation }) => {
 
         socket.onmessage = (e: any) => {
             const data = JSON.parse(e.data)
-            // if (userID !== recipientID.id) {
+            if (userID !== recipientID.id) {
                 const newMessage:any = [{
                     _id: data._id,
                     text: data.text,
@@ -46,7 +46,7 @@ const Chat = ({ route, navigation }) => {
                     }
                 }]
                 setMessages(prevMessage => newMessage.concat(prevMessage))
-            // }
+            }
         }
 
         return () => {
