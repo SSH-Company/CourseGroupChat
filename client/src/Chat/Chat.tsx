@@ -4,7 +4,8 @@ import { GiftedChat, IMessage, User } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import { CustomMessage, CustomToolbar, InboxSettings } from './components';
 import { UserContext } from '../Auth/Login';
-import { RecipientMessageMapContext, RenderMessageContext } from '../Util/WebSocket';
+import { RenderMessageContext } from '../Util/WebSocket';
+import { ChatLog } from '../Util/ChatLog';
 import BASE_URL from '../../BaseUrl';
 import axios from 'axios';
 
@@ -19,7 +20,7 @@ type ChatProps = {
 const Chat = ({ route, navigation }) => {
 
     const userID = useContext(UserContext)
-    const recipientMessageMap = useContext(RecipientMessageMapContext);
+    // const recipientMessageMap = useContext(RecipientMessageMapContext);
     const renderFlag = useContext(RenderMessageContext);
     const { recipientID } = route.params as ChatProps;
     const [user, setUser] = useState<User>();
@@ -33,16 +34,15 @@ const Chat = ({ route, navigation }) => {
         })
     }, [])
 
+    //re set messages everytime a new message is received from socket
     useEffect(() => {
-        const newMessages = recipientMessageMap[recipientID.id]
-        if (messages.length > 0) {
-            const latestDate = messages[0].createdAt as Date
-            const unreadMessages = newMessages.filter(msg => msg.createdAt.getTime() > latestDate.getTime())
-            setMessages(previousMessages => unreadMessages.concat(previousMessages))
-        } else setMessages(newMessages)
+        const log = ChatLog.getChatLog().chatLog
+        setMessages(log[recipientID.id])
     }, [renderFlag])
 
     const onSend = useCallback((messages = []) => {
+        //append to Chatlog instance to save to cache
+        ChatLog.getChatLog().appendLog(recipientID.id, messages)
         setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
         //submit message to queue
         axios.post(`${BASE_URL}/api/message`, { message: {messages, recipientID: recipientID, senderID: userID} })
