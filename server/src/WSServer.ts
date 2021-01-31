@@ -21,7 +21,7 @@ class WSServer {
             connection.on('message', function(message) {
                 if (message.type === 'utf8') {
                     const userID = JSON.parse(message.utf8Data).userID
-                    const queueName = `message-queue${userID}`
+                    const queueName = `message-queue-${userID}`
                     connections[userID] = new Queue(queueName, connection)
                 }
                 else if (message.type === 'binary') {

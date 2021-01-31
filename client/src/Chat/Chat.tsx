@@ -35,13 +35,17 @@ const Chat = ({ route, navigation }) => {
 
     useEffect(() => {
         const newMessages = recipientMessageMap[recipientID.id]
-        if (newMessages) setMessages(newMessages)
-    }, [recipientMessageMap, renderFlag])
+        if (messages.length > 0) {
+            const latestDate = messages[0].createdAt as Date
+            const unreadMessages = newMessages.filter(msg => msg.createdAt.getTime() > latestDate.getTime())
+            setMessages(previousMessages => unreadMessages.concat(previousMessages))
+        } else setMessages(newMessages)
+    }, [renderFlag])
 
     const onSend = useCallback((messages = []) => {
         setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
         //submit message to queue
-        axios.post(`${BASE_URL}/api/message`, { message: {messages, recipientID: recipientID} })
+        axios.post(`${BASE_URL}/api/message`, { message: {messages, recipientID: recipientID, senderID: userID} })
             .then(() => console.log('Message sent to Queue!'))
             .catch(err => console.error(err))
     }, [])
