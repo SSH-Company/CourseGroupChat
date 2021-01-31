@@ -58,7 +58,7 @@ const CustomMessage:FunctionComponent = (props) => {
             key={`user-key-${props['user']['_id']}`}
             renderBubble={() => {
                 const currentMessage = props['currentMessage']
-                const isCurrentUser = currentMessage.user._id === userID
+                const isCurrentUser = currentMessage.user._id === userID._id
                 return (
                     <View style={[styles.item]}>
                         <View style={[styles.balloon, {backgroundColor: isCurrentUser ? '#f5f9ff' : '#7c80ee'}]}>

@@ -3,8 +3,9 @@ import { View, Dimensions } from 'react-native';
 import { GiftedChat, IMessage, User } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import { CustomMessage, CustomToolbar, InboxSettings } from './components';
-import { Socket } from '../Util/WebSocket';
 import { UserContext } from '../Auth/Login';
+import { RenderMessageContext } from '../Util/WebSocket';
+import { ChatLog } from '../Util/ChatLog';
 import BASE_URL from '../../BaseUrl';
 import axios from 'axios';
 
@@ -18,77 +19,31 @@ type ChatProps = {
 
 const Chat = ({ route, navigation }) => {
 
-    const userID = useContext(UserContext)
+    const user = useContext(UserContext)
+    const renderFlag = useContext(RenderMessageContext);
     const { recipientID } = route.params as ChatProps;
-    const [user, setUser] = useState<User>();
     const [messages, setMessages] = useState<IMessage[]>([]);
 
+    //re set messages everytime a new message is received from socket
     useEffect(() => {
-        requestData()
-        websocketConnect()
-    }, [])
-
-    //WebSocket connection
-    const websocketConnect = () => {
-        const socket = Socket.getSocket(userID).socket
-
-        socket.onmessage = (e: any) => {
-            const data = JSON.parse(e.data)
-            if (userID !== recipientID.id) {
-                const newMessage:any = [{
-                    _id: data._id,
-                    text: data.text,
-                    createdAt: new Date(),
-                    user: {
-                        _id: recipientID.id,
-                        name: recipientID.name,
-                        avatar: recipientID.avatar
-                    }
-                }]
-                setMessages(prevMessage => newMessage.concat(prevMessage))
-            }
-        }
-
-        return () => {
-            socket.close();
-        }
-    }
-
-    //Device width
-    let deviceWidth = Dimensions.get('window').width
-
-    const requestData = () => {
-        setMessages([
-            {
-                _id: 2000,
-                text: 'Hello developer',
-                createdAt: new Date(),
-                user: {
-                    _id: recipientID.id,
-                    name: recipientID.name,
-                    avatar: recipientID.avatar,
-                },
-            },
-        ])
-        setUser({
-            _id: userID,
-            name: 'Test Developer',
-            avatar: 'https://placeimg.com/140/140/any'
-        })
-    }
+        const log = ChatLog.getChatLog().chatLog
+        setMessages(log[recipientID.id])
+    }, [renderFlag])
 
     const onSend = useCallback((messages = []) => {
+        //append to Chatlog instance to save to cache
+        ChatLog.getChatLog().appendLog(recipientID.id, messages)
         setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
         //submit message to queue
-        axios.post(`${BASE_URL}/api/message`, { message: {messages, recipientID: recipientID} })
-        .then(() => console.log('Message sent to Queue!'))
-        .catch(err => console.error(err))
+        axios.post(`${BASE_URL}/api/message`, { message: {messages, recipientID: recipientID, senderID: user} })
+            .then(() => console.log('Message sent to Queue!'))
+            .catch(err => console.error(err))
     }, [])
 
     return (
     <View style={{flex: 1}}>
         <DrawerLayout
-            drawerWidth={deviceWidth}
+            drawerWidth={Dimensions.get('window').width}
             drawerPosition={'right'}
             drawerType={'front'}
             drawerBackgroundColor="#ffffff"
@@ -99,7 +54,7 @@ const Chat = ({ route, navigation }) => {
                 user={user}
                 messages={messages}
                 onSend={messages => onSend(messages)}
-                renderMessage={props => { return ( <CustomMessage {...props} uniqueUserId={userID}/> ) }}
+                renderMessage={props => { return ( <CustomMessage {...props} /> ) }}
                 renderInputToolbar={props => { return ( <CustomToolbar {...props} /> ) }}
             />
         </DrawerLayout>
