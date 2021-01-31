@@ -3,8 +3,10 @@ import { View, ScrollView, Platform } from "react-native";
 import { ListItem, Avatar, Header, SearchBar } from "react-native-elements";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import { UserContext } from '../Auth/Login';
-import { RecipientMessageMapContext } from '../Util/WebSocket';
+import { RenderMessageContext } from '../Util/WebSocket';
+import { ChatLog } from '../Util/ChatLog';
 import { exampleList } from "./exampleList";
+
 
 type listtype = {
   id: number;
@@ -21,8 +23,26 @@ const Main = ({ navigation }) => {
   const [search, setSearch] = useState("");
   // data arrays.
   // const userID = useContext(UserContext);
-  // const recipientMessageMap = useContext(RecipientMessageMapContext);
+  const renderFlag = useContext(RenderMessageContext);
   const [filteredList, setFilteredList] = useState<listtype[]>(exampleList);
+
+  useEffect(() => {
+    const log = ChatLog.getChatLog().chatLog
+    let list = []
+    Object.keys(log).forEach(key => {
+      const text = log[key][0]
+      list.push({
+        id: key,
+        message_id: text._id,
+        name: text.user.name,
+        avatar_url: text.user.avatar,
+        subtitle: text.text,
+        created_at: text.createdAt
+      })
+    })
+    const sortedList = list.sort((a, b) => b.created_at - a.created_at)
+    setFilteredList(sortedList)
+  }, [renderFlag])
 
   const searchFunction = (input) => {
     if (input) {

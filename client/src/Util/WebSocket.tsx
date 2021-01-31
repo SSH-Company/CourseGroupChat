@@ -3,16 +3,15 @@ import { UserContext } from '../Auth/Login';
 import BASE_URL from '../../BaseUrl';
 import { ChatLog } from './ChatLog'
 
-export const RecipientMessageMapContext = createContext({})
 export const RenderMessageContext = createContext(false)
 
 const Socket = ({ children }) => {
-    const userID = useContext(UserContext);
+    const user = useContext(UserContext);
     const [renderFlag, setRenderFlag] = useState();
 
     useEffect(() => {
-        if(userID !== -1) websocketConnect()
-    }, [userID])  
+        if(user._id) websocketConnect()
+    }, [user])  
 
     //WebSocket connection
     const websocketConnect = () => {
@@ -21,7 +20,7 @@ const Socket = ({ children }) => {
         const log = ChatLog.getChatLog();
 
         socket.onopen = () => {
-            socket.send(JSON.stringify({userID: userID}));
+            socket.send(JSON.stringify({userID: user._id}));
         }
 
         socket.onmessage = (e: any) => {
@@ -31,12 +30,12 @@ const Socket = ({ children }) => {
                 text: data.text,
                 createdAt: new Date(),
                 user: {
-                    _id: data.senderID,
-                    name: 'Test name',
-                    avatar: 'https://placeimg.com/140/140/any'
+                    _id: data.senderID._id,
+                    name: data.senderID.name,
+                    avatar: data.senderID.avatar
                 }
             }]
-            log.appendLog(data.senderID, newMessage)
+            log.appendLog(data.senderID._id, newMessage)
             setRenderFlag(prevFlag => !prevFlag);
         }
     }

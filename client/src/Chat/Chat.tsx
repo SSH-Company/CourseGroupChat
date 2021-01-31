@@ -19,20 +19,10 @@ type ChatProps = {
 
 const Chat = ({ route, navigation }) => {
 
-    const userID = useContext(UserContext)
-    // const recipientMessageMap = useContext(RecipientMessageMapContext);
+    const user = useContext(UserContext)
     const renderFlag = useContext(RenderMessageContext);
     const { recipientID } = route.params as ChatProps;
-    const [user, setUser] = useState<User>();
     const [messages, setMessages] = useState<IMessage[]>([]);
-
-    useEffect(() => {
-        setUser({
-            _id: userID,
-            name: 'Test Developer',
-            avatar: 'https://placeimg.com/140/140/any'
-        })
-    }, [])
 
     //re set messages everytime a new message is received from socket
     useEffect(() => {
@@ -45,7 +35,7 @@ const Chat = ({ route, navigation }) => {
         ChatLog.getChatLog().appendLog(recipientID.id, messages)
         setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
         //submit message to queue
-        axios.post(`${BASE_URL}/api/message`, { message: {messages, recipientID: recipientID, senderID: userID} })
+        axios.post(`${BASE_URL}/api/message`, { message: {messages, recipientID: recipientID, senderID: user} })
             .then(() => console.log('Message sent to Queue!'))
             .catch(err => console.error(err))
     }, [])
