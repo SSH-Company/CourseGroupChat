@@ -4,7 +4,7 @@ import { GiftedChat, IMessage, User } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import { CustomMessage, CustomToolbar, InboxSettings } from './components';
 import { UserContext } from '../Auth/Login';
-import { Socket } from '../Util/WebSocket';
+import { RecipientMessageMapContext, RenderMessageContext } from '../Util/WebSocket';
 import BASE_URL from '../../BaseUrl';
 import axios from 'axios';
 
@@ -13,14 +13,15 @@ type ChatProps = {
         id: number,
         name: string,
         avatar: string
-    },
-    queuedMessages: string
+    }
 }
 
 const Chat = ({ route, navigation }) => {
 
     const userID = useContext(UserContext)
-    const { recipientID, queuedMessages } = route.params as ChatProps;
+    const recipientMessageMap = useContext(RecipientMessageMapContext);
+    const renderFlag = useContext(RenderMessageContext);
+    const { recipientID } = route.params as ChatProps;
     const [user, setUser] = useState<User>();
     const [messages, setMessages] = useState<IMessage[]>([]);
 
@@ -33,21 +34,16 @@ const Chat = ({ route, navigation }) => {
     }, [])
 
     useEffect(() => {
-        if (queuedMessages) {
-            const newMessages = JSON.parse(queuedMessages)
-            setMessages(prevMessage => {
-                if (prevMessage) return newMessages.concat(prevMessage)
-                else return newMessages
-            })
-        }
-    }, [queuedMessages])
+        const newMessages = recipientMessageMap[recipientID.id]
+        if (newMessages) setMessages(newMessages)
+    }, [recipientMessageMap, renderFlag])
 
     const onSend = useCallback((messages = []) => {
         setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
         //submit message to queue
         axios.post(`${BASE_URL}/api/message`, { message: {messages, recipientID: recipientID} })
-        .then(() => console.log('Message sent to Queue!'))
-        .catch(err => console.error(err))
+            .then(() => console.log('Message sent to Queue!'))
+            .catch(err => console.error(err))
     }, [])
 
     return (

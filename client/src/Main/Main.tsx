@@ -1,15 +1,10 @@
 import React, { useState, useEffect, useContext } from "react";
 import { View, ScrollView, Platform } from "react-native";
-import { IMessage } from 'react-native-gifted-chat';
 import { ListItem, Avatar, Header, SearchBar } from "react-native-elements";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import { UserContext } from '../Auth/Login';
-import { Socket } from '../Util/WebSocket';
+import { RecipientMessageMapContext } from '../Util/WebSocket';
 import { exampleList } from "./exampleList";
-
-type RecipientMessageMapType = {
-  [key: number]: IMessage[]
-}
 
 type listtype = {
   id: number;
@@ -25,60 +20,9 @@ const Main = ({ navigation }) => {
   // search bar.
   const [search, setSearch] = useState("");
   // data arrays.
-  const userID = useContext(UserContext);
+  // const userID = useContext(UserContext);
+  // const recipientMessageMap = useContext(RecipientMessageMapContext);
   const [filteredList, setFilteredList] = useState<listtype[]>(exampleList);
-  const [recipientMessageMap, setRecipientMessageMap] = useState<RecipientMessageMapType>({});
-
-  //Create recipient id -> IMessage[] map
-  useEffect(() => {
-    let map = {} as RecipientMessageMapType
-    exampleList.map(row => {
-      const newMessage = [{
-        _id: row.message_id,
-        text: row.subtitle,
-        createdAt: row.created_at,
-        user: {
-          _id: row.id,
-          name: row.name,
-          avatar: row.avatar_url
-        }
-      }]
-      map[row.id] = newMessage
-    })
-    setRecipientMessageMap(map)
-  }, [exampleList])
-
-  useEffect(() => {
-      websocketConnect()
-  }, [])
-
-  //WebSocket connection
-  const websocketConnect = () => {
-    const socket = Socket.getSocket(userID).socket;
-
-    socket.onmessage = (e: any) => {
-      const data = JSON.parse(e.data)
-      console.log(data)
-      const newMessage:any = [{
-          _id: data._id,
-          text: data.text,
-          createdAt: new Date(),
-          user: {
-              _id: data.recipientID.id,
-              name: data.recipientID.name,
-              avatar: data.recipientID.avatar
-          }
-      }]
-      setRecipientMessageMap(oldMap => {
-        const newMap = oldMap;
-        newMap[data.recipientID.id] = newMessage.concat(oldMap[data.recipientID.id])
-        return newMap
-      })
-    }
-
-    return () => { socket.close() }
-  }
-
 
   const searchFunction = (input) => {
     if (input) {
@@ -129,8 +73,7 @@ const Main = ({ navigation }) => {
             bottomDivider
             onPress={() => {
               navigation.navigate("Chat", {
-                recipientID: { id: l.id, name: l.name, avatar: l.avatar_url },
-                queuedMessages: JSON.stringify(recipientMessageMap[l.id])
+                recipientID: { id: l.id, name: l.name, avatar: l.avatar_url }
               })
             }}
           >
