@@ -3,7 +3,7 @@ import { View, Dimensions } from 'react-native';
 import { GiftedChat, IMessage, User } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import { CustomMessage, CustomToolbar, InboxSettings } from './components';
-import { Socket } from '../Util/WebSocket';
+import { Socket, ChatLog } from '../Util';
 import { UserContext } from '../Auth/Login';
 import BASE_URL from '../../BaseUrl';
 import axios from 'axios';
@@ -78,6 +78,9 @@ const Chat = ({ route, navigation }) => {
     }
 
     const onSend = useCallback((messages = []) => {
+        //append to Chatlog instance to save to cache
+        ChatLog.getChatLog().appendLog(recipientID.id, messages)
+        ChatLog.getChatLog().printLog()
         setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
         //submit message to queue
         axios.post(`${BASE_URL}/api/message`, { message: {messages, recipientID: recipientID} })

@@ -1,4 +1,4 @@
-export class Socket {
+class Socket {
     private static instance: Socket;
     public socket;
 
@@ -17,3 +17,5 @@ export class Socket {
         return Socket.instance
     }
 }
+
+export default Socket
