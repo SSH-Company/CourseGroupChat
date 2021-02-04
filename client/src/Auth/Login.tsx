@@ -5,9 +5,11 @@ import {
     Text,
     View 
 } from 'react-native'
+import { User } from 'react-native-gifted-chat'
 import SignUp from './SignUp'
 import BASE_URL from '../../BaseUrl'
 import axios from 'axios'
+
 
 const styles = StyleSheet.create({
     container: {
@@ -21,12 +23,12 @@ const styles = StyleSheet.create({
     }
 });
 
-export const UserContext = createContext(-1)
+export const UserContext = createContext({} as User)
 
 const LogIn = ({ children }) => {
     const [loading, setLoading] = useState(true)
     const [newUser, setNewUser] = useState(false)
-    const [userID, setUserID] = useState(-1)
+    const [userID, setUserID] = useState({} as User)
 
     /*
         How it works:
@@ -47,7 +49,7 @@ const LogIn = ({ children }) => {
 
     const checkLogIn = async () => {
         const token = await AsyncStorage.getItem('token');
-        // const token = 'TOKEN_TWO';
+        // const token = 'TOKEN_ONE';
         if (token) {
             axios.post(`${BASE_URL}/api/login/`, { userToken: token })
                 .then(async res => {
@@ -56,7 +58,11 @@ const LogIn = ({ children }) => {
                     await AsyncStorage.setItem('user', JSON.stringify(user))
                     //redirect to Main
                     setLoading(false)
-                    setUserID(user.user.ID)
+                    setUserID({
+                        _id: user.user.ID,
+                        name: user.user.FIRST_NAME + user.user.LAST_NAME,
+                        avatar: 'https://placeimg.com/140/140/any'
+                    })
                 })
                 .catch(e => {
                     console.log('login error:', e.response.data)

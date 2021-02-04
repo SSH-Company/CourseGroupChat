@@ -23,9 +23,10 @@ export class MessageController {
         const messages = req.body.message;
         const allMessages:any[] = messages.messages
         const recipientID = messages.recipientID
+        const senderID = messages.senderID
         for (const message of allMessages) {
             const queueName = `message-queue-${recipientID.id}`
-            const queueData = { ...message, recipientID: recipientID }
+            const queueData = { ...message, recipientID: recipientID, senderID: senderID }
             await publishToQueue(queueName, JSON.stringify(queueData));
         }
         res.status(STATUS.OK).json();
