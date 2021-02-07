@@ -7,7 +7,7 @@ export const RenderMessageContext = createContext(false)
 
 const Socket = ({ children }) => {
     const user = useContext(UserContext);
-    const [renderFlag, setRenderFlag] = useState();
+    const [renderFlag, setRenderFlag] = useState()
 
     useEffect(() => {
         if(user._id) websocketConnect()
@@ -16,27 +16,32 @@ const Socket = ({ children }) => {
     //WebSocket connection
     const websocketConnect = () => {
         const url = BASE_URL.split('//')[1]
-        const socket = new WebSocket(`ws://${url}`);
-        const log = ChatLog.getChatLog();
+        const socket = new WebSocket(`ws://${url}`)
 
         socket.onopen = () => {
-            socket.send(JSON.stringify({userID: user._id}));
+            socket.send(JSON.stringify({userID: user._id}))
         }
 
         socket.onmessage = (e: any) => {
             const data = JSON.parse(e.data)
+            const log = ChatLog.getChatLogInstance()
+            const groupInfo = log.groupInfo[Number(data.groupID.id)]
             const newMessage:any = [{
                 _id: data._id,
                 text: data.text,
-                createdAt: new Date(),
+                createdAt: data.createdAt,
                 user: {
-                    _id: data.senderID._id,
-                    name: data.senderID.name,
-                    avatar: data.senderID.avatar
+                    _id: data.groupID.id,
+                    name: groupInfo.name,
+                    avatar: groupInfo.avatar
                 }
             }]
-            log.appendLog(data.senderID._id, newMessage)
-            setRenderFlag(prevFlag => !prevFlag);
+            log.appendLog(data.groupID.id, newMessage)
+            setRenderFlag(prevFlag => !prevFlag)
+        }
+
+        socket.onclose = (e: any) => {
+            console.log('socket closed')
         }
     }
 

@@ -1,18 +1,26 @@
-import { exampleList } from "../Main/exampleList";
 import { IMessage } from 'react-native-gifted-chat';
 
 type RecipientMessageMapType = {
     [key: number]: IMessage[]
 }
 
+type GroupInfoMapType = {
+    [id: number]: {
+        name: string,
+        avatar: string
+    }
+}
+
 export class ChatLog {
     private static instance: ChatLog;
     public chatLog = {} as RecipientMessageMapType;
+    public groupInfo = {} as GroupInfoMapType;
 
     constructor(list: any) {
         let map = {} as RecipientMessageMapType
+        let grpInfo = {} as GroupInfoMapType;
         list.map(row => {
-            const newMessage = [{
+            const newMessage = {
                 _id: row.message_id,
                 text: row.subtitle,
                 createdAt: row.created_at,
@@ -21,21 +29,37 @@ export class ChatLog {
                     name: row.name,
                     avatar: row.avatar_url
                 }
-            }]
-            map[row.id] = newMessage
+            }
+            if (row.id in map) map[row.id].push(newMessage)
+            else {
+                map[row.id] = [newMessage]
+                grpInfo[row.id] = {
+                    name: row.name,
+                    avatar: row.avatar_url
+                }
+            }
         })
         this.chatLog = map
+        this.groupInfo = grpInfo
     }
 
-    public static getChatLog() {
-        if (!this.instance) {
-            this.instance = new ChatLog(exampleList)
+    public static getChatLogInstance(list?: any) {
+        if (!this.instance && list) {
+            this.instance = new ChatLog(list)
         }
         return this.instance
     }
 
-    public appendLog(senderID: number, message: IMessage[]) {
-        if (senderID in this.chatLog) this.chatLog[senderID] = message.concat(this.chatLog[senderID])
+    public appendLog(groupID: number, message: IMessage[]) {
+        if (groupID in this.chatLog) this.chatLog[groupID] = message.concat(this.chatLog[groupID])
         else { console.log('id not found in log') }
+    }
+
+    public printLog() {
+        console.log(this.chatLog)
+    }
+
+    public printGroupInfo() {
+        console.log(this.groupInfo)
     }
 }
