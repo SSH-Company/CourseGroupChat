@@ -1,5 +1,6 @@
-import React, { useEffect, useState, createContext } from 'react'
+import React, { useRef, useEffect, useState, createContext } from 'react'
 import { 
+    AppState,
     AsyncStorage, 
     StyleSheet,
     Text,
@@ -7,9 +8,9 @@ import {
 } from 'react-native'
 import { User } from 'react-native-gifted-chat'
 import SignUp from './SignUp'
+import { ChatLog } from '../Util/ChatLog'
 import BASE_URL from '../../BaseUrl'
 import axios from 'axios'
-
 
 const styles = StyleSheet.create({
     container: {
@@ -29,6 +30,7 @@ const LogIn = ({ children }) => {
     const [loading, setLoading] = useState(true)
     const [newUser, setNewUser] = useState(false)
     const [userID, setUserID] = useState({} as User)
+    const appState = useRef(AppState.currentState)
 
     /*
         How it works:
@@ -47,6 +49,14 @@ const LogIn = ({ children }) => {
         checkLogIn()
     }, [])
 
+    useEffect(() => {
+        AppState.addEventListener("change", handleAppStateChange);
+
+        return () => {
+            AppState.removeEventListener("change", handleAppStateChange);
+        }
+    }, [])
+
     const checkLogIn = async () => {
         const token = await AsyncStorage.getItem('token');
         // const token = 'TOKEN_ONE';
@@ -56,13 +66,24 @@ const LogIn = ({ children }) => {
                     const user = res.data 
                     await AsyncStorage.setItem('token', token)
                     await AsyncStorage.setItem('user', JSON.stringify(user))
-                    //redirect to Main
-                    setLoading(false)
-                    setUserID({
-                        _id: user.user.ID,
-                        name: user.user.FIRST_NAME + user.user.LAST_NAME,
-                        avatar: 'https://placeimg.com/140/140/any'
-                    })
+                    
+                    //retrieve log
+                    axios.get(`${BASE_URL}/api/message/${user.user.ID}`)
+                        .then(async res => {
+                            //construct log
+                            ChatLog.getChatLogInstance(res.data)
+
+                            //redirect to Main
+                            setLoading(false)
+                            setUserID({
+                                _id: user.user.ID,
+                                name: user.user.FIRST_NAME + ' ' + user.user.LAST_NAME,
+                                avatar: 'https://placeimg.com/140/140/any'
+                            })
+                        })
+                        .catch(e => {
+                            console.log('error fetching log: ', e.response.data)
+                        })
                 })
                 .catch(e => {
                     console.log('login error:', e.response.data)
@@ -74,6 +95,10 @@ const LogIn = ({ children }) => {
         }
     }  
 
+    const handleAppStateChange = (nextAppState) => {
+        appState.current = nextAppState
+        console.log(appState.current)
+    }
 
     if (loading) {
         return (

@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useContext } from 'react';
 import { View, Dimensions } from 'react-native';
-import { GiftedChat, IMessage, User } from 'react-native-gifted-chat';
+import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import { CustomMessage, CustomToolbar, InboxSettings } from './components';
 import { UserContext } from '../Auth/Login';
@@ -10,7 +10,7 @@ import BASE_URL from '../../BaseUrl';
 import axios from 'axios';
 
 type ChatProps = {
-    recipientID: {
+    groupID: {
         id: number,
         name: string,
         avatar: string
@@ -20,25 +20,30 @@ type ChatProps = {
 const Chat = ({ route, navigation }) => {
 
     const user = useContext(UserContext)
-    const renderFlag = useContext(RenderMessageContext);
-    const { recipientID } = route.params as ChatProps;
+    const { renderFlag, setRenderFlag } = useContext(RenderMessageContext);
+    const { groupID } = route.params as ChatProps;
     const [messages, setMessages] = useState<IMessage[]>([]);
 
     //re set messages everytime a new message is received from socket
     useEffect(() => {
-        const log = ChatLog.getChatLog().chatLog
-        setMessages(log[recipientID.id])
+        const log = ChatLog.getChatLogInstance().chatLog
+        setMessages(log[groupID.id])
     }, [renderFlag])
 
     const onSend = useCallback((messages = []) => {
         //append to Chatlog instance to save to cache
-        ChatLog.getChatLog().appendLog(recipientID.id, messages)
+        ChatLog.getChatLogInstance().appendLog(groupID.id, messages)
+        setRenderFlag(!renderFlag)
         setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
         //submit message to queue
-        axios.post(`${BASE_URL}/api/message`, { message: {messages, recipientID: recipientID, senderID: user} })
+        sendData(messages)
+    }, [])
+
+    const sendData = (messages = []) => {
+        axios.post(`${BASE_URL}/api/message`, { message: {messages, groupID: groupID, senderID: user} })
             .then(() => console.log('Message sent to Queue!'))
             .catch(err => console.error(err))
-    }, [])
+    }
 
     return (
     <View style={{flex: 1}}>

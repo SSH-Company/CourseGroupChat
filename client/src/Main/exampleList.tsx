@@ -3,7 +3,7 @@ export const exampleList =
   {
     id: 1,
     message_id: 40382,
-    name: 'Sadman Hasan',
+    name: 'Tanvir Shahriar',
     avatar_url: 'https://placeimg.com/140/140/any',
     subtitle: 'Vice President',
     created_at: new Date()
@@ -11,15 +11,15 @@ export const exampleList =
   {
     id: 2,
     message_id: 4023902,
-    name: 'Tanvir Shahriar',
+    name: 'Sadman Hasan',
     avatar_url: 'https://placeimg.com/140/140/any',
     subtitle: 'Vice Chairman',
     created_at: new Date()
   }, 
   {
-    id: 22,
+    id: 3,
     message_id: 30202,
-    name: 'Forhadh Siddik',
+    name: 'Farhad Siddique',
     avatar_url: 'https://placeimg.com/140/140/any',
     subtitle: 'Boo',
     created_at: new Date()

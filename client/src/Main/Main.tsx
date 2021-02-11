@@ -2,11 +2,8 @@ import React, { useState, useEffect, useContext } from "react";
 import { View, ScrollView, Platform } from "react-native";
 import { ListItem, Avatar, Header, SearchBar } from "react-native-elements";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
-import { UserContext } from '../Auth/Login';
 import { RenderMessageContext } from '../Util/WebSocket';
 import { ChatLog } from '../Util/ChatLog';
-import { exampleList } from "./exampleList";
-
 
 type listtype = {
   id: number;
@@ -23,30 +20,33 @@ const Main = ({ navigation }) => {
   const [search, setSearch] = useState("");
   // data arrays.
   // const userID = useContext(UserContext);
-  const renderFlag = useContext(RenderMessageContext);
-  const [filteredList, setFilteredList] = useState<listtype[]>(exampleList);
+  const { renderFlag } = useContext(RenderMessageContext);
+  const [completeList, setCompleteList] = useState<listtype[]>([]);
+  const [filteredList, setFilteredList] = useState<listtype[]>([]);
 
   useEffect(() => {
-    const log = ChatLog.getChatLog().chatLog
+    const log = ChatLog.getChatLogInstance()
     let list = []
-    Object.keys(log).forEach(key => {
-      const text = log[key][0]
+    Object.keys(log.chatLog).forEach(key => {
+      const text = log.chatLog[key][0]
+      const grpInfo = log.groupInfo[key]
       list.push({
         id: key,
         message_id: text._id,
-        name: text.user.name,
-        avatar_url: text.user.avatar,
+        name: grpInfo.name,
+        avatar_url: grpInfo.avatar,
         subtitle: text.text,
         created_at: text.createdAt
       })
     })
-    const sortedList = list.sort((a, b) => b.created_at - a.created_at)
+    const sortedList = list.sort((a, b) => new Date(b.created_at).valueOf() - new Date(a.created_at).valueOf())
     setFilteredList(sortedList)
+    setCompleteList(sortedList)
   }, [renderFlag])
 
   const searchFunction = (input) => {
     if (input) {
-      const newList = exampleList.filter((item) => {
+      const newList = completeList.filter((item) => {
         const itemInfo = item.name ? item.name.toUpperCase() : "".toUpperCase();
         const inputInfo = input.toUpperCase();
         return itemInfo.indexOf(inputInfo) > -1;
@@ -54,7 +54,7 @@ const Main = ({ navigation }) => {
       setFilteredList(newList);
       setSearch(input);
     } else {
-      setFilteredList(exampleList);
+      setFilteredList(completeList);
       setSearch(input);
     }
   };
@@ -93,7 +93,7 @@ const Main = ({ navigation }) => {
             bottomDivider
             onPress={() => {
               navigation.navigate("Chat", {
-                recipientID: { id: l.id, name: l.name, avatar: l.avatar_url }
+                groupID: { id: l.id, name: l.name, avatar: l.avatar_url }
               })
             }}
           >

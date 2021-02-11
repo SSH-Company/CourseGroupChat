@@ -3,13 +3,15 @@ import { Database } from '../services/Database';
 interface MessageInterface {
     ID?: number;
     CREATOR_ID?: number;
+    RECIPIENT_GROUP_ID?: number;
     MESSAGE_BODY?: string;
     CREATE_DATE?: string;
 }
 
-export class UserModel implements MessageInterface {
+export class MessageModel implements MessageInterface {
     ID?: number;
     CREATOR_ID?: number;
+    RECIPIENT_GROUP_ID?: number;
     MESSAGE_BODY?: string;
     CREATE_DATE?: string;
 
@@ -18,11 +20,10 @@ export class UserModel implements MessageInterface {
         Object.assign(this, raw);
     }
 
-    static insert(user: MessageInterface): Promise<void> {
-        const query = `INSERT INTO RT.MESSAGE ("CREATOR_ID", "MESSAGE_BODY", "CREATE_DATE") 
-        VALUES (?, ?, CURRENT_TIMESTAMP);`
-        const params = [user.CREATOR_ID, user.MESSAGE_BODY];
-        
+    static insert(msg: MessageInterface): Promise<void> {
+        let query = `INSERT INTO RT.MESSAGE ("CREATOR_ID", "RECIPIENT_GROUP_ID", "MESSAGE_BODY", "CREATE_DATE") VALUES (?, ?, ?, CURRENT_TIMESTAMP) `
+        const params = [msg.CREATOR_ID, msg.RECIPIENT_GROUP_ID, msg.MESSAGE_BODY];
+
         return new Promise((resolve, reject) => {
             Database.getDB()
                 .query(query, params)
