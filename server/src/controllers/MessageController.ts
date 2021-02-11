@@ -22,6 +22,7 @@ export class MessageController {
             .then(data => {
                 const json = data.map(row => ({
                     id: row.GROUP_ID,
+                    creator_id: row.CREATOR_ID,
                     message_id: row.MESSAGE_ID,
                     name: row.NAME,
                     avatar_url: 'https://placeimg.com/140/140/any',
@@ -53,26 +54,26 @@ export class MessageController {
     @Post('')
     private async submitMessage(req: Request, res: Response) {
         const messages = req.body.message;
-        const allMessages:any[] = messages.messages
+        const message = messages.messages[0]
         const groupID = messages.groupID
         const senderID = messages.senderID
         
         try {
-            for (const message of allMessages) {
-                //find all recipients of this group chat, exclude senderID from the list
-                const groupRecipients = (await UserGroupModel.getRecipients(groupID.id)).map(row => row.USER_ID).filter(id => id != senderID._id);    
-                
-                //send a message to each recipients queue
-                for (const id of groupRecipients) {
-                    const queueName = `message-queue-${id}`
-                    const queueData = { ...message, groupID: groupID, senderID: senderID }
-                    await publishToQueue(queueName, JSON.stringify(queueData));
-                }
-
-                //store message in db
-                await MessageModel.insert({ CREATOR_ID: senderID._id, RECIPIENT_GROUP_ID: groupID.id, MESSAGE_BODY: message.text, CREATE_DATE: message.createdAt });    
+            //find all recipients of this group chat, exclude senderID from the list
+            const groupRecipients = (await UserGroupModel.getRecipients(groupID.id)).map(row => row.USER_ID).filter(id => id != senderID._id);    
+            
+            //send a message to each recipients queue
+            for (const id of groupRecipients) {
+                const queueName = `message-queue-${id}`
+                const queueData = { ...message, groupID: groupID, senderID: senderID }
+                await publishToQueue(queueName, JSON.stringify(queueData));
             }
+
+            //store message in db
+            await MessageModel.insert({ CREATOR_ID: senderID._id, RECIPIENT_GROUP_ID: groupID.id, MESSAGE_BODY: message.text });    
+            
             res.status(STATUS.OK).json();
+
         } catch (err) {
             console.error(err)
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({

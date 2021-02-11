@@ -3,11 +3,15 @@ import { UserContext } from '../Auth/Login';
 import BASE_URL from '../../BaseUrl';
 import { ChatLog } from './ChatLog'
 
-export const RenderMessageContext = createContext(false)
+export const RenderMessageContext = createContext({
+    renderFlag: false,
+    setRenderFlag: (flag: boolean) => {}
+});
 
 const Socket = ({ children }) => {
     const user = useContext(UserContext);
-    const [renderFlag, setRenderFlag] = useState()
+    const [renderFlag, setRenderFlag] = useState(false)
+    const value = { renderFlag, setRenderFlag} as any
 
     useEffect(() => {
         if(user._id) websocketConnect()
@@ -29,7 +33,7 @@ const Socket = ({ children }) => {
             const newMessage:any = [{
                 _id: data._id,
                 text: data.text,
-                createdAt: data.createdAt,
+                createdAt: data.createdAt || new Date(),
                 user: {
                     _id: data.groupID.id,
                     name: groupInfo.name,
@@ -46,7 +50,7 @@ const Socket = ({ children }) => {
     }
 
     return (
-        <RenderMessageContext.Provider value={renderFlag}>
+        <RenderMessageContext.Provider value={value}>
             {children}
         </RenderMessageContext.Provider>
     )

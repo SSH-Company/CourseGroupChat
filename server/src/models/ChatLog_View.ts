@@ -3,6 +3,7 @@ import { Database } from '../services/Database';
 interface ChatLogViewInterface {
     USER_ID?: number;
     GROUP_ID?: number;
+    CREATOR_ID?: number;
     NAME: number;
     MESSAGE_ID?: string;
     MESSAGE_BODY?: string;
@@ -12,6 +13,7 @@ interface ChatLogViewInterface {
 export class ChatLogViewModel implements ChatLogViewInterface {
     USER_ID?: number;
     GROUP_ID?: number;
+    CREATOR_ID?: number;
     NAME: number;
     MESSAGE_ID?: string;
     MESSAGE_BODY?: string;
@@ -40,6 +42,7 @@ export class ChatLogViewModel implements ChatLogViewInterface {
 const SELECT = ` SELECT
 "USER_ID",
 "GROUP_ID",
+"CREATOR_ID",
 "NAME",
 "MESSAGE_ID",
 "MESSAGE_BODY",

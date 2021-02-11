@@ -39,10 +39,12 @@ export class Database {
                 try {
                     const res = await client.query(cleanedStmt, params);
                     resolve(res.rows);
+                    client.release(true);
                     return;
 
                 } catch(err) {
                     reject({message: err});
+                    client.release(true);
                     return;
                 }
             })

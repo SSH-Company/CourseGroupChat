@@ -20,7 +20,7 @@ const Main = ({ navigation }) => {
   const [search, setSearch] = useState("");
   // data arrays.
   // const userID = useContext(UserContext);
-  const renderFlag = useContext(RenderMessageContext);
+  const { renderFlag } = useContext(RenderMessageContext);
   const [completeList, setCompleteList] = useState<listtype[]>([]);
   const [filteredList, setFilteredList] = useState<listtype[]>([]);
 

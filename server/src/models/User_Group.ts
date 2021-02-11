@@ -28,7 +28,9 @@ export class UserGroupModel implements UserGroupInterface {
         return new Promise((resolve, reject) => {
             Database.getDB()
                 .query(query, [uid])
-                .then((data:UserGroupModel[]) => resolve(data.map((d: UserGroupInterface) => new UserGroupModel(d))))
+                .then((data:UserGroupModel[]) => {
+                    resolve(data.map((d: UserGroupInterface) => new UserGroupModel(d)))
+                })
                 .catch(err => {
                     console.log(err)
                     reject(err)

@@ -20,7 +20,7 @@ type ChatProps = {
 const Chat = ({ route, navigation }) => {
 
     const user = useContext(UserContext)
-    const renderFlag = useContext(RenderMessageContext);
+    const { renderFlag, setRenderFlag } = useContext(RenderMessageContext);
     const { groupID } = route.params as ChatProps;
     const [messages, setMessages] = useState<IMessage[]>([]);
 
@@ -33,12 +33,17 @@ const Chat = ({ route, navigation }) => {
     const onSend = useCallback((messages = []) => {
         //append to Chatlog instance to save to cache
         ChatLog.getChatLogInstance().appendLog(groupID.id, messages)
+        setRenderFlag(!renderFlag)
         setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
         //submit message to queue
+        sendData(messages)
+    }, [])
+
+    const sendData = (messages = []) => {
         axios.post(`${BASE_URL}/api/message`, { message: {messages, groupID: groupID, senderID: user} })
             .then(() => console.log('Message sent to Queue!'))
             .catch(err => console.error(err))
-    }, [])
+    }
 
     return (
     <View style={{flex: 1}}>

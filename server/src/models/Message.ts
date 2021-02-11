@@ -21,8 +21,8 @@ export class MessageModel implements MessageInterface {
     }
 
     static insert(msg: MessageInterface): Promise<void> {
-        let query = `INSERT INTO RT.MESSAGE ("CREATOR_ID", "RECIPIENT_GROUP_ID", "MESSAGE_BODY", "CREATE_DATE") VALUES (?, ?, ?, ?) `
-        const params = [msg.CREATOR_ID, msg.RECIPIENT_GROUP_ID, msg.MESSAGE_BODY, msg.CREATE_DATE];
+        let query = `INSERT INTO RT.MESSAGE ("CREATOR_ID", "RECIPIENT_GROUP_ID", "MESSAGE_BODY", "CREATE_DATE") VALUES (?, ?, ?, CURRENT_TIMESTAMP) `
+        const params = [msg.CREATOR_ID, msg.RECIPIENT_GROUP_ID, msg.MESSAGE_BODY];
 
         return new Promise((resolve, reject) => {
             Database.getDB()

@@ -25,7 +25,7 @@ export class ChatLog {
                 text: row.subtitle,
                 createdAt: row.created_at,
                 user: {
-                    _id: row.id,
+                    _id: row.creator_id,
                     name: row.name,
                     avatar: row.avatar_url
                 }
