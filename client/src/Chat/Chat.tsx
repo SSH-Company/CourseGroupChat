@@ -4,7 +4,7 @@ import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import { CustomMessage, CustomToolbar, InboxSettings } from './components';
 import { UserContext } from '../Auth/Login';
-import { RenderMessageContext } from '../Util/WebSocket';
+import { RenderMessageContext } from '../Socket/WebSocket';
 import { ChatLog } from '../Util/ChatLog';
 import BASE_URL from '../../BaseUrl';
 import axios from 'axios';

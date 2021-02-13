@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, createContext } from "react";
 import { UserContext } from '../Auth/Login';
 import BASE_URL from '../../BaseUrl';
-import { ChatLog } from './ChatLog'
+import { ChatLog } from '../Util/ChatLog'
 
 export const RenderMessageContext = createContext({
     renderFlag: false,
