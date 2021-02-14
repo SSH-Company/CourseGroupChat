@@ -40,7 +40,7 @@ const Socket = ({ children }) => {
                     avatar: groupInfo.avatar
                 }
             }]
-            log.appendLog(data.groupID.id, newMessage)
+            log.appendLog(data.groupID, newMessage)
             setRenderFlag(prevFlag => !prevFlag)
         }
 

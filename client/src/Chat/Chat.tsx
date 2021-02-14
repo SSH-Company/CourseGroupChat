@@ -32,7 +32,7 @@ const Chat = ({ route, navigation }) => {
 
     const onSend = useCallback((messages = []) => {
         //append to Chatlog instance to save to cache
-        ChatLog.getChatLogInstance().appendLog(groupID.id, messages)
+        ChatLog.getChatLogInstance().appendLog(groupID, messages)
         setRenderFlag(!renderFlag)
         setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
         //submit message to queue
