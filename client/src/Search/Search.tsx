@@ -3,6 +3,7 @@ import { Button, Text, View, ScrollView, Platform, StyleSheet } from "react-nati
 import { ListItem, Avatar, Header, SearchBar } from "react-native-elements";
 import { UserContext } from '../Auth/Login';
 import Feather from "react-native-vector-icons/Feather";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import BASE_URL from '../../BaseUrl';
 import axios from 'axios';
 
@@ -191,7 +192,11 @@ const Search = ({ navigation }) => {
                     <ListItem.Content>
                         <ListItem.Title>{l.name}</ListItem.Title>
                     </ListItem.Content>
-                    <ListItem.CheckBox checked={l.checked} onPress={() => toggleCheckbox(i)}/>
+                    <ListItem.CheckBox 
+                        checked={l.checked} 
+                        checkedIcon={<Ionicons name="checkmark-circle" size={25} color="#734f96"/>} 
+                        uncheckedIcon={<Ionicons name="checkmark-circle-outline" size={25} color="#734f96"/>}
+                        onPress={() => toggleCheckbox(i)}/>
                 </ListItem>
             ))}
             </ScrollView>
