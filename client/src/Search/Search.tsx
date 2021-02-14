@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Text, View, ScrollView, Platform, StyleSheet } from "react-native";
-import { ListItem, Button, Avatar, Header, SearchBar } from "react-native-elements";
+import { Button, Text, View, ScrollView, Platform, StyleSheet } from "react-native";
+import { ListItem, Avatar, Header, SearchBar } from "react-native-elements";
 import { UserContext } from '../Auth/Login';
 import Feather from "react-native-vector-icons/Feather";
 import BASE_URL from '../../BaseUrl';
@@ -16,6 +16,9 @@ type listtype = {
 //style sheet
 const style = StyleSheet.create({
     search: {},
+    submit: {
+        color: '#734f96'
+    },
     suggested: {
         fontWeight: "bold",
         color: "grey",
@@ -90,6 +93,7 @@ const getData = () => {
 const Search = ({ navigation }) => {
     const user = useContext(UserContext)
     const [search, setSearch] = useState("");
+    const [displaySubmit, setDisplaySubmit] = useState(false);
     const [suggestions, setSuggestions] = useState<listtype[]>([]);
 
     //retrieve data on first load
@@ -98,6 +102,17 @@ const Search = ({ navigation }) => {
             .then((data: listtype[]) => setSuggestions(data))
             .catch(err => console.error(err))
     }, [])
+
+    useEffect(() => {
+        let checked = false
+        suggestions.map(row => {
+            if (row.checked) {
+                checked = true
+                return
+            }
+        })
+        setDisplaySubmit(checked)
+    }, [suggestions])
 
     const toggleCheckbox = (index: number) => {
         const newSuggestions = suggestions;
@@ -133,7 +148,11 @@ const Search = ({ navigation }) => {
                     text: "Choose Members",
                     style: { color: "#734f96", fontSize: 20, fontWeight: "bold" },
                 }}
-                rightComponent={<Button title="OK" onPress={() => handleSubmit()}/>}
+                rightComponent={displaySubmit && 
+                    <View style={{width: '60%'}}>
+                        <Button title="OK" color="#734f96" onPress={() => handleSubmit()} />
+                    </View>
+                }
             />
             <SearchBar
                 platform={Platform.OS === "android" ? "android" : "ios"}

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useContext } from 'react';
-import { View, Dimensions } from 'react-native';
+import { View, Dimensions, BackHandler } from 'react-native';
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import { CustomMessage, CustomToolbar, InboxSettings } from './components';
@@ -23,6 +23,20 @@ const Chat = ({ route, navigation }) => {
     const { renderFlag, setRenderFlag } = useContext(RenderMessageContext);
     const { groupID } = route.params as ChatProps;
     const [messages, setMessages] = useState<IMessage[]>([]);
+
+    useEffect(() => {
+        const backAction = () => {
+          navigation.navigate('Main');
+          return true
+        };
+    
+        const backHandler = BackHandler.addEventListener(
+          "hardwareBackPress",
+          backAction
+        );
+    
+        return () => backHandler.remove();
+      }, []);
 
     //re set messages everytime a new message is received from socket
     useEffect(() => {
