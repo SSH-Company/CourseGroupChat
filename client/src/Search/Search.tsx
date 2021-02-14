@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Text, View, ScrollView, Platform, StyleSheet } from "react-native";
-import { ListItem, Avatar, Header, SearchBar, CheckBox } from "react-native-elements";
+import { ListItem, Button, Avatar, Header, SearchBar } from "react-native-elements";
+import { UserContext } from '../Auth/Login';
 import Feather from "react-native-vector-icons/Feather";
+import BASE_URL from '../../BaseUrl';
+import axios from 'axios';
 
 type listtype = {
     id: number;
@@ -38,13 +41,13 @@ const getData = () => {
         setTimeout(() => {
             resolve([
                 {
-                    id: 1,
+                    id: 2,
                     name: 'Tanvir Shahriar',
                     avatar_url: 'https://placeimg.com/140/140/any',
                     checked: false
                 },
                 {
-                    id: 2,
+                    id: 1,
                     name: 'Sadman Hasan',
                     avatar_url: 'https://placeimg.com/140/140/any',
                     checked: false
@@ -85,6 +88,7 @@ const getData = () => {
 }
 
 const Search = ({ navigation }) => {
+    const user = useContext(UserContext)
     const [search, setSearch] = useState("");
     const [suggestions, setSuggestions] = useState<listtype[]>([]);
 
@@ -101,6 +105,24 @@ const Search = ({ navigation }) => {
         setSuggestions([...newSuggestions]);
     }
 
+    const handleSubmit = () => {
+        const recipients = suggestions.filter(row => row.checked).map(row => row.id)
+        const requestBody = {
+            sender: user._id,
+            recipients: recipients
+        }
+
+        //create the group in the backend
+        axios.post(`${BASE_URL}/api/group`, requestBody)
+            .then(res => {
+                const data = res.data;
+                navigation.navigate('Chat', {
+                    groupID: { id: data.id, name: data.name, avatar: data.avatar_url }
+                })
+            })
+            .catch(err => console.log(err))
+    }
+
     return (
         <View style={{ flex: 1}}>
             <Header
@@ -111,11 +133,8 @@ const Search = ({ navigation }) => {
                     text: "Choose Members",
                     style: { color: "#734f96", fontSize: 20, fontWeight: "bold" },
                 }}
+                rightComponent={<Button title="OK" onPress={() => handleSubmit()}/>}
             />
-            <ScrollView
-                contentOffset={{ x: 0, y: 76 }}
-                keyboardShouldPersistTaps="handled"
-            >
             <SearchBar
                 platform={Platform.OS === "android" ? "android" : "ios"}
                 clearIcon={{ size: 30 }}
@@ -125,6 +144,7 @@ const Search = ({ navigation }) => {
                 value={search}
                 style={style.search}
             />
+            <ScrollView keyboardShouldPersistTaps="handled">
             <View style={style.members}>
                 <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
                 {suggestions.map((l, i) => ( 

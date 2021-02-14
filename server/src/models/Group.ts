@@ -15,4 +15,19 @@ export class GroupModel implements GroupInterface {
         // super();
         Object.assign(this, raw);
     }
+
+    static insert(): Promise<GroupModel> {
+        return new Promise((resolve, reject) => {
+            const query = `INSERT INTO RT.GROUP ("CREATE_DATE", "IS_ACTIVE") VALUES (CURRENT_TIMESTAMP, 'Y') RETURNING * ;`
+            Database.getDB()
+                .query(query)
+                .then((data:GroupModel[]) => {
+                    resolve(new GroupModel(data[0]))
+                })
+                .catch(err => {
+                    console.log(err)
+                    reject(err)
+                })
+        })
+    }
 }
