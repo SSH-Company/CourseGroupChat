@@ -13,7 +13,7 @@ export default function App() {
       <LogIn>
         <NavigationContainer>
             <Socket>
-              <Stack.Navigator initialRouteName="Main" screenOptions={{headerShown: false}}>
+              <Stack.Navigator initialRouteName="Main" screenOptions={{headerShown: false, cardStyle: { backgroundColor: 'white' }}}>
                   <Stack.Screen name="Main" component={Main}/>
                   <Stack.Screen name="Chat" component={Chat}/>
               </Stack.Navigator>

@@ -89,8 +89,6 @@ const Main = ({ navigation }) => {
         {filteredList.map((l, i) => (
           <ListItem
             key={i}
-            topDivider
-            bottomDivider
             onPress={() => {
               navigation.navigate("Chat", {
                 groupID: { id: l.id, name: l.name, avatar: l.avatar_url }
