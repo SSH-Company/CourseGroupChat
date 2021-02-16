@@ -82,4 +82,7 @@ export class MessageController {
             })
         }
     }
+
+    //step 4: create function updateLog, use message ids and update their
+    //statuses to received. Query the log for all senders of the messages. 
 }

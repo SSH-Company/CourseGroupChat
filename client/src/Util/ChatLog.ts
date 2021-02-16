@@ -28,7 +28,8 @@ export class ChatLog {
                     _id: row.creator_id,
                     name: row.name,
                     avatar: row.avatar_url
-                }
+                },
+                received: true
             }
             if (row.id in map) map[row.id].push(newMessage)
             else {
