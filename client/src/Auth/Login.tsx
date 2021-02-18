@@ -97,7 +97,6 @@ const LogIn = ({ children }) => {
 
     const handleAppStateChange = (nextAppState) => {
         appState.current = nextAppState
-        console.log(appState.current)
     }
 
     if (loading) {

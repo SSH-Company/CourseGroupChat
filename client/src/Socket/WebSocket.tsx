@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, createContext } from "react";
 import { UserContext } from '../Auth/Login';
 import BASE_URL from '../../BaseUrl';
-import { ChatLog } from './ChatLog'
+import { ChatLog } from '../Util/ChatLog'
 
 export const RenderMessageContext = createContext({
     renderFlag: false,
@@ -40,7 +40,7 @@ const Socket = ({ children }) => {
                     avatar: groupInfo.avatar
                 }
             }]
-            log.appendLog(data.groupID.id, newMessage)
+            log.appendLog(data.groupID, newMessage)
             setRenderFlag(prevFlag => !prevFlag)
         }
 
