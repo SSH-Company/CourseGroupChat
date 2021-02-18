@@ -1,10 +1,10 @@
 import React, { useState, useCallback, useEffect, useContext } from 'react';
-import { View, Dimensions } from 'react-native';
+import { View, Dimensions, BackHandler } from 'react-native';
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import { CustomMessage, CustomToolbar, InboxSettings } from './components';
 import { UserContext } from '../Auth/Login';
-import { RenderMessageContext } from '../Util/WebSocket';
+import { RenderMessageContext } from '../Socket/WebSocket';
 import { ChatLog } from '../Util/ChatLog';
 import BASE_URL from '../../BaseUrl';
 import axios from 'axios';
@@ -24,6 +24,20 @@ const Chat = ({ route, navigation }) => {
     const { groupID } = route.params as ChatProps;
     const [messages, setMessages] = useState<IMessage[]>([]);
 
+    useEffect(() => {
+        const backAction = () => {
+          navigation.navigate('Main');
+          return true
+        };
+    
+        const backHandler = BackHandler.addEventListener(
+          "hardwareBackPress",
+          backAction
+        );
+    
+        return () => backHandler.remove();
+      }, []);
+
     //re set messages everytime a new message is received from socket
     useEffect(() => {
         const log = ChatLog.getChatLogInstance().chatLog
@@ -32,7 +46,7 @@ const Chat = ({ route, navigation }) => {
 
     const onSend = useCallback((messages = []) => {
         //append to Chatlog instance to save to cache
-        ChatLog.getChatLogInstance().appendLog(groupID.id, messages)
+        ChatLog.getChatLogInstance().appendLog(groupID, messages)
         setRenderFlag(!renderFlag)
         setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
         //submit message to queue

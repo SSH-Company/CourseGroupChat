@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
 import { View, ScrollView, Platform } from "react-native";
 import { ListItem, Avatar, Header, SearchBar } from "react-native-elements";
-import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
-import { RenderMessageContext } from '../Util/WebSocket';
+import Feather from "react-native-vector-icons/Feather";
+import { RenderMessageContext } from '../Socket/WebSocket';
 import { ChatLog } from '../Util/ChatLog';
 
-type listtype = {
+export type listtype = {
   id: number;
   message_id: number;
   name: string;
@@ -65,13 +65,18 @@ const Main = ({ navigation }) => {
       <Header
         placement="center"
         backgroundColor="#ccccff"
-        leftComponent={{ icon: "menu", color: "#734f96" }}
+        leftComponent={{ icon: "menu", color: "#734f96", size: 25 }}
         centerComponent={{
           text: "Chat",
           style: { color: "#734f96", fontSize: 20, fontWeight: "bold" },
         }}
         rightComponent={
-          <FontAwesome5 name={"comments"} color="#734f96" size={20} light />
+          <Feather 
+            name={"edit"} 
+            color="#734f96" 
+            size={25} 
+            onPress={() => navigation.navigate("Search")}
+            />
         }
       />
       <ScrollView

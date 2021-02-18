@@ -50,9 +50,16 @@ export class ChatLog {
         return this.instance
     }
 
-    public appendLog(groupID: number, message: IMessage[]) {
-        if (groupID in this.chatLog) this.chatLog[groupID] = message.concat(this.chatLog[groupID])
-        else { console.log('id not found in log') }
+    public appendLog(group: { id: number, name?: string, avatar?: string }, message: IMessage[]) {
+        if (group.id in this.chatLog) this.chatLog[group.id] = message.concat(this.chatLog[group.id])
+        else { 
+            //new group has been created
+            this.chatLog[group.id] = message
+            this.groupInfo[group.id] = {
+                name: group.name,
+                avatar: group.avatar
+            }
+        }
     }
 
     public printLog() {
