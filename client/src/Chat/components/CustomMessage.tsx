@@ -60,17 +60,19 @@ const CustomMessage:FunctionComponent = (props) => {
     return (
         <Message 
             {...props}
-            key={`user-key-${props['user']['_id']}`}
+            key={`user-key-${props['user']['_id']}-${props['currentMessage'].displayStatus}`}
             renderBubble={() => {
                 const currentMessage = props['currentMessage']
                 const isCurrentUser = currentMessage.user._id === userID._id
                 return (
+                    <>
                     <View style={[styles.item]}>
                         <View style={[styles.balloon, {backgroundColor: isCurrentUser ? '#f5f9ff' : '#7c80ee'}]}>
                             <Text style={{paddingTop: 5, color:  isCurrentUser ? 'black' : 'white'}}>{currentMessage.text}</Text>
                         </View>
-                        {currentMessage.received && <Ionicons name={'checkmark-done-circle'} size={20} style={styles.ticks}/>}
                     </View>
+                    {isCurrentUser && currentMessage.displayStatus && <Text>{currentMessage.status}</Text>}
+                    </>
                 )
             }}
         />

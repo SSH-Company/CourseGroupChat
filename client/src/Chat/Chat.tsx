@@ -48,11 +48,16 @@ const Chat = ({ route, navigation }) => {
 
     const onSend = useCallback((messages = []) => {
         //append to Chatlog instance to save to cache
+
+        //store message ids, set these to pending: true
+        for (const msg of messages) {
+            msg['status'] = "Pending";
+        }
+
         ChatLog.getChatLogInstance().appendLog(groupID, messages)
+        //re renders Main list
         setRenderFlag(!renderFlag)
-
-        //step 1: store message ids, set these to pending: true here
-
+        
         setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
         //submit message to queue
         sendData(messages)
@@ -61,9 +66,9 @@ const Chat = ({ route, navigation }) => {
     const sendData = (messages = []) => {
         axios.post(`${BASE_URL}/api/message`, { message: {messages, groupID: groupID, senderID: user} })
             .then(() => {
-                console.log('Message sent to Queue!')
-
-                //step 2: use the message ids and update them to sent: true here
+                const instance = ChatLog.getChatLogInstance()
+                instance.updateMessageStatus(groupID.id, messages[0])
+                setMessages(instance.chatLog[groupID.id])
             })
             .catch(err => {
                 console.error(err)

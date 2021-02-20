@@ -11,6 +11,13 @@ type GroupInfoMapType = {
     }
 }
 
+const MessageStatusMap = {
+    "Pending": "Sent",
+    "Sent": "Delivered",
+    "Delivered": "Read",
+    "Read": "Read"
+}
+
 export class ChatLog {
     private static instance: ChatLog;
     public chatLog = {} as RecipientMessageMapType;
@@ -29,7 +36,7 @@ export class ChatLog {
                     name: row.name,
                     avatar: row.avatar_url
                 },
-                received: true
+                displayStatus: false
             }
             if (row.id in map) map[row.id].push(newMessage)
             else {
@@ -40,6 +47,14 @@ export class ChatLog {
                 }
             }
         })
+
+        //now we need to check for the last messages sent in each group and mark them
+        Object.keys(map).forEach(key => {
+            const message = map[key]
+            message[0].displayStatus = true
+            map[key] = message
+        })
+
         this.chatLog = map
         this.groupInfo = grpInfo
     }
@@ -61,6 +76,19 @@ export class ChatLog {
                 avatar: group.avatar
             }
         }
+    }
+
+    public updateMessageStatus(groupID: number, message: IMessage) {
+        const messages = this.chatLog[groupID]
+        for (const msg of messages) {
+            msg['displayStatus'] = false;
+            if (msg._id === message._id) {
+                msg['status'] = MessageStatusMap[msg['status']]
+                //only display status for last sent message
+                msg['displayStatus'] = true;    
+            }
+        }
+        this.chatLog[groupID] = messages
     }
 
     public printLog() {
