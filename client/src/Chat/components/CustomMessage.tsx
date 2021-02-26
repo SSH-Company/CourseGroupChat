@@ -3,6 +3,7 @@ import { View, StyleSheet, Text } from 'react-native'
 import { Avatar, Image } from 'react-native-elements'
 import { Message } from 'react-native-gifted-chat'
 import { UserContext } from '../../Auth/Login'
+import { Ionicons } from 'react-native-vector-icons'
 
 //style sheet
 const styles = StyleSheet.create({
@@ -30,6 +31,10 @@ const styles = StyleSheet.create({
         width: 40,
         borderRadius: 3,
     },
+    ticks: {
+        alignSelf: 'flex-end',
+        color: '#734f96'
+    }
 })
 
 const CustomMessage:FunctionComponent = (props) => {
@@ -55,19 +60,21 @@ const CustomMessage:FunctionComponent = (props) => {
     return (
         <Message 
             {...props}
-            key={`user-key-${props['user']['_id']}`}
+            key={`user-key-${props['user']['_id']}-${props['currentMessage'].displayStatus}`}
             renderBubble={() => {
                 const currentMessage = props['currentMessage']
                 const isCurrentUser = currentMessage.user._id === userID._id
                 return (
+                    <>
                     <View style={[styles.item]}>
                         <View style={[styles.balloon, {backgroundColor: isCurrentUser ? '#f5f9ff' : '#7c80ee'}]}>
-                        <Text style={{paddingTop: 5, color:  isCurrentUser ? 'black' : 'white'}}>{currentMessage.text}</Text>
+                            <Text style={{paddingTop: 5, color:  isCurrentUser ? 'black' : 'white'}}>{currentMessage.text}</Text>
                         </View>
                     </View>
+                    {currentMessage.displayStatus && <Text>{currentMessage.status}</Text>}
+                    </>
                 )
             }}
-            
         />
     )
 }

@@ -11,14 +11,17 @@ type GroupInfoMapType = {
     }
 }
 
+export type MessageStatus = "Pending" | "Sent" | "Read"
+
 export class ChatLog {
     private static instance: ChatLog;
+    public userID = -1;
     public chatLog = {} as RecipientMessageMapType;
     public groupInfo = {} as GroupInfoMapType;
 
-    constructor(list: any) {
+    constructor(list: any, userID: number) {
         let map = {} as RecipientMessageMapType
-        let grpInfo = {} as GroupInfoMapType;
+        let grpInfo = {} as GroupInfoMapType
         list.map(row => {
             const newMessage = {
                 _id: row.message_id,
@@ -28,7 +31,8 @@ export class ChatLog {
                     _id: row.creator_id,
                     name: row.name,
                     avatar: row.avatar_url
-                }
+                },
+                status: row.status
             }
             if (row.id in map) map[row.id].push(newMessage)
             else {
@@ -39,13 +43,15 @@ export class ChatLog {
                 }
             }
         })
+
         this.chatLog = map
         this.groupInfo = grpInfo
+        this.userID = userID
     }
 
-    public static getChatLogInstance(list?: any) {
-        if (!this.instance && list) {
-            this.instance = new ChatLog(list)
+    public static getChatLogInstance(list?: any, userID?: number) {
+        if (!this.instance && list && userID) {
+            this.instance = new ChatLog(list, userID)
         }
         return this.instance
     }
@@ -62,11 +68,27 @@ export class ChatLog {
         }
     }
 
-    public printLog() {
-        console.log(this.chatLog)
-    }
-
-    public printGroupInfo() {
-        console.log(this.groupInfo)
+    //TODO: write a better function here to handle all use cases
+    public updateMessageStatus(groupID: number, status: MessageStatus, message?: IMessage) {
+        const messages = this.chatLog[groupID]
+        if (messages) {
+            if (message) {
+                for (const msg of messages) {
+                    msg['displayStatus'] = false;
+                    if (msg._id === message._id) {
+                        msg['status'] = status
+                        //only display status for last sent message
+                        msg['displayStatus'] = true;    
+                    }
+                }
+            } else {
+                messages[0]['displayStatus'] = true;
+                for (const msg of messages) {
+                    if (msg['status'] === status) break;
+                    msg['status'] = status
+                }
+            }
+            this.chatLog[groupID] = messages
+        }
     }
 }

@@ -71,7 +71,7 @@ const LogIn = ({ children }) => {
                     axios.get(`${BASE_URL}/api/message/${user.user.ID}`)
                         .then(async res => {
                             //construct log
-                            ChatLog.getChatLogInstance(res.data)
+                            ChatLog.getChatLogInstance(res.data, user.user.ID)
 
                             //redirect to Main
                             setLoading(false)

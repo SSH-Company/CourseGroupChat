@@ -5,7 +5,7 @@ import { DrawerLayout } from 'react-native-gesture-handler';
 import { CustomMessage, CustomToolbar, InboxSettings } from './components';
 import { UserContext } from '../Auth/Login';
 import { RenderMessageContext } from '../Socket/WebSocket';
-import { ChatLog } from '../Util/ChatLog';
+import { ChatLog, MessageStatus } from '../Util/ChatLog';
 import BASE_URL from '../../BaseUrl';
 import axios from 'axios';
 
@@ -20,7 +20,7 @@ type ChatProps = {
 const Chat = ({ route, navigation }) => {
 
     const user = useContext(UserContext)
-    const { renderFlag, setRenderFlag } = useContext(RenderMessageContext);
+    const { postStatus, renderFlag, setRenderFlag } = useContext(RenderMessageContext);
     const { groupID } = route.params as ChatProps;
     const [messages, setMessages] = useState<IMessage[]>([]);
 
@@ -42,21 +42,32 @@ const Chat = ({ route, navigation }) => {
     useEffect(() => {
         const log = ChatLog.getChatLogInstance().chatLog
         setMessages(log[groupID.id])
+        if (postStatus) axios.post(`${BASE_URL}/api/message/updateMessageStatus`, { groups: [groupID.id], sender: user._id, status: "Read" }).catch(err => console.log(err))
     }, [renderFlag])
 
     const onSend = useCallback((messages = []) => {
         //append to Chatlog instance to save to cache
-        ChatLog.getChatLogInstance().appendLog(groupID, messages)
-        setRenderFlag(!renderFlag)
-        setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
+        //store message ids, set these to pending: true
+        for (const msg of messages) msg['status'] = "Pending" as MessageStatus;
+
+        ChatLog.getChatLogInstance().appendLog(groupID, messages);
+        setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
         //submit message to queue
-        sendData(messages)
+        sendData(messages);
     }, [])
 
     const sendData = (messages = []) => {
         axios.post(`${BASE_URL}/api/message`, { message: {messages, groupID: groupID, senderID: user} })
-            .then(() => console.log('Message sent to Queue!'))
-            .catch(err => console.error(err))
+            .then(() => {
+                const instance = ChatLog.getChatLogInstance()
+                instance.updateMessageStatus(groupID.id, "Sent", messages[0])
+                setMessages(instance.chatLog[groupID.id])
+            })
+            .catch(err => {
+                console.error(err)
+
+                //TODO: figure out a way to display failed notification
+            })
     }
 
     return (
@@ -68,13 +79,14 @@ const Chat = ({ route, navigation }) => {
             drawerBackgroundColor="#ffffff"
             renderNavigationView={InboxSettings}
             contentContainerStyle={{}}
-        >
+        >   
             <GiftedChat
                 user={user}
                 messages={messages}
                 onSend={messages => onSend(messages)}
                 renderMessage={props => { return ( <CustomMessage {...props} /> ) }}
                 renderInputToolbar={props => { return ( <CustomToolbar {...props} /> ) }}
+                isKeyboardInternallyHandled={false}
             />
         </DrawerLayout>
     </View>
