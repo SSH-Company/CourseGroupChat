@@ -71,7 +71,7 @@ const CustomMessage:FunctionComponent = (props) => {
                             <Text style={{paddingTop: 5, color:  isCurrentUser ? 'black' : 'white'}}>{currentMessage.text}</Text>
                         </View>
                     </View>
-                    {isCurrentUser && currentMessage.displayStatus && <Text>{currentMessage.status}</Text>}
+                    {currentMessage.displayStatus && <Text>{currentMessage.status}</Text>}
                     </>
                 )
             }}

@@ -45,7 +45,7 @@ export const publishToQueue = async (queue, message, durable = false) => {
     try {
         const cluster = await amqp.connect(config.rabbit.connectionString);
         const channel = await cluster.createChannel();
-    
+
         await channel.assertQueue(queue, durable= durable);
         await channel.sendToQueue(queue, Buffer.from(message));
       

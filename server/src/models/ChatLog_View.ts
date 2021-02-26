@@ -8,6 +8,7 @@ interface ChatLogViewInterface {
     MESSAGE_ID?: string;
     MESSAGE_BODY?: string;
     CREATE_DATE?: string;
+    STATUS?: string;
 }
 
 export class ChatLogViewModel implements ChatLogViewInterface {
@@ -18,6 +19,7 @@ export class ChatLogViewModel implements ChatLogViewInterface {
     MESSAGE_ID?: string;
     MESSAGE_BODY?: string;
     CREATE_DATE?: string;
+    STATUS?: string;
 
     constructor(raw: ChatLogViewInterface) {
         // super();
@@ -26,7 +28,7 @@ export class ChatLogViewModel implements ChatLogViewInterface {
 
     static getUserLog(uid: number): Promise<ChatLogViewModel[]> {
         const query = `${SELECT} WHERE "USER_ID" = ?; `;
-
+        
         return new Promise((resolve, reject) => {
             Database.getDB()
                 .query(query, [uid])
@@ -46,6 +48,7 @@ const SELECT = ` SELECT
 "NAME",
 "MESSAGE_ID",
 "MESSAGE_BODY",
+"STATUS",
 "CREATE_DATE"
 FROM RT."CHATLOG_VIEW"
 `

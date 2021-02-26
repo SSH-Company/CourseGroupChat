@@ -1,17 +1,19 @@
 import React, { useState, useEffect, useContext, createContext } from "react";
 import { UserContext } from '../Auth/Login';
+import { ChatLog } from '../Util/ChatLog';
 import BASE_URL from '../../BaseUrl';
-import { ChatLog } from '../Util/ChatLog'
 
 export const RenderMessageContext = createContext({
+    postStatus: false,
     renderFlag: false,
     setRenderFlag: (flag: boolean) => {}
 });
 
 const Socket = ({ children }) => {
     const user = useContext(UserContext);
+    const [postStatus, setPostStatus] = useState(false);
     const [renderFlag, setRenderFlag] = useState(false)
-    const value = { renderFlag, setRenderFlag} as any
+    const value = { postStatus, renderFlag, setRenderFlag } as any
 
     useEffect(() => {
         if(user._id) websocketConnect()
@@ -29,18 +31,26 @@ const Socket = ({ children }) => {
         socket.onmessage = (e: any) => {
             const data = JSON.parse(e.data)
             const log = ChatLog.getChatLogInstance()
-            const groupInfo = log.groupInfo[Number(data.groupID.id)]
-            const newMessage:any = [{
-                _id: data._id,
-                text: data.text,
-                createdAt: data.createdAt || new Date(),
-                user: {
-                    _id: data.groupID.id,
-                    name: groupInfo.name,
-                    avatar: groupInfo.avatar
-                }
-            }]
-            log.appendLog(data.groupID, newMessage)
+            
+            if (data.command === "update") {
+                log.updateMessageStatus(data.groupID, data.status)
+                setPostStatus(false)
+            } else {
+                const groupInfo = log.groupInfo[Number(data.groupID.id)]
+                const newMessage:any = [{
+                    _id: data._id,
+                    text: data.text,
+                    createdAt: data.createdAt || new Date(),
+                    user: {
+                        _id: data.groupID.id,
+                        name: groupInfo.name,
+                        avatar: groupInfo.avatar
+                    }
+                }]
+                log.appendLog(data.groupID, newMessage)  
+                setPostStatus(true) 
+            }
+
             setRenderFlag(prevFlag => !prevFlag)
         }
 
