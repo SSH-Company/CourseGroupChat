@@ -20,7 +20,7 @@ type ChatProps = {
 const Chat = ({ route, navigation }) => {
 
     const user = useContext(UserContext)
-    const { postStatus, renderFlag, setRenderFlag } = useContext(RenderMessageContext);
+    const { postStatus, renderFlag, setPostStatus, setRenderFlag } = useContext(RenderMessageContext);
     const { groupID } = route.params as ChatProps;
     const [messages, setMessages] = useState<IMessage[]>([]);
 
@@ -40,28 +40,37 @@ const Chat = ({ route, navigation }) => {
 
     //re set messages everytime a new message is received from socket
     useEffect(() => {
-        const log = ChatLog.getChatLogInstance().chatLog
-        setMessages(log[groupID.id])
-        if (postStatus) axios.post(`${BASE_URL}/api/message/updateMessageStatus`, { groups: [groupID.id], sender: user._id, status: "Read" }).catch(err => console.log(err))
+        resetMessages();
     }, [renderFlag])
 
-    const onSend = useCallback((messages = []) => {
+    const resetMessages = async () => {
+        const instance = await ChatLog.getChatLogInstance();
+        const log = instance.chatLog;
+        const filteredMessages = log[groupID.id].filter(msg => msg.text !== '');
+        setMessages(filteredMessages);
+        if (postStatus) {
+            axios.post(`${BASE_URL}/api/message/updateMessageStatus`, { groups: [groupID.id], sender: user._id, status: "Read" }).catch(err => console.log(err))
+            setPostStatus(false);
+        }    
+    }
+    
+    const onSend = useCallback(async (messages = []) => {
         //append to Chatlog instance to save to cache
         //store message ids, set these to pending: true
         for (const msg of messages) msg['status'] = "Pending" as MessageStatus;
-
-        ChatLog.getChatLogInstance().appendLog(groupID, messages);
+        const instance = await ChatLog.getChatLogInstance();
+        instance.appendLog(groupID, messages);
         setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
-        //submit message to queue
         sendData(messages);
     }, [])
 
+    //helper function for sending message to queue
     const sendData = (messages = []) => {
         axios.post(`${BASE_URL}/api/message`, { message: {messages, groupID: groupID, senderID: user} })
-            .then(() => {
-                const instance = ChatLog.getChatLogInstance()
+            .then(async () => {
+                const instance = await ChatLog.getChatLogInstance()
                 instance.updateMessageStatus(groupID.id, "Sent", messages[0])
-                setMessages(instance.chatLog[groupID.id])
+                setRenderFlag(!renderFlag);
             })
             .catch(err => {
                 console.error(err)

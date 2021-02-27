@@ -66,24 +66,14 @@ const LogIn = ({ children }) => {
                     const user = res.data 
                     await AsyncStorage.setItem('token', token)
                     await AsyncStorage.setItem('user', JSON.stringify(user))
-                    
-                    //retrieve log
-                    axios.get(`${BASE_URL}/api/message/${user.user.ID}`)
-                        .then(async res => {
-                            //construct log
-                            ChatLog.getChatLogInstance(res.data, user.user.ID)
-
-                            //redirect to Main
-                            setLoading(false)
-                            setUserID({
-                                _id: user.user.ID,
-                                name: user.user.FIRST_NAME + ' ' + user.user.LAST_NAME,
-                                avatar: 'https://placeimg.com/140/140/any'
-                            })
-                        })
-                        .catch(e => {
-                            console.log('error fetching log: ', e.response.data)
-                        })
+                    await ChatLog.getChatLogInstance(true, user.user.ID); 
+                    setUserID({
+                        _id: user.user.ID,
+                        name: user.user.FIRST_NAME + ' ' + user.user.LAST_NAME,
+                        avatar: 'https://placeimg.com/140/140/any'
+                    })
+                    //redirect to Main
+                    setLoading(false)
                 })
                 .catch(e => {
                     console.log('login error:', e.response.data)

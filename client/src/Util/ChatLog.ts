@@ -1,4 +1,6 @@
 import { IMessage } from 'react-native-gifted-chat';
+import BASE_URL from '../../BaseUrl';
+import axios from 'axios';
 
 type RecipientMessageMapType = {
     [key: number]: IMessage[]
@@ -9,6 +11,10 @@ type GroupInfoMapType = {
         name: string,
         avatar: string
     }
+}
+
+function revisedRandId() {
+    return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(2, 10);
 }
 
 export type MessageStatus = "Pending" | "Sent" | "Read"
@@ -24,8 +30,8 @@ export class ChatLog {
         let grpInfo = {} as GroupInfoMapType
         list.map(row => {
             const newMessage = {
-                _id: row.message_id,
-                text: row.subtitle,
+                _id: row.message_id || revisedRandId(),
+                text: row.subtitle || '',
                 createdAt: row.created_at,
                 user: {
                     _id: row.creator_id,
@@ -49,11 +55,20 @@ export class ChatLog {
         this.userID = userID
     }
 
-    public static getChatLogInstance(list?: any, userID?: number) {
-        if (!this.instance && list && userID) {
-            this.instance = new ChatLog(list, userID)
+    public static async getChatLogInstance(refreshLog: boolean = false, userID?: any) {
+        if ((!this.instance && userID) || refreshLog) {
+            const id = userID ? userID : this.instance.userID;
+            //retrieve log
+            try {
+                const res = await axios.get(`${BASE_URL}/api/message/${id}`)
+                this.instance = new ChatLog(res.data, id);
+                return this.instance;    
+            } catch (err) {
+                console.error('Something went wrong attempting to fetch chat log.');
+            }
+        } else {
+            return this.instance
         }
-        return this.instance
     }
 
     public appendLog(group: { id: number, name?: string, avatar?: string }, message: IMessage[]) {
@@ -82,13 +97,14 @@ export class ChatLog {
                     }
                 }
             } else {
-                messages[0]['displayStatus'] = true;
                 for (const msg of messages) {
                     if (msg['status'] === status) break;
-                    msg['status'] = status
+                    msg['status'] = status;
+                    msg['displayStatus'] = false;
                 }
+                messages[0]['displayStatus'] = true;
             }
-            this.chatLog[groupID] = messages
+            this.chatLog[groupID] = messages;
         }
     }
 }
