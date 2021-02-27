@@ -1,9 +1,7 @@
 import React, { FunctionComponent, useContext } from 'react'
 import { View, StyleSheet, Text } from 'react-native'
-import { Avatar, Image } from 'react-native-elements'
 import { Message } from 'react-native-gifted-chat'
 import { UserContext } from '../../Auth/Login'
-import { Ionicons } from 'react-native-vector-icons'
 
 //style sheet
 const styles = StyleSheet.create({
@@ -38,24 +36,7 @@ const styles = StyleSheet.create({
 })
 
 const CustomMessage:FunctionComponent = (props) => {
-    
-    const userID = useContext(UserContext)
-    
-    //TODO: rendering avatar
-    const renderAvatar = (avatarProps: any) => {
-        const user = avatarProps.user
-        if (user) {
-            return (
-                <Avatar 
-                    rounded 
-                    source={{
-                        uri: user.avatar
-                    }}
-                    containerStyle={styles.avatar}
-                />
-            )
-        }
-    }
+    const userID = useContext(UserContext);
 
     return (
         <Message 

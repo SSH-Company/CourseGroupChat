@@ -2,10 +2,16 @@ import React, { useState, useEffect, useContext } from "react";
 import { Button, Text, View, ScrollView, Platform, StyleSheet } from "react-native";
 import { ListItem, Avatar, Header, SearchBar } from "react-native-elements";
 import { UserContext } from '../Auth/Login';
+import { RenderMessageContext } from '../Socket/WebSocket';
+import { ChatLog } from "../Util/ChatLog";
 import Feather from "react-native-vector-icons/Feather";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import BASE_URL from '../../BaseUrl';
 import axios from 'axios';
+
+type SearchProps = {
+    groupName: string
+}
 
 type listtype = {
     id: number;
@@ -91,9 +97,11 @@ const getData = () => {
     })
 }
 
-const Search = ({ navigation }) => {
-    const user = useContext(UserContext)
+const Search = ({ route, navigation }) => {
+    const user = useContext(UserContext);
+    const { groupName } = route.params as SearchProps;
     const [search, setSearch] = useState("");
+    const { renderFlag, setRenderFlag } = useContext(RenderMessageContext);
     const [displaySubmit, setDisplaySubmit] = useState(false);
     const [suggestions, setSuggestions] = useState<listtype[]>([]);
 
@@ -125,13 +133,16 @@ const Search = ({ navigation }) => {
         const recipients = suggestions.filter(row => row.checked).map(row => row.id)
         const requestBody = {
             sender: user._id,
-            recipients: recipients
+            recipients: recipients,
+            groupName: groupName
         }
 
         //create the group in the backend
         axios.post(`${BASE_URL}/api/group`, requestBody)
-            .then(res => {
+            .then(async res => {
                 const data = res.data;
+                await ChatLog.getChatLogInstance(true);
+                setRenderFlag(!renderFlag);
                 navigation.navigate('Chat', {
                     groupID: { id: data.id, name: data.name, avatar: data.avatar_url }
                 })
@@ -158,7 +169,7 @@ const Search = ({ navigation }) => {
             <SearchBar
                 platform={Platform.OS === "android" ? "android" : "ios"}
                 clearIcon={{ size: 30 }}
-                placeholder="Search messages"
+                placeholder="Search contacts"
                 onChangeText={(text) => {}}
                 onCancel={() => {}}
                 value={search}

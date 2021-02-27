@@ -6,6 +6,7 @@ import BASE_URL from '../../BaseUrl';
 export const RenderMessageContext = createContext({
     postStatus: false,
     renderFlag: false,
+    setPostStatus: (flag: boolean) => {},
     setRenderFlag: (flag: boolean) => {}
 });
 
@@ -13,7 +14,7 @@ const Socket = ({ children }) => {
     const user = useContext(UserContext);
     const [postStatus, setPostStatus] = useState(false);
     const [renderFlag, setRenderFlag] = useState(false)
-    const value = { postStatus, renderFlag, setRenderFlag } as any
+    const value = { postStatus, renderFlag, setPostStatus, setRenderFlag } as any
 
     useEffect(() => {
         if(user._id) websocketConnect()
@@ -28,29 +29,39 @@ const Socket = ({ children }) => {
             socket.send(JSON.stringify({userID: user._id}))
         }
 
-        socket.onmessage = (e: any) => {
+        socket.onmessage = async (e: any) => {
             const data = JSON.parse(e.data)
-            const log = ChatLog.getChatLogInstance()
-            
-            if (data.command === "update") {
-                log.updateMessageStatus(data.groupID, data.status)
-                setPostStatus(false)
-            } else {
-                const groupInfo = log.groupInfo[Number(data.groupID.id)]
-                const newMessage:any = [{
-                    _id: data._id,
-                    text: data.text,
-                    createdAt: data.createdAt || new Date(),
-                    user: {
-                        _id: data.groupID.id,
-                        name: groupInfo.name,
-                        avatar: groupInfo.avatar
-                    }
-                }]
-                log.appendLog(data.groupID, newMessage)  
-                setPostStatus(true) 
-            }
+            var log: any;
 
+            switch (data.command) {
+                case 'refresh':
+                    await ChatLog.getChatLogInstance(true);
+                    setPostStatus(false);
+                    break;
+                case 'update':
+                    log = await ChatLog.getChatLogInstance()
+                    log.updateMessageStatus(data.groupID, data.status)
+                    setPostStatus(false);
+                    break;
+                case 'append':
+                    log = await ChatLog.getChatLogInstance()
+                    const groupInfo = log.groupInfo[Number(data.groupID.id)]
+                    const newMessage:any = [{
+                        _id: data._id,
+                        text: data.text,
+                        createdAt: data.createdAt,
+                        user: {
+                            _id: data.groupID.id,
+                            name: groupInfo.name,
+                            avatar: groupInfo.avatar
+                        }
+                    }]
+                    log.appendLog(data.groupID, newMessage)  
+                    setPostStatus(true); 
+                    break;
+                default:
+                    break;
+            }
             setRenderFlag(prevFlag => !prevFlag)
         }
 
