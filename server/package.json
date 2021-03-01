@@ -17,6 +17,8 @@
     "https": "^1.0.0",
     "node-cache": "^5.1.2",
     "nodemon": "^2.0.6",
+    "passport": "^0.4.1",
+    "passport-saml": "^2.0.5",
     "path": "^0.12.7",
     "pg": "^8.5.1",
     "ts-node": "^9.0.0",

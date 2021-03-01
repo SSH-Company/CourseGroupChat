@@ -1,5 +1,6 @@
 import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
+import { WebView } from 'react-native-webview';
 
 const styles = StyleSheet.create({
     container: {
@@ -16,9 +17,10 @@ const styles = StyleSheet.create({
 
 const SignUp = () => {
     return (
-        <View style={[styles.container, styles.horizontal]}>
-            <Text>Sign Up Page!</Text>
-        </View>
+        <WebView
+            source={{ uri: 'https://ssh-company-dev.onelogin.com/login' }}
+            style={{ marginTop: 20 }}
+        />
     )
 }
 

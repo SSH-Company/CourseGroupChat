@@ -27,6 +27,7 @@
     "react-native-svg": "^12.1.0",
     "react-native-vector-icons": "^7.1.0",
     "react-native-web": "~0.13.12",
+    "react-native-webview": "^11.2.3",
     "websocket": "^1.0.33",
     "ws": "^7.4.2"
   },

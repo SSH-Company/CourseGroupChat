@@ -1,14 +1,18 @@
 import { Request, Response } from 'express'
 import {
+    Middleware,
     Controller,
+    Get,
     Post
 } from '@overnightjs/core';
 import { verifyToken } from '../services/UserAuth';
 import { UserModel } from '../models/User';
 import * as STATUS from 'http-status-codes';
+import passport from 'passport';
 
 @Controller('login')
 export class LoginController {
+    @Middleware([passport.authenticate('samlStrategy')])
     @Post('')
     private userLogin(req: Request, res: Response) {
         let token:string;
@@ -21,6 +25,7 @@ export class LoginController {
             })
             return;
         }
+        console.log(req.user)
         verifyToken(token)
             .then(uid => {
                 //TODO: add a service to ensure session is alive
@@ -46,5 +51,8 @@ export class LoginController {
             })
         
     }
+
+    // @Post('callback')
+    // private loginCallback(req: Request, res: Response)
 
 }

@@ -58,8 +58,8 @@ const LogIn = ({ children }) => {
     }, [])
 
     const checkLogIn = async () => {
-        const token = await AsyncStorage.getItem('token');
-        // const token = 'TOKEN_ONE';
+        // const token = '1';
+        const token = null;
         if (token) {
             axios.post(`${BASE_URL}/api/login/`, { userToken: token })
                 .then(async res => {
