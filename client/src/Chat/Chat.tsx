@@ -19,7 +19,7 @@ type ChatProps = {
 
 const Chat = ({ route, navigation }) => {
 
-    const user = useContext(UserContext)
+    const { user, setUser } = useContext(UserContext)
     const { postStatus, renderFlag, setPostStatus, setRenderFlag } = useContext(RenderMessageContext);
     const { groupID } = route.params as ChatProps;
     const [messages, setMessages] = useState<IMessage[]>([]);

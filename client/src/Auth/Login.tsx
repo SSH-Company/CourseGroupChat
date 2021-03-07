@@ -1,16 +1,16 @@
-import React, { useRef, useEffect, useState, createContext } from 'react'
+import React, { useRef, useEffect, useState, createContext } from 'react';
 import { 
     AppState,
     AsyncStorage, 
     StyleSheet,
     Text,
     View 
-} from 'react-native'
-import { User } from 'react-native-gifted-chat'
-import SignUp from './SignUp'
-import { ChatLog } from '../Util/ChatLog'
-import BASE_URL from '../../BaseUrl'
-import axios from 'axios'
+} from 'react-native';
+import { User } from 'react-native-gifted-chat';
+import SignUp from './SignUp';
+import { ChatLog } from '../Util/ChatLog';
+import BASE_URL from '../../BaseUrl';
+import axios from 'axios';
 
 const styles = StyleSheet.create({
     container: {
@@ -24,13 +24,18 @@ const styles = StyleSheet.create({
     }
 });
 
-export const UserContext = createContext({} as User)
+export const UserContext = createContext({
+    user: {} as User,
+    setUser: (user: User) => {}
+})
 
 const LogIn = ({ children }) => {
     const [loading, setLoading] = useState(true)
     const [newUser, setNewUser] = useState(false)
-    const [userID, setUserID] = useState({} as User)
-    const appState = useRef(AppState.currentState)
+    const [userID, setUserID] = useState({} as User);
+    const [sourceHTML, setSourceHTML] = useState<any>();
+    const appState = useRef(AppState.currentState);
+    const userState = { userID, setUserID } as any
 
     /*
         How it works:
@@ -47,6 +52,7 @@ const LogIn = ({ children }) => {
 
     useEffect(() => {
         checkLogIn()
+        // clearCache();
     }, [])
 
     useEffect(() => {
@@ -57,32 +63,65 @@ const LogIn = ({ children }) => {
         }
     }, [])
 
-    const checkLogIn = async () => {
-        // const token = '1';
-        const token = null;
-        if (token) {
-            axios.post(`${BASE_URL}/api/login/`, { userToken: token })
+    const clearCache = async () => {
+        await AsyncStorage.removeItem('token');
+        await AsyncStorage.removeItem('user');
+        console.log('Cleared cache!');
+    }
+
+    const checkLogIn = () => {
+        axios.get(`${BASE_URL}/api/login`)
                 .then(async res => {
-                    const user = res.data 
-                    await AsyncStorage.setItem('token', token)
-                    await AsyncStorage.setItem('user', JSON.stringify(user))
-                    await ChatLog.getChatLogInstance(true, user.user.ID); 
-                    setUserID({
-                        _id: user.user.ID,
-                        name: user.user.FIRST_NAME + ' ' + user.user.LAST_NAME,
-                        avatar: 'https://placeimg.com/140/140/any'
-                    })
-                    //redirect to Main
-                    setLoading(false)
+                    setSourceHTML({
+                        type: "html",
+                        data: res.data
+                    });
+                    setNewUser(true);
+                    setLoading(false);
                 })
-                .catch(e => {
-                    console.log('login error:', e.response.data)
+                .catch(err => {
+                    const response = err.response;
+                    if (response) {
+                        switch (response.status) {
+                            case 302:
+                                setNewUser(true);
+                                setSourceHTML({
+                                    type: "uri",
+                                    data: response.data.redirect
+                                });
+                                setLoading(false);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
                 })
-        } else {
-            //not logged in
-            setLoading(false)
-            setNewUser(true)
-        }
+        // const token = '1';
+        // const token = null;
+        // if (token) {
+            
+        //     // axios.post(`${BASE_URL}/api/login/`, { userToken: token })
+        //     //     .then(async res => {
+        //     //         const user = res.data 
+        //     //         await AsyncStorage.setItem('token', token)
+        //     //         await AsyncStorage.setItem('user', JSON.stringify(user))
+        //     //         await ChatLog.getChatLogInstance(true, user.user.ID); 
+        //     //         setUserID({
+        //     //             _id: user.user.ID,
+        //     //             name: user.user.FIRST_NAME + ' ' + user.user.LAST_NAME,
+        //     //             avatar: 'https://placeimg.com/140/140/any'
+        //     //         })
+        //     //         //redirect to Main
+        //     //         setLoading(false)
+        //     //     })
+        //     //     .catch(e => {
+        //     //         console.log('login error:', e.response.data)
+        //     //     })
+        // } else {
+        //     //not logged in
+        //     setLoading(false)
+        //     setNewUser(true)
+        // }
     }  
 
     const handleAppStateChange = (nextAppState) => {
@@ -98,11 +137,15 @@ const LogIn = ({ children }) => {
     } else {
         if (newUser) {
             return (
-                <SignUp />
+                <SignUp 
+                    viewType="webview"
+                    source={sourceHTML.data} 
+                    sourceType={sourceHTML.type}
+                />
             )
         } else {
             return (
-                <UserContext.Provider value={userID}>
+                <UserContext.Provider value={userState}>
                     {children}
                 </UserContext.Provider>
             )
@@ -111,3 +154,7 @@ const LogIn = ({ children }) => {
 }
 
 export default LogIn
+
+
+
+

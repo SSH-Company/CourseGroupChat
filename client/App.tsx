@@ -5,7 +5,7 @@ import Socket from './src/Socket/WebSocket';
 import Main from './src/Main/Main'
 import Chat from './src/Chat/Chat'
 import { CreateGroupForm, Search } from './src/Search'
-import { LogIn } from './src/Auth'
+import { LogIn, SignUp } from './src/Auth'
 
 export default function App() {
   const Stack = createStackNavigator()

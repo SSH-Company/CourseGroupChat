@@ -11,7 +11,7 @@ export const RenderMessageContext = createContext({
 });
 
 const Socket = ({ children }) => {
-    const user = useContext(UserContext);
+    const { user, setUser } = useContext(UserContext);
     const [postStatus, setPostStatus] = useState(false);
     const [renderFlag, setRenderFlag] = useState(false)
     const value = { postStatus, renderFlag, setPostStatus, setRenderFlag } as any
@@ -68,6 +68,8 @@ const Socket = ({ children }) => {
         socket.onclose = (e: any) => {
             console.log('socket closed')
         }
+
+        return () => { socket.close(); }
     }
 
     return (

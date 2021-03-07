@@ -98,7 +98,7 @@ const getData = () => {
 }
 
 const Search = ({ route, navigation }) => {
-    const user = useContext(UserContext);
+    const { user, setUser } = useContext(UserContext);
     const { groupName } = route.params as SearchProps;
     const [search, setSearch] = useState("");
     const { renderFlag, setRenderFlag } = useContext(RenderMessageContext);
