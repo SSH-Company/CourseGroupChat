@@ -1,5 +1,4 @@
 import NodeCache from 'node-cache';
-import passport from 'passport';
 
 const cache = new NodeCache()
 

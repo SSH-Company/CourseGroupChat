@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
 })
 
 const CustomMessage:FunctionComponent = (props) => {
-    const { user, setUser } = useContext(UserContext);
+    const user = useContext(UserContext);
 
     return (
         <Message 
