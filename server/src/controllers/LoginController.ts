@@ -1,4 +1,4 @@
-import { Request, Response, Next } from 'express'
+import { Request, Response } from 'express'
 import {
     Middleware,
     Controller,
@@ -20,7 +20,7 @@ export class LoginController {
     
     @Post('callback')
     @Middleware([passport.authenticate('saml', { failureRedirect: '/', failureFlash: true })])
-    private async successLogin(req: Request, res: Response, next: Next) {
+    private async successLogin(req: Request, res: Response) {
         try {
             //TODO: add a service to ensure session is alive
             let session = req.session;
