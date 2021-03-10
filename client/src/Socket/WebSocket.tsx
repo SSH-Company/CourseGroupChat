@@ -68,6 +68,8 @@ const Socket = ({ children }) => {
         socket.onclose = (e: any) => {
             console.log('socket closed')
         }
+
+        return () => { socket.close(); }
     }
 
     return (

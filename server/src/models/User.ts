@@ -35,12 +35,33 @@ export class UserModel implements UserInterface {
         })
     }
 
-    static getUserAccount(uid: string): Promise<UserModel> {
+    static getUserAccountByID(uid: string): Promise<UserModel> {
         const query = `SELECT * FROM RT.USER WHERE "ID" = ?;`
         
         return new Promise((resolve, reject) => {
             Database.getDB()
                 .query(query, [uid])
+                .then((data:UserModel[]) => {
+                    if (data.length === 0) {
+                        reject({
+                            message: 'Invalid user id.'
+                        })
+                    }
+                    resolve(new UserModel(data[0]))
+                })
+                .catch(err => {
+                    console.log(err)
+                    reject(err)
+                })
+        })
+    }
+
+    static getUserAccountByEmail(email: string): Promise<UserModel> {
+        const query = `SELECT * FROM RT.USER WHERE lower("EMAIL") = ?;`
+
+        return new Promise((resolve, reject) => {
+            Database.getDB()
+                .query(query, [email.trim().toLowerCase()])
                 .then((data:UserModel[]) => {
                     if (data.length === 0) {
                         reject({

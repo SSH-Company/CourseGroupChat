@@ -5,6 +5,8 @@ import session from 'express-session';
 import { ApiController } from './controllers/ApiController';
 import { Server } from '@overnightjs/core';
 import { Logger } from '@overnightjs/logger';
+import passport from 'passport';
+import * as saml from 'passport-saml';
 
 class CGCServer extends Server {
     private readonly SERVER_STARTED = process.env.NODE_ENV + ' Server started on port: ';
@@ -20,6 +22,29 @@ class CGCServer extends Server {
                 saveUninitialized: true
             })
         );
+
+        passport.serializeUser((user, done) => {
+            done(null, user);
+        });
+        
+        passport.deserializeUser((user, done) => {
+            done(null, user);
+        });
+        
+        const samlStrategy = new saml.Strategy({
+            callbackUrl: '/api/login/callback',
+            entryPoint: 'https://konnect-dev.onelogin.com/trust/saml2/http-post/sso/6740884b-6011-4391-9f6a-45db07600563',
+            issuer: 'dev-app-konnect'
+        }, 
+        (profile, done) => {
+            console.log(profile);
+            return done(null, profile);
+        })
+
+        passport.use('saml', samlStrategy);
+        this.app.use(passport.initialize({}));
+        this.app.use(passport.session({}));
+    
         this.setupControllers();
     }
 

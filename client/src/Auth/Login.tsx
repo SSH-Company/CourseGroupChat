@@ -1,16 +1,15 @@
-import React, { useRef, useEffect, useState, createContext } from 'react'
+import React, { useRef, useEffect, useState, createContext } from 'react';
 import { 
     AppState,
-    AsyncStorage, 
     StyleSheet,
     Text,
     View 
-} from 'react-native'
-import { User } from 'react-native-gifted-chat'
-import SignUp from './SignUp'
-import { ChatLog } from '../Util/ChatLog'
-import BASE_URL from '../../BaseUrl'
-import axios from 'axios'
+} from 'react-native';
+import { User } from 'react-native-gifted-chat';
+import { WebView } from 'react-native-webview';
+import { ChatLog } from '../Util/ChatLog';
+import BASE_URL from '../../BaseUrl';
+import axios from 'axios';
 
 const styles = StyleSheet.create({
     container: {
@@ -29,24 +28,41 @@ export const UserContext = createContext({} as User)
 const LogIn = ({ children }) => {
     const [loading, setLoading] = useState(true)
     const [newUser, setNewUser] = useState(false)
-    const [userID, setUserID] = useState({} as User)
-    const appState = useRef(AppState.currentState)
+    const [userID, setUserID] = useState({} as User);
+    const [sourceHTML, setSourceHTML] = useState<any>();
+    const appState = useRef(AppState.currentState);
 
     /*
         How it works:
-        The access token is first extracted from Async Storage.
-
-        If the access token exists:
-        We send a request to our Login controller to get the user data using the token. The controller
-        function will verify the token and set the session data in the server. The user data and 
-        token will be stored in the phones local storage.
-
-        If it doesn't exist: 
-        The user isn't logged in, redirect to Auth Screen
+        A request is sent to the backend where there is a Middleware check
+        to ensure the user is logged in. If they aren't, a 302 status code
+        is returned, where the redirect url can be used to open a WebView for 
+        the user to login. After user verification is successful, the WebView 
+        redirects to a page from where the User's database information is collected
+        and stored. The user is then redirected to the Main page.
     */
 
     useEffect(() => {
-        checkLogIn()
+        axios.get(`${BASE_URL}/api/login`)
+            .then(async res => {
+                setSourceHTML({ html: res.data });
+                setNewUser(true);
+                setLoading(false);
+            })
+            .catch(err => {
+                const response = err.response;
+                if (response) {
+                    switch (response.status) {
+                        case 302:
+                            setNewUser(true);
+                            setSourceHTML({ uri: response.data.redirect });
+                            setLoading(false);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            })
     }, [])
 
     useEffect(() => {
@@ -57,36 +73,29 @@ const LogIn = ({ children }) => {
         }
     }, [])
 
-    const checkLogIn = async () => {
-        const token = await AsyncStorage.getItem('token');
-        // const token = 'TOKEN_ONE';
-        if (token) {
-            axios.post(`${BASE_URL}/api/login/`, { userToken: token })
-                .then(async res => {
-                    const user = res.data 
-                    await AsyncStorage.setItem('token', token)
-                    await AsyncStorage.setItem('user', JSON.stringify(user))
-                    await ChatLog.getChatLogInstance(true, user.user.ID); 
-                    setUserID({
-                        _id: user.user.ID,
-                        name: user.user.FIRST_NAME + ' ' + user.user.LAST_NAME,
-                        avatar: 'https://placeimg.com/140/140/any'
-                    })
-                    //redirect to Main
-                    setLoading(false)
-                })
-                .catch(e => {
-                    console.log('login error:', e.response.data)
-                })
-        } else {
-            //not logged in
-            setLoading(false)
-            setNewUser(true)
-        }
-    }  
-
     const handleAppStateChange = (nextAppState) => {
         appState.current = nextAppState
+    }
+
+    const handleNavigationStateChange = (state) => {
+        // console.log(state);
+    }
+
+    const handleMessage = async (msg: string) => {
+        try {
+            const user = JSON.parse(msg);
+            await ChatLog.getChatLogInstance(true, user.ID); 
+            setUserID({
+                _id: user.ID,
+                name: user.FIRST_NAME + ' ' + user.LAST_NAME,
+                avatar: 'https://placeimg.com/140/140/any'
+            })
+            //redirect to Main
+            setNewUser(false)
+        } catch (err) {
+            console.log(err);
+            return
+        }
     }
 
     if (loading) {
@@ -98,7 +107,16 @@ const LogIn = ({ children }) => {
     } else {
         if (newUser) {
             return (
-                <SignUp />
+                <WebView
+                    javaScriptEnabled={true}
+                    domStorageEnabled={true}
+                    originWhitelist={["*"]}
+                    source={{...sourceHTML}}
+                    style={{ marginTop: 20 }}
+                    onNavigationStateChange={handleNavigationStateChange}
+                    injectedJavaScript={`window.ReactNativeWebView.postMessage(document.getElementsByClassName('userBody')[0].innerHTML);`}
+                    onMessage={(e) => handleMessage(e.nativeEvent.data)}
+                />
             )
         } else {
             return (
@@ -111,3 +129,7 @@ const LogIn = ({ children }) => {
 }
 
 export default LogIn
+
+
+
+

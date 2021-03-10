@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
 })
 
 const CustomMessage:FunctionComponent = (props) => {
-    const userID = useContext(UserContext);
+    const user = useContext(UserContext);
 
     return (
         <Message 
@@ -44,7 +44,7 @@ const CustomMessage:FunctionComponent = (props) => {
             key={`user-key-${props['user']['_id']}-${props['currentMessage'].displayStatus}`}
             renderBubble={() => {
                 const currentMessage = props['currentMessage']
-                const isCurrentUser = currentMessage.user._id === userID._id
+                const isCurrentUser = currentMessage.user._id === user._id
                 return (
                     <>
                     <View style={[styles.item]}>

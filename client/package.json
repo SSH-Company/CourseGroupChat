@@ -27,8 +27,11 @@
     "react-native-svg": "^12.1.0",
     "react-native-vector-icons": "^7.1.0",
     "react-native-web": "~0.13.12",
+    "react-native-webview": "^11.2.3",
+    "react-native-xml2js": "^1.0.3",
     "websocket": "^1.0.33",
-    "ws": "^7.4.2"
+    "ws": "^7.4.2",
+    "xml2js": "^0.4.23"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0",
