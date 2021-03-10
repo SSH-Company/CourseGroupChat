@@ -33,17 +33,13 @@ const LogIn = ({ children }) => {
     const appState = useRef(AppState.currentState);
 
     /*
-    TODO: update this comment
         How it works:
-        The access token is first extracted from Async Storage.
-
-        If the access token exists:
-        We send a request to our Login controller to get the user data using the token. The controller
-        function will verify the token and set the session data in the server. The user data and 
-        token will be stored in the phones local storage.
-
-        If it doesn't exist: 
-        The user isn't logged in, redirect to Auth Screen
+        A request is sent to the backend where there is a Middleware check
+        to ensure the user is logged in. If they aren't, a 302 status code
+        is returned, where the redirect url can be used to open a WebView for 
+        the user to login. After user verification is successful, the WebView 
+        redirects to a page from where the User's database information is collected
+        and stored. The user is then redirected to the Main page.
     */
 
     useEffect(() => {
