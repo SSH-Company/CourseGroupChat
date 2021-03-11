@@ -1,9 +1,11 @@
 import { Request, Response } from 'express'
 import {
     Controller,
-    Post
+    Post,
+    Get
 } from '@overnightjs/core';
 import * as STATUS from 'http-status-codes';
+import { UserModel } from '../models/User';
 import { GroupModel } from '../models/Group';
 import { UserGroupModel } from '../models/User_Group';
 import { publishToQueue } from '../services/Queue';
@@ -50,6 +52,24 @@ export class GroupController {
                 identifier: "GC002"
             })
         }
+    }
+
+    @Get('')
+    private searchList(req: Request, res: Response) {
+        UserModel.getAllUsers()
+            .then(users => {
+                res.status(STATUS.OK).json(users.map(row => ({
+                    id: row.ID,
+                    name: row.FIRST_NAME + ' ' + row.LAST_NAME,
+                    avatar_url: 'https://placeimg.com/140/140/any'
+                })))
+            })
+            .catch(err => {
+                res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                    message: "Something went wrong while attempting to get user list.",
+                    identifier: "GC003"
+                })
+            })
     }
 
 }

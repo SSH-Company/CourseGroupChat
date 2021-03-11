@@ -11,6 +11,7 @@
     "@react-native-community/masked-view": "^0.1.10",
     "@react-navigation/native": "^5.9.0",
     "@react-navigation/stack": "^5.13.0",
+    "autosuggest": "0.0.2",
     "axios": "^0.21.1",
     "cors": "^2.8.5",
     "expo": "~40.0.0",

@@ -14,7 +14,6 @@ export class LoginController {
     @Get('')
     @Middleware([passport.authenticate('saml')])
     private userLogin(req: Request, res: Response) {
-        console.log(req.user);
         res.status(STATUS.OK).json(req.user);
     }
     
