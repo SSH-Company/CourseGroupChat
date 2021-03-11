@@ -49,7 +49,7 @@ const Chat = ({ route, navigation }) => {
         const filteredMessages = log[groupID.id].filter(msg => msg.text !== '');
         setMessages(filteredMessages);
         if (postStatus) {
-            axios.post(`${BASE_URL}/api/message/updateMessageStatus`, { groups: [groupID.id], sender: user._id, status: "Read" }).catch(err => console.log(err))
+            axios.post(`${BASE_URL}/api/message/updateMessageStatus`, { groups: [groupID.id], status: "Read" }).catch(err => console.log(err))
             setPostStatus(false);
         }    
     }
@@ -66,7 +66,7 @@ const Chat = ({ route, navigation }) => {
 
     //helper function for sending message to queue
     const sendData = (messages = []) => {
-        axios.post(`${BASE_URL}/api/message`, { message: {messages, groupID: groupID, senderID: user} })
+        axios.post(`${BASE_URL}/api/message`, { message: { messages, groupID: groupID } })
             .then(async () => {
                 const instance = await ChatLog.getChatLogInstance()
                 instance.updateMessageStatus(groupID.id, "Sent", messages[0])
