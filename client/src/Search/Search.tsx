@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useMemo, useState, useEffect, useContext } from "react";
 import { Button, Text, View, ScrollView, Platform, StyleSheet } from "react-native";
 import { ListItem, Avatar, Header, SearchBar } from "react-native-elements";
 import { UserContext } from '../Auth/Login';
@@ -47,6 +47,12 @@ const Search = ({ route, navigation }) => {
     const { renderFlag, setRenderFlag } = useContext(RenderMessageContext);
     const [displaySubmit, setDisplaySubmit] = useState(false);
     const [suggestions, setSuggestions] = useState<listtype[]>([]);
+    const renderLimit = 20;
+
+    const filteredTable = useMemo<listtype[]>(() => {
+        const table = suggestions.filter(item => item.name.toLowerCase().includes(search.toLowerCase())).slice(0, renderLimit);
+        return table;
+    }, [suggestions, search])
 
     //retrieve data on first load
     useEffect(() => {
@@ -137,7 +143,7 @@ const Search = ({ route, navigation }) => {
                 </ScrollView>
             </View>
             <Text style={style.suggested}>Suggested</Text>
-            {suggestions.filter(item => item.name.toLowerCase().includes(search.toLowerCase())).map((l, i) => (
+            {filteredTable.map((l, i) => (
                 <ListItem
                     key={`${i}-${l.name}`}
                     onPress={() => toggleCheckbox(i)}
