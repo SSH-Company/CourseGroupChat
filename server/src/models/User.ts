@@ -76,4 +76,18 @@ export class UserModel implements UserInterface {
                 })
         })
     }
+
+    static getAllUsers(): Promise<UserModel[]> {
+        const query = `SELECT * FROM RT.USER order by "FIRST_NAME";`
+
+        return new Promise((resolve, reject) => {
+            Database.getDB()
+                .query(query)
+                .then((data:UserModel[]) => resolve(data.map(d => new UserModel(d))))
+                .catch(err => {
+                    console.log(err)
+                    reject(err)
+                })
+        })
+    }
 }

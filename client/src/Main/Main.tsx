@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext } from "react";
 import { View, ScrollView, Platform } from "react-native";
 import { ListItem, Avatar, Header, SearchBar } from "react-native-elements";
 import Feather from "react-native-vector-icons/Feather";
-import { UserContext } from '../Auth/Login';
 import { RenderMessageContext } from '../Socket/WebSocket';
 import { ChatLog } from '../Util/ChatLog';
 
@@ -20,7 +19,6 @@ const Main = ({ navigation }) => {
   // search bar.
   const [search, setSearch] = useState("");
   // data arrays.
-  const user = useContext(UserContext);
   const { renderFlag } = useContext(RenderMessageContext);
   const [completeList, setCompleteList] = useState<listtype[]>([]);
   const [filteredList, setFilteredList] = useState<listtype[]>([]);
@@ -80,7 +78,7 @@ const Main = ({ navigation }) => {
             name={"edit"} 
             color="#734f96" 
             size={25} 
-            onPress={() => navigation.navigate("CreateGroupForm")}
+            onPress={() => navigation.navigate("CreateGroupForm")} //TODO: change back to CreateGroupForm
           />
         }
       />

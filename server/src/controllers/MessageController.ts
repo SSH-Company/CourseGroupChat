@@ -6,6 +6,7 @@ import {
 } from '@overnightjs/core';
 import * as STATUS from 'http-status-codes';
 import { publishToQueue } from '../services/Queue';
+import { UserModel } from '../models/User';
 import { MessageModel } from '../models/Message';
 import { UserGroupModel } from '../models/User_Group';
 import { ChatLogViewModel } from '../models/ChatLog_View';
@@ -55,10 +56,17 @@ export class MessageController {
     */
     @Post('')
     private async submitMessage(req: Request, res: Response) {
+        const session = req.session;
+        const user = session.user as UserModel;
+
         const messages = req.body.message;
         const message = messages.messages[0]
         const groupID = messages.groupID
-        const senderID = messages.senderID
+        const senderID = {
+            _id: user.ID,
+            name: user.FIRST_NAME + ' ' + user.LAST_NAME,
+            avatar: 'https://placeimg.com/140/140/any'
+        }
         
         try {
             //find all recipients of this group chat, exclude senderID from the list
@@ -89,7 +97,10 @@ export class MessageController {
     //statuses to received. Query the log for all senders of the messages.
     @Post('updateMessageStatus')
     private async updateMessageStatus(req: Request, res: Response) {
-        const { groups, sender, status } = req.body;
+        const session = req.session;
+        const user = session.user as UserModel;
+        
+        const { groups, status } = req.body;
         
         if (!Array(groups) || !['Delivered', 'Read'].includes(status)) {
             res.status(STATUS.BAD_REQUEST).json({
@@ -101,11 +112,11 @@ export class MessageController {
         try {
             for (const grp of groups) {
                 //find all recipients of this group chat, exclude senderID from the list
-                const groupRecipients = (await UserGroupModel.getRecipients(grp)).map(row => row.USER_ID).filter(id => id != sender);    
+                const groupRecipients = (await UserGroupModel.getRecipients(grp)).map(row => row.USER_ID).filter(id => id != user.ID);    
                 
                 for (const id of groupRecipients) {
                     const queueName = `message-queue-${id}`
-                    const queueData = {command: "update", groupID: grp, senderID: sender, status: status}
+                    const queueData = {command: "update", groupID: grp, senderID: user.ID, status: status}
                     await publishToQueue(queueName, JSON.stringify(queueData))
                 }
 

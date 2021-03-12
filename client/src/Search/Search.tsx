@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useMemo, useState, useEffect, useContext } from "react";
 import { Button, Text, View, ScrollView, Platform, StyleSheet } from "react-native";
 import { ListItem, Avatar, Header, SearchBar } from "react-native-elements";
 import { UserContext } from '../Auth/Login';
@@ -8,10 +8,6 @@ import Feather from "react-native-vector-icons/Feather";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import BASE_URL from '../../BaseUrl';
 import axios from 'axios';
-
-type SearchProps = {
-    groupName: string
-}
 
 type listtype = {
     id: number;
@@ -44,71 +40,24 @@ const style = StyleSheet.create({
     }
 })
 
-
-//example list data
-const getData = () => {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            resolve([
-                {
-                    id: 2,
-                    name: 'Tanvir Shahriar',
-                    avatar_url: 'https://placeimg.com/140/140/any',
-                    checked: false
-                },
-                {
-                    id: 1,
-                    name: 'Sadman Hasan',
-                    avatar_url: 'https://placeimg.com/140/140/any',
-                    checked: false
-                }, 
-                {
-                    id: 3,
-                    name: 'Farhad Siddique',
-                    avatar_url: 'https://placeimg.com/140/140/any',
-                    checked: false
-                },
-                {
-                    id: 4,
-                    name: 'Test user',
-                    avatar_url: 'https://placeimg.com/140/140/any',
-                    checked: false
-                },
-                {
-                    id: 5,
-                    name: 'User test',
-                    avatar_url: 'https://placeimg.com/140/140/any',
-                    checked: false
-                },
-                {
-                    id: 6,
-                    name: 'Asasas Sasasda',
-                    avatar_url: 'https://placeimg.com/140/140/any',
-                    checked: false
-                },
-                {
-                    id: 7,
-                    name: 'User 7',
-                    avatar_url: 'https://placeimg.com/140/140/any',
-                    checked: false
-                }
-            ])
-        }, 500)
-    })
-}
-
 const Search = ({ route, navigation }) => {
     const user = useContext(UserContext);
-    const { groupName } = route.params as SearchProps;
+    const { groupName } = route.params;
     const [search, setSearch] = useState("");
     const { renderFlag, setRenderFlag } = useContext(RenderMessageContext);
     const [displaySubmit, setDisplaySubmit] = useState(false);
     const [suggestions, setSuggestions] = useState<listtype[]>([]);
+    const renderLimit = 20;
+
+    const filteredTable = useMemo<listtype[]>(() => {
+        const table = suggestions.filter(item => item.name.toLowerCase().includes(search.toLowerCase())).slice(0, renderLimit);
+        return table;
+    }, [suggestions, search])
 
     //retrieve data on first load
     useEffect(() => {
-        getData()
-            .then((data: listtype[]) => setSuggestions(data))
+        axios.get(`${BASE_URL}/api/group`)
+            .then(res => setSuggestions(res.data.map(row => ({ ...row, checked: false }))))
             .catch(err => console.error(err))
     }, [])
 
@@ -170,8 +119,8 @@ const Search = ({ route, navigation }) => {
                 platform={Platform.OS === "android" ? "android" : "ios"}
                 clearIcon={{ size: 30 }}
                 placeholder="Search contacts"
-                onChangeText={(text) => {}}
-                onCancel={() => {}}
+                onChangeText={(text) => setSearch(text)}
+                onCancel={() => setSearch('')}
                 value={search}
                 style={style.search}
             />
@@ -194,7 +143,7 @@ const Search = ({ route, navigation }) => {
                 </ScrollView>
             </View>
             <Text style={style.suggested}>Suggested</Text>
-            {suggestions.map((l, i) => (
+            {filteredTable.map((l, i) => (
                 <ListItem
                     key={`${i}-${l.name}`}
                     onPress={() => toggleCheckbox(i)}
