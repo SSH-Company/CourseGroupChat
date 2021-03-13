@@ -17,6 +17,8 @@ export class MessageController {
     @Get(':id')
     private getLog(req: Request, res: Response) {
         const id = req.params.id
+        const url = "http://localhost:3000";
+        const emptyResponse = '/images/empty_profile_pic.jpg';
     
         try {
            ChatLogViewModel.getUserLog(id)
@@ -26,7 +28,7 @@ export class MessageController {
                     creator_id: row.CREATOR_ID,
                     message_id: row.MESSAGE_ID,
                     name: row.NAME,
-                    avatar_url: 'https://placeimg.com/140/140/any',
+                    avatar_url: `${url}${row.AVATAR ? row.AVATAR : emptyResponse}`,
                     subtitle: row.MESSAGE_BODY,
                     created_at: row.CREATE_DATE,
                     status: row.STATUS

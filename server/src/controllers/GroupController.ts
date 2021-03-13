@@ -1,20 +1,38 @@
 import { Request, Response } from 'express'
 import {
+    Middleware,
     Controller,
     Post,
     Get
 } from '@overnightjs/core';
+import multer from 'multer';
 import * as STATUS from 'http-status-codes';
 import { UserModel } from '../models/User';
 import { GroupModel } from '../models/Group';
 import { UserGroupModel } from '../models/User_Group';
 import { publishToQueue } from '../services/Queue';
 
+let storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'src/public/client/images/')
+    },
+    filename: function (req, file, cb) {
+        const extension = file.mimetype.split('/')[1];
+        cb(null, file.fieldname + '-' + Date.now() + '.' + extension)
+    }
+})
+
+const upload = multer({ storage: storage })
+
 @Controller('group')
 export class GroupController {
     @Post('')
+    @Middleware([upload.single('avatar')])
     private async createGroup(req: Request, res: Response) {
-        const { sender, recipients, groupName } = req.body;
+        const session = req.session;
+        const recipients = JSON.parse(req.body.recipients);
+        const groupName = req.body.groupName;
+        const urlFilePath = `/images/${req.file.filename}`;
 
         if(!Array.isArray(recipients) || recipients.length === 0 || !groupName) {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
@@ -26,10 +44,10 @@ export class GroupController {
         try {
 
             //create new group and retrieve group ID
-            const newGroup = await GroupModel.insert();
+            const newGroup = await GroupModel.insert(urlFilePath);
             
             //insert sender into the new group
-            await UserGroupModel.insert(sender, newGroup.ID, groupName);
+            await UserGroupModel.insert(session.user.ID, newGroup.ID, groupName);
 
             //insert members into new group
             //send a message to other group members to refresh their logs
@@ -43,7 +61,7 @@ export class GroupController {
             res.status(STATUS.OK).json({
                 id: newGroup.ID,
                 name: groupName,
-                avatar_url: 'https://placeimg.com/140/140/any'
+                avatar_url: `http://localhost:3000${urlFilePath}`
             });
 
         } catch (err) {

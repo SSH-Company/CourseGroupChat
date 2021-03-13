@@ -1,7 +1,6 @@
 import React, { useMemo, useState, useEffect, useContext } from "react";
 import { Button, Text, View, ScrollView, Platform, StyleSheet } from "react-native";
 import { ListItem, Avatar, Header, SearchBar } from "react-native-elements";
-import { UserContext } from '../Auth/Login';
 import { RenderMessageContext } from '../Socket/WebSocket';
 import { ChatLog } from "../Util/ChatLog";
 import Feather from "react-native-vector-icons/Feather";
@@ -41,8 +40,7 @@ const style = StyleSheet.create({
 })
 
 const Search = ({ route, navigation }) => {
-    const user = useContext(UserContext);
-    const { groupName } = route.params;
+    const { groupName, photo } = route.params;
     const [search, setSearch] = useState("");
     const { renderFlag, setRenderFlag } = useContext(RenderMessageContext);
     const [displaySubmit, setDisplaySubmit] = useState(false);
@@ -80,14 +78,13 @@ const Search = ({ route, navigation }) => {
 
     const handleSubmit = () => {
         const recipients = suggestions.filter(row => row.checked).map(row => row.id)
-        const requestBody = {
-            sender: user._id,
-            recipients: recipients,
-            groupName: groupName
-        }
+        const formData = new FormData();
+        formData.append('avatar', {...photo});
+        formData.append('recipients', JSON.stringify(recipients));
+        formData.append('groupName', groupName);
 
         //create the group in the backend
-        axios.post(`${BASE_URL}/api/group`, requestBody)
+        axios.post(`${BASE_URL}/api/group`, formData, { headers: { 'content-type': 'multipart/form-data' } })
             .then(async res => {
                 const data = res.data;
                 await ChatLog.getChatLogInstance(true);
