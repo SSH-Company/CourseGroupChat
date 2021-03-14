@@ -45,11 +45,12 @@ const CustomMessage:FunctionComponent = (props) => {
             renderBubble={() => {
                 const currentMessage = props['currentMessage']
                 const isCurrentUser = currentMessage.user._id === user._id
+                
                 return (
                     <View style={[styles.item]}>
                         <View style={[styles.balloon, {backgroundColor: isCurrentUser ? '#f5f9ff' : '#7c80ee'}]}>
-                            {currentMessage.text && <Text style={{paddingTop: 5, color:  isCurrentUser ? 'black' : 'white'}}>{currentMessage.text}</Text>}
-                            {currentMessage.image && (<Image
+                            {currentMessage.text !== "" && <Text style={{paddingTop: 5, color:  isCurrentUser ? 'black' : 'white'}}>{currentMessage.text}</Text>}
+                            {currentMessage.image !== "" && (<Image
                                 source={{ uri: currentMessage.image }}
                                 style={{ width: 200, height: 200, marginBottom: 10 }}
                             />)}

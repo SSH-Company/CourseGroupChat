@@ -47,7 +47,7 @@ const Chat = ({ route, navigation }) => {
     const resetMessages = async () => {
         const instance = await ChatLog.getChatLogInstance();
         const log = instance.chatLog;
-        const filteredMessages = log[groupID.id].filter(msg => msg.text !== '');
+        const filteredMessages = log[groupID.id].filter(msg => msg.text !== '' || msg.image !== '');
         setMessages(filteredMessages);
         if (postStatus) {
             axios.post(`${BASE_URL}/api/message/updateMessageStatus`, { groups: [groupID.id], status: "Read" }).catch(err => console.log(err))
@@ -62,12 +62,17 @@ const Chat = ({ route, navigation }) => {
         const instance = await ChatLog.getChatLogInstance();
         instance.appendLog(groupID, messages);
         setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
-        // sendData(messages);
+        sendData(messages);
     }, [])
 
     //helper function for sending message to queue
     const sendData = (messages = []) => {
-        axios.post(`${BASE_URL}/api/message`, { message: { messages, groupID: groupID } })
+        //here we are assuming only one message is posted at a time
+        const formData = new FormData();
+        formData.append('photo', {...messages[0].imageData});
+        formData.append('message', JSON.stringify({ messages, groupID: groupID }))
+
+        axios.post(`${BASE_URL}/api/message`, formData, { headers: { 'content-type': 'multipart/form-data' } })
             .then(async () => {
                 const instance = await ChatLog.getChatLogInstance()
                 instance.updateMessageStatus(groupID.id, "Sent", messages[0])
@@ -90,6 +95,7 @@ const Chat = ({ route, navigation }) => {
                     createdAt: Date.now(),
                     displayStatus: true,
                     image: imageRes.uri,
+                    imageData: imageRes,
                     user: user
                 }
                 onSend([newMessage]);

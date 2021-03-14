@@ -14,7 +14,7 @@ import { publishToQueue } from '../services/Queue';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'src/public/client/images/')
+        cb(null, 'src/public/client/images/profiles/')
     },
     filename: function (req, file, cb) {
         const extension = file.mimetype.split('/')[1];
@@ -32,7 +32,7 @@ export class GroupController {
         const session = req.session;
         const recipients = JSON.parse(req.body.recipients);
         const groupName = req.body.groupName;
-        const urlFilePath = `/images/${req.file.filename}`;
+        const urlFilePath = `/images/profiles/${req.file.filename}`;
 
         if(!Array.isArray(recipients) || recipients.length === 0 || !groupName) {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({

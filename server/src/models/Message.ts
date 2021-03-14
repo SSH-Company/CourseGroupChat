@@ -5,6 +5,7 @@ interface MessageInterface {
     CREATOR_ID?: number;
     RECIPIENT_GROUP_ID?: number;
     MESSAGE_BODY?: string;
+    MESSAGE_TYPE?: "image" | "text";
     CREATE_DATE?: string;
     STATUS?: string;
 }
@@ -14,6 +15,7 @@ export class MessageModel implements MessageInterface {
     CREATOR_ID?: number;
     RECIPIENT_GROUP_ID?: number;
     MESSAGE_BODY?: string;
+    MESSAGE_TYPE?: "image" | "text";
     CREATE_DATE?: string;
     STATUS?: string;
 
@@ -23,8 +25,8 @@ export class MessageModel implements MessageInterface {
     }
 
     static insert(msg: MessageInterface): Promise<void> {
-        const query = `INSERT INTO RT.MESSAGE ("CREATOR_ID", "RECIPIENT_GROUP_ID", "MESSAGE_BODY", "CREATE_DATE", "STATUS") VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?) `;
-        const params = [msg.CREATOR_ID, msg.RECIPIENT_GROUP_ID, msg.MESSAGE_BODY, msg.STATUS];
+        const query = `INSERT INTO RT.MESSAGE ("CREATOR_ID", "RECIPIENT_GROUP_ID", "MESSAGE_BODY", "MESSAGE_TYPE", "CREATE_DATE", "STATUS") VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?) `;
+        const params = [msg.CREATOR_ID, msg.RECIPIENT_GROUP_ID, msg.MESSAGE_BODY, msg.MESSAGE_TYPE, msg.STATUS];
 
         return new Promise((resolve, reject) => {
             Database.getDB()
