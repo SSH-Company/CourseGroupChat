@@ -5,7 +5,8 @@ import { DrawerLayout } from 'react-native-gesture-handler';
 import { CustomMessage, CustomToolbar, InboxSettings } from './components';
 import { UserContext } from '../Auth/Login';
 import { RenderMessageContext } from '../Socket/WebSocket';
-import { ChatLog, MessageStatus } from '../Util/ChatLog';
+import { handleImagePick, handlePermissionRequest } from "../Util/ImagePicker";
+import { ChatLog, MessageStatus, revisedRandId } from '../Util/ChatLog';
 import BASE_URL from '../../BaseUrl';
 import axios from 'axios';
 
@@ -61,7 +62,7 @@ const Chat = ({ route, navigation }) => {
         const instance = await ChatLog.getChatLogInstance();
         instance.appendLog(groupID, messages);
         setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
-        sendData(messages);
+        // sendData(messages);
     }, [])
 
     //helper function for sending message to queue
@@ -79,6 +80,25 @@ const Chat = ({ route, navigation }) => {
             })
     }
 
+    const onImagePick = async () => {
+        try {
+            const status = await handlePermissionRequest();
+            if (status === "granted") {
+                const imageRes = await handleImagePick();
+                const newMessage = {
+                    _id: revisedRandId(),
+                    createdAt: Date.now(),
+                    displayStatus: true,
+                    image: imageRes.uri,
+                    user: user
+                }
+                onSend([newMessage]);
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
     return (
     <View style={{flex: 1}}>
         <DrawerLayout
@@ -94,7 +114,7 @@ const Chat = ({ route, navigation }) => {
                 messages={messages}
                 onSend={messages => onSend(messages)}
                 renderMessage={props => { return ( <CustomMessage {...props} /> ) }}
-                renderInputToolbar={props => { return ( <CustomToolbar {...props} /> ) }}
+                renderInputToolbar={props => { return ( <CustomToolbar children={props} onImagePick={onImagePick} /> ) }}
                 isKeyboardInternallyHandled={false}
             />
         </DrawerLayout>

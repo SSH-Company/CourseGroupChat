@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useContext } from 'react'
-import { View, StyleSheet, Text } from 'react-native'
+import { View, StyleSheet, Text, Image } from 'react-native'
 import { Message } from 'react-native-gifted-chat'
 import { UserContext } from '../../Auth/Login'
 
@@ -46,14 +46,16 @@ const CustomMessage:FunctionComponent = (props) => {
                 const currentMessage = props['currentMessage']
                 const isCurrentUser = currentMessage.user._id === user._id
                 return (
-                    <>
                     <View style={[styles.item]}>
                         <View style={[styles.balloon, {backgroundColor: isCurrentUser ? '#f5f9ff' : '#7c80ee'}]}>
-                            <Text style={{paddingTop: 5, color:  isCurrentUser ? 'black' : 'white'}}>{currentMessage.text}</Text>
+                            {currentMessage.text && <Text style={{paddingTop: 5, color:  isCurrentUser ? 'black' : 'white'}}>{currentMessage.text}</Text>}
+                            {currentMessage.image && (<Image
+                                source={{ uri: currentMessage.image }}
+                                style={{ width: 200, height: 200, marginBottom: 10 }}
+                            />)}
+                            {currentMessage.displayStatus && <Text>{currentMessage.status}</Text>}
                         </View>
                     </View>
-                    {currentMessage.displayStatus && <Text>{currentMessage.status}</Text>}
-                    </>
                 )
             }}
         />

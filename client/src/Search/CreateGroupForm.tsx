@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { View, Image, Button, StyleSheet } from "react-native";
 import { Header, Input } from "react-native-elements";
-import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from "react-native-vector-icons";
+import { handleImagePick, handlePermissionRequest } from "../Util/ImagePicker";
 
 const styles = StyleSheet.create({
     imagePicker: { 
@@ -18,18 +18,6 @@ const CreateGroupForm = ({ navigation }) => {
     const [groupName, setGroupName] = useState<string>();
     const [errorMessage, setErrorMessage] = useState<string>();
 
-    useEffect(() => {
-        handlePermissionRequest()
-    }, []);
-
-    const handlePermissionRequest = async () => {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted') {
-            alert('Sorry, we need camera roll permissions to make this work!');
-        }
-        return
-    }
-
     const handleFormSubmit = () => {
         if (!groupName) {
             setErrorMessage('Group name is required');
@@ -41,26 +29,17 @@ const CreateGroupForm = ({ navigation }) => {
         navigation.navigate('Search', { groupName: groupName, photo: image })
     }
 
-    const handleImagePick = async () => {
-        let result: any = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.All,
-          allowsEditing: true,
-          aspect: [4, 3],
-          quality: 1,
-        });
-    
-        if (!result.cancelled) {
-            const filename = result.uri.split('/').pop();
-            let match = /\.(\w+)$/.exec(filename);
-            let type = match ? `image/${match[1]}` : `image`;
-
-            setImage({
-                uri: result.uri,
-                name: filename,
-                type: type
-            });
+    const onImagePick = async () => {
+        try {
+            const status = await handlePermissionRequest();
+            if (status === "granted") {
+                const imageRes = await handleImagePick();
+                setImage(imageRes);
+            }
+        } catch (err) {
+            console.log(err);
         }
-      };
+    }
 
     return (
         <View style={{ flex: 1 }}>
@@ -93,7 +72,7 @@ const CreateGroupForm = ({ navigation }) => {
                     style={{ width: 400, height: 400, marginBottom: 10 }}
                 />
                 )}
-                <Button title="Choose Photo" onPress={handleImagePick} />
+                <Button title="Choose Photo" onPress={onImagePick} />
             </View>
             <Input 
                 placeholder="Group name (Required)"

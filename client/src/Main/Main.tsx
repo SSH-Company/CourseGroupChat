@@ -103,7 +103,7 @@ const Main = ({ navigation }) => {
               })
             }}
           >
-            <Avatar rounded size="medium" source={{ uri: l.avatar_url }} />
+            <Avatar rounded size="medium" source={{ uri: l.avatar_url }}/>
             <ListItem.Content>
               <ListItem.Title>{l.name}</ListItem.Title>
               <ListItem.Subtitle>{l.subtitle}</ListItem.Subtitle>

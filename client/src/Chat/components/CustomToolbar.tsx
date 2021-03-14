@@ -1,6 +1,6 @@
-import React, { FunctionComponent, useState, useEffect } from 'react'
-import { View, StyleSheet } from 'react-native'
-import { InputToolbar, Send } from 'react-native-gifted-chat'
+import React, { FunctionComponent, useState, useEffect } from 'react';
+import { View, StyleSheet } from 'react-native';
+import { InputToolbar, Send } from 'react-native-gifted-chat';
 import { Entypo, SimpleLineIcons, Ionicons, MaterialCommunityIcons } from 'react-native-vector-icons';
 
 const style = StyleSheet.create({
@@ -38,22 +38,37 @@ const style = StyleSheet.create({
     }
 })
 
-const CustomToolbar:FunctionComponent = (props: any) => {
+type CustomToolbarProps = {
+    children: any,
+    onImagePick: () => any
+}
+
+const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
+    let {
+        children,
+        onImagePick = () => {}
+    } = props;
 
     const [isTyping, setIsTyping] = useState(false);
 
     useEffect(() => {
-        setIsTyping(props.text.length > 0)
-    }, [props.text])
+        setIsTyping(children.text.length > 0)
+    }, [children.text])
 
     return (
         <View style={[style.container]}>
             <View style={[style.container]}>
                 <InputToolbar 
-                    {...props} 
+                    {...children} 
                     containerStyle={style.inputbar} 
                     renderSend={() => (
-                        <Entypo name={'image'} size={20} color='#734f96' style={style.clipIcon}/>
+                        <Entypo 
+                            name={'image'} 
+                            size={20} 
+                            color='#734f96' 
+                            style={style.clipIcon}
+                            onPress={onImagePick}
+                        />
                     )}
                     renderActions={() => (
                         <SimpleLineIcons name={'camera'} size={20} color='#734f96' style={style.actionIcon}/>
@@ -61,8 +76,13 @@ const CustomToolbar:FunctionComponent = (props: any) => {
                 />
             </View>
             {isTyping ?
-                <Send {...props}>
-                    <MaterialCommunityIcons name={'send-circle'} color='#734f96' size={50} style={style.sendIcon}/>
+                <Send {...children}>
+                    <MaterialCommunityIcons 
+                        name={'send-circle'} 
+                        color='#734f96' 
+                        size={50} 
+                        style={style.sendIcon}
+                    />
                 </Send>
                     :
                 <Ionicons name={'mic-circle'} color='#734f96' size={50} style={style.micIcon}/>
