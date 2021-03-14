@@ -96,6 +96,7 @@ const Chat = ({ route, navigation }) => {
                     displayStatus: true,
                     image: imageRes.uri,
                     imageData: imageRes,
+                    subtitle: `You sent a photo`,
                     user: user
                 }
                 onSend([newMessage]);

@@ -48,7 +48,9 @@ const Socket = ({ children }) => {
                     const groupInfo = log.groupInfo[Number(data.groupID.id)]
                     const newMessage:any = [{
                         _id: data._id,
-                        text: data.text,
+                        text: data.text || '',
+                        image: data.image || '',
+                        subtitle: data.image !== '' ? `${data.groupID.name} sent a photo` : data.text,
                         createdAt: data.createdAt,
                         user: {
                             _id: data.groupID.id,
