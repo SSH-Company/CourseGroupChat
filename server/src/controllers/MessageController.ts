@@ -8,6 +8,7 @@ import {
 import multer from 'multer';
 import * as STATUS from 'http-status-codes';
 import { publishToQueue } from '../services/Queue';
+import BaseUrl from '../services/BaseUrl';
 import { UserModel } from '../models/User';
 import { MessageModel } from '../models/Message';
 import { UserGroupModel } from '../models/User_Group';
@@ -32,7 +33,6 @@ export class MessageController {
     @Get(':id')
     private getLog(req: Request, res: Response) {
         const id = req.params.id
-        const url = "http://localhost:3000";
         const emptyResponse = '/images/empty_profile_pic.jpg';
 
         ChatLogViewModel.getUserLog(id)
@@ -42,7 +42,7 @@ export class MessageController {
                 creator_id: row.CREATOR_ID,
                 message_id: row.MESSAGE_ID,
                 name: row.NAME,
-                avatar_url: `${url}${row.AVATAR ? row.AVATAR : emptyResponse}`,
+                avatar_url: `${BaseUrl}${row.AVATAR ? row.AVATAR : emptyResponse}`,
                 text: row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : '',
                 image: row.MESSAGE_TYPE === "image" ? row.MESSAGE_BODY : '',
                 subtitle: row.MESSAGE_TYPE === "image" ? `${row.CREATOR_ID} sent a photo.` : row.MESSAGE_BODY,
@@ -91,7 +91,7 @@ export class MessageController {
             let messageType: "text" | "image" = "text", urlFilePath = '';
 
             if (req.file) {
-                urlFilePath = `http://localhost:3000/images/messages/${req.file.filename}`;
+                urlFilePath = `${BaseUrl}/images/messages/${req.file.filename}`;
                 messageType = "image";
             }
 
