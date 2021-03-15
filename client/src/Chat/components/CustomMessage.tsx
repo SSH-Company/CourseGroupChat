@@ -3,6 +3,7 @@ import { View, StyleSheet, Text, Image } from 'react-native';
 import { Message } from 'react-native-gifted-chat';
 import { Video } from 'expo-av';
 import { UserContext } from '../../Auth/Login';
+import BASE_URL from '../../../BaseUrl';
 
 //style sheet
 const styles = StyleSheet.create({
@@ -65,6 +66,9 @@ const CustomMessage:FunctionComponent = (props) => {
                             (<Video
                                 style={styles.video}
                                 source={{ uri: currentMessage.video }}
+                                //TODO: find a good way to display loading icon
+                                // usePoster
+                                // posterSource={{ uri: `${BASE_URL}/media/loading_icon.jpg` }} 
                                 useNativeControls
                                 resizeMode="cover"
                                 isLooping
