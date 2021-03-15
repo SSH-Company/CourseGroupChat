@@ -15,6 +15,7 @@
     "fs": "^0.0.1-security",
     "http-status-codes": "^2.1.4",
     "https": "^1.0.0",
+    "multer": "^1.4.2",
     "node-cache": "^5.1.2",
     "nodemon": "^2.0.6",
     "passport": "^0.4.1",

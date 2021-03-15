@@ -13,7 +13,7 @@ type GroupInfoMapType = {
     }
 }
 
-function revisedRandId() {
+export function revisedRandId() {
     return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(2, 10);
 }
 
@@ -31,7 +31,10 @@ export class ChatLog {
         list.map(row => {
             const newMessage = {
                 _id: row.message_id || revisedRandId(),
-                text: row.subtitle || '',
+                text: row.text || '',
+                image: row.image || '',
+                video: row.video || '',
+                subtitle: row.subtitle || '',
                 createdAt: row.created_at,
                 user: {
                     _id: row.creator_id,
@@ -49,7 +52,7 @@ export class ChatLog {
                 }
             }
         })
-
+        
         this.chatLog = map
         this.groupInfo = grpInfo
         this.userID = userID

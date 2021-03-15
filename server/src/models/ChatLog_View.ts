@@ -3,10 +3,12 @@ import { Database } from '../services/Database';
 interface ChatLogViewInterface {
     USER_ID?: number;
     GROUP_ID?: number;
+    AVATAR?: string;
     CREATOR_ID?: number;
     NAME: number;
     MESSAGE_ID?: string;
     MESSAGE_BODY?: string;
+    MESSAGE_TYPE?: "text" | "image" | "video";
     CREATE_DATE?: string;
     STATUS?: string;
 }
@@ -14,10 +16,12 @@ interface ChatLogViewInterface {
 export class ChatLogViewModel implements ChatLogViewInterface {
     USER_ID?: number;
     GROUP_ID?: number;
+    AVATAR?: string;
     CREATOR_ID?: number;
     NAME: number;
     MESSAGE_ID?: string;
     MESSAGE_BODY?: string;
+    MESSAGE_TYPE?: "text" | "image" | "video";
     CREATE_DATE?: string;
     STATUS?: string;
 
@@ -44,10 +48,12 @@ export class ChatLogViewModel implements ChatLogViewInterface {
 const SELECT = ` SELECT
 "USER_ID",
 "GROUP_ID",
+"AVATAR",
 "CREATOR_ID",
 "NAME",
 "MESSAGE_ID",
 "MESSAGE_BODY",
+"MESSAGE_TYPE",
 "STATUS",
 "CREATE_DATE"
 FROM RT."CHATLOG_VIEW"

@@ -38,7 +38,7 @@ const Main = ({ navigation }) => {
         message_id: text._id,
         name: grpInfo.name,
         avatar_url: grpInfo.avatar,
-        subtitle: text.text,
+        subtitle: text.subtitle || text.text,
         created_at: text.createdAt
       })
     })
@@ -103,7 +103,7 @@ const Main = ({ navigation }) => {
               })
             }}
           >
-            <Avatar rounded size="medium" source={{ uri: l.avatar_url }} />
+            <Avatar rounded size="medium" source={{ uri: l.avatar_url }}/>
             <ListItem.Content>
               <ListItem.Title>{l.name}</ListItem.Title>
               <ListItem.Subtitle>{l.subtitle}</ListItem.Subtitle>

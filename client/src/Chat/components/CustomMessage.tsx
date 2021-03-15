@@ -1,7 +1,9 @@
-import React, { FunctionComponent, useContext } from 'react'
-import { View, StyleSheet, Text } from 'react-native'
-import { Message } from 'react-native-gifted-chat'
-import { UserContext } from '../../Auth/Login'
+import React, { FunctionComponent, useContext } from 'react';
+import { View, StyleSheet, Text, Image } from 'react-native';
+import { Message } from 'react-native-gifted-chat';
+import { Video } from 'expo-av';
+import { UserContext } from '../../Auth/Login';
+import BASE_URL from '../../../BaseUrl';
 
 //style sheet
 const styles = StyleSheet.create({
@@ -32,6 +34,11 @@ const styles = StyleSheet.create({
     ticks: {
         alignSelf: 'flex-end',
         color: '#734f96'
+    },
+    video: {
+        minWidth: 200,
+        minHeight: 200,
+        alignSelf: 'center'
     }
 })
 
@@ -45,15 +52,30 @@ const CustomMessage:FunctionComponent = (props) => {
             renderBubble={() => {
                 const currentMessage = props['currentMessage']
                 const isCurrentUser = currentMessage.user._id === user._id
+                
                 return (
-                    <>
                     <View style={[styles.item]}>
                         <View style={[styles.balloon, {backgroundColor: isCurrentUser ? '#f5f9ff' : '#7c80ee'}]}>
-                            <Text style={{paddingTop: 5, color:  isCurrentUser ? 'black' : 'white'}}>{currentMessage.text}</Text>
+                            {currentMessage.text !== "" && <Text style={{paddingTop: 5, color:  isCurrentUser ? 'black' : 'white'}}>{currentMessage.text}</Text>}
+                            {currentMessage.hasOwnProperty('image') && currentMessage.image.length > 0 && 
+                            (<Image
+                                source={{ uri: currentMessage.image }}
+                                style={{ width: 200, height: 200, marginBottom: 10 }}
+                            />)}
+                            {currentMessage.hasOwnProperty('video') && currentMessage.video.length > 0 &&
+                            (<Video
+                                style={styles.video}
+                                source={{ uri: currentMessage.video }}
+                                //TODO: find a good way to display loading icon
+                                // usePoster
+                                // posterSource={{ uri: `${BASE_URL}/media/loading_icon.jpg` }} 
+                                useNativeControls
+                                resizeMode="cover"
+                                isLooping
+                            />)}
+                            {currentMessage.displayStatus && <Text>{currentMessage.status}</Text>}
                         </View>
                     </View>
-                    {currentMessage.displayStatus && <Text>{currentMessage.status}</Text>}
-                    </>
                 )
             }}
         />
