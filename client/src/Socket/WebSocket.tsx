@@ -50,7 +50,7 @@ const Socket = ({ children }) => {
                         _id: data._id,
                         text: data.text || '',
                         image: data.image || '',
-                        subtitle: data.image !== '' ? `${data.groupID.name} sent a photo` : data.text,
+                        subtitle: data.image.length > 0 ? `${data.groupID.name} sent a photo` : data.text,
                         createdAt: data.createdAt,
                         user: {
                             _id: data.groupID.id,

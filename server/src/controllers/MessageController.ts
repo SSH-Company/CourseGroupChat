@@ -94,7 +94,8 @@ export class MessageController {
             if (req.file) {
                 urlFilePath = `${BaseUrl}/images/messages/${req.file.filename}`;
                 messageType = "image";
-            }
+                message.image = urlFilePath
+            } else message.image = '';
 
             //find all recipients of this group chat, exclude senderID from the list
             const groupRecipients = (await UserGroupModel.getRecipients(groupID.id)).map(row => row.USER_ID).filter(id => id != senderID._id);    
