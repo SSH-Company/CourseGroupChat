@@ -5,7 +5,7 @@ interface MessageInterface {
     CREATOR_ID?: number;
     RECIPIENT_GROUP_ID?: number;
     MESSAGE_BODY?: string;
-    MESSAGE_TYPE?: "image" | "text";
+    MESSAGE_TYPE?: "image" | "text" | "video";
     CREATE_DATE?: string;
     STATUS?: string;
 }
@@ -15,7 +15,7 @@ export class MessageModel implements MessageInterface {
     CREATOR_ID?: number;
     RECIPIENT_GROUP_ID?: number;
     MESSAGE_BODY?: string;
-    MESSAGE_TYPE?: "image" | "text";
+    MESSAGE_TYPE?: "image" | "text" | "video";
     CREATE_DATE?: string;
     STATUS?: string;
 

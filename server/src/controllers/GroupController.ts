@@ -11,10 +11,11 @@ import { UserModel } from '../models/User';
 import { GroupModel } from '../models/Group';
 import { UserGroupModel } from '../models/User_Group';
 import { publishToQueue } from '../services/Queue';
+import BaseUrl from '../services/BaseUrl';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'src/public/client/images/profiles/')
+        cb(null, 'src/public/client/media/profiles/')
     },
     filename: function (req, file, cb) {
         const extension = file.mimetype.split('/')[1];
@@ -32,7 +33,7 @@ export class GroupController {
         const session = req.session;
         const recipients = JSON.parse(req.body.recipients);
         const groupName = req.body.groupName;
-        const urlFilePath = `/images/profiles/${req.file.filename}`;
+        const urlFilePath = `/media/profiles/${req.file.filename}`;
 
         if(!Array.isArray(recipients) || recipients.length === 0 || !groupName) {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
@@ -61,7 +62,7 @@ export class GroupController {
             res.status(STATUS.OK).json({
                 id: newGroup.ID,
                 name: groupName,
-                avatar_url: `http://localhost:3000${urlFilePath}`
+                avatar_url: `${BaseUrl}${urlFilePath}`
             });
 
         } catch (err) {

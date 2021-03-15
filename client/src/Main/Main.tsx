@@ -38,7 +38,7 @@ const Main = ({ navigation }) => {
         message_id: text._id,
         name: grpInfo.name,
         avatar_url: grpInfo.avatar,
-        subtitle: text.subtitle ? text.subtitle : text.text,
+        subtitle: text.subtitle || text.text,
         created_at: text.createdAt
       })
     })

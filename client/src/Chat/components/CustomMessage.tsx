@@ -1,7 +1,8 @@
-import React, { FunctionComponent, useContext } from 'react'
-import { View, StyleSheet, Text, Image } from 'react-native'
-import { Message } from 'react-native-gifted-chat'
-import { UserContext } from '../../Auth/Login'
+import React, { FunctionComponent, useContext } from 'react';
+import { View, StyleSheet, Text, Image } from 'react-native';
+import { Message } from 'react-native-gifted-chat';
+import { Video } from 'expo-av';
+import { UserContext } from '../../Auth/Login';
 
 //style sheet
 const styles = StyleSheet.create({
@@ -32,6 +33,11 @@ const styles = StyleSheet.create({
     ticks: {
         alignSelf: 'flex-end',
         color: '#734f96'
+    },
+    video: {
+        minWidth: 200,
+        minHeight: 200,
+        alignSelf: 'center'
     }
 })
 
@@ -54,6 +60,14 @@ const CustomMessage:FunctionComponent = (props) => {
                             (<Image
                                 source={{ uri: currentMessage.image }}
                                 style={{ width: 200, height: 200, marginBottom: 10 }}
+                            />)}
+                            {currentMessage.hasOwnProperty('video') && currentMessage.video.length > 0 &&
+                            (<Video
+                                style={styles.video}
+                                source={{ uri: currentMessage.video }}
+                                useNativeControls
+                                resizeMode="cover"
+                                isLooping
                             />)}
                             {currentMessage.displayStatus && <Text>{currentMessage.status}</Text>}
                         </View>

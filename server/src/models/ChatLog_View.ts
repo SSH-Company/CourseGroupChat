@@ -8,7 +8,7 @@ interface ChatLogViewInterface {
     NAME: number;
     MESSAGE_ID?: string;
     MESSAGE_BODY?: string;
-    MESSAGE_TYPE?: "text" | "image";
+    MESSAGE_TYPE?: "text" | "image" | "video";
     CREATE_DATE?: string;
     STATUS?: string;
 }
@@ -21,7 +21,7 @@ export class ChatLogViewModel implements ChatLogViewInterface {
     NAME: number;
     MESSAGE_ID?: string;
     MESSAGE_BODY?: string;
-    MESSAGE_TYPE?: "text" | "image";
+    MESSAGE_TYPE?: "text" | "image" | "video";
     CREATE_DATE?: string;
     STATUS?: string;
 

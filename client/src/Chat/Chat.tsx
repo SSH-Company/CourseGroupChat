@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect, useContext } from 'react';
 import { View, Dimensions, BackHandler } from 'react-native';
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
+import * as VideoExtensions from 'video-extensions';
 import { CustomMessage, CustomToolbar, InboxSettings } from './components';
 import { UserContext } from '../Auth/Login';
 import { RenderMessageContext } from '../Socket/WebSocket';
@@ -47,7 +48,7 @@ const Chat = ({ route, navigation }) => {
     const resetMessages = async () => {
         const instance = await ChatLog.getChatLogInstance();
         const log = instance.chatLog;
-        const filteredMessages = log[groupID.id].filter(msg => msg.text !== '' || msg.image !== '');
+        const filteredMessages = log[groupID.id];
         setMessages(filteredMessages);
         if (postStatus) {
             axios.post(`${BASE_URL}/api/message/updateMessageStatus`, { groups: [groupID.id], status: "Read" }).catch(err => console.log(err))
@@ -68,13 +69,12 @@ const Chat = ({ route, navigation }) => {
     //helper function for sending message to queue
     const sendData = async (messages = []) => {
         //here we are assuming only one message is posted at a time
-        
         try {
             const imageType = messages[0].hasOwnProperty('imageData');
             let formData: any;
             if (imageType) {
                 formData = new FormData();
-                formData.append('photo', {...messages[0].imageData});
+                formData.append('media', {...messages[0].imageData});
                 formData.append('message', JSON.stringify({ messages, groupID: groupID }))
                 await axios.post(`${BASE_URL}/api/message`, formData, { headers: { 'content-type': 'multipart/form-data' } })
             } else {
@@ -97,12 +97,14 @@ const Chat = ({ route, navigation }) => {
             if (status === "granted") {
                 const imageRes = await handleImagePick(type);
                 if (imageRes) {
+                    const fileExtension = imageRes.type.split('/')[1];
+                    const mediaType = (VideoExtensions as any).default.includes(fileExtension) ? "video" : "image";
                     const newMessage = {
                         _id: revisedRandId(),
                         createdAt: Date.now(),
-                        displayStatus: true,
-                        image: imageRes.uri,
+                        [mediaType]: imageRes.uri,
                         imageData: imageRes,
+                        displayStatus: true,
                         subtitle: `You sent a photo`,
                         user: user
                     }

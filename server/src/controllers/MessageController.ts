@@ -16,7 +16,7 @@ import { ChatLogViewModel } from '../models/ChatLog_View';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'src/public/client/images/messages/')
+        cb(null, 'src/public/client/media/messages/')
     },
     filename: function (req, file, cb) {
         const extension = file.mimetype.split('/')[1];
@@ -34,7 +34,7 @@ export class MessageController {
     private getLog(req: Request, res: Response) {
         const session = req.session;
         const id = req.params.id
-        const emptyResponse = '/images/empty_profile_pic.jpg';
+        const emptyResponse = '/media/empty_profile_pic.jpg';
 
         ChatLogViewModel.getUserLog(id)
         .then(data => {
@@ -44,9 +44,8 @@ export class MessageController {
                 message_id: row.MESSAGE_ID,
                 name: row.NAME,
                 avatar_url: `${BaseUrl}${row.AVATAR ? row.AVATAR : emptyResponse}`,
-                text: row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : '',
-                image: row.MESSAGE_TYPE === "image" ? row.MESSAGE_BODY : '',
-                subtitle: row.MESSAGE_TYPE === "image" ? `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_ID} sent a photo.` : row.MESSAGE_BODY,
+                [row.MESSAGE_TYPE]: row.MESSAGE_BODY,
+                subtitle: row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_ID} sent a ${row.MESSAGE_TYPE}.`,
                 created_at: row.CREATE_DATE,
                 status: row.STATUS
             }))
@@ -73,7 +72,7 @@ export class MessageController {
         }
     */
     @Post('')
-    @Middleware([upload.single('photo')])
+    @Middleware([upload.single('media')])
     private async submitMessage(req: Request, res: Response) {
         
         try {
@@ -89,13 +88,15 @@ export class MessageController {
                 avatar: 'https://placeimg.com/140/140/any'
             }
 
-            let messageType: "text" | "image" = "text", urlFilePath = '';
+            let messageType: "text" | "image" | "video" = "text", 
+                urlFilePath = '';
 
             if (req.file) {
-                urlFilePath = `${BaseUrl}/images/messages/${req.file.filename}`;
-                messageType = "image";
-                message.image = urlFilePath
-            } else message.image = '';
+                urlFilePath = `${BaseUrl}/media/messages/${req.file.filename}`;
+                //assuming file types can be "video" or "image"
+                messageType = message.hasOwnProperty('image') ? "image" : "video";
+                message[messageType] = urlFilePath
+            }
 
             //find all recipients of this group chat, exclude senderID from the list
             const groupRecipients = (await UserGroupModel.getRecipients(groupID.id)).map(row => row.USER_ID).filter(id => id != senderID._id);    

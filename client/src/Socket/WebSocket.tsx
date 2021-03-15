@@ -49,8 +49,6 @@ const Socket = ({ children }) => {
                     const newMessage:any = [{
                         _id: data._id,
                         text: data.text || '',
-                        image: data.image || '',
-                        subtitle: data.image.length > 0 ? `${data.groupID.name} sent a photo` : data.text,
                         createdAt: data.createdAt,
                         user: {
                             _id: data.groupID.id,
@@ -58,6 +56,16 @@ const Socket = ({ children }) => {
                             avatar: groupInfo.avatar
                         }
                     }]
+                    //check if message contains image/video
+                    let mediaType = ''
+                    if (data.hasOwnProperty('image') && data.image !== '') mediaType = "image"
+                    if (data.hasOwnProperty('video') && data.video !== '') mediaType = "video"
+                    
+                    if (mediaType !== '') {
+                        newMessage[mediaType] = data[mediaType];
+                        newMessage.subtitle = `${data.groupID.name} sent a ${mediaType}.`;
+                    }
+
                     log.appendLog(data.groupID, newMessage)  
                     setPostStatus(true); 
                     break;

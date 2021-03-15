@@ -33,6 +33,7 @@ export class ChatLog {
                 _id: row.message_id || revisedRandId(),
                 text: row.text || '',
                 image: row.image || '',
+                video: row.video || '',
                 subtitle: row.subtitle || '',
                 createdAt: row.created_at,
                 user: {
