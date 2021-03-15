@@ -32,6 +32,7 @@ export class MessageController {
 
     @Get(':id')
     private getLog(req: Request, res: Response) {
+        const session = req.session;
         const id = req.params.id
         const emptyResponse = '/images/empty_profile_pic.jpg';
 
@@ -45,7 +46,7 @@ export class MessageController {
                 avatar_url: `${BaseUrl}${row.AVATAR ? row.AVATAR : emptyResponse}`,
                 text: row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : '',
                 image: row.MESSAGE_TYPE === "image" ? row.MESSAGE_BODY : '',
-                subtitle: row.MESSAGE_TYPE === "image" ? `${row.CREATOR_ID} sent a photo.` : row.MESSAGE_BODY,
+                subtitle: row.MESSAGE_TYPE === "image" ? `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_ID} sent a photo.` : row.MESSAGE_BODY,
                 created_at: row.CREATE_DATE,
                 status: row.STATUS
             }))

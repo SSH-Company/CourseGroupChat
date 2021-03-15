@@ -40,13 +40,13 @@ const style = StyleSheet.create({
 
 type CustomToolbarProps = {
     children: any,
-    onImagePick: () => any
+    onImagePick: (type: "library" | "camera") => any
 }
 
 const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
     let {
         children,
-        onImagePick = () => {}
+        onImagePick = (type) => {}
     } = props;
 
     const [isTyping, setIsTyping] = useState(false);
@@ -67,11 +67,17 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
                             size={20} 
                             color='#734f96' 
                             style={style.clipIcon}
-                            onPress={onImagePick}
+                            onPress={() => onImagePick("library")}
                         />
                     )}
                     renderActions={() => (
-                        <SimpleLineIcons name={'camera'} size={20} color='#734f96' style={style.actionIcon}/>
+                        <SimpleLineIcons 
+                            name={'camera'} 
+                            size={20} 
+                            color='#734f96' 
+                            style={style.actionIcon}
+                            onPress={() => onImagePick("camera")}
+                        />
                     )}
                 />
             </View>

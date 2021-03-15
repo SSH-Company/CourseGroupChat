@@ -62,44 +62,52 @@ const Chat = ({ route, navigation }) => {
         const instance = await ChatLog.getChatLogInstance();
         instance.appendLog(groupID, messages);
         setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
-        sendData(messages);
+        await sendData(messages);
     }, [])
 
     //helper function for sending message to queue
-    const sendData = (messages = []) => {
+    const sendData = async (messages = []) => {
         //here we are assuming only one message is posted at a time
-        const formData = new FormData();
-        formData.append('photo', {...messages[0].imageData});
-        formData.append('message', JSON.stringify({ messages, groupID: groupID }))
-
-        axios.post(`${BASE_URL}/api/message`, formData, { headers: { 'content-type': 'multipart/form-data' } })
-            .then(async () => {
-                const instance = await ChatLog.getChatLogInstance()
-                instance.updateMessageStatus(groupID.id, "Sent", messages[0])
-                setRenderFlag(!renderFlag);
-            })
-            .catch(err => {
-                console.error(err)
-
-                //TODO: figure out a way to display failed notification
-            })
+        
+        try {
+            const imageType = messages[0].hasOwnProperty('imageData');
+            let formData: any;
+            if (imageType) {
+                formData = new FormData();
+                formData.append('photo', {...messages[0].imageData});
+                formData.append('message', JSON.stringify({ messages, groupID: groupID }))
+                await axios.post(`${BASE_URL}/api/message`, formData, { headers: { 'content-type': 'multipart/form-data' } })
+            } else {
+                formData = { message: JSON.stringify({ messages, groupID: groupID })}
+                await axios.post(`${BASE_URL}/api/message`, formData)
+            }
+            
+            const instance = await ChatLog.getChatLogInstance()
+            instance.updateMessageStatus(groupID.id, "Sent", messages[0])
+            setRenderFlag(!renderFlag);
+        } catch (err) {
+            //TODO: display failed notification here
+            console.error(err);
+        }
     }
 
-    const onImagePick = async () => {
+    const onImagePick = async (type) => {
         try {
-            const status = await handlePermissionRequest();
+            const status = await handlePermissionRequest(type);
             if (status === "granted") {
-                const imageRes = await handleImagePick();
-                const newMessage = {
-                    _id: revisedRandId(),
-                    createdAt: Date.now(),
-                    displayStatus: true,
-                    image: imageRes.uri,
-                    imageData: imageRes,
-                    subtitle: `You sent a photo`,
-                    user: user
+                const imageRes = await handleImagePick(type);
+                if (imageRes) {
+                    const newMessage = {
+                        _id: revisedRandId(),
+                        createdAt: Date.now(),
+                        displayStatus: true,
+                        image: imageRes.uri,
+                        imageData: imageRes,
+                        subtitle: `You sent a photo`,
+                        user: user
+                    }
+                    onSend([newMessage]);
                 }
-                onSend([newMessage]);
             }
         } catch (err) {
             console.log(err);
@@ -121,7 +129,7 @@ const Chat = ({ route, navigation }) => {
                 messages={messages}
                 onSend={messages => onSend(messages)}
                 renderMessage={props => { return ( <CustomMessage {...props} /> ) }}
-                renderInputToolbar={props => { return ( <CustomToolbar children={props} onImagePick={onImagePick} /> ) }}
+                renderInputToolbar={props => { return ( <CustomToolbar children={props} onImagePick={type => onImagePick(type)} /> ) }}
                 isKeyboardInternallyHandled={false}
             />
         </DrawerLayout>

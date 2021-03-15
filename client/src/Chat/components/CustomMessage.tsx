@@ -50,7 +50,8 @@ const CustomMessage:FunctionComponent = (props) => {
                     <View style={[styles.item]}>
                         <View style={[styles.balloon, {backgroundColor: isCurrentUser ? '#f5f9ff' : '#7c80ee'}]}>
                             {currentMessage.text !== "" && <Text style={{paddingTop: 5, color:  isCurrentUser ? 'black' : 'white'}}>{currentMessage.text}</Text>}
-                            {currentMessage.image !== "" && (<Image
+                            {currentMessage.hasOwnProperty('image') && currentMessage.image.length > 0 && 
+                            (<Image
                                 source={{ uri: currentMessage.image }}
                                 style={{ width: 200, height: 200, marginBottom: 10 }}
                             />)}

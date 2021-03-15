@@ -1,30 +1,59 @@
 import * as ImagePicker from 'expo-image-picker';
 
-export const handlePermissionRequest = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
+type MediaType = "library" | "camera"
+
+export const handlePermissionRequest = async (type: MediaType) => {
+    let status;
+    
+    switch (type) {
+        case "camera":
+            status = await ImagePicker.requestCameraPermissionsAsync();
+            break;
+        case "library":
+            status = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            break;
+        default:
+            break;
+    }
+
+    if (status.status !== 'granted') {
         alert('Sorry, we need camera roll permissions to make this work!');
     }
-    return status
+    return status.status
 }
 
-export const handleImagePick = async () => {
-    let result: any = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+export const handleImagePick = async (type: MediaType) => {
+    let result: any;
+    
+    switch (type) {
+        case "camera":
+            result = await ImagePicker.launchCameraAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.All,
+                allowsEditing: true
+            });
+            break;
+        case "library":
+            result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.All,
+                allowsEditing: true,
+                aspect: [4, 3],
+                quality: 1,
+            });
+            break;
+        default:
+            break;
+    }
 
     if (!result.cancelled) {
         const filename = result.uri.split('/').pop();
         let match = /\.(\w+)$/.exec(filename);
-        let type = match ? `image/${match[1]}` : `image`;
-
+        let fileType = match ? `image/${match[1]}` : `image`;
+    
         return {
             uri: result.uri,
             name: filename,
-            type: type
+            type: fileType
         };
     }
 };
+

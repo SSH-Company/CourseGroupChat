@@ -20,8 +20,6 @@ class Queue {
             channel.prefetch(prefetch);
         }
     
-        console.log(` [x] Waiting for messages in ${queue}. To exit press CTRL+C`)
-       
         try {
             channel.consume(queue, message => {
             if (message !== null) {
@@ -48,9 +46,6 @@ export const publishToQueue = async (queue, message, durable = false) => {
 
         await channel.assertQueue(queue, durable= durable);
         await channel.sendToQueue(queue, Buffer.from(message));
-      
-        console.info(' [x] Sending message to queue', queue, message);
-            
     } catch (error) {
         // handle error response
         console.error(error, 'Unable to connect to cluster!');  
