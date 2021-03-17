@@ -1,9 +1,9 @@
-import React from 'react'
+import React, { FunctionComponent } from 'react'
 import { View, Text, StyleSheet, Dimensions } from 'react-native'
 import { ListItem, Image } from 'react-native-elements'
 import { AntDesign, Entypo, Ionicons, MaterialIcons } from 'react-native-vector-icons'
 
-const InboxSettings = () => {
+const InboxSettings:FunctionComponent = () => {
 
     //store device dimensions
     const deviceDimensions = Dimensions.get('window')

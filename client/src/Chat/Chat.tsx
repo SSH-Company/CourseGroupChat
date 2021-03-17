@@ -1,7 +1,9 @@
-import React, { useState, useCallback, useEffect, useContext } from 'react';
-import { View, Dimensions, BackHandler } from 'react-native';
+import React, { useState, useCallback, useEffect, useContext, useRef } from 'react';
+import { View, Dimensions, BackHandler, Text } from 'react-native';
+import { Avatar, Header } from "react-native-elements";
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
+import { Ionicons } from "react-native-vector-icons";
 import * as VideoExtensions from 'video-extensions';
 import { CustomMessage, CustomToolbar, InboxSettings } from './components';
 import { UserContext } from '../Auth/Login';
@@ -25,6 +27,7 @@ const Chat = ({ route, navigation }) => {
     const { postStatus, renderFlag, setPostStatus, setRenderFlag } = useContext(RenderMessageContext);
     const { groupID } = route.params as ChatProps;
     const [messages, setMessages] = useState<IMessage[]>([]);
+    const drawerRef = useRef(null);
 
     useEffect(() => {
         const backAction = () => {
@@ -119,6 +122,7 @@ const Chat = ({ route, navigation }) => {
     return (
     <View style={{flex: 1}}>
         <DrawerLayout
+            ref={drawerRef}
             drawerWidth={Dimensions.get('window').width}
             drawerPosition={'right'}
             drawerType={'front'}
@@ -126,6 +130,35 @@ const Chat = ({ route, navigation }) => {
             renderNavigationView={InboxSettings}
             contentContainerStyle={{}}
         >   
+            <Header
+                placement="center"
+                backgroundColor="#ccccff"
+                leftComponent={
+                    <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
+                        <Ionicons 
+                            name="arrow-back-sharp" 
+                            size={30} 
+                            color="#734f96" 
+                            onPress={() => navigation.navigate('Main')}
+                        />
+                        <Avatar source={{ uri: groupID.avatar }} rounded size={30} containerStyle={{ marginLeft: 10, borderColor: "white", borderWidth: 1 }}/>        
+                    </View>
+                }
+                centerComponent={
+                    <Text style={{ alignSelf: 'center', fontWeight: 'bold', fontSize: 20 }}>
+                        {groupID.name}
+                    </Text>                
+                }
+                rightComponent={
+                    <Ionicons 
+                        name="information-circle-outline" 
+                        size={30} 
+                        color="#734f96" 
+                        onPress={() => drawerRef.current.openDrawer()}
+                    />
+                }
+            />
+
             <GiftedChat
                 user={user}
                 messages={messages}
