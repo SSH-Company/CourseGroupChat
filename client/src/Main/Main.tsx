@@ -2,8 +2,14 @@ import React, { useState, useEffect, useContext } from "react";
 import { View, ScrollView, Platform } from "react-native";
 import { ListItem, Avatar, Header, SearchBar } from "react-native-elements";
 import Feather from "react-native-vector-icons/Feather";
+
+// file imports.
+import { UserContext } from '../Auth/Login';
 import { RenderMessageContext } from '../Socket/WebSocket';
 import { ChatLog } from '../Util/ChatLog';
+
+import * as Notifications from 'expo-notifications';
+import {Button} from 'react-native';
 
 export type listtype = {
   id: number;
@@ -24,8 +30,9 @@ const Main = ({ navigation }) => {
   const [filteredList, setFilteredList] = useState<listtype[]>([]);
 
   useEffect(() => {
+    // chat list.
     resetList();
-  }, [renderFlag])
+  }, [renderFlag]) 
 
   const resetList = async () => {
     const log = await ChatLog.getChatLogInstance()
@@ -82,6 +89,12 @@ const Main = ({ navigation }) => {
           />
         }
       />
+      <Button
+        title="Press to schedule a notification"
+        onPress={async () => {
+          await schedulePushNotification();
+        }}
+      />
       <ScrollView
         contentOffset={{ x: 0, y: 76 }}
         keyboardShouldPersistTaps="handled"
@@ -114,4 +127,17 @@ const Main = ({ navigation }) => {
     </View>
   );
 };
+
+// test notifications.
+async function schedulePushNotification() {
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "You've got mail! 📬",
+      body: 'Here is the notification body',
+      data: { data: 'goes here' },
+    },
+    trigger: { seconds: 2 },
+  });
+}
+
 export default Main;
