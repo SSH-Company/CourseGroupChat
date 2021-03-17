@@ -1,7 +1,9 @@
-import React, { useState, useCallback, useEffect, useContext } from 'react';
+import React, { useState, useCallback, useEffect, useContext, useRef } from 'react';
 import { View, Dimensions, BackHandler } from 'react-native';
+import { Avatar, Header } from "react-native-elements";
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
+import { Ionicons } from "react-native-vector-icons";
 import * as VideoExtensions from 'video-extensions';
 import { CustomMessage, CustomToolbar, InboxSettings } from './components';
 import { UserContext } from '../Auth/Login';
@@ -25,6 +27,8 @@ const Chat = ({ route, navigation }) => {
     const { postStatus, renderFlag, setPostStatus, setRenderFlag } = useContext(RenderMessageContext);
     const { groupID } = route.params as ChatProps;
     const [messages, setMessages] = useState<IMessage[]>([]);
+    const drawerRef = useRef(null);
+    const avatarSize = 25;
 
     useEffect(() => {
         const backAction = () => {
@@ -48,8 +52,7 @@ const Chat = ({ route, navigation }) => {
     const resetMessages = async () => {
         const instance = await ChatLog.getChatLogInstance();
         const log = instance.chatLog;
-        const filteredMessages = log[groupID.id].filter(m => m.text !== '' || m.image !== '' || m.video !== '');
-        setMessages(filteredMessages);
+        setMessages(log[groupID.id]);
         if (postStatus) {
             axios.post(`${BASE_URL}/api/message/updateMessageStatus`, { groups: [groupID.id], status: "Read" }).catch(err => console.log(err))
             setPostStatus(false);
@@ -119,13 +122,42 @@ const Chat = ({ route, navigation }) => {
     return (
     <View style={{flex: 1}}>
         <DrawerLayout
+            ref={drawerRef}
             drawerWidth={Dimensions.get('window').width}
             drawerPosition={'right'}
             drawerType={'front'}
             drawerBackgroundColor="#ffffff"
-            renderNavigationView={InboxSettings}
+            renderNavigationView={() => InboxSettings({ source: groupID.avatar, name: groupID.name })}
             contentContainerStyle={{}}
         >   
+            <Header
+                placement="center"
+                backgroundColor="#ccccff"
+                leftComponent={
+                    <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
+                        <Ionicons 
+                            name="arrow-back-sharp" 
+                            size={avatarSize} 
+                            color="#734f96" 
+                            onPress={() => navigation.navigate('Main')}
+                        />
+                        <Avatar source={{ uri: groupID.avatar }} rounded size={avatarSize} containerStyle={{ marginLeft: 10, borderColor: "white", borderWidth: 1 }}/>        
+                    </View>
+                }
+                centerComponent={{
+                    text: groupID.name,
+                    style: { color: "#734f96", fontSize: 20, fontWeight: "bold" },
+                }}
+                rightComponent={
+                    <Ionicons 
+                        name="information-circle-outline" 
+                        size={avatarSize} 
+                        color="#734f96" 
+                        onPress={() => drawerRef.current.openDrawer()}
+                    />
+                }
+            />
+
             <GiftedChat
                 user={user}
                 messages={messages}
