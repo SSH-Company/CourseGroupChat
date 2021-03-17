@@ -52,8 +52,7 @@ const Chat = ({ route, navigation }) => {
     const resetMessages = async () => {
         const instance = await ChatLog.getChatLogInstance();
         const log = instance.chatLog;
-        const filteredMessages = log[groupID.id].filter(m => m.text !== '' || m.image !== '' || m.video !== '');
-        setMessages(filteredMessages);
+        setMessages(log[groupID.id]);
         if (postStatus) {
             axios.post(`${BASE_URL}/api/message/updateMessageStatus`, { groups: [groupID.id], status: "Read" }).catch(err => console.log(err))
             setPostStatus(false);
