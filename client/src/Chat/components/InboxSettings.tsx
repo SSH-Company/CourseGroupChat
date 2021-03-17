@@ -1,9 +1,14 @@
-import React, { FunctionComponent } from 'react'
+import React from 'react'
 import { View, Text, StyleSheet, Dimensions } from 'react-native'
 import { ListItem, Image } from 'react-native-elements'
 import { AntDesign, Entypo, Ionicons, MaterialIcons } from 'react-native-vector-icons'
 
-const InboxSettings:FunctionComponent = () => {
+type InboxSettingsProps = {
+    source: string,
+    name: string
+}
+
+const InboxSettings = (props: InboxSettingsProps) => {
 
     //store device dimensions
     const deviceDimensions = Dimensions.get('window')
@@ -27,12 +32,6 @@ const InboxSettings:FunctionComponent = () => {
             borderRadius: 200
         }
     })
-
-    //Channel photo components
-    const imageProps = {
-        source: 'https://placeimg.com/140/140/any',
-        name: 'Tehari Ghor'
-    }
 
     //Menu list components
     const iconSize = 20
@@ -76,10 +75,10 @@ const InboxSettings:FunctionComponent = () => {
         <View style={styles.drawerContainer}>
             <View style={styles.imageContainer}>
                 <Image 
-                    source={{ uri: imageProps.source }}
+                    source={{ uri: props.source }}
                     style={styles.imageStyle}
                 />
-                <Text style={{paddingBottom: 10, fontSize: 25}}>{imageProps.name}</Text>
+                <Text style={{paddingBottom: 10, fontSize: 25}}>{props.name}</Text>
             </View>
             {list.map((item, i) => (
                 <ListItem key={i}>

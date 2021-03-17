@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useContext, useRef } from 'react';
-import { View, Dimensions, BackHandler, Text } from 'react-native';
+import { View, Dimensions, BackHandler } from 'react-native';
 import { Avatar, Header } from "react-native-elements";
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
@@ -28,6 +28,7 @@ const Chat = ({ route, navigation }) => {
     const { groupID } = route.params as ChatProps;
     const [messages, setMessages] = useState<IMessage[]>([]);
     const drawerRef = useRef(null);
+    const avatarSize = 25;
 
     useEffect(() => {
         const backAction = () => {
@@ -127,7 +128,7 @@ const Chat = ({ route, navigation }) => {
             drawerPosition={'right'}
             drawerType={'front'}
             drawerBackgroundColor="#ffffff"
-            renderNavigationView={InboxSettings}
+            renderNavigationView={() => InboxSettings({ source: groupID.avatar, name: groupID.name })}
             contentContainerStyle={{}}
         >   
             <Header
@@ -137,22 +138,21 @@ const Chat = ({ route, navigation }) => {
                     <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
                         <Ionicons 
                             name="arrow-back-sharp" 
-                            size={30} 
+                            size={avatarSize} 
                             color="#734f96" 
                             onPress={() => navigation.navigate('Main')}
                         />
-                        <Avatar source={{ uri: groupID.avatar }} rounded size={30} containerStyle={{ marginLeft: 10, borderColor: "white", borderWidth: 1 }}/>        
+                        <Avatar source={{ uri: groupID.avatar }} rounded size={avatarSize} containerStyle={{ marginLeft: 10, borderColor: "white", borderWidth: 1 }}/>        
                     </View>
                 }
-                centerComponent={
-                    <Text style={{ alignSelf: 'center', fontWeight: 'bold', fontSize: 20 }}>
-                        {groupID.name}
-                    </Text>                
-                }
+                centerComponent={{
+                    text: groupID.name,
+                    style: { color: "#734f96", fontSize: 20, fontWeight: "bold" },
+                }}
                 rightComponent={
                     <Ionicons 
                         name="information-circle-outline" 
-                        size={30} 
+                        size={avatarSize} 
                         color="#734f96" 
                         onPress={() => drawerRef.current.openDrawer()}
                     />
