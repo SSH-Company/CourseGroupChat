@@ -7,9 +7,15 @@ import {
 } from 'react-native';
 import { User } from 'react-native-gifted-chat';
 import { WebView } from 'react-native-webview';
+import { Cache } from 'react-native-cache';
+import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// file imports.
 import { ChatLog } from '../Util/ChatLog';
 import BASE_URL from '../../BaseUrl';
-import axios from 'axios';
 
 const styles = StyleSheet.create({
     container: {
@@ -25,12 +31,36 @@ const styles = StyleSheet.create({
 
 export const UserContext = createContext({} as User)
 
+// cache to hold expo token.
+const cache = new Cache ({
+    namespace: "myapp",
+    policy: {
+        maxEntries: 10
+    },
+    backend: AsyncStorage
+});
+
+// notification handler.
+Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+    }),
+  });  
+
 const LogIn = ({ children }) => {
     const [loading, setLoading] = useState(true)
     const [newUser, setNewUser] = useState(false)
     const [userID, setUserID] = useState({} as User);
     const [sourceHTML, setSourceHTML] = useState<any>();
     const appState = useRef(AppState.currentState);
+    const [expoPushToken, setExpoPushToken] = useState('');
+    const [notification, setNotification] = useState(false);
+
+    // notification listeners. 
+    const notificationListener = useRef<any>();
+    const responseListener = useRef<any>();
 
     /*
         How it works:
@@ -72,6 +102,71 @@ const LogIn = ({ children }) => {
             AppState.removeEventListener("change", handleAppStateChange);
         }
     }, [])
+
+    // put inside login so it only checks for/generates token once per app init.
+    useEffect(() => {
+        // notifications.
+        registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+    
+        notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+          setNotification(notification);
+        });
+    
+        responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+          console.log(response);
+        });
+    
+        return () => {
+          Notifications.removeNotificationSubscription(notificationListener);
+          Notifications.removeNotificationSubscription(responseListener);
+        };
+      }, []);
+
+    // setup function for expo notifications.
+    const registerForPushNotificationsAsync = async () => {
+    let token;
+    if (Constants.isDevice) {
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
+        if (existingStatus !== 'granted') {
+            const { status } = await Notifications.requestPermissionsAsync();
+            finalStatus = status;
+        }
+        if (finalStatus !== 'granted') {
+            alert('Failed to get push token for push notification!');
+            return;
+        }
+        token = (await Notifications.getExpoPushTokenAsync()).data;
+        console.log(token);
+
+    } else {
+        alert('Must use physical device for Push Notifications');
+    }
+
+    if (Platform.OS === 'android') {
+        Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+        });
+    }
+    /* send token to backend for storage here */
+    if (token) {
+        axios.post(`${BASE_URL}/api/notification`, {expoToken: token})
+        .then(async res => {
+            console.log('successfully sent expo token to backend')
+        })
+        .catch(e => {
+            console.log('expo token error:', e.response.data)
+        })
+    }
+    else {
+        console.log('no expo token generated')
+    }
+
+    return token;
+    }
 
     const handleAppStateChange = (nextAppState) => {
         appState.current = nextAppState
