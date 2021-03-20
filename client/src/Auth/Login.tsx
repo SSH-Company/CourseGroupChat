@@ -3,7 +3,8 @@ import {
     AppState,
     StyleSheet,
     Text,
-    View 
+    View,
+    Platform 
 } from 'react-native';
 import { User } from 'react-native-gifted-chat';
 import { WebView } from 'react-native-webview';
@@ -59,8 +60,8 @@ const LogIn = ({ children }) => {
     const [notification, setNotification] = useState(false);
 
     // notification listeners. 
-    const notificationListener = useRef<any>();
-    const responseListener = useRef<any>();
+    const notificationListener = useRef<any>(null);
+    const responseListener = useRef<any>(null);
 
     /*
         How it works:
@@ -71,7 +72,6 @@ const LogIn = ({ children }) => {
         redirects to a page from where the User's database information is collected
         and stored. The user is then redirected to the Main page.
     */
-
     useEffect(() => {
         axios.get(`${BASE_URL}/api/login`)
             .then(async res => {
@@ -124,48 +124,52 @@ const LogIn = ({ children }) => {
 
     // setup function for expo notifications.
     const registerForPushNotificationsAsync = async () => {
-    let token;
-    if (Constants.isDevice) {
-        const { status: existingStatus } = await Notifications.getPermissionsAsync();
-        let finalStatus = existingStatus;
-        if (existingStatus !== 'granted') {
-            const { status } = await Notifications.requestPermissionsAsync();
-            finalStatus = status;
+        let token;
+        if (Constants.isDevice) {
+            try {
+                const { status: existingStatus } = await Notifications.getPermissionsAsync();
+                let finalStatus = existingStatus;
+                if (existingStatus !== 'granted') {
+                    const { status } = await Notifications.requestPermissionsAsync();
+                    finalStatus = status;
+                }
+                if (finalStatus !== 'granted') {
+                    alert('Failed to get push token for push notification!');
+                    return;
+                }
+                token = (await Notifications.getExpoPushTokenAsync()).data;
+                console.log(token);
+            } catch (err) {
+                console.log(err)
+                return
+            }
+
+        } else {
+            alert('Must use physical device for Push Notifications');
         }
-        if (finalStatus !== 'granted') {
-            alert('Failed to get push token for push notification!');
-            return;
+
+        if (Platform.OS === 'android') {
+            Notifications.setNotificationChannelAsync('default', {
+                name: 'default',
+                importance: Notifications.AndroidImportance.MAX,
+                vibrationPattern: [0, 250, 250, 250],
+                lightColor: '#FF231F7C',
+            });
         }
-        token = (await Notifications.getExpoPushTokenAsync()).data;
-        console.log(token);
+        /* send token to backend for storage here */
+        if (token) {
+            axios.post(`${BASE_URL}/api/notification`, {expoToken: token})
+            .then(res => {
+                console.log('successfully sent expo token to backend')
+            })
+            .catch(e => {
+                console.log('expo token error:', e.response.data)
+            })
+        } else {
+            console.log('no expo token generated')
+        }
 
-    } else {
-        alert('Must use physical device for Push Notifications');
-    }
-
-    if (Platform.OS === 'android') {
-        Notifications.setNotificationChannelAsync('default', {
-        name: 'default',
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF231F7C',
-        });
-    }
-    /* send token to backend for storage here */
-    if (token) {
-        axios.post(`${BASE_URL}/api/notification`, {expoToken: token})
-        .then(async res => {
-            console.log('successfully sent expo token to backend')
-        })
-        .catch(e => {
-            console.log('expo token error:', e.response.data)
-        })
-    }
-    else {
-        console.log('no expo token generated')
-    }
-
-    return token;
+        return token;
     }
 
     const handleAppStateChange = (nextAppState) => {
