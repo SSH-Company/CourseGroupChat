@@ -9,7 +9,8 @@ type RecipientMessageMapType = {
 type GroupInfoMapType = {
     [id: number]: {
         name: string,
-        avatar: string
+        avatar: string,
+        verified: 'Y' | 'N'
     }
 }
 
@@ -48,7 +49,8 @@ export class ChatLog {
                 map[row.id] = [newMessage]
                 grpInfo[row.id] = {
                     name: row.name,
-                    avatar: row.avatar_url
+                    avatar: row.avatar_url,
+                    verified: row.verified
                 }
             }
         })

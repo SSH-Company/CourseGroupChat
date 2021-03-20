@@ -37,19 +37,28 @@ export class MessageController {
 
         ChatLogViewModel.getUserLog(id)
         .then(data => {
-            const json = data.map(row => ({
-                id: row.GROUP_ID,
-                creator_id: row.CREATOR_ID,
-                message_id: row.MESSAGE_ID,
-                name: row.NAME,
-                avatar_url: `${BaseUrl}${row.AVATAR ? row.AVATAR : emptyResponse}`,
-                [row.MESSAGE_TYPE]: row.MESSAGE_BODY,
-                subtitle: row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_ID} sent a ${row.MESSAGE_TYPE}.`,
-                created_at: row.CREATE_DATE,
-                status: row.STATUS
-            }))
+            const responseJson = [];
+            data.forEach(row => {
+                const json = {
+                    id: row.GROUP_ID,
+                    creator_id: row.CREATOR_ID,
+                    message_id: row.MESSAGE_ID,
+                    name: row.NAME,
+                    avatar_url: `${BaseUrl}${row.AVATAR ? row.AVATAR : emptyResponse}`,
+                    created_at: row.CREATE_DATE,
+                    status: row.STATUS || 'Read',
+                    verified: row.VERIFIED
+                }
+                if (row.MESSAGE_ID) {
+                    json[row.MESSAGE_TYPE] = row.MESSAGE_BODY,
+                    json['subtitle'] = row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_ID} sent a ${row.MESSAGE_TYPE}.`                        
+                } else {
+                    json['subtitle'] = `You have been added to ${row.NAME}!`
+                }
+                responseJson.push(json)
+            })
 
-            res.status(STATUS.OK).json(json)
+            res.status(STATUS.OK).json(responseJson)
         })
         .catch(err => {
             console.error(err)

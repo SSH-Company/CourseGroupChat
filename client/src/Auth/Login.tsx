@@ -45,7 +45,7 @@ const cache = new Cache ({
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldShowAlert: true,
-      shouldPlaySound: false,
+      shouldPlaySound: true,
       shouldSetBadge: false,
     }),
   });  
@@ -137,6 +137,7 @@ const LogIn = ({ children }) => {
                     alert('Failed to get push token for push notification!');
                     return;
                 }
+                //TODO: investigate why this function is generation an error
                 token = (await Notifications.getExpoPushTokenAsync()).data;
                 console.log(token);
             } catch (err) {

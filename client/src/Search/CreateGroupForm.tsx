@@ -31,9 +31,9 @@ const CreateGroupForm = ({ navigation }) => {
 
     const onImagePick = async () => {
         try {
-            const status = await handlePermissionRequest();
+            const status = await handlePermissionRequest("library");
             if (status === "granted") {
-                const imageRes = await handleImagePick();
+                const imageRes = await handleImagePick("library");
                 setImage(imageRes);
             }
         } catch (err) {

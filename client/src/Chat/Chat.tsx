@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useContext, useRef } from 'react';
-import { View, Dimensions, BackHandler } from 'react-native';
+import { Text, View, Dimensions, BackHandler } from 'react-native';
 import { Avatar, Header } from "react-native-elements";
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
@@ -10,6 +10,7 @@ import { UserContext } from '../Auth/Login';
 import { RenderMessageContext } from '../Socket/WebSocket';
 import { handleImagePick, handlePermissionRequest } from "../Util/ImagePicker";
 import { ChatLog, MessageStatus, revisedRandId } from '../Util/ChatLog';
+import VerifiedIcon from '../Util/VerifiedIcon';
 import BASE_URL from '../../BaseUrl';
 import axios from 'axios';
 
@@ -17,7 +18,8 @@ type ChatProps = {
     groupID: {
         id: number,
         name: string,
-        avatar: string
+        avatar: string,
+        verified: 'Y' | 'N'
     }
 }
 
@@ -52,7 +54,9 @@ const Chat = ({ route, navigation }) => {
     const resetMessages = async () => {
         const instance = await ChatLog.getChatLogInstance();
         const log = instance.chatLog;
-        setMessages(log[groupID.id]);
+        //we're filtering here to ensure we can retrieve empty group chats, but not render any empty messages
+        const filteredMessages = log[groupID.id].filter(msg => msg.text !== '' || msg.image !== '' || msg.video !== '')
+        setMessages(filteredMessages);
         if (postStatus) {
             axios.post(`${BASE_URL}/api/message/updateMessageStatus`, { groups: [groupID.id], status: "Read" }).catch(err => console.log(err))
             setPostStatus(false);
@@ -144,10 +148,12 @@ const Chat = ({ route, navigation }) => {
                         <Avatar source={{ uri: groupID.avatar }} rounded size={avatarSize} containerStyle={{ marginLeft: 10, borderColor: "white", borderWidth: 1 }}/>        
                     </View>
                 }
-                centerComponent={{
-                    text: groupID.name,
-                    style: { color: "#734f96", fontSize: 20, fontWeight: "bold" },
-                }}
+                centerComponent={
+                    <View style={{ display:'flex', flexDirection: "row", justifyContent: "space-between" }}>
+                        <Text style={{ color: "#734f96", fontSize: 17 }}>{`${groupID.name}`}</Text>
+                        {groupID.verified === 'Y' && <VerifiedIcon style={{ marginLeft: 8 }}/>}
+                    </View>
+                }
                 rightComponent={
                     <Ionicons 
                         name="information-circle-outline" 

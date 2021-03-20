@@ -90,7 +90,7 @@ const Search = ({ route, navigation }) => {
                 await ChatLog.getChatLogInstance(true);
                 setRenderFlag(!renderFlag);
                 navigation.navigate('Chat', {
-                    groupID: { id: data.id, name: data.name, avatar: data.avatar_url }
+                    groupID: { id: data.id, name: data.name, avatar: data.avatar_url, verified: 'N' }
                 })
             })
             .catch(err => console.log(err))
