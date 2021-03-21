@@ -11,8 +11,8 @@ import * as Notifications from 'expo-notifications';
 import {Button} from 'react-native';
 
 export type listtype = {
-  id: number;
-  message_id: number;
+  id: string;
+  message_id: string;
   name: string;
   avatar_url: string;
   subtitle: string;

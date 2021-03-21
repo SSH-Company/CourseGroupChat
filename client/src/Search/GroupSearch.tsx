@@ -1,13 +1,24 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ActivityIndicator, View, ScrollView, Platform } from "react-native";
+import { ActivityIndicator, View, Text, ScrollView, Platform, StyleSheet } from "react-native";
 import { ListItem, Avatar, SearchBar, Header } from "react-native-elements";
 import VerifiedIcon from '../Util/VerifiedIcon';
 import BASE_URL from '../../BaseUrl';
 import axios from 'axios';
 import { Ionicons } from "react-native-vector-icons";
 
+//style sheet
+const style = StyleSheet.create({
+  verified: {
+      fontWeight: "bold",
+      color: "grey",
+      paddingTop: 10,
+      paddingLeft: 10,
+      paddingBottom: 10
+  }
+})
+
 type listtype = {
-    id: number;
+    id: string;
     name: string;
     avatar_url: string;
     verified: 'Y' | 'N';
@@ -37,13 +48,41 @@ const GroupSearch = ({ navigation }) => {
         return verifiedList.filter(item => item.name.toLowerCase().includes(search.toLowerCase())).slice(0, 20);
     }, [verifiedList, search])
 
+    const renderList = (list: listtype[]) => {
+        return (
+          list.map((l, i) => (
+            <ListItem
+              key={i}
+              onPress={() => {
+                navigation.navigate("Chat", {
+                  groupID: { 
+                    id: l.id, 
+                    name: l.name, 
+                    avatar: l.avatar_url, 
+                    verified: l.verified
+                  }
+                })
+              }}
+            >
+              <Avatar rounded size="medium" source={{ uri: l.avatar_url }}/>
+              <ListItem.Content>
+                <View style={{ display:'flex', flexDirection: "row", justifyContent: "space-between" }}>
+                  <ListItem.Title>{`${l.name}`}</ListItem.Title>
+                  {l.verified === 'Y' && <VerifiedIcon style={{ marginLeft: 8 }}/>}
+                </View>
+              </ListItem.Content>
+            </ListItem>
+          ))
+        )
+    }
+
     return (
         <View style={{ flex: 1 }}>
             <Header
                 placement="center"
                 backgroundColor="#ccccff"
                 leftComponent={
-                    <Ionicons 
+                  <Ionicons 
                     name="arrow-back-sharp" 
                     size={25} 
                     color="#734f96" 
@@ -59,35 +98,24 @@ const GroupSearch = ({ navigation }) => {
                     clearIcon={{ size: 30 }}
                     placeholder="Search for groups"
                     onChangeText={(text) => setSearch(text)}
-                    onCancel={() => setSearch("")}
+                    onCancel={() => searchRef.current.clear()}
                     value={search}
+                    showCancel={false}
                 />
                 {loading ?
                     <ActivityIndicator />
                     :
-                    filteredList.map((l, i) => (
-                        <ListItem
-                          key={i}
-                          onPress={() => {
-                            navigation.navigate("Chat", {
-                              groupID: { 
-                                id: l.id, 
-                                name: l.name, 
-                                avatar: l.avatar_url, 
-                                verified: l.verified
-                              }
-                            })
-                          }}
-                        >
-                          <Avatar rounded size="medium" source={{ uri: `${BASE_URL}${l.avatar_url}` }}/>
-                          <ListItem.Content>
-                            <View style={{ display:'flex', flexDirection: "row", justifyContent: "space-between" }}>
-                              <ListItem.Title>{`${l.name}`}</ListItem.Title>
-                              {l.verified === 'Y' && <VerifiedIcon style={{ marginLeft: 8 }}/>}
-                            </View>
-                          </ListItem.Content>
-                        </ListItem>
-                      ))
+                    (search.length === 0 ?
+                      <>
+                        <Text style={style.verified}>Recent Chats</Text>
+                        {renderList(verifiedList.filter(row => row.verified === 'N').slice(0, 5))}
+                        <Text style={style.verified}>Verified groups</Text>
+                        {renderList(verifiedList.filter(row => row.verified === 'Y').slice(0, 10))}
+                      </>
+                      :
+                      renderList(filteredList)
+                    )
+
                 }
             </ScrollView>
         </View>

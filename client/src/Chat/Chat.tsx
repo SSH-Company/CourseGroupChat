@@ -16,7 +16,7 @@ import axios from 'axios';
 
 type ChatProps = {
     groupID: {
-        id: number,
+        id: string,
         name: string,
         avatar: string,
         verified: 'Y' | 'N'
@@ -54,13 +54,16 @@ const Chat = ({ route, navigation }) => {
     const resetMessages = async () => {
         const instance = await ChatLog.getChatLogInstance();
         const log = instance.chatLog;
-        //we're filtering here to ensure we can retrieve empty group chats, but not render any empty messages
-        const filteredMessages = log[groupID.id].filter(msg => msg.text !== '' || msg.image !== '' || msg.video !== '')
-        setMessages(filteredMessages);
-        if (postStatus) {
-            axios.post(`${BASE_URL}/api/message/updateMessageStatus`, { groups: [groupID.id], status: "Read" }).catch(err => console.log(err))
-            setPostStatus(false);
-        }    
+        
+        if (groupID.id in log) {
+            //we're filtering here to ensure we can retrieve empty group chats, but not render any empty messages
+            const filteredMessages = log[groupID.id].filter(msg => msg.text !== '' || msg.image !== '' || msg.video !== '')
+            setMessages(filteredMessages);
+            if (postStatus) {
+                axios.post(`${BASE_URL}/api/message/updateMessageStatus`, { groups: [groupID.id], status: "Read" }).catch(err => console.log(err))
+                setPostStatus(false);
+            }   
+        } else setMessages([]);
     }
     
     const onSend = useCallback(async (messages = []) => {

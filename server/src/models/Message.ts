@@ -1,9 +1,9 @@
 import { Database } from '../services/Database';
 
 interface MessageInterface {
-    ID?: number;
-    CREATOR_ID?: number;
-    RECIPIENT_GROUP_ID?: number;
+    ID?: string;
+    CREATOR_ID?: string;
+    RECIPIENT_GROUP_ID?: string;
     MESSAGE_BODY?: string;
     MESSAGE_TYPE?: "image" | "text" | "video";
     CREATE_DATE?: string;
@@ -11,9 +11,9 @@ interface MessageInterface {
 }
 
 export class MessageModel implements MessageInterface {
-    ID?: number;
-    CREATOR_ID?: number;
-    RECIPIENT_GROUP_ID?: number;
+    ID?: string;
+    CREATOR_ID?: string;
+    RECIPIENT_GROUP_ID?: string;
     MESSAGE_BODY?: string;
     MESSAGE_TYPE?: "image" | "text" | "video";
     CREATE_DATE?: string;
@@ -36,7 +36,7 @@ export class MessageModel implements MessageInterface {
         })
     }
 
-    static updateStatus(groupID: number, toStatus: string, fromStatus: string): Promise<void> {
+    static updateStatus(groupID: string, toStatus: string, fromStatus: string): Promise<void> {
         return new Promise((resolve, reject) => {
             const query = ' UPDATE RT.MESSAGE SET "STATUS" = ? WHERE "RECIPIENT_GROUP_ID" = ? AND "STATUS" = ? ';
             const params = [toStatus, groupID, fromStatus];

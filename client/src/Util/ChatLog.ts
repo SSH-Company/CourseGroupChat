@@ -3,11 +3,11 @@ import BASE_URL from '../../BaseUrl';
 import axios from 'axios';
 
 type RecipientMessageMapType = {
-    [key: number]: IMessage[]
+    [key: string]: IMessage[]
 }
 
 type GroupInfoMapType = {
-    [id: number]: {
+    [id: string]: {
         name: string,
         avatar: string,
         verified: 'Y' | 'N'
@@ -76,20 +76,21 @@ export class ChatLog {
         }
     }
 
-    public appendLog(group: { id: number, name?: string, avatar?: string }, message: IMessage[]) {
+    public appendLog(group: { id: string, name?: string, avatar?: string, verified: 'Y' | 'N' }, message: IMessage[]) {
         if (group.id in this.chatLog) this.chatLog[group.id] = message.concat(this.chatLog[group.id])
         else { 
             //new group has been created
             this.chatLog[group.id] = message
             this.groupInfo[group.id] = {
                 name: group.name,
-                avatar: group.avatar
+                avatar: group.avatar,
+                verified: group.verified
             }
         }
     }
 
     //TODO: write a better function here to handle all use cases
-    public updateMessageStatus(groupID: number, status: MessageStatus, message?: IMessage) {
+    public updateMessageStatus(groupID: string, status: MessageStatus, message?: IMessage) {
         const messages = this.chatLog[groupID]
         if (messages) {
             if (message) {

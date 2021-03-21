@@ -99,8 +99,8 @@ export class GroupController {
             .then(list => {
                 res.status(STATUS.OK).json(list.map(row => ({
                     id: row.CODE,
-                    name: row.NAME,
-                    avatar_url: row.AVATAR ? row.AVATAR : `/media/empty_profile_pic.jpg`,
+                    name: row.VERIFIED === "Y" ? row.CODE : row.NAME,
+                    avatar_url: `${BaseUrl}${row.AVATAR ? row.AVATAR : `/media/empty_profile_pic.jpg`}`,
                     verified: row.VERIFIED
                 })))
             })

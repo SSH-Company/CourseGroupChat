@@ -9,7 +9,7 @@ import BASE_URL from '../../BaseUrl';
 import axios from 'axios';
 
 type listtype = {
-    id: number;
+    id: string;
     name: string;
     avatar_url: string;
     checked: boolean

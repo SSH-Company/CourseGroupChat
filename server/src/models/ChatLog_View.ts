@@ -1,12 +1,12 @@
 import { Database } from '../services/Database';
 
 interface ChatLogViewInterface {
-    USER_ID?: number;
-    GROUP_ID?: number;
+    USER_ID?: string;
+    GROUP_ID?: string;
     VERIFIED?: 'Y' | 'N';
     AVATAR?: string;
-    CREATOR_ID?: number;
-    NAME: number;
+    CREATOR_ID?: string;
+    NAME: string;
     MESSAGE_ID?: string;
     MESSAGE_BODY?: string;
     MESSAGE_TYPE?: "text" | "image" | "video";
@@ -15,12 +15,12 @@ interface ChatLogViewInterface {
 }
 
 export class ChatLogViewModel implements ChatLogViewInterface {
-    USER_ID?: number;
-    GROUP_ID?: number;
+    USER_ID?: string;
+    GROUP_ID?: string;
     VERIFIED?: 'Y' | 'N';
     AVATAR?: string;
-    CREATOR_ID?: number;
-    NAME: number;
+    CREATOR_ID?: string;
+    NAME: string;
     MESSAGE_ID?: string;
     MESSAGE_BODY?: string;
     MESSAGE_TYPE?: "text" | "image" | "video";

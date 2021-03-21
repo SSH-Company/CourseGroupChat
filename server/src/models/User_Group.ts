@@ -1,18 +1,18 @@
 import { Database } from '../services/Database';
 
 interface UserGroupInterface {
-    ID?: number;
-    USER_ID?: number;
-    GROUP_ID?: number;
+    ID?: string;
+    USER_ID?: string;
+    GROUP_ID?: string;
     NAME?: string;
     CREATE_DATE?: string;
     IS_ACTIVE?: "Y" | "N";
 }
 
 export class UserGroupModel implements UserGroupInterface {
-    ID?: number;
-    USER_ID?: number;
-    GROUP_ID?: number;
+    ID?: string;
+    USER_ID?: string;
+    GROUP_ID?: string;
     NAME?: string;
     CREATE_DATE?: string;
     IS_ACTIVE?: "Y" | "N";
@@ -22,7 +22,7 @@ export class UserGroupModel implements UserGroupInterface {
         Object.assign(this, raw);
     }
 
-    static insert(userID: number, grpID: number, name: string): Promise<void> {
+    static insert(userID: string, grpID: string, name: string): Promise<void> {
         return new Promise((resolve, reject) => {
             const query = `INSERT INTO RT.USER_GROUP ("USER_ID", "GROUP_ID", "NAME", "CREATE_DATE", "IS_ACTIVE") 
                             VALUES (?, ?, ?, CURRENT_TIMESTAMP, 'Y'); `
