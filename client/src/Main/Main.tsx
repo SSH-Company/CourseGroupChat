@@ -16,18 +16,15 @@ export type listtype = {
   name: string;
   avatar_url: string;
   subtitle: string;
-  created_at: Date,
+  created_at?: Date,
   verified: 'Y' | 'N';
 };
 
 // landing page.
 const Main = ({ navigation }) => {
-  // search bar.
-  const [search, setSearch] = useState("");
   // data arrays.
   const { renderFlag } = useContext(RenderMessageContext);
   const [completeList, setCompleteList] = useState<listtype[]>([]);
-  const [filteredList, setFilteredList] = useState<listtype[]>([]);
 
   useEffect(() => {
     // chat list.
@@ -51,24 +48,8 @@ const Main = ({ navigation }) => {
       })
     })
     const sortedList = list.sort((a, b) => new Date(b.created_at).valueOf() - new Date(a.created_at).valueOf())
-    setFilteredList(sortedList)
     setCompleteList(sortedList)
   }
-
-  const searchFunction = (input) => {
-    if (input) {
-      const newList = completeList.filter((item) => {
-        const itemInfo = item.name ? item.name.toUpperCase() : "".toUpperCase();
-        const inputInfo = input.toUpperCase();
-        return itemInfo.indexOf(inputInfo) > -1;
-      });
-      setFilteredList(newList);
-      setSearch(input);
-    } else {
-      setFilteredList(completeList);
-      setSearch(input);
-    }
-  };
 
   // renders header | searchbar | chat list
   return (
@@ -103,12 +84,10 @@ const Main = ({ navigation }) => {
         <SearchBar
           platform={Platform.OS === "android" ? "android" : "ios"}
           clearIcon={{ size: 30 }}
-          placeholder="Search messages"
-          onChangeText={(text) => searchFunction(text)}
-          onCancel={() => searchFunction("")}
-          value={search}
+          placeholder="Search groups"
+          onFocus={() => navigation.navigate("GroupSearch")}
         />
-        {filteredList.map((l, i) => (
+        {completeList.map((l, i) => (
           <ListItem
             key={i}
             onPress={() => {

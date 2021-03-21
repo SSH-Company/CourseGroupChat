@@ -4,7 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import Socket from './src/Socket/WebSocket';
 import Main from './src/Main/Main'
 import Chat from './src/Chat/Chat'
-import { CreateGroupForm, Search } from './src/Search'
+import { CreateGroupForm, Search, GroupSearch } from './src/Search'
 import { LogIn } from './src/Auth'
 
 export default function App() {
@@ -19,6 +19,7 @@ export default function App() {
                   <Stack.Screen name="Chat" component={Chat}/>
                   <Stack.Screen name="CreateGroupForm" component={CreateGroupForm}/>
                   <Stack.Screen name="Search" component={Search}/>
+                  <Stack.Screen name="GroupSearch" component={GroupSearch}/>
               </Stack.Navigator>
             </Socket>
         </NavigationContainer>

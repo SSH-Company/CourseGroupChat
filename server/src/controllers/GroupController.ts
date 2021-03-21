@@ -10,6 +10,7 @@ import * as STATUS from 'http-status-codes';
 import { UserModel } from '../models/User';
 import { GroupModel } from '../models/Group';
 import { UserGroupModel } from '../models/User_Group';
+import { UserGroupListModel } from '../models/UserGroupList';
 import { publishToQueue } from '../services/Queue';
 import BaseUrl from '../services/BaseUrl';
 
@@ -73,7 +74,7 @@ export class GroupController {
         }
     }
 
-    @Get('')
+    @Get('users')
     private searchList(req: Request, res: Response) {
         UserModel.getAllUsers()
             .then(users => {
@@ -90,5 +91,27 @@ export class GroupController {
                 })
             })
     }
+
+    @Get('all-groups')
+    private verifiedGroupsList(req: Request, res: Response) {
+        const session = req.session;
+        UserGroupListModel.getUserGroupSearchList(session.user.ID)
+            .then(list => {
+                res.status(STATUS.OK).json(list.map(row => ({
+                    id: row.CODE,
+                    name: row.NAME,
+                    avatar_url: row.AVATAR ? row.AVATAR : `/media/empty_profile_pic.jpg`,
+                    verified: row.VERIFIED
+                })))
+            })
+            .catch(err => {
+                res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                    message: "Something went wrong while attempting to get verified course list.",
+                    identifier: "GC004"
+                })
+            })
+    }
+
+
 
 }

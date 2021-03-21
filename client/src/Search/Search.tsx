@@ -54,7 +54,7 @@ const Search = ({ route, navigation }) => {
 
     //retrieve data on first load
     useEffect(() => {
-        axios.get(`${BASE_URL}/api/group`)
+        axios.get(`${BASE_URL}/api/group/users`)
             .then(res => setSuggestions(res.data.map(row => ({ ...row, checked: false }))))
             .catch(err => console.error(err))
     }, [])
