@@ -79,7 +79,7 @@ export class ChatLog {
     public appendLog(group: { id: string, name?: string, avatar?: string, verified: 'Y' | 'N' }, message: IMessage[]) {
         if (group.id in this.chatLog) this.chatLog[group.id] = message.concat(this.chatLog[group.id])
         else { 
-            //new group has been created
+            //new group has been created/joined
             this.chatLog[group.id] = message
             this.groupInfo[group.id] = {
                 name: group.name,

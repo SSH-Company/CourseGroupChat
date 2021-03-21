@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useContext, useRef } from 'react';
 import { Text, View, Dimensions, BackHandler } from 'react-native';
-import { Avatar, Header } from "react-native-elements";
+import { Avatar, Button, Header } from "react-native-elements";
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import { Ionicons } from "react-native-vector-icons";
@@ -29,6 +29,7 @@ const Chat = ({ route, navigation }) => {
     const { postStatus, renderFlag, setPostStatus, setRenderFlag } = useContext(RenderMessageContext);
     const { groupID } = route.params as ChatProps;
     const [messages, setMessages] = useState<IMessage[]>([]);
+    const [newGroup, setNewGroup] = useState<boolean>();
     const drawerRef = useRef(null);
     const avatarSize = 25;
 
@@ -54,16 +55,20 @@ const Chat = ({ route, navigation }) => {
     const resetMessages = async () => {
         const instance = await ChatLog.getChatLogInstance();
         const log = instance.chatLog;
-        
+
         if (groupID.id in log) {
             //we're filtering here to ensure we can retrieve empty group chats, but not render any empty messages
             const filteredMessages = log[groupID.id].filter(msg => msg.text !== '' || msg.image !== '' || msg.video !== '')
             setMessages(filteredMessages);
+            setNewGroup(false);
             if (postStatus) {
                 axios.post(`${BASE_URL}/api/message/updateMessageStatus`, { groups: [groupID.id], status: "Read" }).catch(err => console.log(err))
                 setPostStatus(false);
             }   
-        } else setMessages([]);
+        } else {
+            setNewGroup(true);
+            setMessages([]);
+        };
     }
     
     const onSend = useCallback(async (messages = []) => {
@@ -126,10 +131,22 @@ const Chat = ({ route, navigation }) => {
         }
     }
 
+    const handleJoinGroup = async () => {
+        try {
+            await axios.post(`${BASE_URL}/api/group/join-group`, { id: groupID.id, name: groupID.name })
+            await ChatLog.getChatLogInstance(true);
+            setRenderFlag(!renderFlag);
+        } catch (err) {
+            console.log('unable to join group');
+            console.error(err);
+        }
+    }
+
     return (
     <View style={{flex: 1}}>
         <DrawerLayout
             ref={drawerRef}
+            drawerLockMode={newGroup ? 'locked-closed' : 'unlocked'}
             drawerWidth={Dimensions.get('window').width}
             drawerPosition={'right'}
             drawerType={'front'}
@@ -166,15 +183,20 @@ const Chat = ({ route, navigation }) => {
                     />
                 }
             />
-
-            <GiftedChat
-                user={user}
-                messages={messages}
-                onSend={messages => onSend(messages)}
-                renderMessage={props => { return ( <CustomMessage {...props} /> ) }}
-                renderInputToolbar={props => { return ( <CustomToolbar children={props} onImagePick={type => onImagePick(type)} /> ) }}
-                isKeyboardInternallyHandled={false}
-            />
+            {newGroup ? 
+                <View style={{ flex: 1, alignSelf: 'center', justifyContent: 'center' }}>
+                    <Button title={`Join ${groupID.name}`} onPress={handleJoinGroup}/>
+                </View>
+                :
+                <GiftedChat
+                    user={user}
+                    messages={messages}
+                    onSend={messages => onSend(messages)}
+                    renderMessage={props => { return ( <CustomMessage {...props} /> ) }}
+                    renderInputToolbar={props => { return ( <CustomToolbar children={props} onImagePick={type => onImagePick(type)} /> ) }}
+                    isKeyboardInternallyHandled={false}
+                />
+            }
         </DrawerLayout>
     </View>
     )

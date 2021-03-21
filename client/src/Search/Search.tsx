@@ -84,7 +84,7 @@ const Search = ({ route, navigation }) => {
         formData.append('groupName', groupName);
 
         //create the group in the backend
-        axios.post(`${BASE_URL}/api/group`, formData, { headers: { 'content-type': 'multipart/form-data' } })
+        axios.post(`${BASE_URL}/api/group/create-group`, formData, { headers: { 'content-type': 'multipart/form-data' } })
             .then(async res => {
                 const data = res.data;
                 await ChatLog.getChatLogInstance(true);
@@ -97,7 +97,7 @@ const Search = ({ route, navigation }) => {
     }
 
     return (
-        <View style={{ flex: 1}}>
+        <View style={{ flex: 1 }}>
             <Header
                 placement="center"
                 backgroundColor="#ccccff"
