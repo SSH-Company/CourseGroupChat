@@ -3,7 +3,8 @@ import {
     Middleware,
     Controller,
     Post,
-    Get
+    Get,
+    Delete
 } from '@overnightjs/core';
 import multer from 'multer';
 import * as STATUS from 'http-status-codes';
@@ -138,7 +139,22 @@ export class GroupController {
                 identifier: "GC006"
             })
         }
+    }
 
+    @Delete('leave-group/:grpId')
+    private async leaveGroup(req: Request, res: Response) {
+        try {
+            const session = req.session;
+            const grpId = req.params.grpId;
+            await UserGroupModel.removeFromGroup(session.user.ID, grpId);
+            res.status(STATUS.OK).json();
+            return;
+        } catch (err) {
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong while attempting to leave group.",
+                identifier: "GC007"
+            })
+        }
     }
 
 

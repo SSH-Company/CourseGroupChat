@@ -151,7 +151,15 @@ const Chat = ({ route, navigation }) => {
             drawerPosition={'right'}
             drawerType={'front'}
             drawerBackgroundColor="#ffffff"
-            renderNavigationView={() => InboxSettings({ source: groupID.avatar, name: groupID.name })}
+            renderNavigationView={() => 
+                InboxSettings({
+                    group: { _id: groupID.id, name: groupID.name, avatar: groupID.avatar },
+                    onLeaveGroup: async () => {
+                        await ChatLog.getChatLogInstance(true);
+                        setRenderFlag(!renderFlag);
+                        navigation.navigate('Main');
+                    }
+                })}
             contentContainerStyle={{}}
         >   
             <Header
