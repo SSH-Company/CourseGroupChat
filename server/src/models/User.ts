@@ -1,7 +1,7 @@
 import { Database } from '../services/Database';
 
 interface UserInterface {
-    ID?: number;
+    ID?: string;
     FIRST_NAME?: string;
     LAST_NAME?: string;
     EMAIL?: string;
@@ -10,7 +10,7 @@ interface UserInterface {
 }
 
 export class UserModel implements UserInterface {
-    ID?: number;
+    ID?: string;
     FIRST_NAME?: string;
     LAST_NAME?: string;
     EMAIL?: string;

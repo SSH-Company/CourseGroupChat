@@ -1,11 +1,14 @@
 import React from 'react'
 import { View, Text, StyleSheet, Dimensions } from 'react-native'
 import { ListItem, Image } from 'react-native-elements'
+import { User } from 'react-native-gifted-chat'
 import { AntDesign, Entypo, Ionicons, MaterialIcons } from 'react-native-vector-icons'
+import BASE_URL from '../../../BaseUrl';
+import axios from 'axios';
 
 type InboxSettingsProps = {
-    source: string,
-    name: string
+    group: User,
+    onLeaveGroup: () => any
 }
 
 const InboxSettings = (props: InboxSettingsProps) => {
@@ -32,6 +35,12 @@ const InboxSettings = (props: InboxSettingsProps) => {
             borderRadius: 200
         }
     })
+
+    const handleLeaveGroup = () => {
+        axios.delete(`${BASE_URL}/api/group/leave-group/${props.group._id}`)
+            .then(props.onLeaveGroup)
+            .catch(err => console.log(err));
+    }
 
     //Menu list components
     const iconSize = 20
@@ -66,8 +75,9 @@ const InboxSettings = (props: InboxSettingsProps) => {
             icon: <Ionicons name={"heart"} size={iconSize}/>
         },
         {
-            title: 'Settings',
-            icon: <Ionicons name={"settings-outline"} size={iconSize}/>
+            title: 'Leave Group',
+            icon: <Ionicons name={"exit-outline"} size={iconSize}/>,
+            onPress: handleLeaveGroup
         }
     ]
     
@@ -75,13 +85,13 @@ const InboxSettings = (props: InboxSettingsProps) => {
         <View style={styles.drawerContainer}>
             <View style={styles.imageContainer}>
                 <Image 
-                    source={{ uri: props.source }}
+                    source={{ uri: props.group.avatar as string }}
                     style={styles.imageStyle}
                 />
-                <Text style={{paddingBottom: 10, fontSize: 25}}>{props.name}</Text>
+                <Text style={{paddingBottom: 10, fontSize: 25}}>{props.group.name}</Text>
             </View>
             {list.map((item, i) => (
-                <ListItem key={i}>
+                <ListItem key={i} onPress={item.onPress}>
                     {item.icon}
                     <ListItem.Content>
                     <ListItem.Title>{item.title}</ListItem.Title>

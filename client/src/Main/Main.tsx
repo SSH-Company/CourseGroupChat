@@ -4,30 +4,27 @@ import { ListItem, Avatar, Header, SearchBar } from "react-native-elements";
 import Feather from "react-native-vector-icons/Feather";
 
 // file imports.
-import { UserContext } from '../Auth/Login';
 import { RenderMessageContext } from '../Socket/WebSocket';
 import { ChatLog } from '../Util/ChatLog';
-
+import VerifiedIcon from '../Util/VerifiedIcon';
 import * as Notifications from 'expo-notifications';
 import {Button} from 'react-native';
 
 export type listtype = {
-  id: number;
-  message_id: number;
+  id: string;
+  message_id: string;
   name: string;
   avatar_url: string;
   subtitle: string;
-  created_at: Date
+  created_at?: Date,
+  verified: 'Y' | 'N';
 };
 
 // landing page.
 const Main = ({ navigation }) => {
-  // search bar.
-  const [search, setSearch] = useState("");
   // data arrays.
   const { renderFlag } = useContext(RenderMessageContext);
   const [completeList, setCompleteList] = useState<listtype[]>([]);
-  const [filteredList, setFilteredList] = useState<listtype[]>([]);
 
   useEffect(() => {
     // chat list.
@@ -46,28 +43,13 @@ const Main = ({ navigation }) => {
         name: grpInfo.name,
         avatar_url: grpInfo.avatar,
         subtitle: text.subtitle || text.text,
-        created_at: text.createdAt
+        created_at: text.createdAt,
+        verified: grpInfo.verified
       })
     })
     const sortedList = list.sort((a, b) => new Date(b.created_at).valueOf() - new Date(a.created_at).valueOf())
-    setFilteredList(sortedList)
     setCompleteList(sortedList)
   }
-
-  const searchFunction = (input) => {
-    if (input) {
-      const newList = completeList.filter((item) => {
-        const itemInfo = item.name ? item.name.toUpperCase() : "".toUpperCase();
-        const inputInfo = input.toUpperCase();
-        return itemInfo.indexOf(inputInfo) > -1;
-      });
-      setFilteredList(newList);
-      setSearch(input);
-    } else {
-      setFilteredList(completeList);
-      setSearch(input);
-    }
-  };
 
   // renders header | searchbar | chat list
   return (
@@ -102,23 +84,29 @@ const Main = ({ navigation }) => {
         <SearchBar
           platform={Platform.OS === "android" ? "android" : "ios"}
           clearIcon={{ size: 30 }}
-          placeholder="Search messages"
-          onChangeText={(text) => searchFunction(text)}
-          onCancel={() => searchFunction("")}
-          value={search}
+          placeholder="Search groups"
+          onFocus={() => navigation.navigate("GroupSearch")}
         />
-        {filteredList.map((l, i) => (
+        {completeList.map((l, i) => (
           <ListItem
             key={i}
             onPress={() => {
               navigation.navigate("Chat", {
-                groupID: { id: l.id, name: l.name, avatar: l.avatar_url }
+                groupID: { 
+                  id: l.id, 
+                  name: l.name, 
+                  avatar: l.avatar_url, 
+                  verified: l.verified
+                }
               })
             }}
           >
             <Avatar rounded size="medium" source={{ uri: l.avatar_url }}/>
             <ListItem.Content>
-              <ListItem.Title>{l.name}</ListItem.Title>
+              <View style={{ display:'flex', flexDirection: "row", justifyContent: "space-between" }}>
+                <ListItem.Title>{`${l.name}`}</ListItem.Title>
+                {l.verified === 'Y' && <VerifiedIcon style={{ marginLeft: 8 }}/>}
+              </View>
               <ListItem.Subtitle>{l.subtitle}</ListItem.Subtitle>
             </ListItem.Content>
           </ListItem>

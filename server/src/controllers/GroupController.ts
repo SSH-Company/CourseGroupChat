@@ -3,13 +3,15 @@ import {
     Middleware,
     Controller,
     Post,
-    Get
+    Get,
+    Delete
 } from '@overnightjs/core';
 import multer from 'multer';
 import * as STATUS from 'http-status-codes';
 import { UserModel } from '../models/User';
 import { GroupModel } from '../models/Group';
 import { UserGroupModel } from '../models/User_Group';
+import { UserGroupListModel } from '../models/UserGroupList';
 import { publishToQueue } from '../services/Queue';
 import BaseUrl from '../services/BaseUrl';
 
@@ -27,7 +29,7 @@ const upload = multer({ storage: storage })
 
 @Controller('group')
 export class GroupController {
-    @Post('')
+    @Post('create-group')
     @Middleware([upload.single('avatar')])
     private async createGroup(req: Request, res: Response) {
         const session = req.session;
@@ -73,7 +75,7 @@ export class GroupController {
         }
     }
 
-    @Get('')
+    @Get('users')
     private searchList(req: Request, res: Response) {
         UserModel.getAllUsers()
             .then(users => {
@@ -90,5 +92,71 @@ export class GroupController {
                 })
             })
     }
+
+    @Get('all-groups')
+    private verifiedGroupsList(req: Request, res: Response) {
+        const session = req.session;
+        UserGroupListModel.getUserGroupSearchList(session.user.ID)
+            .then(list => {
+                res.status(STATUS.OK).json(list.map(row => ({
+                    id: row.CODE,
+                    name: row.VERIFIED === "Y" ? row.CODE : row.NAME,
+                    avatar_url: `${BaseUrl}${row.AVATAR ? row.AVATAR : `/media/empty_profile_pic.jpg`}`,
+                    verified: row.VERIFIED
+                })))
+            })
+            .catch(err => {
+                res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                    message: "Something went wrong while attempting to get verified course list.",
+                    identifier: "GC004"
+                })
+            })
+    }
+
+    @Post('join-group')
+    private async joinGroup(req: Request, res: Response) {
+        
+        try {
+            const session = req.session;
+            const { id, name } = req.body;
+            
+            if (typeof id !== 'string' || id === ''
+                || typeof name !== 'string' || name === ''
+            ) {
+                res.status(STATUS.BAD_REQUEST).json({
+                    message: "Request body must contain [id] and [name].",
+                    identifier: "GC005"
+                })
+                return;
+            }
+            
+            //insert user into the group
+            await UserGroupModel.insert(session.user.ID, id, name);
+            res.status(STATUS.OK).json();
+        } catch(err) {
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong while attempting to join new group.",
+                identifier: "GC006"
+            })
+        }
+    }
+
+    @Delete('leave-group/:grpId')
+    private async leaveGroup(req: Request, res: Response) {
+        try {
+            const session = req.session;
+            const grpId = req.params.grpId;
+            await UserGroupModel.removeFromGroup(session.user.ID, grpId);
+            res.status(STATUS.OK).json();
+            return;
+        } catch (err) {
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong while attempting to leave group.",
+                identifier: "GC007"
+            })
+        }
+    }
+
+
 
 }

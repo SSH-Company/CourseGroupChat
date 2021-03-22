@@ -1,14 +1,14 @@
 import { Database } from '../services/Database';
 
 interface GroupInterface {
-    ID?: number;
+    ID?: string;
     CREATE_DATE?: string;
     AVATAR?: string;
     IS_ACTIVE?: "Y" | "N";
 }
 
 export class GroupModel implements GroupInterface {
-    ID?: number;
+    ID?: string;
     CREATE_DATE?: string;
     AVATAR?: string;
     IS_ACTIVE?: "Y" | "N";

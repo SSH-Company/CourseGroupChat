@@ -1,18 +1,18 @@
 import { Database } from '../services/Database';
 
 interface UserGroupInterface {
-    ID?: number;
-    USER_ID?: number;
-    GROUP_ID?: number;
+    ID?: string;
+    USER_ID?: string;
+    GROUP_ID?: string;
     NAME?: string;
     CREATE_DATE?: string;
     IS_ACTIVE?: "Y" | "N";
 }
 
 export class UserGroupModel implements UserGroupInterface {
-    ID?: number;
-    USER_ID?: number;
-    GROUP_ID?: number;
+    ID?: string;
+    USER_ID?: string;
+    GROUP_ID?: string;
     NAME?: string;
     CREATE_DATE?: string;
     IS_ACTIVE?: "Y" | "N";
@@ -22,10 +22,10 @@ export class UserGroupModel implements UserGroupInterface {
         Object.assign(this, raw);
     }
 
-    static insert(userID: number, grpID: number, name: string): Promise<void> {
+    static insert(userID: string, grpID: string, name: string): Promise<void> {
         return new Promise((resolve, reject) => {
             const query = `INSERT INTO RT.USER_GROUP ("USER_ID", "GROUP_ID", "NAME", "CREATE_DATE", "IS_ACTIVE") 
-                            VALUES (?, ?, ?, CURRENT_TIMESTAMP, 'Y'); `
+                            VALUES (?, ?, ?, CURRENT_TIMESTAMP, 'Y') ; `
             
             Database.getDB()
                 .query(query, [userID, grpID, name])
@@ -38,7 +38,7 @@ export class UserGroupModel implements UserGroupInterface {
     }
 
     static getRecipients(uid: string): Promise<UserGroupModel[]> {
-        const query = `SELECT "USER_ID" FROM RT.USER_GROUP WHERE "GROUP_ID" = ?;`
+        const query = `SELECT "USER_ID" FROM RT.USER_GROUP WHERE "GROUP_ID" = ? ;`
         
         return new Promise((resolve, reject) => {
             Database.getDB()
@@ -47,7 +47,20 @@ export class UserGroupModel implements UserGroupInterface {
                     resolve(data.map((d: UserGroupInterface) => new UserGroupModel(d)))
                 })
                 .catch(err => {
-                    console.log(err)
+                    console.error(err)
+                    reject(err)
+                })
+        })
+    }
+
+    static removeFromGroup(userID: string, grpID: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const query = `DELETE FROM RT.USER_GROUP WHERE "USER_ID" = ? AND "GROUP_ID" = ? ;`
+            Database.getDB()
+                .query(query, [userID, grpID])
+                .then(() => resolve())
+                .catch(err => {
+                    console.error(err)
                     reject(err)
                 })
         })

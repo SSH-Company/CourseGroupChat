@@ -8,11 +8,11 @@ import {
 import multer from 'multer';
 import * as STATUS from 'http-status-codes';
 import { publishToQueue } from '../services/Queue';
-import BaseUrl from '../services/BaseUrl';
 import { UserModel } from '../models/User';
 import { MessageModel } from '../models/Message';
 import { UserGroupModel } from '../models/User_Group';
 import { ChatLogViewModel } from '../models/ChatLog_View';
+import BaseUrl from '../services/BaseUrl';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -37,19 +37,28 @@ export class MessageController {
 
         ChatLogViewModel.getUserLog(id)
         .then(data => {
-            const json = data.map(row => ({
-                id: row.GROUP_ID,
-                creator_id: row.CREATOR_ID,
-                message_id: row.MESSAGE_ID,
-                name: row.NAME,
-                avatar_url: `${BaseUrl}${row.AVATAR ? row.AVATAR : emptyResponse}`,
-                [row.MESSAGE_TYPE]: row.MESSAGE_BODY,
-                subtitle: row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_ID} sent a ${row.MESSAGE_TYPE}.`,
-                created_at: row.CREATE_DATE,
-                status: row.STATUS
-            }))
+            const responseJson = [];
+            data.forEach(row => {
+                const json = {
+                    id: row.GROUP_ID,
+                    creator_id: row.CREATOR_ID,
+                    message_id: row.MESSAGE_ID,
+                    name: row.VERIFIED === "Y" ? row.GROUP_ID : row.NAME,
+                    avatar_url: `${BaseUrl}${row.AVATAR ? row.AVATAR : emptyResponse}`,
+                    created_at: row.CREATE_DATE,
+                    status: row.STATUS || 'Read',
+                    verified: row.VERIFIED
+                }
+                if (row.MESSAGE_ID) {
+                    json[row.MESSAGE_TYPE] = row.MESSAGE_BODY,
+                    json['subtitle'] = row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_ID} sent a ${row.MESSAGE_TYPE}.`                        
+                } else {
+                    json['subtitle'] = `You have been added to ${json.name}!`
+                }
+                responseJson.push(json)
+            })
 
-            res.status(STATUS.OK).json(json)
+            res.status(STATUS.OK).json(responseJson)
         })
         .catch(err => {
             console.error(err)
@@ -99,14 +108,14 @@ export class MessageController {
 
             //find all recipients of this group chat, exclude senderID from the list
             const groupRecipients = (await UserGroupModel.getRecipients(groupID.id)).map(row => row.USER_ID).filter(id => id != senderID._id);    
-            
+                        
             //send a message to each recipients queue
             for (const id of groupRecipients) {
                 const queueName = `message-queue-${id}`
                 const queueData = { ...message, command: "append", groupID: groupID, senderID: senderID }
                 await publishToQueue(queueName, JSON.stringify(queueData));
             }
-
+            
             //store message in db
             await MessageModel.insert({ 
                 CREATOR_ID: senderID._id, 

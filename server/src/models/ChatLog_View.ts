@@ -1,11 +1,12 @@
 import { Database } from '../services/Database';
 
 interface ChatLogViewInterface {
-    USER_ID?: number;
-    GROUP_ID?: number;
+    USER_ID?: string;
+    GROUP_ID?: string;
+    VERIFIED?: 'Y' | 'N';
     AVATAR?: string;
-    CREATOR_ID?: number;
-    NAME: number;
+    CREATOR_ID?: string;
+    NAME: string;
     MESSAGE_ID?: string;
     MESSAGE_BODY?: string;
     MESSAGE_TYPE?: "text" | "image" | "video";
@@ -14,11 +15,12 @@ interface ChatLogViewInterface {
 }
 
 export class ChatLogViewModel implements ChatLogViewInterface {
-    USER_ID?: number;
-    GROUP_ID?: number;
+    USER_ID?: string;
+    GROUP_ID?: string;
+    VERIFIED?: 'Y' | 'N';
     AVATAR?: string;
-    CREATOR_ID?: number;
-    NAME: number;
+    CREATOR_ID?: string;
+    NAME: string;
     MESSAGE_ID?: string;
     MESSAGE_BODY?: string;
     MESSAGE_TYPE?: "text" | "image" | "video";
@@ -31,7 +33,7 @@ export class ChatLogViewModel implements ChatLogViewInterface {
     }
 
     static getUserLog(uid: number): Promise<ChatLogViewModel[]> {
-        const query = `${SELECT} WHERE "USER_ID" = ?; `;
+        const query = `${SELECT} WHERE "USER_ID" = ? AND "VERIFIED" IS NOT NULL; `;
         
         return new Promise((resolve, reject) => {
             Database.getDB()
@@ -48,6 +50,7 @@ export class ChatLogViewModel implements ChatLogViewInterface {
 const SELECT = ` SELECT
 "USER_ID",
 "GROUP_ID",
+"VERIFIED",
 "AVATAR",
 "CREATOR_ID",
 "NAME",

@@ -9,7 +9,7 @@ import BASE_URL from '../../BaseUrl';
 import axios from 'axios';
 
 type listtype = {
-    id: number;
+    id: string;
     name: string;
     avatar_url: string;
     checked: boolean
@@ -54,7 +54,7 @@ const Search = ({ route, navigation }) => {
 
     //retrieve data on first load
     useEffect(() => {
-        axios.get(`${BASE_URL}/api/group`)
+        axios.get(`${BASE_URL}/api/group/users`)
             .then(res => setSuggestions(res.data.map(row => ({ ...row, checked: false }))))
             .catch(err => console.error(err))
     }, [])
@@ -84,20 +84,20 @@ const Search = ({ route, navigation }) => {
         formData.append('groupName', groupName);
 
         //create the group in the backend
-        axios.post(`${BASE_URL}/api/group`, formData, { headers: { 'content-type': 'multipart/form-data' } })
+        axios.post(`${BASE_URL}/api/group/create-group`, formData, { headers: { 'content-type': 'multipart/form-data' } })
             .then(async res => {
                 const data = res.data;
                 await ChatLog.getChatLogInstance(true);
                 setRenderFlag(!renderFlag);
                 navigation.navigate('Chat', {
-                    groupID: { id: data.id, name: data.name, avatar: data.avatar_url }
+                    groupID: { id: data.id, name: data.name, avatar: data.avatar_url, verified: 'N' }
                 })
             })
             .catch(err => console.log(err))
     }
 
     return (
-        <View style={{ flex: 1}}>
+        <View style={{ flex: 1 }}>
             <Header
                 placement="center"
                 backgroundColor="#ccccff"
