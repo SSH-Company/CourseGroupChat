@@ -146,7 +146,6 @@ const Chat = ({ route, navigation }) => {
     <View style={{flex: 1}}>
         <DrawerLayout
             ref={drawerRef}
-            drawerLockMode={newGroup ? 'locked-closed' : 'unlocked'}
             drawerWidth={Dimensions.get('window').width}
             drawerPosition={'right'}
             drawerType={'front'}
@@ -183,7 +182,7 @@ const Chat = ({ route, navigation }) => {
                     </View>
                 }
                 rightComponent={
-                    <Ionicons 
+                    !newGroup && <Ionicons 
                         name="information-circle-outline" 
                         size={avatarSize} 
                         color="#734f96" 
