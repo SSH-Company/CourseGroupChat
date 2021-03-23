@@ -134,7 +134,6 @@ const Chat = ({ route, navigation }) => {
     const handleJoinGroup = async () => {
         try {
             await axios.post(`${BASE_URL}/api/group/join-group`, { id: groupID.id, name: groupID.name })
-            await ChatLog.getChatLogInstance(true);
             setRenderFlag(!renderFlag);
         } catch (err) {
             console.log('unable to join group');
@@ -154,7 +153,6 @@ const Chat = ({ route, navigation }) => {
                 InboxSettings({
                     group: { _id: groupID.id, name: groupID.name, avatar: groupID.avatar },
                     onLeaveGroup: async () => {
-                        await ChatLog.getChatLogInstance(true);
                         setRenderFlag(!renderFlag);
                         navigation.navigate('Main');
                     }

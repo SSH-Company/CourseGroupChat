@@ -87,7 +87,6 @@ const Search = ({ route, navigation }) => {
         axios.post(`${BASE_URL}/api/group/create-group`, formData, { headers: { 'content-type': 'multipart/form-data' } })
             .then(async res => {
                 const data = res.data;
-                await ChatLog.getChatLogInstance(true);
                 setRenderFlag(!renderFlag);
                 navigation.navigate('Chat', {
                     groupID: { id: data.id, name: data.name, avatar: data.avatar_url, verified: 'N' }

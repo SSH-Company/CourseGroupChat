@@ -34,7 +34,7 @@ const Main = ({ navigation }) => {
 
   const resetList = async () => {
     setRefreshing(true);
-    const log = await ChatLog.getChatLogInstance()
+    const log = await ChatLog.getChatLogInstance(true)
     let list = []
     Object.keys(log.chatLog).forEach(key => {
       const text = log.chatLog[key][0]
