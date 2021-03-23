@@ -39,7 +39,7 @@ export class ChatLog {
                 createdAt: row.created_at,
                 user: {
                     _id: row.creator_id,
-                    name: row.name,
+                    name: row.creator_name,
                     avatar: row.avatar_url
                 },
                 status: row.status
