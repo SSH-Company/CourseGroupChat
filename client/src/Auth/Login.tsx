@@ -137,7 +137,7 @@ const LogIn = ({ children }) => {
                     alert('Failed to get push token for push notification!');
                     return;
                 }
-                //TODO: investigate why this function is generation an error
+                //TODO: investigate why this function is generating an error
                 token = (await Notifications.getExpoPushTokenAsync()).data;
                 console.log(token);
             } catch (err) {
@@ -212,7 +212,7 @@ const LogIn = ({ children }) => {
                     domStorageEnabled={true}
                     originWhitelist={["*"]}
                     source={{...sourceHTML}}
-                    style={{ marginTop: 20 }}
+                    style={{ marginTop: 30 }}
                     onNavigationStateChange={handleNavigationStateChange}
                     injectedJavaScript={`window.ReactNativeWebView.postMessage(document.getElementsByClassName('userBody')[0].innerHTML);`}
                     onMessage={(e) => handleMessage(e.nativeEvent.data)}

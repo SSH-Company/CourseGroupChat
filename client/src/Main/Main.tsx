@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { View, ScrollView, Platform } from "react-native";
+import { View, ScrollView, Platform, RefreshControl } from "react-native";
 import { ListItem, Avatar, Header, SearchBar } from "react-native-elements";
 import Feather from "react-native-vector-icons/Feather";
 
@@ -25,6 +25,7 @@ const Main = ({ navigation }) => {
   // data arrays.
   const { renderFlag } = useContext(RenderMessageContext);
   const [completeList, setCompleteList] = useState<listtype[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     // chat list.
@@ -32,6 +33,7 @@ const Main = ({ navigation }) => {
   }, [renderFlag]) 
 
   const resetList = async () => {
+    setRefreshing(true);
     const log = await ChatLog.getChatLogInstance()
     let list = []
     Object.keys(log.chatLog).forEach(key => {
@@ -49,6 +51,7 @@ const Main = ({ navigation }) => {
     })
     const sortedList = list.sort((a, b) => new Date(b.created_at).valueOf() - new Date(a.created_at).valueOf())
     setCompleteList(sortedList)
+    setRefreshing(false)
   }
 
   // renders header | searchbar | chat list
@@ -80,6 +83,9 @@ const Main = ({ navigation }) => {
       <ScrollView
         contentOffset={{ x: 0, y: 76 }}
         keyboardShouldPersistTaps="handled"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={resetList}/>
+        }
       >
         <SearchBar
           platform={Platform.OS === "android" ? "android" : "ios"}
