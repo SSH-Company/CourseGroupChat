@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { View, Image, Button, StyleSheet } from "react-native";
-import { Header, Input } from "react-native-elements";
+import React, { useState } from "react";
+import { Text, View, StyleSheet } from "react-native";
+import { Header, Input, Image } from "react-native-elements";
+import * as VideoExtensions from 'video-extensions';
 import { Ionicons } from "react-native-vector-icons";
 import { handleImagePick, handlePermissionRequest } from "../Util/ImagePicker";
+import BASE_URL from '../../BaseUrl';
 
 const styles = StyleSheet.create({
     imagePicker: { 
@@ -14,9 +16,10 @@ const styles = StyleSheet.create({
 })
 
 const CreateGroupForm = ({ navigation }) => {
-    const [image, setImage] = useState(null);
+    const [image, setImage] = useState({ uri: `${BASE_URL}/media/empty_profile_pic.jpg` });
     const [groupName, setGroupName] = useState<string>();
     const [errorMessage, setErrorMessage] = useState<string>();
+    const [invalidImage, setInvalidImage] = useState(false);
 
     const handleFormSubmit = () => {
         if (!groupName) {
@@ -31,10 +34,19 @@ const CreateGroupForm = ({ navigation }) => {
 
     const onImagePick = async () => {
         try {
+            setInvalidImage(false);
             const status = await handlePermissionRequest("library");
             if (status === "granted") {
                 const imageRes = await handleImagePick("library");
-                setImage(imageRes);
+                if (imageRes) {
+                    const fileExtension = imageRes.type.split('/')[1];
+                    const mediaType = (VideoExtensions as any).default.includes(fileExtension) ? "video" : "image";
+                    if (mediaType === "video") {
+                        setInvalidImage(true);
+                        return;
+                    }
+                    setImage(imageRes);
+                } 
             }
         } catch (err) {
             console.log(err);
@@ -70,9 +82,10 @@ const CreateGroupForm = ({ navigation }) => {
                 <Image
                     source={{ uri: image.uri }}
                     style={{ width: 400, height: 400, marginBottom: 10 }}
+                    onPress={onImagePick}
                 />
                 )}
-                <Button title="Choose Photo" onPress={onImagePick} />
+                {invalidImage && <Text style={{ color: 'red' }}>The selected file type is not accepted</Text>}
             </View>
             <Input 
                 placeholder="Group name (Required)"

@@ -45,16 +45,11 @@ const Socket = ({ children }) => {
                     break;
                 case 'append':
                     log = await ChatLog.getChatLogInstance()
-                    const groupInfo = log.groupInfo[Number(data.groupID.id)]
                     const newMessage:any = [{
                         _id: data._id,
                         text: data.text || '',
                         createdAt: data.createdAt,
-                        user: {
-                            _id: data.groupID.id,
-                            name: groupInfo.name,
-                            avatar: groupInfo.avatar
-                        }
+                        user: {...data.senderID}
                     }]
                     //check if message contains image/video
                     let mediaType = ''

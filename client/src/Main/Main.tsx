@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
-import { View, ScrollView, Platform, RefreshControl } from "react-native";
+import { Button, View, ScrollView, Platform, RefreshControl } from "react-native";
 import { ListItem, Avatar, Header, SearchBar } from "react-native-elements";
-import Feather from "react-native-vector-icons/Feather";
-
-// file imports.
+import * as Notifications from 'expo-notifications';
+import { Feather } from "react-native-vector-icons";
 import { RenderMessageContext } from '../Socket/WebSocket';
 import { ChatLog } from '../Util/ChatLog';
 import VerifiedIcon from '../Util/VerifiedIcon';
-import * as Notifications from 'expo-notifications';
-import {Button} from 'react-native';
 
 export type listtype = {
   id: string;
