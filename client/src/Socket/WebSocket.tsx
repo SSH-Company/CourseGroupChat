@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useContext, createContext } from "react";
+import React, { useState, useEffect, useContext, useRef, createContext } from "react";
+import { User } from 'react-native-gifted-chat';
 import * as Notifications from 'expo-notifications';
 import { UserContext } from '../Auth/Login';
 import { ChatLog } from '../Util/ChatLog';
@@ -16,16 +17,28 @@ const Socket = ({ children }) => {
     const [postStatus, setPostStatus] = useState(false);
     const [renderFlag, setRenderFlag] = useState(false)
     const value = { postStatus, renderFlag, setPostStatus, setRenderFlag } as any
+    const [notification, setNotification] = useState();
+    const notificationListener = useRef<any>(null);
 
     useEffect(() => {
         if(user._id) websocketConnect()
     }, [user])  
 
-    const schedulePushNotification = async (groupName: string, text: string) => {
+    useEffect(() => {
+        //detect when user touch notification
+        notificationListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+            setNotification(notification);
+        });
+      
+        return () => {notification.current.remove()}
+    }, [])
+
+    const schedulePushNotification = async (group: User, text: string) => {
         await Notifications.scheduleNotificationAsync({
             content: {
-              title: groupName,
-              body: text
+              title: group.name as string,
+              body: text,
+              data: {...group}
             },
             trigger: null,
         });
@@ -78,7 +91,7 @@ const Socket = ({ children }) => {
                     //notify the user
                     const notificationBody = newMessage[0].subtitle || newMessage[0].text
                     console.log(notificationBody)
-                    await schedulePushNotification(data.groupID.name, notificationBody);
+                    await schedulePushNotification(data.groupID, notificationBody);
                     break;
                 default:
                     break;

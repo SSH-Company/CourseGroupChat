@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Button, View, ScrollView, Platform, RefreshControl } from "react-native";
+import { View, ScrollView, Platform, RefreshControl } from "react-native";
 import { ListItem, Avatar, Header, SearchBar } from "react-native-elements";
-import * as Notifications from 'expo-notifications';
 import { Feather } from "react-native-vector-icons";
 import { RenderMessageContext } from '../Socket/WebSocket';
 import { ChatLog } from '../Util/ChatLog';
@@ -71,12 +70,6 @@ const Main = ({ navigation }) => {
           />
         }
       />
-      <Button
-        title="Press to schedule a notification"
-        onPress={async () => {
-          await schedulePushNotification();
-        }}
-      />
       <ScrollView
         contentOffset={{ x: 0, y: 76 }}
         keyboardShouldPersistTaps="handled"
@@ -118,17 +111,5 @@ const Main = ({ navigation }) => {
     </View>
   );
 };
-
-// test notifications.
-async function schedulePushNotification() {
-  await Notifications.scheduleNotificationAsync({
-    content: {
-      title: "You've got mail! 📬",
-      body: 'Here is the notification body',
-      data: { data: 'goes here' },
-    },
-    trigger: null,
-  });
-}
 
 export default Main;
