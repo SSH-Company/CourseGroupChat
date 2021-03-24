@@ -31,11 +31,11 @@ const Main = ({ navigation }) => {
 
   const resetList = async () => {
     setRefreshing(true);
-    const log = await ChatLog.getChatLogInstance(true)
-    let list = []
+    const log = await ChatLog.getChatLogInstance(true);
+    let list = [];
     Object.keys(log.chatLog).forEach(key => {
-      const text = log.chatLog[key][0]
-      const grpInfo = log.groupInfo[key]
+      const text = log.chatLog[key][0];
+      const grpInfo = log.groupInfo[key];
       list.push({
         id: key,
         message_id: text._id,
@@ -44,11 +44,11 @@ const Main = ({ navigation }) => {
         subtitle: text.subtitle || text.text,
         created_at: text.createdAt,
         verified: grpInfo.verified
-      })
-    })
-    const sortedList = list.sort((a, b) => new Date(b.created_at).valueOf() - new Date(a.created_at).valueOf())
-    setCompleteList(sortedList)
-    setRefreshing(false)
+      });
+    });
+    const sortedList = list.sort((a, b) => new Date(b.created_at).valueOf() - new Date(a.created_at).valueOf());
+    setCompleteList(sortedList);
+    setRefreshing(false);
   }
 
   // renders header | searchbar | chat list
@@ -127,7 +127,7 @@ async function schedulePushNotification() {
       body: 'Here is the notification body',
       data: { data: 'goes here' },
     },
-    trigger: { seconds: 2 },
+    trigger: null,
   });
 }
 

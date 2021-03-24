@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext, createContext } from "react";
+import * as Notifications from 'expo-notifications';
 import { UserContext } from '../Auth/Login';
 import { ChatLog } from '../Util/ChatLog';
 import BASE_URL from '../../BaseUrl';
@@ -19,6 +20,16 @@ const Socket = ({ children }) => {
     useEffect(() => {
         if(user._id) websocketConnect()
     }, [user])  
+
+    const schedulePushNotification = async (groupName: string, text: string) => {
+        await Notifications.scheduleNotificationAsync({
+            content: {
+              title: groupName,
+              body: text
+            },
+            trigger: null,
+        });
+    }
 
     //WebSocket connection
     const websocketConnect = () => {
@@ -48,7 +59,7 @@ const Socket = ({ children }) => {
                     const newMessage:any = [{
                         _id: data._id,
                         text: data.text || '',
-                        createdAt: data.createdAt,
+                        createdAt: data.createdAt || Date.now(),
                         user: {...data.senderID}
                     }]
                     //check if message contains image/video
@@ -57,12 +68,17 @@ const Socket = ({ children }) => {
                     if (data.hasOwnProperty('video') && data.video !== '') mediaType = "video"
                     
                     if (mediaType !== '') {
-                        newMessage[mediaType] = data[mediaType];
-                        newMessage.subtitle = `${data.groupID.name} sent a ${mediaType}.`;
+                        newMessage[0][mediaType] = data[mediaType];
+                        newMessage[0].subtitle = `${data.groupID.name} sent a ${mediaType}.`;
                     }
 
                     log.appendLog(data.groupID, newMessage)  
                     setPostStatus(true); 
+
+                    //notify the user
+                    const notificationBody = newMessage[0].subtitle || newMessage[0].text
+                    console.log(notificationBody)
+                    await schedulePushNotification(data.groupID.name, notificationBody);
                     break;
                 default:
                     break;
