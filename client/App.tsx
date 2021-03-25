@@ -2,17 +2,22 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import Socket from './src/Socket/WebSocket';
-import Main from './src/Main/Main'
-import Chat from './src/Chat/Chat'
-import { CreateGroupForm, Search, GroupSearch } from './src/Search'
-import { LogIn } from './src/Auth'
+import Main from './src/Main/Main';
+import Chat from './src/Chat/Chat';
+import { 
+  CreateGroupForm, 
+  Search, 
+  GroupSearch } 
+from './src/Search';
+import { LogIn } from './src/Auth';
+import { navigationRef } from './src/Util/RootNavigation';
 
 export default function App() {
   const Stack = createStackNavigator()
 
   return (
       <LogIn>
-        <NavigationContainer>
+        <NavigationContainer ref={navigationRef}>
             <Socket>
               <Stack.Navigator initialRouteName="Main" screenOptions={{headerShown: false, cardStyle: { backgroundColor: 'white' }}}>
                   <Stack.Screen name="Main" component={Main}/>

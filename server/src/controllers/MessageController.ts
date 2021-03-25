@@ -88,14 +88,16 @@ export class MessageController {
             const session = req.session;
             const user = session.user as UserModel;
 
-            const messages = JSON.parse(req.body.message);
+            const messages = req.body.message;
             const message = messages.messages[0]
             const groupID = messages.groupID
-            const senderID = {
-                _id: user.ID,
-                name: user.FIRST_NAME + ' ' + user.LAST_NAME,
-                avatar: 'https://placeimg.com/140/140/any'
-            }
+            const senderID = messages.senderID
+            
+            // {
+            //     _id: user.ID,
+            //     name: user.FIRST_NAME + ' ' + user.LAST_NAME,
+            //     avatar: 'https://placeimg.com/140/140/any'
+            // }
 
             let messageType: "text" | "image" | "video" = "text", 
                 urlFilePath = '';

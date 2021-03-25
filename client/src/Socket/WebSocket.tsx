@@ -3,6 +3,7 @@ import { User } from 'react-native-gifted-chat';
 import * as Notifications from 'expo-notifications';
 import { UserContext } from '../Auth/Login';
 import { ChatLog } from '../Util/ChatLog';
+import { navigate } from '../Util/RootNavigation';
 import BASE_URL from '../../BaseUrl';
 
 export const RenderMessageContext = createContext({
@@ -17,7 +18,6 @@ const Socket = ({ children }) => {
     const [postStatus, setPostStatus] = useState(false);
     const [renderFlag, setRenderFlag] = useState(false)
     const value = { postStatus, renderFlag, setPostStatus, setRenderFlag } as any
-    const [notification, setNotification] = useState();
     const notificationListener = useRef<any>(null);
 
     useEffect(() => {
@@ -27,10 +27,11 @@ const Socket = ({ children }) => {
     useEffect(() => {
         //detect when user touch notification
         notificationListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-            setNotification(notification);
+            const data = response.notification.request.content.data;
+            navigate('Chat', { groupID: {...data} });
         });
       
-        return () => {notification.current.remove()}
+        return () => { notificationListener.current.remove() }
     }, [])
 
     const schedulePushNotification = async (group: User, text: string) => {
