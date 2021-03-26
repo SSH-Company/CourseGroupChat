@@ -3,6 +3,7 @@ import { Text, View, Dimensions, BackHandler } from 'react-native';
 import { Avatar, Button, Header } from "react-native-elements";
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
+import { useActionSheet } from '@expo/react-native-action-sheet'
 import { Ionicons } from "react-native-vector-icons";
 import * as VideoExtensions from 'video-extensions';
 import { CustomMessage, CustomToolbar, InboxSettings } from './components';
@@ -30,7 +31,9 @@ const Chat = ({ route, navigation }) => {
     const { groupID } = route.params as ChatProps;
     const [messages, setMessages] = useState<IMessage[]>([]);
     const [newGroup, setNewGroup] = useState<boolean>();
+    const { showActionSheetWithOptions } = useActionSheet();
     const drawerRef = useRef(null);
+    const giftedChatRef = useRef(null);
     const avatarSize = 25;
 
     useEffect(() => {
@@ -53,11 +56,11 @@ const Chat = ({ route, navigation }) => {
     }, [renderFlag, groupID])
 
     const resetMessages = async () => {
-        const instance = await ChatLog.getChatLogInstance();
+        const instance = await ChatLog.getChatLogInstance(true);
         const log = instance.chatLog;
 
         if (groupID.id in log) {
-            //we're filtering here to ensure we can retrieve empty group chats, but not render any empty messages
+            //we're filtering here to ensure we can retrieve empty group chats from ChatLog_View, but not render any empty messages
             const filteredMessages = log[groupID.id].filter(msg => msg.text !== '' || msg.image !== '' || msg.video !== '')
             setMessages(filteredMessages);
             setNewGroup(false);
@@ -141,6 +144,29 @@ const Chat = ({ route, navigation }) => {
         }
     }
 
+    const handleLongPress = async (id: string) => {
+        const options = ['Remove message', 'Edit message'];
+        const cancelButtonIndex = options.length - 1;
+        await showActionSheetWithOptions({
+            options,
+            cancelButtonIndex
+        }, async (buttonIndex) => {
+            switch (buttonIndex) {
+                case 0:
+                    const reqBody = {
+                        groupID: groupID.id,
+                        messageID: id
+                    }
+                    await axios.delete(`${BASE_URL}/api/message`, { data: reqBody });
+                    setRenderFlag(!renderFlag);
+                    break;
+                case 1:
+                    console.log('edit here');
+                    break;
+            }
+        });
+    }
+
     return (
     <View style={{flex: 1}}>
         <DrawerLayout
@@ -194,10 +220,11 @@ const Chat = ({ route, navigation }) => {
                 </View>
                 :
                 <GiftedChat
+                    ref={giftedChatRef}
                     user={user}
                     messages={messages}
                     onSend={messages => onSend(messages)}
-                    renderMessage={props => { return ( <CustomMessage {...props} /> ) }}
+                    renderMessage={props => { return ( <CustomMessage children={props} onLongPress={id => handleLongPress(id)} /> ) }}
                     renderInputToolbar={props => { return ( <CustomToolbar children={props} onImagePick={type => onImagePick(type)} /> ) }}
                     isKeyboardInternallyHandled={false}
                 />

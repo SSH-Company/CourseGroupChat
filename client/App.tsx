@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator, TransitionSpecs } from '@react-navigation/stack';
+import { ActionSheetProvider } from '@expo/react-native-action-sheet'
 import Socket from './src/Socket/WebSocket';
 import Main from './src/Main/Main';
 import Chat from './src/Chat/Chat';
@@ -16,6 +17,7 @@ export default function App() {
   const Stack = createStackNavigator()
 
   return (
+    <ActionSheetProvider>
       <LogIn>
         <NavigationContainer ref={navigationRef}>
             <Socket>
@@ -38,5 +40,6 @@ export default function App() {
             </Socket>
         </NavigationContainer>
       </LogIn>
+    </ActionSheetProvider>
   )
 };

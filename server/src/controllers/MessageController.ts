@@ -3,7 +3,8 @@ import {
     Middleware,
     Controller,
     Post,
-    Get
+    Get,
+    Delete
 } from '@overnightjs/core';
 import multer from 'multer';
 import * as STATUS from 'http-status-codes';
@@ -119,6 +120,7 @@ export class MessageController {
             
             //store message in db
             await MessageModel.insert({ 
+                ID: message._id,
                 CREATOR_ID: senderID._id, 
                 RECIPIENT_GROUP_ID: groupID.id, 
                 MESSAGE_BODY: messageType === "text" ? message.text : urlFilePath,
@@ -182,4 +184,26 @@ export class MessageController {
             })
         }
     } 
+
+    @Delete('')
+    private async deleteMessage(req: Request, res: Response) {
+        const { groupID, messageID } = req.body;
+
+        if (!groupID || !messageID) {
+            res.status(STATUS.BAD_REQUEST).json({
+                message: "Request body must contain { groupID, messageID }",
+                identifier: "MC005"
+            })
+        }
+
+        MessageModel.delete(groupID, messageID)
+            .then(() => res.status(STATUS.OK).json({ message: "successfully deleted message!" }))
+            .catch(err => {
+                console.error(err);
+                res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                    message: "Something went wrong attempting to delete message.",
+                    identifier: "MC006"
+                })
+            })
+    }
 }
