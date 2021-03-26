@@ -42,6 +42,7 @@ export class MessageController {
                 const json = {
                     id: row.GROUP_ID,
                     creator_id: row.CREATOR_ID,
+                    creator_name: row.CREATOR_NAME,
                     message_id: row.MESSAGE_ID,
                     name: row.VERIFIED === "Y" ? row.GROUP_ID : row.NAME,
                     avatar_url: `${BaseUrl}${row.AVATAR ? row.AVATAR : emptyResponse}`,

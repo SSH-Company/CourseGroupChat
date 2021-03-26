@@ -1,6 +1,9 @@
-import React, { useState, useEffect, useContext, createContext } from "react";
+import React, { useState, useEffect, useContext, useRef, createContext } from "react";
+import { User } from 'react-native-gifted-chat';
+import * as Notifications from 'expo-notifications';
 import { UserContext } from '../Auth/Login';
 import { ChatLog } from '../Util/ChatLog';
+import { navigationRef, navigate } from '../Util/RootNavigation';
 import BASE_URL from '../../BaseUrl';
 
 export const RenderMessageContext = createContext({
@@ -15,10 +18,32 @@ const Socket = ({ children }) => {
     const [postStatus, setPostStatus] = useState(false);
     const [renderFlag, setRenderFlag] = useState(false)
     const value = { postStatus, renderFlag, setPostStatus, setRenderFlag } as any
+    const notificationListener = useRef<any>(null);
 
     useEffect(() => {
         if(user._id) websocketConnect()
     }, [user])  
+
+    useEffect(() => {
+        //detect when user touch notification
+        notificationListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+            const data = response.notification.request.content.data;
+            navigate('Chat', { groupID: {...data} });
+        });
+      
+        return () => { notificationListener.current.remove() }
+    }, [])
+
+    const schedulePushNotification = async (group: User, text: string) => {
+        await Notifications.scheduleNotificationAsync({
+            content: {
+              title: group.name as string,
+              body: text,
+              data: {...group}
+            },
+            trigger: null,
+        });
+    }
 
     //WebSocket connection
     const websocketConnect = () => {
@@ -45,16 +70,11 @@ const Socket = ({ children }) => {
                     break;
                 case 'append':
                     log = await ChatLog.getChatLogInstance()
-                    const groupInfo = log.groupInfo[Number(data.groupID.id)]
                     const newMessage:any = [{
                         _id: data._id,
                         text: data.text || '',
-                        createdAt: data.createdAt,
-                        user: {
-                            _id: data.groupID.id,
-                            name: groupInfo.name,
-                            avatar: groupInfo.avatar
-                        }
+                        createdAt: data.createdAt || Date.now(),
+                        user: {...data.senderID}
                     }]
                     //check if message contains image/video
                     let mediaType = ''
@@ -62,12 +82,26 @@ const Socket = ({ children }) => {
                     if (data.hasOwnProperty('video') && data.video !== '') mediaType = "video"
                     
                     if (mediaType !== '') {
-                        newMessage[mediaType] = data[mediaType];
-                        newMessage.subtitle = `${data.groupID.name} sent a ${mediaType}.`;
+                        newMessage[0][mediaType] = data[mediaType];
+                        newMessage[0].subtitle = `${data.groupID.name} sent a ${mediaType}.`;
                     }
 
                     log.appendLog(data.groupID, newMessage)  
                     setPostStatus(true); 
+
+                    //notify the user
+                    const notificationBody = newMessage[0].subtitle || newMessage[0].text
+                    console.log(notificationBody)
+
+                    //check current view the user is in
+                    const currentRoute = navigationRef.current.getCurrentRoute(); 
+
+                    //only notify if this groups view is not open
+                    if (currentRoute.name === 'Chat') {
+                        if (data.groupID.id !== currentRoute.params.groupID.id)
+                            await schedulePushNotification(data.groupID, notificationBody);
+                    } else await schedulePushNotification(data.groupID, notificationBody);
+
                     break;
                 default:
                     break;

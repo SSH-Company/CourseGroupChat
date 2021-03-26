@@ -57,10 +57,6 @@ const LogIn = ({ children }) => {
     const [sourceHTML, setSourceHTML] = useState<any>();
     const appState = useRef(AppState.currentState);
     const [expoPushToken, setExpoPushToken] = useState('');
-    const [notification, setNotification] = useState(false);
-
-    // notification listeners. 
-    const notificationListener = useRef<any>(null);
     const responseListener = useRef<any>(null);
 
     /*
@@ -108,16 +104,11 @@ const LogIn = ({ children }) => {
         // notifications.
         registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
     
-        notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-          setNotification(notification);
-        });
-    
         responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
           console.log(response);
         });
     
         return () => {
-          Notifications.removeNotificationSubscription(notificationListener);
           Notifications.removeNotificationSubscription(responseListener);
         };
       }, []);
@@ -137,7 +128,7 @@ const LogIn = ({ children }) => {
                     alert('Failed to get push token for push notification!');
                     return;
                 }
-                //TODO: investigate why this function is generation an error
+                //TODO: investigate why this function is generating an error
                 token = (await Notifications.getExpoPushTokenAsync()).data;
                 console.log(token);
             } catch (err) {
@@ -212,7 +203,7 @@ const LogIn = ({ children }) => {
                     domStorageEnabled={true}
                     originWhitelist={["*"]}
                     source={{...sourceHTML}}
-                    style={{ marginTop: 20 }}
+                    style={{ marginTop: 30 }}
                     onNavigationStateChange={handleNavigationStateChange}
                     injectedJavaScript={`window.ReactNativeWebView.postMessage(document.getElementsByClassName('userBody')[0].innerHTML);`}
                     onMessage={(e) => handleMessage(e.nativeEvent.data)}

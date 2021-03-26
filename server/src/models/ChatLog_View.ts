@@ -6,6 +6,7 @@ interface ChatLogViewInterface {
     VERIFIED?: 'Y' | 'N';
     AVATAR?: string;
     CREATOR_ID?: string;
+    CREATOR_NAME?: string;
     NAME: string;
     MESSAGE_ID?: string;
     MESSAGE_BODY?: string;
@@ -20,6 +21,7 @@ export class ChatLogViewModel implements ChatLogViewInterface {
     VERIFIED?: 'Y' | 'N';
     AVATAR?: string;
     CREATOR_ID?: string;
+    CREATOR_NAME?: string;
     NAME: string;
     MESSAGE_ID?: string;
     MESSAGE_BODY?: string;
@@ -53,6 +55,7 @@ const SELECT = ` SELECT
 "VERIFIED",
 "AVATAR",
 "CREATOR_ID",
+"CREATOR_NAME",
 "NAME",
 "MESSAGE_ID",
 "MESSAGE_BODY",
