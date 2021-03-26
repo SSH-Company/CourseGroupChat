@@ -50,7 +50,7 @@ const Chat = ({ route, navigation }) => {
     //re set messages everytime a new message is received from socket
     useEffect(() => {
         resetMessages();
-    }, [renderFlag])
+    }, [renderFlag, groupID])
 
     const resetMessages = async () => {
         const instance = await ChatLog.getChatLogInstance();

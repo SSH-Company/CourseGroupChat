@@ -3,7 +3,7 @@ import { User } from 'react-native-gifted-chat';
 import * as Notifications from 'expo-notifications';
 import { UserContext } from '../Auth/Login';
 import { ChatLog } from '../Util/ChatLog';
-import { navigate } from '../Util/RootNavigation';
+import { navigationRef, navigate } from '../Util/RootNavigation';
 import BASE_URL from '../../BaseUrl';
 
 export const RenderMessageContext = createContext({
@@ -92,7 +92,16 @@ const Socket = ({ children }) => {
                     //notify the user
                     const notificationBody = newMessage[0].subtitle || newMessage[0].text
                     console.log(notificationBody)
-                    await schedulePushNotification(data.groupID, notificationBody);
+
+                    //check current view the user is in
+                    const currentRoute = navigationRef.current.getCurrentRoute(); 
+
+                    //only notify if this groups view is not open
+                    if (currentRoute.name === 'Chat') {
+                        if (data.groupID.id !== currentRoute.params.groupID.id)
+                            await schedulePushNotification(data.groupID, notificationBody);
+                    } else await schedulePushNotification(data.groupID, notificationBody);
+
                     break;
                 default:
                     break;
