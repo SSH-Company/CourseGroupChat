@@ -37,7 +37,7 @@ export class UserGroupModel implements UserGroupInterface {
         })
     }
 
-    static getRecipients(uid: string): Promise<UserGroupModel[]> {
+    static getMembers(uid: string): Promise<UserGroupModel[]> {
         const query = `SELECT "USER_ID" FROM RT.USER_GROUP WHERE "GROUP_ID" = ? ;`
         
         return new Promise((resolve, reject) => {

@@ -45,7 +45,7 @@ const Chat = ({ route, navigation }) => {
         );
     
         return () => backHandler.remove();
-      }, []);
+    }, []);
 
     //re set messages everytime a new message is received from socket
     useEffect(() => {

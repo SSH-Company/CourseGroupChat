@@ -41,7 +41,7 @@ export class UserModel implements UserInterface {
         return new Promise((resolve, reject) => {
             Database.getDB()
                 .query(query, [uid])
-                .then((data:UserModel[]) => {
+                .then((data:UserInterface[]) => {
                     if (data.length === 0) {
                         reject({
                             message: 'Invalid user id.'
@@ -62,7 +62,7 @@ export class UserModel implements UserInterface {
         return new Promise((resolve, reject) => {
             Database.getDB()
                 .query(query, [email.trim().toLowerCase()])
-                .then((data:UserModel[]) => {
+                .then((data:UserInterface[]) => {
                     if (data.length === 0) {
                         reject({
                             message: 'Invalid user id.'
@@ -83,7 +83,24 @@ export class UserModel implements UserInterface {
         return new Promise((resolve, reject) => {
             Database.getDB()
                 .query(query)
-                .then((data:UserModel[]) => resolve(data.map(d => new UserModel(d))))
+                .then((data:UserInterface[]) => resolve(data.map(d => new UserModel(d))))
+                .catch(err => {
+                    console.log(err)
+                    reject(err)
+                })
+        })
+    }
+
+    static getMembersByGroupId(id: string): Promise<UserModel[]> {
+        const query = `SELECT u."ID", u."FIRST_NAME", u."LAST_NAME" 
+                    FROM RT.USER_GROUP ug
+                    LEFT JOIN RT.USER u on ug."USER_ID" = u."ID"
+                    WHERE "GROUP_ID" = ? `;
+        
+        return new Promise((resolve, reject) => {
+            Database.getDB()
+                .query(query, [id])
+                .then((data:UserInterface[]) => resolve(data.map(d => new UserModel(d))))
                 .catch(err => {
                     console.log(err)
                     reject(err)

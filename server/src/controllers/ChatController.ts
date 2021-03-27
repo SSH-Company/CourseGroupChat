@@ -109,7 +109,7 @@ export class ChatController {
             }
 
             //find all recipients of this group chat, exclude senderID from the list
-            const groupRecipients = (await UserGroupModel.getRecipients(groupID.id)).map(row => row.USER_ID).filter(id => id != senderID._id);    
+            const groupRecipients = (await UserGroupModel.getMembers(groupID.id)).map(row => row.USER_ID).filter(id => id != senderID._id);    
                         
             //send a message to each recipients queue
             for (const id of groupRecipients) {
@@ -158,7 +158,7 @@ export class ChatController {
         try {
             for (const grp of groups) {
                 //find all recipients of this group chat, exclude senderID from the list
-                const groupRecipients = (await UserGroupModel.getRecipients(grp)).map(row => row.USER_ID).filter(id => id != user.ID);    
+                const groupRecipients = (await UserGroupModel.getMembers(grp)).map(row => row.USER_ID).filter(id => id != user.ID);    
                 
                 for (const id of groupRecipients) {
                     const queueName = `message-queue-${id}`
@@ -240,13 +240,53 @@ export class ChatController {
         try {
             const session = req.session;
             const grpId = req.params.grpId;
+
+            if (!grpId) {
+                res.status(STATUS.BAD_REQUEST).json({
+                    message: "Request parameter must contain grpId",
+                    identifier: "CC009"
+                });
+                return;
+            }
+
             await UserGroupModel.removeFromGroup(session.user.ID, grpId);
             res.status(STATUS.OK).json();
             return;
         } catch (err) {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong while attempting to leave group.",
-                identifier: "CC009"
+                identifier: "CC010"
+            })
+        }
+    }
+
+    @Get('group-members/:grpId')
+    private async getGroupMembers(req: Request, res: Response) {
+        try {
+            const grpId = req.params.grpId;
+
+            if (!grpId) {
+                res.status(STATUS.BAD_REQUEST).json({
+                    message: "Request parameter must contain grpId",
+                    identifier: "CC011"
+                });
+                return;
+            }
+
+            const members = await UserModel.getMembersByGroupId(grpId);
+
+            res.status(STATUS.OK).json(members.map(row => ({
+                id: row.ID,
+                name: row.FIRST_NAME + ' ' + row.LAST_NAME,
+                avatar_url: 'https://placeimg.com/140/140/any',
+                checked: false
+            })));
+
+        } catch(err) {
+            console.error(err);
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong while attempting to retrieve group member list.",
+                identifier: "CC012"
             })
         }
     }
