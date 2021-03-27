@@ -86,14 +86,7 @@ const Main = ({ navigation }) => {
         <BaseList
             items={completeList}
             itemOnPress={(l, i) => {
-                navigation.navigate("Chat", {
-                    groupID: { 
-                        id: l.id, 
-                        name: l.name, 
-                        avatar: l.avatar_url, 
-                        verified: l.verified
-                    }
-                })
+                navigation.navigate("Chat", { groupID: l.id })
             }}
         />
       </ScrollView>

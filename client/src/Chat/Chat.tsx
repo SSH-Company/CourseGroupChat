@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useContext, useRef } from 'react';
-import { Text, View, Dimensions, BackHandler } from 'react-native';
+import { ActivityIndicator, Text, View, Dimensions, BackHandler } from 'react-native';
 import { Avatar, Button, Header } from "react-native-elements";
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
@@ -15,22 +15,19 @@ import VerifiedIcon from '../Util/CommonComponents/VerifiedIcon';
 import BASE_URL from '../../BaseUrl';
 import axios from 'axios';
 
-type ChatProps = {
-    groupID: {
-        id: string,
-        name: string,
-        avatar: string,
-        verified: 'Y' | 'N'
-    }
-}
-
 const Chat = ({ route, navigation }) => {
-
     const user = useContext(UserContext)
     const { postStatus, renderFlag, setPostStatus, setRenderFlag } = useContext(RenderMessageContext);
-    const { groupID } = route.params as ChatProps;
+    const { groupID } = route.params;
+    const [group, setGroup] = useState<any>({
+        id: groupID,
+        name: '',
+        avatar: '',
+        verified: 'N'
+    });
     const [messages, setMessages] = useState<IMessage[]>([]);
     const [newGroup, setNewGroup] = useState<boolean>();
+    const [loading, setLoading] = useState(true);
     const { showActionSheetWithOptions } = useActionSheet();
     const drawerRef = useRef(null);
     const giftedChatRef = useRef(null);
@@ -56,22 +53,32 @@ const Chat = ({ route, navigation }) => {
     }, [renderFlag, groupID])
 
     const resetMessages = async () => {
+        setLoading(true);
         const instance = await ChatLog.getChatLogInstance(true);
         const log = instance.chatLog;
 
-        if (groupID.id in log) {
+        if (groupID in log) {
+            const groupInfo = instance.groupInfo[groupID];
+            setGroup({
+                ...group,
+                name: groupInfo.name,
+                avatar: groupInfo.avatar,
+                verified: groupInfo.verified
+            });
+            
             //we're filtering here to ensure we can retrieve empty group chats from ChatLog_View, but not render any empty messages
-            const filteredMessages = log[groupID.id].filter(msg => msg.text !== '' || msg.image !== '' || msg.video !== '')
+            const filteredMessages = log[groupID].filter(msg => msg.text !== '' || msg.image !== '' || msg.video !== '')
             setMessages(filteredMessages);
             setNewGroup(false);
             if (postStatus) {
-                axios.post(`${BASE_URL}/api/message/updateMessageStatus`, { groups: [groupID.id], status: "Read" }).catch(err => console.log(err))
+                axios.post(`${BASE_URL}/api/message/updateMessageStatus`, { groups: [groupID], status: "Read" }).catch(err => console.log(err))
                 setPostStatus(false);
             }   
         } else {
             setNewGroup(true);
             setMessages([]);
         };
+        setLoading(false);
     }
     
     const onSend = useCallback(async (messages = []) => {
@@ -79,7 +86,7 @@ const Chat = ({ route, navigation }) => {
         //store message ids, set these to pending: true
         for (const msg of messages) msg['status'] = "Pending" as MessageStatus;
         const instance = await ChatLog.getChatLogInstance();
-        instance.appendLog(groupID, messages);
+        instance.appendLog(group, messages);
         setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
         await sendData(messages);
     }, [])
@@ -93,15 +100,15 @@ const Chat = ({ route, navigation }) => {
             if (imageType) {
                 formData = new FormData();
                 formData.append('media', {...messages[0].imageData});
-                formData.append('message', JSON.stringify({ messages, groupID: groupID }))
+                formData.append('message', JSON.stringify({ messages, groupID: group }))
                 await axios.post(`${BASE_URL}/api/message`, formData, { headers: { 'content-type': 'multipart/form-data' } })
             } else {
-                formData = { message: JSON.stringify({ messages, groupID: groupID })}
+                formData = { message: JSON.stringify({ messages, groupID: group })}
                 await axios.post(`${BASE_URL}/api/message`, formData)
             }
             
             const instance = await ChatLog.getChatLogInstance()
-            instance.updateMessageStatus(groupID.id, "Sent", messages[0])
+            instance.updateMessageStatus(groupID, "Sent", messages[0])
             setRenderFlag(!renderFlag);
         } catch (err) {
             //TODO: display failed notification here
@@ -136,7 +143,7 @@ const Chat = ({ route, navigation }) => {
 
     const handleJoinGroup = async () => {
         try {
-            await axios.post(`${BASE_URL}/api/group/join-group`, { id: groupID.id, name: groupID.name })
+            await axios.post(`${BASE_URL}/api/group/join-group`, { id: groupID, name: group.name })
             setRenderFlag(!renderFlag);
         } catch (err) {
             console.log('unable to join group');
@@ -154,7 +161,7 @@ const Chat = ({ route, navigation }) => {
             switch (buttonIndex) {
                 case 0:
                     const reqBody = {
-                        groupID: groupID.id,
+                        groupID: groupID,
                         messageID: id
                     }
                     await axios.delete(`${BASE_URL}/api/message`, { data: reqBody });
@@ -168,69 +175,74 @@ const Chat = ({ route, navigation }) => {
     }
 
     return (
-    <View style={{flex: 1}}>
-        <DrawerLayout
-            ref={drawerRef}
-            drawerWidth={Dimensions.get('window').width}
-            drawerPosition={'right'}
-            drawerType={'front'}
-            drawerBackgroundColor="#ffffff"
-            renderNavigationView={() => 
-                InboxSettings({
-                    group: { _id: groupID.id, name: groupID.name, avatar: groupID.avatar },
-                    onLeaveGroup: async () => {
-                        setRenderFlag(!renderFlag);
-                        navigation.navigate('Main');
-                    }
-                })}
-            contentContainerStyle={{}}
-        >   
-            <Header
-                placement="left"
-                backgroundColor="#ccccff"
-                leftComponent={
-                    <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
-                        <Ionicons 
-                            name="arrow-back-sharp" 
-                            size={avatarSize} 
-                            color="#734f96" 
-                            onPress={() => navigation.navigate('Main')}
-                        />
-                        <Avatar source={{ uri: groupID.avatar }} rounded size={avatarSize} containerStyle={{ marginLeft: 10, borderColor: "white", borderWidth: 1 }}/>        
-                    </View>
-                }
-                centerComponent={
-                    <View style={{ display:'flex', flexDirection: "row", justifyContent: "space-between" }}>
-                        <Text style={{ color: "#734f96", fontSize: 17 }}>{`${groupID.name}`}</Text>
-                        {groupID.verified === 'Y' && <VerifiedIcon style={{ marginLeft: 8 }}/>}
-                    </View>
-                }
-                rightComponent={
-                    !newGroup && <Ionicons 
-                        name="information-circle-outline" 
-                        size={avatarSize} 
-                        color="#734f96" 
-                        onPress={() => drawerRef.current.openDrawer()}
-                    />
-                }
-            />
-            {newGroup ? 
-                <View style={{ flex: 1, alignSelf: 'center', justifyContent: 'center' }}>
-                    <Button title={`Join ${groupID.name}`} onPress={handleJoinGroup}/>
-                </View>
+        <View style={{flex: 1}}>
+            {loading ?
+                <ActivityIndicator />
                 :
-                <GiftedChat
-                    ref={giftedChatRef}
-                    user={user}
-                    messages={messages}
-                    onSend={messages => onSend(messages)}
-                    renderMessage={props => { return ( <CustomMessage children={props} onLongPress={id => handleLongPress(id)} /> ) }}
-                    renderInputToolbar={props => { return ( <CustomToolbar children={props} onImagePick={type => onImagePick(type)} /> ) }}
-                    isKeyboardInternallyHandled={false}
-                />
+                <DrawerLayout
+                    ref={drawerRef}
+                    drawerWidth={Dimensions.get('window').width}
+                    drawerPosition={'right'}
+                    drawerType={'front'}
+                    drawerBackgroundColor="#ffffff"
+                    renderNavigationView={() => 
+                        InboxSettings({
+                            group: { _id: group.id, name: group.name, avatar: group.avatar },
+                            onLeaveGroup: async () => {
+                                setRenderFlag(!renderFlag);
+                                navigation.navigate('Main');
+                            }
+                        })}
+                    contentContainerStyle={{}}
+                >   
+                    <Header
+                        placement="left"
+                        backgroundColor="#ccccff"
+                        leftComponent={
+                            <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
+                                <Ionicons 
+                                    name="arrow-back-sharp" 
+                                    size={avatarSize} 
+                                    color="#734f96" 
+                                    onPress={() => navigation.navigate('Main')}
+                                />
+                                <Avatar source={{ uri: group.avatar }} rounded size={avatarSize} containerStyle={{ marginLeft: 10, borderColor: "white", borderWidth: 1 }}/>        
+                            </View>
+                        }
+                        centerComponent={
+                            <View style={{ display:'flex', flexDirection: "row", justifyContent: "space-between" }}>
+                                <Text style={{ color: "#734f96", fontSize: 17 }}>{`${group.name}`}</Text>
+                                {group.verified === 'Y' && <VerifiedIcon style={{ marginLeft: 8 }}/>}
+                            </View>
+                        }
+                        rightComponent={
+                            !newGroup && <Ionicons 
+                                name="information-circle-outline" 
+                                size={avatarSize} 
+                                color="#734f96" 
+                                onPress={() => drawerRef.current.openDrawer()}
+                            />
+                        }
+                    />
+                    {newGroup ? 
+                        <View style={{ flex: 1, alignSelf: 'center', justifyContent: 'center' }}>
+                            <Button title={`Join ${group.name}`} onPress={handleJoinGroup}/>
+                        </View>
+                        :
+                        <GiftedChat
+                            ref={giftedChatRef}
+                            user={user}
+                            messages={messages}
+                            onSend={messages => onSend(messages)}
+                            renderMessage={props => { return ( <CustomMessage children={props} onLongPress={id => handleLongPress(id)} /> ) }}
+                            renderInputToolbar={props => { return ( <CustomToolbar children={props} onImagePick={type => onImagePick(type)} /> ) }}
+                            isKeyboardInternallyHandled={false}
+                        />
+                    }
+                </DrawerLayout>
             }
-        </DrawerLayout>
-    </View>
+            
+        </View>
     )
 }
 

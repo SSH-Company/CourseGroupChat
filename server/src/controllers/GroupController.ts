@@ -156,4 +156,43 @@ export class GroupController {
             })
         }
     }
+
+    @Post('add-members')
+    private async addMembers(req: Request, res: Response) {
+        try {
+            const { groupID, groupName, recipients } = req.body;
+
+            if (!groupID || !groupName || !Array.isArray(recipients)) {
+                res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                    message: "Invalid parameters for adding group.",
+                    identifier: "GC008"
+                });
+                return;
+            }
+
+            if (recipients.length === 0) {
+                res.status(STATUS.OK).json();
+                return;
+            }
+
+            //insert members into new group
+            //send a message to other group members to refresh their logs
+            for(const id of recipients) {
+                await UserGroupModel.insert(id, groupID, groupName);
+                const queueName = `message-queue-${id}`
+                const queueData = { command: "refresh" }
+                await publishToQueue(queueName, JSON.stringify(queueData))
+            }
+
+            res.status(STATUS.OK).json({
+                message: "Successfully added all members."
+            });
+
+        } catch (err) {
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong while attempting to add group members.",
+                identifier: "GC009"
+            })
+        }
+    }
 }

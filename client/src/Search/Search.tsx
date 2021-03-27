@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useContext } from "react";
-import { Button, Text, View, ScrollView, Platform, StyleSheet } from "react-native";
-import { Avatar, Header, SearchBar } from "react-native-elements";
+import { Text, View, ScrollView, Platform, StyleSheet } from "react-native";
+import { Avatar, Header, SearchBar, Button } from "react-native-elements";
 import { RenderMessageContext } from '../Socket/WebSocket';
 import Feather from "react-native-vector-icons/Feather";
 import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
@@ -31,8 +31,20 @@ const style = StyleSheet.create({
     }
 })
 
+type SearchProp = {
+    groupName: string,
+    groupID?: string,   //required if search type === "add"
+    photo?: any,        //required if search type === "create"
+    searchType: "add" | "create"
+}
+
 const Search = ({ route, navigation }) => {
-    const { groupName, photo } = route.params;
+    const { 
+        groupName, 
+        groupID = '', 
+        photo = {}, 
+        searchType
+    } = route.params as SearchProp;
     const [search, setSearch] = useState("");
     const { renderFlag, setRenderFlag } = useContext(RenderMessageContext);
     const [displaySubmit, setDisplaySubmit] = useState(false);
@@ -70,21 +82,37 @@ const Search = ({ route, navigation }) => {
 
     const handleSubmit = () => {
         const recipients = suggestions.filter(row => row.checked).map(row => row.id)
-        const formData = new FormData();
-        formData.append('avatar', {...photo});
-        formData.append('recipients', JSON.stringify(recipients));
-        formData.append('groupName', groupName);
-
-        //create the group in the backend
-        axios.post(`${BASE_URL}/api/group/create-group`, formData, { headers: { 'content-type': 'multipart/form-data' } })
-            .then(async res => {
-                const data = res.data;
-                setRenderFlag(!renderFlag);
-                navigation.navigate('Chat', {
-                    groupID: { id: data.id, name: data.name, avatar: data.avatar_url, verified: 'N' }
+        
+        if (searchType === "create") {
+            const formData = new FormData();
+            formData.append('avatar', {...photo});
+            formData.append('recipients', JSON.stringify(recipients));
+            formData.append('groupName', groupName);
+    
+            //create the group in the backend
+            axios.post(`${BASE_URL}/api/group/create-group`, formData, { headers: { 'content-type': 'multipart/form-data' } })
+                .then(async res => {
+                    const data = res.data;
+                    setRenderFlag(!renderFlag);
+                    navigation.navigate('Chat', { groupID: data.id })
                 })
-            })
-            .catch(err => console.log(err))
+                .catch(err => console.log(err))
+        } 
+        else if (searchType === "add") {
+            const reqBody = {
+                groupID: groupID,
+                groupName: groupName,
+                recipients: recipients
+            }
+
+            //add the members in the backend
+            axios.post(`${BASE_URL}/api/group/add-members`, reqBody)
+                .then(async res => {
+                    setRenderFlag(!renderFlag);
+                    navigation.navigate('Chat', { groupID: groupID })
+                })
+                .catch(err => console.log(err))
+        }   
     }
 
     return (
@@ -99,7 +127,7 @@ const Search = ({ route, navigation }) => {
                 }}
                 rightComponent={displaySubmit && 
                     <View style={{width: '60%'}}>
-                        <Button title="OK" color="#734f96" onPress={() => handleSubmit()} />
+                        <Button title="OK" onPress={() => handleSubmit()} />
                     </View>
                 }
             />
