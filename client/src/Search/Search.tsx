@@ -1,19 +1,11 @@
 import React, { useMemo, useState, useEffect, useContext } from "react";
 import { Button, Text, View, ScrollView, Platform, StyleSheet } from "react-native";
-import { ListItem, Avatar, Header, SearchBar } from "react-native-elements";
+import { Avatar, Header, SearchBar } from "react-native-elements";
 import { RenderMessageContext } from '../Socket/WebSocket';
-import { ChatLog } from "../Util/ChatLog";
 import Feather from "react-native-vector-icons/Feather";
-import Ionicons from "react-native-vector-icons/Ionicons";
+import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
 import BASE_URL from '../../BaseUrl';
 import axios from 'axios';
-
-type listtype = {
-    id: string;
-    name: string;
-    avatar_url: string;
-    checked: boolean
-}
 
 //style sheet
 const style = StyleSheet.create({
@@ -138,23 +130,12 @@ const Search = ({ route, navigation }) => {
                 ))}
                 </ScrollView>
             </View>
-            <Text style={style.suggested}>Suggested</Text>
-            {filteredTable.map((l, i) => (
-                <ListItem
-                    key={`${i}-${l.name}`}
-                    onPress={() => toggleCheckbox(i)}
-                >
-                <Avatar rounded size="medium" source={{ uri: l.avatar_url }} />
-                    <ListItem.Content>
-                        <ListItem.Title>{l.name}</ListItem.Title>
-                    </ListItem.Content>
-                    <ListItem.CheckBox 
-                        checked={l.checked} 
-                        checkedIcon={<Ionicons name="checkmark-circle" size={25} color="#734f96"/>} 
-                        uncheckedIcon={<Ionicons name="checkmark-circle-outline" size={25} color="#734f96"/>}
-                        onPress={() => toggleCheckbox(i)}/>
-                </ListItem>
-            ))}
+            <BaseList
+                title="Suggested"
+                items={filteredTable}
+                itemOnPress={(l, i) => toggleCheckbox(i)}
+                checkBoxes
+            />
             </ScrollView>
         </View>
     )

@@ -1,28 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ActivityIndicator, View, Text, ScrollView, Platform, StyleSheet } from "react-native";
-import { ListItem, Avatar, SearchBar, Header } from "react-native-elements";
-import VerifiedIcon from '../Util/VerifiedIcon';
+import { ActivityIndicator, View, ScrollView, Platform } from "react-native";
+import { SearchBar, Header } from "react-native-elements";
+import { Ionicons } from "react-native-vector-icons";
+import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
 import BASE_URL from '../../BaseUrl';
 import axios from 'axios';
-import { Ionicons } from "react-native-vector-icons";
-
-//style sheet
-const style = StyleSheet.create({
-  verified: {
-      fontWeight: "bold",
-      color: "grey",
-      paddingTop: 10,
-      paddingLeft: 10,
-      paddingBottom: 10
-  }
-})
-
-type listtype = {
-    id: string;
-    name: string;
-    avatar_url: string;
-    verified: 'Y' | 'N';
-}
 
 const GroupSearch = ({ navigation }) => {
     const [search, setSearch] = useState("");
@@ -48,32 +30,15 @@ const GroupSearch = ({ navigation }) => {
         return verifiedList.filter(item => item.name.toLowerCase().includes(search.toLowerCase())).slice(0, 20);
     }, [verifiedList, search])
 
-    const renderList = (list: listtype[]) => {
-        return (
-          list.map((l, i) => (
-            <ListItem
-              key={i}
-              onPress={() => {
-                navigation.navigate("Chat", {
-                  groupID: { 
-                    id: l.id, 
-                    name: l.name, 
-                    avatar: l.avatar_url, 
-                    verified: l.verified
-                  }
-                })
-              }}
-            >
-              <Avatar rounded size="medium" source={{ uri: l.avatar_url }}/>
-              <ListItem.Content>
-                <View style={{ display:'flex', flexDirection: "row", justifyContent: "space-between" }}>
-                  <ListItem.Title>{`${l.name}`}</ListItem.Title>
-                  {l.verified === 'Y' && <VerifiedIcon style={{ marginLeft: 8 }}/>}
-                </View>
-              </ListItem.Content>
-            </ListItem>
-          ))
-        )
+    const onItemPress = (item: listtype) => {
+        navigation.navigate("Chat", {
+            groupID: { 
+              id: item.id, 
+              name: item.name, 
+              avatar: item.avatar_url, 
+              verified: item.verified
+            }
+        })
     }
 
     return (
@@ -107,15 +72,23 @@ const GroupSearch = ({ navigation }) => {
                     :
                     (search.length === 0 ?
                       <>
-                        <Text style={style.verified}>Recent Chats</Text>
-                        {renderList(verifiedList.filter(row => row.verified === 'N').slice(0, 5))}
-                        <Text style={style.verified}>Verified groups</Text>
-                        {renderList(verifiedList.filter(row => row.verified === 'Y').slice(0, 10))}
+                        <BaseList 
+                            title="Recent Chats"
+                            items={verifiedList.filter(row => row.verified === 'N').slice(0, 5)}
+                            itemOnPress={l => onItemPress(l)}
+                        />
+                        <BaseList
+                            title="Verified groups"
+                            items={verifiedList.filter(row => row.verified === 'Y').slice(0, 10)}
+                            itemOnPress={l => onItemPress(l)}
+                        />
                       </>
                       :
-                      renderList(filteredList)
+                      <BaseList 
+                          items={filteredList}
+                          itemOnPress={l => onItemPress(l)}
+                      />
                     )
-
                 }
             </ScrollView>
         </View>

@@ -3,7 +3,7 @@ import { Text, View, Dimensions, BackHandler } from 'react-native';
 import { Avatar, Button, Header } from "react-native-elements";
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
-import { useActionSheet } from '@expo/react-native-action-sheet'
+import { useActionSheet } from '@expo/react-native-action-sheet';
 import { Ionicons } from "react-native-vector-icons";
 import * as VideoExtensions from 'video-extensions';
 import { CustomMessage, CustomToolbar, InboxSettings } from './components';
@@ -11,7 +11,7 @@ import { UserContext } from '../Auth/Login';
 import { RenderMessageContext } from '../Socket/WebSocket';
 import { handleImagePick, handlePermissionRequest } from "../Util/ImagePicker";
 import { ChatLog, MessageStatus, revisedRandId } from '../Util/ChatLog';
-import VerifiedIcon from '../Util/VerifiedIcon';
+import VerifiedIcon from '../Util/CommonComponents/VerifiedIcon';
 import BASE_URL from '../../BaseUrl';
 import axios from 'axios';
 
@@ -186,7 +186,7 @@ const Chat = ({ route, navigation }) => {
             contentContainerStyle={{}}
         >   
             <Header
-                placement="center"
+                placement="left"
                 backgroundColor="#ccccff"
                 leftComponent={
                     <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>

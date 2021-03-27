@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+ import { Request, Response } from 'express'
 import {
     Middleware,
     Controller,
@@ -156,7 +156,4 @@ export class GroupController {
             })
         }
     }
-
-
-
 }

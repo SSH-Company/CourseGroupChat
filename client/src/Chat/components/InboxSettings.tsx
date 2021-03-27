@@ -47,32 +47,20 @@ const InboxSettings = (props: InboxSettingsProps) => {
 
     const list = [
         {
-            title: 'Mute',
+            title: 'Ignore group',
             icon: <Entypo name={"sound-mute"} size={iconSize}/>
         },
         {
-            title: 'Member list',
+            title: 'Group Members',
             icon: <MaterialIcons name={"groups"} size={iconSize}/>
         },
         {
-            title: 'Gallery',
+            title: 'View photos and videos',
             icon: <AntDesign name={"picture"} size={iconSize}/>
-        },
-        {
-            title: 'Calendar',
-            icon: <Entypo name={"calendar"} size={iconSize}/>
         },
         {
             title: 'Search messages',
             icon: <Entypo name={"magnifying-glass"} size={iconSize}/>
-        },
-        {
-            title: 'Polls',
-            icon: <MaterialIcons name={"how-to-vote"} size={iconSize}/>
-        },
-        {
-            title: 'Popular',
-            icon: <Ionicons name={"heart"} size={iconSize}/>
         },
         {
             title: 'Leave Group',
