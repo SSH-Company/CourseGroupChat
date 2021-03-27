@@ -1,10 +1,9 @@
- import { Request, Response } from 'express'
+import { Request, Response } from 'express'
 import {
     Middleware,
     Controller,
     Post,
-    Get,
-    Delete
+    Get
 } from '@overnightjs/core';
 import multer from 'multer';
 import * as STATUS from 'http-status-codes';
@@ -27,8 +26,47 @@ let storage = multer.diskStorage({
 
 const upload = multer({ storage: storage })
 
-@Controller('group')
-export class GroupController {
+@Controller('search')
+export class SearchController {
+    @Get('users')
+    private searchList(req: Request, res: Response) {
+        UserModel.getAllUsers()
+            .then(users => {
+                res.status(STATUS.OK).json(users.map(row => ({
+                    id: row.ID,
+                    name: row.FIRST_NAME + ' ' + row.LAST_NAME,
+                    avatar_url: 'https://placeimg.com/140/140/any'
+                })))
+            })
+            .catch(err => {
+                console.error(err)
+                res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                    message: "Something went wrong while attempting to get user list.",
+                    identifier: "SC001"
+                })
+            })
+    }
+
+    @Get('all-groups')
+    private verifiedGroupsList(req: Request, res: Response) {
+        const session = req.session;
+        UserGroupListModel.getUserGroupSearchList(session.user.ID)
+            .then(list => {
+                res.status(STATUS.OK).json(list.map(row => ({
+                    id: row.CODE,
+                    name: row.VERIFIED === "Y" ? row.CODE : row.NAME,
+                    avatar_url: `${BaseUrl}${row.AVATAR ? row.AVATAR : `/media/empty_profile_pic.jpg`}`,
+                    verified: row.VERIFIED
+                })))
+            })
+            .catch(err => {
+                res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                    message: "Something went wrong while attempting to get verified course list.",
+                    identifier: "SC002"
+                })
+            })
+    }
+
     @Post('create-group')
     @Middleware([upload.single('avatar')])
     private async createGroup(req: Request, res: Response) {
@@ -40,7 +78,7 @@ export class GroupController {
         if(!Array.isArray(recipients) || recipients.length === 0 || !groupName) {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Request must contain array of [recipients], and a valid Group Name.",
-                identifier: "GC001"
+                identifier: "SC003"
             })
         }
         
@@ -70,89 +108,7 @@ export class GroupController {
         } catch (err) {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong while attempting to create a new group.",
-                identifier: "GC002"
-            })
-        }
-    }
-
-    @Get('users')
-    private searchList(req: Request, res: Response) {
-        UserModel.getAllUsers()
-            .then(users => {
-                res.status(STATUS.OK).json(users.map(row => ({
-                    id: row.ID,
-                    name: row.FIRST_NAME + ' ' + row.LAST_NAME,
-                    avatar_url: 'https://placeimg.com/140/140/any'
-                })))
-            })
-            .catch(err => {
-                res.status(STATUS.INTERNAL_SERVER_ERROR).json({
-                    message: "Something went wrong while attempting to get user list.",
-                    identifier: "GC003"
-                })
-            })
-    }
-
-    @Get('all-groups')
-    private verifiedGroupsList(req: Request, res: Response) {
-        const session = req.session;
-        UserGroupListModel.getUserGroupSearchList(session.user.ID)
-            .then(list => {
-                res.status(STATUS.OK).json(list.map(row => ({
-                    id: row.CODE,
-                    name: row.VERIFIED === "Y" ? row.CODE : row.NAME,
-                    avatar_url: `${BaseUrl}${row.AVATAR ? row.AVATAR : `/media/empty_profile_pic.jpg`}`,
-                    verified: row.VERIFIED
-                })))
-            })
-            .catch(err => {
-                res.status(STATUS.INTERNAL_SERVER_ERROR).json({
-                    message: "Something went wrong while attempting to get verified course list.",
-                    identifier: "GC004"
-                })
-            })
-    }
-
-    @Post('join-group')
-    private async joinGroup(req: Request, res: Response) {
-        
-        try {
-            const session = req.session;
-            const { id, name } = req.body;
-            
-            if (typeof id !== 'string' || id === ''
-                || typeof name !== 'string' || name === ''
-            ) {
-                res.status(STATUS.BAD_REQUEST).json({
-                    message: "Request body must contain [id] and [name].",
-                    identifier: "GC005"
-                })
-                return;
-            }
-            
-            //insert user into the group
-            await UserGroupModel.insert(session.user.ID, id, name);
-            res.status(STATUS.OK).json();
-        } catch(err) {
-            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
-                message: "Something went wrong while attempting to join new group.",
-                identifier: "GC006"
-            })
-        }
-    }
-
-    @Delete('leave-group/:grpId')
-    private async leaveGroup(req: Request, res: Response) {
-        try {
-            const session = req.session;
-            const grpId = req.params.grpId;
-            await UserGroupModel.removeFromGroup(session.user.ID, grpId);
-            res.status(STATUS.OK).json();
-            return;
-        } catch (err) {
-            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
-                message: "Something went wrong while attempting to leave group.",
-                identifier: "GC007"
+                identifier: "SC004"
             })
         }
     }
@@ -165,7 +121,7 @@ export class GroupController {
             if (!groupID || !groupName || !Array.isArray(recipients)) {
                 res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                     message: "Invalid parameters for adding group.",
-                    identifier: "GC008"
+                    identifier: "SC005"
                 });
                 return;
             }
@@ -191,8 +147,9 @@ export class GroupController {
         } catch (err) {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong while attempting to add group members.",
-                identifier: "GC009"
+                identifier: "SC006"
             })
         }
     }
+
 }

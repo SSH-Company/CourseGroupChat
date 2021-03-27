@@ -58,7 +58,7 @@ const Search = ({ route, navigation }) => {
 
     //retrieve data on first load
     useEffect(() => {
-        axios.get(`${BASE_URL}/api/group/users`)
+        axios.get(`${BASE_URL}/api/search/users`)
             .then(res => setSuggestions(res.data.map(row => ({ ...row, checked: false }))))
             .catch(err => console.error(err))
     }, [])
@@ -90,7 +90,7 @@ const Search = ({ route, navigation }) => {
             formData.append('groupName', groupName);
     
             //create the group in the backend
-            axios.post(`${BASE_URL}/api/group/create-group`, formData, { headers: { 'content-type': 'multipart/form-data' } })
+            axios.post(`${BASE_URL}/api/search/create-group`, formData, { headers: { 'content-type': 'multipart/form-data' } })
                 .then(async res => {
                     const data = res.data;
                     setRenderFlag(!renderFlag);
@@ -106,7 +106,7 @@ const Search = ({ route, navigation }) => {
             }
 
             //add the members in the backend
-            axios.post(`${BASE_URL}/api/group/add-members`, reqBody)
+            axios.post(`${BASE_URL}/api/search/add-members`, reqBody)
                 .then(async res => {
                     setRenderFlag(!renderFlag);
                     navigation.navigate('Chat', { groupID: groupID })

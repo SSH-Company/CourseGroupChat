@@ -27,8 +27,8 @@ let storage = multer.diskStorage({
 
 const upload = multer({ storage: storage })
 
-@Controller('message')
-export class MessageController {
+@Controller('chat')
+export class ChatController {
 
     @Get(':id')
     private getLog(req: Request, res: Response) {
@@ -66,7 +66,7 @@ export class MessageController {
             console.error(err)
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong while fetching user chat log.",
-                identifier: "MC001"
+                identifier: "CC001"
             })
         }) 
     }
@@ -134,7 +134,7 @@ export class MessageController {
             console.error(err)
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong while sending message.",
-                identifier: "MC002"
+                identifier: "CC002"
             })
         }
     }
@@ -151,7 +151,7 @@ export class MessageController {
         if (!Array(groups) || !['Delivered', 'Read'].includes(status)) {
             res.status(STATUS.BAD_REQUEST).json({
                 message: "Request body must contain array of [group ids] / Request status must be Delivered / Read ",
-                identifier: "MC003"
+                identifier: "CC003"
             })
         }
 
@@ -180,7 +180,7 @@ export class MessageController {
             console.error(err)
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong while sending request to update message status.",
-                identifier: "MC004"
+                identifier: "CC004"
             })
         }
     } 
@@ -192,7 +192,7 @@ export class MessageController {
         if (!groupID || !messageID) {
             res.status(STATUS.BAD_REQUEST).json({
                 message: "Request body must contain { groupID, messageID }",
-                identifier: "MC005"
+                identifier: "CC005"
             })
         }
 
@@ -202,8 +202,52 @@ export class MessageController {
                 console.error(err);
                 res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                     message: "Something went wrong attempting to delete message.",
-                    identifier: "MC006"
+                    identifier: "CC006"
                 })
             })
+    }
+
+    @Post('join-group')
+    private async joinGroup(req: Request, res: Response) {
+        
+        try {
+            const session = req.session;
+            const { id, name } = req.body;
+            
+            if (typeof id !== 'string' || id === ''
+                || typeof name !== 'string' || name === ''
+            ) {
+                res.status(STATUS.BAD_REQUEST).json({
+                    message: "Request body must contain [id] and [name].",
+                    identifier: "CC007"
+                })
+                return;
+            }
+            
+            //insert user into the group
+            await UserGroupModel.insert(session.user.ID, id, name);
+            res.status(STATUS.OK).json();
+        } catch(err) {
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong while attempting to join new group.",
+                identifier: "CC008"
+            })
+        }
+    }
+
+    @Delete('leave-group/:grpId')
+    private async leaveGroup(req: Request, res: Response) {
+        try {
+            const session = req.session;
+            const grpId = req.params.grpId;
+            await UserGroupModel.removeFromGroup(session.user.ID, grpId);
+            res.status(STATUS.OK).json();
+            return;
+        } catch (err) {
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong while attempting to leave group.",
+                identifier: "CC009"
+            })
+        }
     }
 }

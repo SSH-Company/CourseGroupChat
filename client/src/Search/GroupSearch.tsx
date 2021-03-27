@@ -18,7 +18,7 @@ const GroupSearch = ({ navigation }) => {
     }, [])
 
     const getVerifiedList = () => {
-        axios.get(`${BASE_URL}/api/group/all-groups`)
+        axios.get(`${BASE_URL}/api/search/all-groups`)
             .then(res => {
                 setVerifiedList(res.data);
                 setLoading(false);

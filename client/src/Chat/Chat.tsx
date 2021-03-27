@@ -71,7 +71,7 @@ const Chat = ({ route, navigation }) => {
             setMessages(filteredMessages);
             setNewGroup(false);
             if (postStatus) {
-                axios.post(`${BASE_URL}/api/message/updateMessageStatus`, { groups: [groupID], status: "Read" }).catch(err => console.log(err))
+                axios.post(`${BASE_URL}/api/chat/updateMessageStatus`, { groups: [groupID], status: "Read" }).catch(err => console.log(err))
                 setPostStatus(false);
             }   
         } else {
@@ -101,10 +101,10 @@ const Chat = ({ route, navigation }) => {
                 formData = new FormData();
                 formData.append('media', {...messages[0].imageData});
                 formData.append('message', JSON.stringify({ messages, groupID: group }))
-                await axios.post(`${BASE_URL}/api/message`, formData, { headers: { 'content-type': 'multipart/form-data' } })
+                await axios.post(`${BASE_URL}/api/chat`, formData, { headers: { 'content-type': 'multipart/form-data' } })
             } else {
                 formData = { message: JSON.stringify({ messages, groupID: group })}
-                await axios.post(`${BASE_URL}/api/message`, formData)
+                await axios.post(`${BASE_URL}/api/chat`, formData)
             }
             
             const instance = await ChatLog.getChatLogInstance()
@@ -143,7 +143,7 @@ const Chat = ({ route, navigation }) => {
 
     const handleJoinGroup = async () => {
         try {
-            await axios.post(`${BASE_URL}/api/group/join-group`, { id: groupID, name: group.name })
+            await axios.post(`${BASE_URL}/api/chat/join-group`, { id: groupID, name: group.name })
             setRenderFlag(!renderFlag);
         } catch (err) {
             console.log('unable to join group');
@@ -164,7 +164,7 @@ const Chat = ({ route, navigation }) => {
                         groupID: groupID,
                         messageID: id
                     }
-                    await axios.delete(`${BASE_URL}/api/message`, { data: reqBody });
+                    await axios.delete(`${BASE_URL}/api/chat`, { data: reqBody });
                     setRenderFlag(!renderFlag);
                     break;
                 case 1:

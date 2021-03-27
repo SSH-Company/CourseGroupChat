@@ -1,5 +1,4 @@
-export * from './TestController';
 export * from './LoginController';
-export * from './MessageController';
-export * from './GroupController';
+export * from './ChatController';
+export * from './SearchController';
 export * from './NotificationController';
