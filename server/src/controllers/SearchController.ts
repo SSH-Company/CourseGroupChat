@@ -73,7 +73,7 @@ export class SearchController {
         const session = req.session;
         const recipients = JSON.parse(req.body.recipients);
         const groupName = req.body.groupName;
-        const urlFilePath = `/media/profiles/${req.file.filename}`;
+        const urlFilePath = req.file ? `/media/profiles/${req.file.filename}` : `/media/empty_profile_pic.jpg`;
 
         if(!Array.isArray(recipients) || recipients.length === 0 || !groupName) {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({

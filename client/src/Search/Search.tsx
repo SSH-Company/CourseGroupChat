@@ -33,7 +33,7 @@ const style = StyleSheet.create({
 type SearchProp = {
     groupName: string,
     groupID?: string,   //required if search type === "add"
-    photo?: any,        //required if search type === "create"
+    photo?: any,     
     searchType: "add" | "create"
 }
 
@@ -83,7 +83,7 @@ const Search = ({ route, navigation }) => {
         
         if (searchType === "create") {
             const formData = new FormData();
-            formData.append('avatar', {...photo});
+            if (photo !== '') formData.append('avatar', {...photo});
             formData.append('recipients', JSON.stringify(recipients));
             formData.append('groupName', groupName);
     
