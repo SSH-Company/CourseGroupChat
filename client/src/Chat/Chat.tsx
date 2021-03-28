@@ -5,6 +5,7 @@ import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import { useActionSheet } from '@expo/react-native-action-sheet';
 import { Ionicons } from "react-native-vector-icons";
+import { useIsFocused } from "@react-navigation/native";
 import * as VideoExtensions from 'video-extensions';
 import { CustomMessage, CustomToolbar, InboxSettings } from './components';
 import { UserContext } from '../Auth/Login';
@@ -18,17 +19,18 @@ import axios from 'axios';
 const Chat = ({ route, navigation }) => {
     const user = useContext(UserContext)
     const { postStatus, renderFlag, setPostStatus, setRenderFlag } = useContext(RenderMessageContext);
-    const { groupID } = route.params;
+    const { groupID, name, avatar, verified } = route.params;
     const [group, setGroup] = useState<any>({
         id: groupID,
-        name: '',
-        avatar: '',
-        verified: 'N'
+        name: name || '',
+        avatar: avatar || `${BASE_URL}/media/empty_profile_pic.jpg`,
+        verified: verified || 'N'
     });
     const [messages, setMessages] = useState<IMessage[]>([]);
     const [newGroup, setNewGroup] = useState<boolean>();
     const [loading, setLoading] = useState(true);
     const { showActionSheetWithOptions } = useActionSheet();
+    const isFocused = useIsFocused();
     const drawerRef = useRef(null);
     const giftedChatRef = useRef(null);
     const avatarSize = 25;
@@ -47,14 +49,18 @@ const Chat = ({ route, navigation }) => {
         return () => backHandler.remove();
     }, []);
 
+    useEffect(() => {
+        resetMessages(true);
+    }, [isFocused])
+
     //re set messages everytime a new message is received from socket
     useEffect(() => {
         resetMessages();
     }, [renderFlag, groupID])
 
-    const resetMessages = async () => {
+    const resetMessages = async (fromSource: boolean = false) => {
         setLoading(true);
-        const instance = await ChatLog.getChatLogInstance(true);
+        const instance = await ChatLog.getChatLogInstance(fromSource);
         const log = instance.chatLog;
 
         if (groupID in log) {
@@ -144,7 +150,7 @@ const Chat = ({ route, navigation }) => {
     const handleJoinGroup = async () => {
         try {
             await axios.post(`${BASE_URL}/api/chat/join-group`, { id: groupID, name: group.name })
-            setRenderFlag(!renderFlag);
+            resetMessages(true);
         } catch (err) {
             console.log('unable to join group');
             console.error(err);
@@ -165,7 +171,7 @@ const Chat = ({ route, navigation }) => {
                         messageID: id
                     }
                     await axios.delete(`${BASE_URL}/api/chat`, { data: reqBody });
-                    setRenderFlag(!renderFlag);
+                    resetMessages(true);
                     break;
                 case 1:
                     console.log('edit here');
@@ -188,10 +194,7 @@ const Chat = ({ route, navigation }) => {
                     renderNavigationView={() => 
                         InboxSettings({
                             group: { _id: group.id, name: group.name, avatar: group.avatar },
-                            onLeaveGroup: async () => {
-                                setRenderFlag(!renderFlag);
-                                navigation.navigate('Main');
-                            }
+                            onLeaveGroup: () => navigation.navigate('Main')
                         })}
                     contentContainerStyle={{}}
                 >   
@@ -206,7 +209,11 @@ const Chat = ({ route, navigation }) => {
                                     color="#734f96" 
                                     onPress={() => navigation.navigate('Main')}
                                 />
-                                <Avatar source={{ uri: group.avatar }} rounded size={avatarSize} containerStyle={{ marginLeft: 10, borderColor: "white", borderWidth: 1 }}/>        
+                                <Avatar 
+                                    source={{ uri: group.avatar }} 
+                                    rounded 
+                                    size={avatarSize} 
+                                    containerStyle={{ marginLeft: 10, borderColor: "white", borderWidth: 1 }}/>        
                             </View>
                         }
                         centerComponent={

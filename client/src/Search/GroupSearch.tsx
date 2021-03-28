@@ -31,7 +31,7 @@ const GroupSearch = ({ navigation }) => {
     }, [verifiedList, search])
 
     const onItemPress = (item: listtype) => {
-        navigation.navigate("Chat", { groupID: item.id })
+        navigation.navigate("Chat", { groupID: item.id, name: item.name, avatar: item.avatar_url, verified: item.verified })
     }
 
     return (

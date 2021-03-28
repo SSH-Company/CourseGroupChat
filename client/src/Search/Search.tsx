@@ -1,7 +1,6 @@
-import React, { useMemo, useState, useEffect, useContext } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Text, View, ScrollView, Platform, StyleSheet } from "react-native";
 import { Avatar, Header, SearchBar, Button } from "react-native-elements";
-import { RenderMessageContext } from '../Socket/WebSocket';
 import Feather from "react-native-vector-icons/Feather";
 import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
 import BASE_URL from '../../BaseUrl';
@@ -46,7 +45,6 @@ const Search = ({ route, navigation }) => {
         searchType
     } = route.params as SearchProp;
     const [search, setSearch] = useState("");
-    const { renderFlag, setRenderFlag } = useContext(RenderMessageContext);
     const [displaySubmit, setDisplaySubmit] = useState(false);
     const [suggestions, setSuggestions] = useState<listtype[]>([]);
     const renderLimit = 20;
@@ -93,7 +91,6 @@ const Search = ({ route, navigation }) => {
             axios.post(`${BASE_URL}/api/search/create-group`, formData, { headers: { 'content-type': 'multipart/form-data' } })
                 .then(async res => {
                     const data = res.data;
-                    setRenderFlag(!renderFlag);
                     navigation.navigate('Chat', { groupID: data.id })
                 })
                 .catch(err => console.log(err))
@@ -107,8 +104,7 @@ const Search = ({ route, navigation }) => {
 
             //add the members in the backend
             axios.post(`${BASE_URL}/api/search/add-members`, reqBody)
-                .then(async res => {
-                    setRenderFlag(!renderFlag);
+                .then(res => {
                     navigation.navigate('Chat', { groupID: groupID })
                 })
                 .catch(err => console.log(err))
@@ -151,9 +147,9 @@ const Search = ({ route, navigation }) => {
                             size="large" 
                             source={{ uri: l.avatar_url }} 
                             onPress={() => toggleCheckbox(i)}/>
-                        <Text style={{ fontWeight: "bold", color: "black", alignSelf: 'stretch', textAlign: 'center' }}
-                            textBreakStrategy="simple"
-                        >{l.name.split(" ")[0]}</Text>
+                        <Text style={{ fontWeight: "bold", color: "black", alignSelf: 'stretch', textAlign: 'center' }} textBreakStrategy="simple">
+                            {l.name.split(" ")[0]}
+                        </Text>
                     </View>
                 ))}
                 </ScrollView>

@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { ActivityIndicator, BackHandler, View, ScrollView } from "react-native";
 import { Header } from "react-native-elements";
 import { navigationRef } from '../../Util/RootNavigation';
 import { Ionicons } from "react-native-vector-icons";
+import { UserContext } from '../../Auth/Login';
 import BaseList from '../../Util/CommonComponents/BaseList';
 import BASE_URL from '../../../BaseUrl';
 import axios from 'axios';
@@ -17,9 +18,11 @@ type listtype = {
 const GroupMembers = ({ route, navigation }) => {
 
     const { id, name } = route.params;
+    const user = useContext(UserContext);
     const [members, setMembers] = useState<listtype[]>([]);
     const [loading, setLoading] = useState(true);
     const [displayRemove, setDisplayRemove] = useState(false);
+    const [refresh, setRefresh] = useState(true);
 
     useEffect(() => {
         const backAction = () => {
@@ -43,7 +46,7 @@ const GroupMembers = ({ route, navigation }) => {
                 setLoading(false);
             })
             .catch(err => console.log(err));
-    }, [id])
+    }, [id, refresh])
 
     useEffect(() => {
         let checked = false
@@ -62,9 +65,25 @@ const GroupMembers = ({ route, navigation }) => {
         setMembers(newItems);
     }
 
-    const handleRemoveUsers = () => {
-        const selections = members.filter(member => member.checked);
-        console.log(selections);
+    const handleRemoveUsers = async () => {
+        const selections = members.filter(member => member.checked).map(row => row.id.toString());
+        const reqBody = {
+            users: selections,
+            grpId: id,
+            leave: false
+        }
+
+        try {
+            await axios.delete(`${BASE_URL}/api/chat/remove-from-group`, { data: reqBody });
+            //if the user also removed them selves, they have effectively left the group
+            if (selections.includes(user._id.toString())) {
+                //refresh and navigate back to Main 
+                navigation.navigate('Main');
+            } else setRefresh(!refresh);
+
+        } catch (err) {
+            console.log(err)
+        }
     }
 
     return (
@@ -113,7 +132,6 @@ const GroupMembers = ({ route, navigation }) => {
                         items={members}
                         itemOnPress={(l, i) => toggleCheckbox(i)}
                         checkBoxes
-                        renderBasedOnCheckbox
                     />
                 </ScrollView>
             }

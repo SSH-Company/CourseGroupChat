@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { View, ScrollView, Platform, RefreshControl } from "react-native";
 import { Header, SearchBar } from "react-native-elements";
 import { Feather } from "react-native-vector-icons";
+import { useIsFocused } from "@react-navigation/native";
 import { RenderMessageContext } from '../Socket/WebSocket';
 import { ChatLog } from '../Util/ChatLog';
 import BaseList from '../Util/CommonComponents/BaseList';
@@ -21,12 +22,13 @@ const Main = ({ navigation }) => {
   // data arrays.
   const { renderFlag } = useContext(RenderMessageContext);
   const [completeList, setCompleteList] = useState<listtype[]>([]);
-  const [refreshing, setRefreshing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false); 
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     // chat list.
     resetList();
-  }, [renderFlag]) 
+  }, [renderFlag, isFocused]) 
 
   const resetList = async () => {
     setRefreshing(true);

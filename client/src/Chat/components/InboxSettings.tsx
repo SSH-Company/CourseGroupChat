@@ -42,7 +42,11 @@ const InboxSettings = (props: InboxSettingsProps) => {
     }
 
     const handleLeaveGroup = () => {
-        axios.delete(`${BASE_URL}/api/chat/leave-group/${props.group._id}`)
+        const reqBody = {
+            grpId: props.group._id,
+            leave: true
+        }
+        axios.delete(`${BASE_URL}/api/chat/remove-from-group`, { data: reqBody })
             .then(props.onLeaveGroup)
             .catch(err => console.log(err));
     }

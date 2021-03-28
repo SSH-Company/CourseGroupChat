@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState, useEffect } from 'react';
+import React, { FunctionComponent } from 'react';
 import { View, Text, StyleSheet } from "react-native";
 import { ListItem, Avatar } from "react-native-elements";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -30,13 +30,7 @@ type BaseListProps = {
     
     //this is required if renderBasedOnCheckbox is set to true
     itemOnPress?: (item: listtype, index: number) => any,
-    checkBoxes?: boolean,
-    onSelectCheckedItems?: (items: listtype[]) => any 
-    // set to true if you're planning on rendering a 
-    // component based on the checked items, in that case the
-    // toggle checkbox functionality needs to controlled from the
-    // parent class
-    renderBasedOnCheckbox?: boolean,    
+    checkBoxes?: boolean   
 }
 
 const BaseList:FunctionComponent<BaseListProps> = (props) => {
@@ -44,41 +38,16 @@ const BaseList:FunctionComponent<BaseListProps> = (props) => {
         title = '',
         items = [],
         itemOnPress = (item: listtype, index: number) => {},
-        checkBoxes = false,
-        onSelectCheckedItems = (items: listtype[]) => {},
-        renderBasedOnCheckbox = false
+        checkBoxes = false
     } = props;
-
-    const [renderItems, setRenderItems] = useState<listtype[]>([]);
-
-    useEffect(() => {
-        setRenderItems([...items]);
-    }, []);
-
-    if (!renderBasedOnCheckbox) {
-        useEffect(() => {
-            setRenderItems([...items]);
-        }, [items])
-    
-        onSelectCheckedItems(items.filter(item => item.checked === true));
-    }
-
-    const toggleCheckbox = (index: number) => {
-        const newItems = [...renderItems];
-        newItems[index].checked = !newItems[index].checked;
-        setRenderItems(newItems);
-    }
     
     return (
         <>
         {title.length > 0 && <Text style={style.title}>{title}</Text>}
-        {renderItems.map((l, i) => (
+        {items.map((l, i) => (
             <ListItem
               key={i}
-              onPress={(e) => {
-                  if (checkBoxes && !renderBasedOnCheckbox) toggleCheckbox(i)
-                  else itemOnPress(l, i)
-              }}
+              onPress={(e) => itemOnPress(l, i)}
             >
                 <Avatar rounded size="medium" source={{ uri: l.avatar_url }}/>
                 <ListItem.Content>
@@ -93,10 +62,7 @@ const BaseList:FunctionComponent<BaseListProps> = (props) => {
                     checked={l.checked} 
                     checkedIcon={<Ionicons name="checkmark-circle" size={25} color="#734f96"/>} 
                     uncheckedIcon={<Ionicons name="checkmark-circle-outline" size={25} color="#734f96"/>}
-                    onPress={() => {
-                        if (!renderBasedOnCheckbox) toggleCheckbox(i)
-                        else itemOnPress(l, i)
-                    }}/>
+                    onPress={() => itemOnPress(l, i)}/>
                 }
             </ListItem>
           ))}

@@ -53,11 +53,13 @@ export class UserGroupModel implements UserGroupInterface {
         })
     }
 
-    static removeFromGroup(userID: string, grpID: string): Promise<void> {
+    static removeFromGroup(users: string[], grpID: string): Promise<void> {
         return new Promise((resolve, reject) => {
-            const query = `DELETE FROM RT.USER_GROUP WHERE "USER_ID" = ? AND "GROUP_ID" = ? ;`
+            const params = Array(users.length).fill("?").join(",");
+            const query = `DELETE FROM RT.USER_GROUP WHERE "USER_ID" IN (${params}) AND "GROUP_ID" = ? ;`
+            
             Database.getDB()
-                .query(query, [userID, grpID])
+                .query(query, users.concat(grpID))
                 .then(() => resolve())
                 .catch(err => {
                     console.error(err)

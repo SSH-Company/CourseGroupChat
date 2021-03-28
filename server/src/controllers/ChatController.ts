@@ -235,21 +235,24 @@ export class ChatController {
         }
     }
 
-    @Delete('leave-group/:grpId')
-    private async leaveGroup(req: Request, res: Response) {
+    @Delete('remove-from-group')
+    private async removeFromGroup(req: Request, res: Response) {
         try {
             const session = req.session;
-            const grpId = req.params.grpId;
+            const { users, grpId, leave } = req.body;
 
-            if (!grpId) {
+            if (!grpId || leave === undefined) {
                 res.status(STATUS.BAD_REQUEST).json({
-                    message: "Request parameter must contain grpId",
+                    message: "Request parameter must contain grpId and leave parameter.",
                     identifier: "CC009"
                 });
                 return;
             }
 
-            await UserGroupModel.removeFromGroup(session.user.ID, grpId);
+            const removeUsers = leave === true ? [session.user.ID] : users;
+
+            await UserGroupModel.removeFromGroup(removeUsers, grpId);
+
             res.status(STATUS.OK).json();
             return;
         } catch (err) {
