@@ -29,7 +29,10 @@ const CreateGroupForm = ({ navigation }) => {
 
         //clear error message
         setErrorMessage('');
-        navigation.navigate('Search', { groupName: groupName, photo: image })
+        navigation.navigate('Search', { 
+            groupName: groupName, 
+            photo: image.hasOwnProperty('name') ? image : '', 
+            searchType: "create" })
     }
 
     const onImagePick = async () => {

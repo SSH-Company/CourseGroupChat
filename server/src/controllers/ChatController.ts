@@ -3,7 +3,8 @@ import {
     Middleware,
     Controller,
     Post,
-    Get
+    Get,
+    Delete
 } from '@overnightjs/core';
 import multer from 'multer';
 import * as STATUS from 'http-status-codes';
@@ -26,8 +27,8 @@ let storage = multer.diskStorage({
 
 const upload = multer({ storage: storage })
 
-@Controller('message')
-export class MessageController {
+@Controller('chat')
+export class ChatController {
 
     @Get(':id')
     private getLog(req: Request, res: Response) {
@@ -65,7 +66,7 @@ export class MessageController {
             console.error(err)
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong while fetching user chat log.",
-                identifier: "MC001"
+                identifier: "CC001"
             })
         }) 
     }
@@ -108,7 +109,7 @@ export class MessageController {
             }
 
             //find all recipients of this group chat, exclude senderID from the list
-            const groupRecipients = (await UserGroupModel.getRecipients(groupID.id)).map(row => row.USER_ID).filter(id => id != senderID._id);    
+            const groupRecipients = (await UserGroupModel.getMembers(groupID.id)).map(row => row.USER_ID).filter(id => id != senderID._id);    
                         
             //send a message to each recipients queue
             for (const id of groupRecipients) {
@@ -119,6 +120,7 @@ export class MessageController {
             
             //store message in db
             await MessageModel.insert({ 
+                ID: message._id,
                 CREATOR_ID: senderID._id, 
                 RECIPIENT_GROUP_ID: groupID.id, 
                 MESSAGE_BODY: messageType === "text" ? message.text : urlFilePath,
@@ -132,7 +134,7 @@ export class MessageController {
             console.error(err)
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong while sending message.",
-                identifier: "MC002"
+                identifier: "CC002"
             })
         }
     }
@@ -149,14 +151,14 @@ export class MessageController {
         if (!Array(groups) || !['Delivered', 'Read'].includes(status)) {
             res.status(STATUS.BAD_REQUEST).json({
                 message: "Request body must contain array of [group ids] / Request status must be Delivered / Read ",
-                identifier: "MC003"
+                identifier: "CC003"
             })
         }
 
         try {
             for (const grp of groups) {
                 //find all recipients of this group chat, exclude senderID from the list
-                const groupRecipients = (await UserGroupModel.getRecipients(grp)).map(row => row.USER_ID).filter(id => id != user.ID);    
+                const groupRecipients = (await UserGroupModel.getMembers(grp)).map(row => row.USER_ID).filter(id => id != user.ID);    
                 
                 for (const id of groupRecipients) {
                     const queueName = `message-queue-${id}`
@@ -178,8 +180,117 @@ export class MessageController {
             console.error(err)
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong while sending request to update message status.",
-                identifier: "MC004"
+                identifier: "CC004"
             })
         }
     } 
+
+    @Delete('')
+    private async deleteMessage(req: Request, res: Response) {
+        const { groupID, messageID } = req.body;
+
+        if (!groupID || !messageID) {
+            res.status(STATUS.BAD_REQUEST).json({
+                message: "Request body must contain { groupID, messageID }",
+                identifier: "CC005"
+            })
+        }
+
+        MessageModel.delete(groupID, messageID)
+            .then(() => res.status(STATUS.OK).json({ message: "successfully deleted message!" }))
+            .catch(err => {
+                console.error(err);
+                res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                    message: "Something went wrong attempting to delete message.",
+                    identifier: "CC006"
+                })
+            })
+    }
+
+    @Post('join-group')
+    private async joinGroup(req: Request, res: Response) {
+        
+        try {
+            const session = req.session;
+            const { id, name } = req.body;
+            
+            if (typeof id !== 'string' || id === ''
+                || typeof name !== 'string' || name === ''
+            ) {
+                res.status(STATUS.BAD_REQUEST).json({
+                    message: "Request body must contain [id] and [name].",
+                    identifier: "CC007"
+                })
+                return;
+            }
+            
+            //insert user into the group
+            await UserGroupModel.insert(session.user.ID, id, name);
+            res.status(STATUS.OK).json();
+        } catch(err) {
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong while attempting to join new group.",
+                identifier: "CC008"
+            })
+        }
+    }
+
+    @Delete('remove-from-group')
+    private async removeFromGroup(req: Request, res: Response) {
+        try {
+            const session = req.session;
+            const { users, grpId, leave } = req.body;
+
+            if (!grpId || leave === undefined) {
+                res.status(STATUS.BAD_REQUEST).json({
+                    message: "Request parameter must contain grpId and leave parameter.",
+                    identifier: "CC009"
+                });
+                return;
+            }
+
+            const removeUsers = leave === true ? [session.user.ID] : users;
+
+            await UserGroupModel.removeFromGroup(removeUsers, grpId);
+
+            res.status(STATUS.OK).json();
+            return;
+        } catch (err) {
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong while attempting to leave group.",
+                identifier: "CC010"
+            })
+        }
+    }
+
+    @Get('group-members/:grpId')
+    private async getGroupMembers(req: Request, res: Response) {
+        try {
+            const grpId = req.params.grpId;
+
+            if (!grpId) {
+                res.status(STATUS.BAD_REQUEST).json({
+                    message: "Request parameter must contain grpId",
+                    identifier: "CC011"
+                });
+                return;
+            }
+
+            const members = await UserModel.getMembersByGroupId(grpId);
+
+            res.status(STATUS.OK).json(members.map(row => ({
+                id: row.ID,
+                name: row.FIRST_NAME + ' ' + row.LAST_NAME,
+                avatar_url: 'https://placeimg.com/140/140/any',
+                checked: false
+            })));
+
+        } catch(err) {
+            console.error(err);
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong while attempting to retrieve group member list.",
+                identifier: "CC012"
+            })
+        }
+    }
 }

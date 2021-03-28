@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
 import { View, ScrollView, Platform, RefreshControl } from "react-native";
-import { ListItem, Avatar, Header, SearchBar } from "react-native-elements";
+import { Header, SearchBar } from "react-native-elements";
 import { Feather } from "react-native-vector-icons";
+import { useIsFocused } from "@react-navigation/native";
 import { RenderMessageContext } from '../Socket/WebSocket';
 import { ChatLog } from '../Util/ChatLog';
-import VerifiedIcon from '../Util/VerifiedIcon';
+import BaseList from '../Util/CommonComponents/BaseList';
 
 export type listtype = {
   id: string;
@@ -21,12 +22,13 @@ const Main = ({ navigation }) => {
   // data arrays.
   const { renderFlag } = useContext(RenderMessageContext);
   const [completeList, setCompleteList] = useState<listtype[]>([]);
-  const [refreshing, setRefreshing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false); 
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     // chat list.
     resetList();
-  }, [renderFlag]) 
+  }, [renderFlag, isFocused]) 
 
   const resetList = async () => {
     setRefreshing(true);
@@ -66,7 +68,7 @@ const Main = ({ navigation }) => {
             name={"edit"} 
             color="#734f96" 
             size={25} 
-            onPress={() => navigation.navigate("CreateGroupForm")} //TODO: change back to CreateGroupForm
+            onPress={() => navigation.navigate("CreateGroupForm")}
           />
         }
       />
@@ -83,30 +85,12 @@ const Main = ({ navigation }) => {
           placeholder="Search groups"
           onFocus={() => navigation.navigate("GroupSearch")}
         />
-        {completeList.map((l, i) => (
-          <ListItem
-            key={i}
-            onPress={() => {
-              navigation.navigate("Chat", {
-                groupID: { 
-                  id: l.id, 
-                  name: l.name, 
-                  avatar: l.avatar_url, 
-                  verified: l.verified
-                }
-              })
+        <BaseList
+            items={completeList}
+            itemOnPress={(l, i) => {
+                navigation.navigate("Chat", { groupID: l.id })
             }}
-          >
-            <Avatar rounded size="medium" source={{ uri: l.avatar_url }}/>
-            <ListItem.Content>
-              <View style={{ display:'flex', flexDirection: "row", justifyContent: "space-between" }}>
-                <ListItem.Title>{`${l.name}`}</ListItem.Title>
-                {l.verified === 'Y' && <VerifiedIcon style={{ marginLeft: 8 }}/>}
-              </View>
-              <ListItem.Subtitle>{l.subtitle}</ListItem.Subtitle>
-            </ListItem.Content>
-          </ListItem>
-        ))}
+        />
       </ScrollView>
     </View>
   );
