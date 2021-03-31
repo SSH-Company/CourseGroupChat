@@ -77,12 +77,13 @@ export class UserModel implements UserInterface {
         })
     }
 
-    static getAllUsers(): Promise<UserModel[]> {
-        const query = `SELECT * FROM RT.USER order by "FIRST_NAME";`
-
+    static getUsersForSearch(excludeIds: string[]): Promise<UserModel[]> {
+        const params = Array(excludeIds.length).fill("?").join(",");
+        const query = `SELECT * FROM RT.USER WHERE "ID" NOT IN (${params}) ORDER BY "FIRST_NAME" `
+        
         return new Promise((resolve, reject) => {
             Database.getDB()
-                .query(query)
+                .query(query, excludeIds)
                 .then((data:UserInterface[]) => resolve(data.map(d => new UserModel(d))))
                 .catch(err => {
                     console.log(err)
