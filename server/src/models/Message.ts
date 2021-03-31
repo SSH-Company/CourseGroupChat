@@ -59,4 +59,27 @@ export class MessageModel implements MessageInterface {
             .catch(err => reject(err))
         })
     }
+
+    static getById(id: string): Promise<MessageModel> {
+        const query = `${SELECT} WHERE "ID" = ? `;
+
+        return new Promise((resolve, reject) => {
+            Database.getDB()
+            .query(query, [id])
+            .then((data: MessageInterface[]) => resolve(new MessageModel(data[0])))
+            .catch(err => reject(err))
+        })
+    }
 }
+
+const SELECT = `
+SELECT 
+"ID",
+"CREATOR_ID",
+"RECIPIENT_GROUP_ID",
+"MESSAGE_BODY",
+"MESSAGE_TYPE",
+"CREATE_DATE",
+"STATUS"
+FROM RT.MESSAGE
+`

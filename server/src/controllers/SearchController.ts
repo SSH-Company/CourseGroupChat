@@ -29,22 +29,22 @@ const upload = multer({ storage: storage })
 @Controller('search')
 export class SearchController {
     @Get('users')
-    private searchList(req: Request, res: Response) {
-        UserModel.getAllUsers()
-            .then(users => {
-                res.status(STATUS.OK).json(users.map(row => ({
-                    id: row.ID,
-                    name: row.FIRST_NAME + ' ' + row.LAST_NAME,
-                    avatar_url: 'https://placeimg.com/140/140/any'
-                })))
+    private async searchList(req: Request, res: Response) {
+        try {
+            const excludeIds = req.query.excludeIds;
+            const users = (await UserModel.getUsersForSearch(excludeIds)).map(row => ({
+                id: row.ID,
+                name: row.FIRST_NAME + ' ' + row.LAST_NAME,
+                avatar_url: 'https://placeimg.com/140/140/any'
+            }));
+            res.status(STATUS.OK).json(users);
+        } catch (err) {
+            console.error(err)
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong while attempting to get user list.",
+                identifier: "SC001"
             })
-            .catch(err => {
-                console.error(err)
-                res.status(STATUS.INTERNAL_SERVER_ERROR).json({
-                    message: "Something went wrong while attempting to get user list.",
-                    identifier: "SC001"
-                })
-            })
+        }
     }
 
     @Get('all-groups')

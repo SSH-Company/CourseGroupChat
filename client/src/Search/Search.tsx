@@ -34,7 +34,8 @@ type SearchProp = {
     groupName: string,
     groupID?: string,   //required if search type === "add"
     photo?: any,     
-    searchType: "add" | "create"
+    searchType: "add" | "create",
+    existingMembers?: string[]
 }
 
 const Search = ({ route, navigation }) => {
@@ -42,7 +43,8 @@ const Search = ({ route, navigation }) => {
         groupName, 
         groupID = '', 
         photo = {}, 
-        searchType
+        searchType,
+        existingMembers = []
     } = route.params as SearchProp;
     const [search, setSearch] = useState("");
     const [displaySubmit, setDisplaySubmit] = useState(false);
@@ -56,7 +58,7 @@ const Search = ({ route, navigation }) => {
 
     //retrieve data on first load
     useEffect(() => {
-        axios.get(`${BASE_URL}/api/search/users`)
+        axios.get(`${BASE_URL}/api/search/users`, { params: { excludeIds: existingMembers } })
             .then(res => setSuggestions(res.data.map(row => ({ ...row, checked: false }))))
             .catch(err => console.error(err))
     }, [])

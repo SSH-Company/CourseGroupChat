@@ -119,7 +119,12 @@ const GroupMembers = ({ route, navigation }) => {
                             name="person-add"
                             size={30}
                             color="#734f96"
-                            onPress={() => navigation.navigate('Search', { groupName: name, groupID: id, searchType: "add" })}
+                            onPress={() => navigation.navigate('Search', 
+                                {   groupName: name, 
+                                    groupID: id, 
+                                    searchType: "add",
+                                    existingMembers: members.map(mem => mem.id)
+                                })}
                         />
                     </View>
                 }
