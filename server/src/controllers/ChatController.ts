@@ -6,6 +6,7 @@ import {
     Get,
     Delete
 } from '@overnightjs/core';
+import fs from 'fs';
 import multer from 'multer';
 import * as STATUS from 'http-status-codes';
 import { publishToQueue } from '../services/Queue';
@@ -187,24 +188,33 @@ export class ChatController {
 
     @Delete('')
     private async deleteMessage(req: Request, res: Response) {
-        const { groupID, messageID } = req.body;
+        try{
+            const { groupID, messageID } = req.body;
 
-        if (!groupID || !messageID) {
-            res.status(STATUS.BAD_REQUEST).json({
-                message: "Request body must contain { groupID, messageID }",
-                identifier: "CC005"
+            if (!groupID || !messageID) {
+                res.status(STATUS.BAD_REQUEST).json({
+                    message: "Request body must contain { groupID, messageID }",
+                    identifier: "CC005"
+                })
+            }
+
+            const message = await MessageModel.getById(messageID);
+
+            if (message.MESSAGE_TYPE !== "text") {
+                const path = message.MESSAGE_BODY.split('messages/')[1];
+                const fullPath = `src/public/client/media/messages/${path}`;
+                await fs.unlinkSync(fullPath);
+            }
+
+            await MessageModel.delete(groupID, messageID);
+            res.status(STATUS.OK).json({ message: "successfully deleted message!" });
+        } catch (err) {
+            console.error(err);
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong attempting to delete message.",
+                identifier: "CC006"
             })
         }
-
-        MessageModel.delete(groupID, messageID)
-            .then(() => res.status(STATUS.OK).json({ message: "successfully deleted message!" }))
-            .catch(err => {
-                console.error(err);
-                res.status(STATUS.INTERNAL_SERVER_ERROR).json({
-                    message: "Something went wrong attempting to delete message.",
-                    identifier: "CC006"
-                })
-            })
     }
 
     @Post('join-group')
