@@ -1,16 +1,18 @@
 import { Pool } from 'pg';
+import { Config } from './Config';
 
 export class Database {
     private static instance: Database;
     public readonly pool: Pool;
 
     private constructor() {
+        let config = Config.getConfig().db;
         this.pool = new Pool({
-            user: 'dbinst',
-            host: 'localhost',
-            database: 'api',
-            password: 'password',
-            port: 5432
+            user: config.UID,
+            host: config.HOST,
+            database: config.DB,
+            password: config.PWD,
+            port: config.PORT
         })
     }
 

@@ -31,7 +31,7 @@ export class SearchController {
     @Get('users')
     private async searchList(req: Request, res: Response) {
         try {
-            const excludeIds = req.query.excludeIds;
+            const excludeIds = req.query.excludeIds || [];
             const users = (await UserModel.getUsersForSearch(excludeIds)).map(row => ({
                 id: row.ID,
                 name: row.FIRST_NAME + ' ' + row.LAST_NAME,

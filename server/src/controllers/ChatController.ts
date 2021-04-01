@@ -34,7 +34,7 @@ export class ChatController {
     @Get(':id')
     private getLog(req: Request, res: Response) {
         const session = req.session;
-        const id = req.params.id
+        const id = req.params.id;
         const emptyResponse = '/media/empty_profile_pic.jpg';
 
         ChatLogViewModel.getUserLog(id)
