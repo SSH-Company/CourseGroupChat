@@ -43,7 +43,7 @@ const BaseList:FunctionComponent<BaseListProps> = (props) => {
     
     return (
         <>
-        {title.length > 0 && <Text style={style.title}>{title}</Text>}
+        {items.length > 0 && title.length > 0 && <Text style={style.title}>{title}</Text>}
         {items.map((l, i) => (
             <ListItem
               key={i}
