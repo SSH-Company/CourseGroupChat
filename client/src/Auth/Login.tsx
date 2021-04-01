@@ -196,7 +196,7 @@ const LogIn = ({ children }) => {
             </View>
         )
     } else {
-        if (newUser) {
+        if (!newUser) { //FIX ME
             return (
                 <WebView
                     javaScriptEnabled={true}

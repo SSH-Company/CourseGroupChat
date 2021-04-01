@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { View, ScrollView, Platform, RefreshControl } from "react-native";
 import { ListItem, Avatar, Header, SearchBar } from "react-native-elements";
-import { Feather } from "react-native-vector-icons";
+import { Feather, FontAwesome } from "react-native-vector-icons";
 import { RenderMessageContext } from '../Socket/WebSocket';
 import { ChatLog } from '../Util/ChatLog';
 import VerifiedIcon from '../Util/VerifiedIcon';
@@ -56,7 +56,14 @@ const Main = ({ navigation }) => {
       <Header
         placement="center"
         backgroundColor="#ccccff"
-        leftComponent={{ icon: "menu", color: "#734f96", size: 25 }}
+        leftComponent={
+          <FontAwesome
+            name={"bars"}
+            color="#734f96" 
+            size={25}
+            onPress={() => navigation.navigate("Profile")}  // TODO: change slide scroll from left to right
+          />
+        }
         centerComponent={{
           text: "Chat",
           style: { color: "#734f96", fontSize: 20, fontWeight: "bold" },

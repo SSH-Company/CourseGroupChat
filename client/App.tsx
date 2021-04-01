@@ -4,6 +4,7 @@ import { createStackNavigator, TransitionSpecs } from '@react-navigation/stack';
 import Socket from './src/Socket/WebSocket';
 import Main from './src/Main/Main';
 import Chat from './src/Chat/Chat';
+import Profile from './src/Profile/Profile';
 import { LogIn } from './src/Auth';
 import { 
   CreateGroupForm, 
@@ -31,6 +32,7 @@ export default function App() {
                       },
                     }}
                   />
+                  <Stack.Screen name="Profile" component={Profile}/>
                   <Stack.Screen name="CreateGroupForm" component={CreateGroupForm}/>
                   <Stack.Screen name="Search" component={Search}/>
                   <Stack.Screen name="GroupSearch" component={GroupSearch}/>
