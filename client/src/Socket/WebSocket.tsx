@@ -28,7 +28,7 @@ const Socket = ({ children }) => {
         //detect when user touch notification
         notificationListener.current = Notifications.addNotificationResponseReceivedListener(response => {
             const data = response.notification.request.content.data;
-            navigate('Chat', { groupID: {...data} });
+            navigate('Chat', { groupID: data.id });
         });
       
         return () => { notificationListener.current.remove() }

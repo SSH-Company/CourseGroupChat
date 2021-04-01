@@ -1,19 +1,10 @@
-import React, { useMemo, useState, useEffect, useContext } from "react";
-import { Button, Text, View, ScrollView, Platform, StyleSheet } from "react-native";
-import { ListItem, Avatar, Header, SearchBar } from "react-native-elements";
-import { RenderMessageContext } from '../Socket/WebSocket';
-import { ChatLog } from "../Util/ChatLog";
+import React, { useMemo, useState, useEffect } from "react";
+import { Text, View, ScrollView, Platform, StyleSheet } from "react-native";
+import { Avatar, Header, SearchBar, Button } from "react-native-elements";
 import Feather from "react-native-vector-icons/Feather";
-import Ionicons from "react-native-vector-icons/Ionicons";
+import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
 import BASE_URL from '../../BaseUrl';
 import axios from 'axios';
-
-type listtype = {
-    id: string;
-    name: string;
-    avatar_url: string;
-    checked: boolean
-}
 
 //style sheet
 const style = StyleSheet.create({
@@ -39,10 +30,23 @@ const style = StyleSheet.create({
     }
 })
 
+type SearchProp = {
+    groupName: string,
+    groupID?: string,   //required if search type === "add"
+    photo?: any,     
+    searchType: "add" | "create",
+    existingMembers?: string[]
+}
+
 const Search = ({ route, navigation }) => {
-    const { groupName, photo } = route.params;
+    const { 
+        groupName, 
+        groupID = '', 
+        photo = {}, 
+        searchType,
+        existingMembers = []
+    } = route.params as SearchProp;
     const [search, setSearch] = useState("");
-    const { renderFlag, setRenderFlag } = useContext(RenderMessageContext);
     const [displaySubmit, setDisplaySubmit] = useState(false);
     const [suggestions, setSuggestions] = useState<listtype[]>([]);
     const renderLimit = 20;
@@ -54,7 +58,7 @@ const Search = ({ route, navigation }) => {
 
     //retrieve data on first load
     useEffect(() => {
-        axios.get(`${BASE_URL}/api/group/users`)
+        axios.get(`${BASE_URL}/api/search/users`, { params: { excludeIds: existingMembers } })
             .then(res => setSuggestions(res.data.map(row => ({ ...row, checked: false }))))
             .catch(err => console.error(err))
     }, [])
@@ -78,21 +82,35 @@ const Search = ({ route, navigation }) => {
 
     const handleSubmit = () => {
         const recipients = suggestions.filter(row => row.checked).map(row => row.id)
-        const formData = new FormData();
-        formData.append('avatar', {...photo});
-        formData.append('recipients', JSON.stringify(recipients));
-        formData.append('groupName', groupName);
-
-        //create the group in the backend
-        axios.post(`${BASE_URL}/api/group/create-group`, formData, { headers: { 'content-type': 'multipart/form-data' } })
-            .then(async res => {
-                const data = res.data;
-                setRenderFlag(!renderFlag);
-                navigation.navigate('Chat', {
-                    groupID: { id: data.id, name: data.name, avatar: data.avatar_url, verified: 'N' }
+        
+        if (searchType === "create") {
+            const formData = new FormData();
+            if (photo !== '') formData.append('avatar', {...photo});
+            formData.append('recipients', JSON.stringify(recipients));
+            formData.append('groupName', groupName);
+    
+            //create the group in the backend
+            axios.post(`${BASE_URL}/api/search/create-group`, formData, { headers: { 'content-type': 'multipart/form-data' } })
+                .then(async res => {
+                    const data = res.data;
+                    navigation.navigate('Chat', { groupID: data.id })
                 })
-            })
-            .catch(err => console.log(err))
+                .catch(err => console.log(err))
+        } 
+        else if (searchType === "add") {
+            const reqBody = {
+                groupID: groupID,
+                groupName: groupName,
+                recipients: recipients
+            }
+
+            //add the members in the backend
+            axios.post(`${BASE_URL}/api/search/add-members`, reqBody)
+                .then(res => {
+                    navigation.navigate('Chat', { groupID: groupID })
+                })
+                .catch(err => console.log(err))
+        }   
     }
 
     return (
@@ -107,7 +125,7 @@ const Search = ({ route, navigation }) => {
                 }}
                 rightComponent={displaySubmit && 
                     <View style={{width: '60%'}}>
-                        <Button title="OK" color="#734f96" onPress={() => handleSubmit()} />
+                        <Button title="OK" onPress={() => handleSubmit()} />
                     </View>
                 }
             />
@@ -131,30 +149,19 @@ const Search = ({ route, navigation }) => {
                             size="large" 
                             source={{ uri: l.avatar_url }} 
                             onPress={() => toggleCheckbox(i)}/>
-                        <Text style={{ fontWeight: "bold", color: "black", alignSelf: 'stretch', textAlign: 'center' }}
-                            textBreakStrategy="simple"
-                        >{l.name.split(" ")[0]}</Text>
+                        <Text style={{ fontWeight: "bold", color: "black", alignSelf: 'stretch', textAlign: 'center' }} textBreakStrategy="simple">
+                            {l.name.split(" ")[0]}
+                        </Text>
                     </View>
                 ))}
                 </ScrollView>
             </View>
-            <Text style={style.suggested}>Suggested</Text>
-            {filteredTable.map((l, i) => (
-                <ListItem
-                    key={`${i}-${l.name}`}
-                    onPress={() => toggleCheckbox(i)}
-                >
-                <Avatar rounded size="medium" source={{ uri: l.avatar_url }} />
-                    <ListItem.Content>
-                        <ListItem.Title>{l.name}</ListItem.Title>
-                    </ListItem.Content>
-                    <ListItem.CheckBox 
-                        checked={l.checked} 
-                        checkedIcon={<Ionicons name="checkmark-circle" size={25} color="#734f96"/>} 
-                        uncheckedIcon={<Ionicons name="checkmark-circle-outline" size={25} color="#734f96"/>}
-                        onPress={() => toggleCheckbox(i)}/>
-                </ListItem>
-            ))}
+            <BaseList
+                title="Suggested"
+                items={filteredTable}
+                itemOnPress={(l, i) => toggleCheckbox(i)}
+                checkBoxes
+            />
             </ScrollView>
         </View>
     )

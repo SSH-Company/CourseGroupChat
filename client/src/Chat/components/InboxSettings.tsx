@@ -1,8 +1,9 @@
-import React from 'react'
-import { View, Text, StyleSheet, Dimensions } from 'react-native'
-import { ListItem, Image } from 'react-native-elements'
-import { User } from 'react-native-gifted-chat'
-import { AntDesign, Entypo, Ionicons, MaterialIcons } from 'react-native-vector-icons'
+import React from 'react';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { ListItem, Image } from 'react-native-elements';
+import { User } from 'react-native-gifted-chat';
+import { AntDesign, Entypo, Ionicons, MaterialIcons } from 'react-native-vector-icons';
+import { navigate } from '../../Util/RootNavigation';
 import BASE_URL from '../../../BaseUrl';
 import axios from 'axios';
 
@@ -36,8 +37,16 @@ const InboxSettings = (props: InboxSettingsProps) => {
         }
     })
 
+    const handleViewMembers = () => {
+        navigate('GroupMembers', { id: props.group._id, name: props.group.name });
+    }
+
     const handleLeaveGroup = () => {
-        axios.delete(`${BASE_URL}/api/group/leave-group/${props.group._id}`)
+        const reqBody = {
+            grpId: props.group._id,
+            leave: true
+        }
+        axios.delete(`${BASE_URL}/api/chat/remove-from-group`, { data: reqBody })
             .then(props.onLeaveGroup)
             .catch(err => console.log(err));
     }
@@ -47,32 +56,21 @@ const InboxSettings = (props: InboxSettingsProps) => {
 
     const list = [
         {
-            title: 'Mute',
+            title: 'Ignore group',
             icon: <Entypo name={"sound-mute"} size={iconSize}/>
         },
         {
-            title: 'Member list',
-            icon: <MaterialIcons name={"groups"} size={iconSize}/>
+            title: 'Group Members',
+            icon: <MaterialIcons name={"groups"} size={iconSize}/>,
+            onPress: handleViewMembers
         },
         {
-            title: 'Gallery',
+            title: 'View photos and videos',
             icon: <AntDesign name={"picture"} size={iconSize}/>
-        },
-        {
-            title: 'Calendar',
-            icon: <Entypo name={"calendar"} size={iconSize}/>
         },
         {
             title: 'Search messages',
             icon: <Entypo name={"magnifying-glass"} size={iconSize}/>
-        },
-        {
-            title: 'Polls',
-            icon: <MaterialIcons name={"how-to-vote"} size={iconSize}/>
-        },
-        {
-            title: 'Popular',
-            icon: <Ionicons name={"heart"} size={iconSize}/>
         },
         {
             title: 'Leave Group',

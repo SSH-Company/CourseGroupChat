@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useContext } from 'react';
-import { View, StyleSheet, Text, Image } from 'react-native';
+import { View, StyleSheet, Text, Image, TouchableOpacity } from 'react-native';
 import { Message } from 'react-native-gifted-chat';
 import { Video } from 'expo-av';
 import { UserContext } from '../../Auth/Login';
@@ -42,39 +42,47 @@ const styles = StyleSheet.create({
     }
 })
 
-const CustomMessage:FunctionComponent = (props) => {
+type CustomMessageProps = {
+    children: any,
+    onLongPress: (id: string) => any
+}
+
+const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
+    const { children, onLongPress } = props;
     const user = useContext(UserContext);
 
     return (
         <Message 
-            {...props}
-            key={`user-key-${props['user']['_id']}-${props['currentMessage'].displayStatus}`}
+            {...children}
+            key={`user-key-${children['user']['_id']}-${children['currentMessage'].displayStatus}`}
             renderBubble={() => {
-                const currentMessage = props['currentMessage']
+                const currentMessage = children['currentMessage']
                 const isCurrentUser = currentMessage.user._id === user._id
                 
                 return (
                     <View style={[styles.item]}>
-                        <View style={[styles.balloon, {backgroundColor: isCurrentUser ? '#f5f9ff' : '#7c80ee'}]}>
-                            {currentMessage.text !== "" && <Text style={{paddingTop: 5, color:  isCurrentUser ? 'black' : 'white'}}>{currentMessage.text}</Text>}
-                            {currentMessage.hasOwnProperty('image') && currentMessage.image.length > 0 && 
-                            (<Image
-                                source={{ uri: currentMessage.image }}
-                                style={{ width: 200, height: 200, marginBottom: 10 }}
-                            />)}
-                            {currentMessage.hasOwnProperty('video') && currentMessage.video.length > 0 &&
-                            (<Video
-                                style={styles.video}
-                                source={{ uri: currentMessage.video }}
-                                //TODO: find a good way to display loading icon
-                                // usePoster
-                                // posterSource={{ uri: `${BASE_URL}/media/loading_icon.jpg` }} 
-                                useNativeControls
-                                resizeMode="cover"
-                                isLooping
-                            />)}
-                            {currentMessage.displayStatus && <Text>{currentMessage.status}</Text>}
-                        </View>
+                        <TouchableOpacity onLongPress={() => onLongPress(currentMessage._id)}>
+                            <View style={[styles.balloon, {backgroundColor: isCurrentUser ? '#f5f9ff' : '#7c80ee'}]}>
+                                    {currentMessage.text !== "" && <Text style={{paddingTop: 5, color:  isCurrentUser ? 'black' : 'white'}}>{currentMessage.text}</Text>}
+                                    {currentMessage.hasOwnProperty('image') && currentMessage.image.length > 0 && 
+                                    (<Image
+                                        source={{ uri: currentMessage.image }}
+                                        style={{ width: 200, height: 200, marginBottom: 10 }}
+                                    />)}
+                                    {currentMessage.hasOwnProperty('video') && currentMessage.video.length > 0 &&
+                                    (<Video
+                                        style={styles.video}
+                                        source={{ uri: currentMessage.video }}
+                                        //TODO: find a good way to display loading icon
+                                        // usePoster
+                                        // posterSource={{ uri: `${BASE_URL}/media/loading_icon.jpg` }} 
+                                        useNativeControls
+                                        resizeMode="cover"
+                                        isLooping
+                                    />)}
+                                    {currentMessage.displayStatus && <Text>{currentMessage.status}</Text>}
+                            </View>
+                        </TouchableOpacity>
                     </View>
                 )
             }}

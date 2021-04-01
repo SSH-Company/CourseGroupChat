@@ -1,19 +1,5 @@
-import React, { useContext } from 'react'
-import { View, Text, StyleSheet } from 'react-native'
+import React from 'react'
 import { WebView } from 'react-native-webview';
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: 'center'
-    },
-    horizontal: {
-        flexDirection: "row",
-        justifyContent: "space-around",
-        padding: 10
-    }
-});
 
 type SignUpProps = {
     viewType: "webview" | "children"

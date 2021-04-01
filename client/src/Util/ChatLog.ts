@@ -65,7 +65,7 @@ export class ChatLog {
             const id = userID ? userID : this.instance.userID;
             //retrieve log
             try {
-                const res = await axios.get(`${BASE_URL}/api/message/${id}`)
+                const res = await axios.get(`${BASE_URL}/api/chat/${id}`)
                 this.instance = new ChatLog(res.data, id);
                 return this.instance;    
             } catch (err) {

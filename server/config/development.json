@@ -1,0 +1,9 @@
+{
+    "db": {
+        "HOST": "test-database.cn2nj08ueeqy.ca-central-1.rds.amazonaws.com",
+        "DB": "postgres",
+        "UID": "ssh_company",
+        "PWD": "kawydIzPSaZmAdr4Kcgh",
+        "PORT": 5432
+    }
+}
