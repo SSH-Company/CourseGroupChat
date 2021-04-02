@@ -9,9 +9,9 @@ class Queue {
         this.consumeQueue(name);
     }
 
-    private consumeQueue = async (queue = config.rabbit.queue, isNoAck = false, durable = false, prefetch = null) => {
+    private consumeQueue = async (queue = config.queue, isNoAck = false, durable = false, prefetch = null) => {
     
-        const cluster = await amqp.connect(config.rabbit.connectionString);
+        const cluster = await amqp.connect(config);
         const channel = await cluster.createChannel();
     
         await channel.assertQueue(queue, durable=durable);
@@ -41,7 +41,7 @@ class Queue {
 //general function for publishing by queue name
 export const publishToQueue = async (queue, message, durable = false) => {
     try {
-        const cluster = await amqp.connect(config.rabbit.connectionString);
+        const cluster = await amqp.connect(config);
         const channel = await cluster.createChannel();
 
         await channel.assertQueue(queue, durable= durable);
