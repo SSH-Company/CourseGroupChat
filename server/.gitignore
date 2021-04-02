@@ -1,4 +1,3 @@
 node_modules/**/*
 src/public/*
-
-config/pem/ssh-*
+src/services/BaseUrl.*
