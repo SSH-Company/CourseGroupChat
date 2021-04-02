@@ -3,7 +3,7 @@ import { View, StyleSheet, Text, Image, TouchableOpacity } from 'react-native';
 import { Message } from 'react-native-gifted-chat';
 import { Video } from 'expo-av';
 import { UserContext } from '../../Auth/Login';
-import BASE_URL from '../../../BaseUrl';
+import BASE_URL from '../../BaseUrl';
 
 //style sheet
 const styles = StyleSheet.create({

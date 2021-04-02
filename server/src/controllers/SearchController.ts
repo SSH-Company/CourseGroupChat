@@ -12,7 +12,7 @@ import { GroupModel } from '../models/Group';
 import { UserGroupModel } from '../models/User_Group';
 import { UserGroupListModel } from '../models/UserGroupList';
 import { publishToQueue } from '../services/Queue';
-import BaseUrl from '../services/BaseUrl';
+import BaseUrl from '../BaseUrl';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {

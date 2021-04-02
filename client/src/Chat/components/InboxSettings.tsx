@@ -4,7 +4,7 @@ import { ListItem, Image } from 'react-native-elements';
 import { User } from 'react-native-gifted-chat';
 import { AntDesign, Entypo, Ionicons, MaterialIcons } from 'react-native-vector-icons';
 import { navigate } from '../../Util/RootNavigation';
-import BASE_URL from '../../../BaseUrl';
+import BASE_URL from '../../BaseUrl';
 import axios from 'axios';
 
 type InboxSettingsProps = {

@@ -4,7 +4,7 @@ import * as Notifications from 'expo-notifications';
 import { UserContext } from '../Auth/Login';
 import { ChatLog } from '../Util/ChatLog';
 import { navigationRef, navigate } from '../Util/RootNavigation';
-import BASE_URL from '../../BaseUrl';
+import BASE_URL from '../BaseUrl';
 
 export const RenderMessageContext = createContext({
     postStatus: false,

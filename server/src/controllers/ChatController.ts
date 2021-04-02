@@ -14,7 +14,7 @@ import { UserModel } from '../models/User';
 import { MessageModel } from '../models/Message';
 import { UserGroupModel } from '../models/User_Group';
 import { ChatLogViewModel } from '../models/ChatLog_View';
-import BaseUrl from '../services/BaseUrl';
+import BaseUrl from '../BaseUrl';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {

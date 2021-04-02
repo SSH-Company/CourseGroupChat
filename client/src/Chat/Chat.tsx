@@ -13,7 +13,7 @@ import { RenderMessageContext } from '../Socket/WebSocket';
 import { handleImagePick, handlePermissionRequest } from "../Util/ImagePicker";
 import { ChatLog, MessageStatus, revisedRandId } from '../Util/ChatLog';
 import VerifiedIcon from '../Util/CommonComponents/VerifiedIcon';
-import BASE_URL from '../../BaseUrl';
+import BASE_URL from '../BaseUrl';
 import axios from 'axios';
 
 const Chat = ({ route, navigation }) => {

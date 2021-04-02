@@ -1,5 +1,5 @@
 import { IMessage } from 'react-native-gifted-chat';
-import BASE_URL from '../../BaseUrl';
+import BASE_URL from '../BaseUrl';
 import axios from 'axios';
 
 type RecipientMessageMapType = {

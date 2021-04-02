@@ -16,7 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // file imports.
 import { ChatLog } from '../Util/ChatLog';
-import BASE_URL from '../../BaseUrl';
+import BASE_URL from '../BaseUrl';
 
 const styles = StyleSheet.create({
     container: {
