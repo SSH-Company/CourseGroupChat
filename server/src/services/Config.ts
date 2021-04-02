@@ -30,13 +30,13 @@ export class Config {
             PWD: _config.get("db.PWD")
         }
         this.rabbit = {
-            protocol: _config.get("db.protocol"),
-            hostname: _config.get("db.hostname"),
-            port: _config.get("db.port"),
-            username: _config.get("db.username"),
-            password: _config.get("db.password"),
-            locale: _config.get("db.locale"),
-            queue: _config.get("db.queue")
+            protocol: _config.get("rabbit.protocol"),
+            hostname: _config.get("rabbit.hostname"),
+            port: _config.get("rabbit.port"),
+            username: _config.get("rabbit.username"),
+            password: _config.get("rabbit.password"),
+            locale: _config.get("rabbit.locale"),
+            queue: _config.get("rabbit.queue")
         }
     }
 
