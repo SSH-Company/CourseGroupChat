@@ -8,6 +8,16 @@ interface DBConfig {
     PORT: number
 }
 
+interface RabbitConfig {
+    protocol: string,
+    hostname: string,
+    port: number,
+    username: string,
+    password: string,
+    locale: string,
+    queue: string
+}
+
 export class Config {
     private static instance: Config;
 
@@ -19,9 +29,19 @@ export class Config {
             UID: _config.get("db.UID"),
             PWD: _config.get("db.PWD")
         }
+        this.rabbit = {
+            protocol: _config.get("db.protocol"),
+            hostname: _config.get("db.hostname"),
+            port: _config.get("db.port"),
+            username: _config.get("db.username"),
+            password: _config.get("db.password"),
+            locale: _config.get("db.locale"),
+            queue: _config.get("db.queue")
+        }
     }
 
     public db: DBConfig;
+    public rabbit: RabbitConfig;
 
     public static getConfig(): Config {
         if (!Config.instance) {

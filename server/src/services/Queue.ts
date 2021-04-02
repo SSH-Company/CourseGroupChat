@@ -1,5 +1,5 @@
 import amqp from 'amqplib';
-import { config } from '../../config/rabbitMq'
+import { Config } from './Config';
 
 class Queue {
     private connection;
@@ -9,8 +9,9 @@ class Queue {
         this.consumeQueue(name);
     }
 
-    private consumeQueue = async (queue = config.queue, isNoAck = false, durable = false, prefetch = null) => {
+    private consumeQueue = async (queue = Config.getConfig().rabbit.queue, isNoAck = false, durable = false, prefetch = null) => {
     
+        const config = Config.getConfig().rabbit;
         const cluster = await amqp.connect(config);
         const channel = await cluster.createChannel();
     
@@ -41,9 +42,10 @@ class Queue {
 //general function for publishing by queue name
 export const publishToQueue = async (queue, message, durable = false) => {
     try {
+        const config = Config.getConfig().rabbit;
         const cluster = await amqp.connect(config);
         const channel = await cluster.createChannel();
-
+        
         await channel.assertQueue(queue, durable= durable);
         await channel.sendToQueue(queue, Buffer.from(message));
     } catch (error) {
