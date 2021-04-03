@@ -7,8 +7,8 @@ import { Server } from '@overnightjs/core';
 import { Logger } from '@overnightjs/logger';
 import passport from 'passport';
 import * as saml from 'passport-saml';
-import sessionFileStore from 'session-file-store';
-const FileStore = sessionFileStore(session);
+// import sessionFileStore from 'session-file-store';
+// const FileStore = sessionFileStore(session);
 
 class CGCServer extends Server {
     private readonly SERVER_STARTED = process.env.NODE_ENV + ' Server started on port: ';
@@ -20,7 +20,7 @@ class CGCServer extends Server {
         this.app.use(
             session({
                 secret: "test",
-                cookie: { maxAge: 60 * 1000 * 300 },
+                // cookie: { maxAge: 60 * 1000 * 300 },
                 resave: true,
                 saveUninitialized: true,
                 // store: null 
