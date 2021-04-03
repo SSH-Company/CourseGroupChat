@@ -84,7 +84,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                                         isLooping
                                     />)}
                             </View>
-                            {displayStatus && <Text>{currentMessage.status}</Text>}
+                            {<Text>{currentMessage.status}</Text>}
                         </TouchableOpacity>
                     </View>
                 )

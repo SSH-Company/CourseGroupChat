@@ -23,7 +23,8 @@ class CGCServer extends Server {
                 cookie: { maxAge: 60 * 1000 * 300 },
                 resave: true,
                 saveUninitialized: true,
-                store: new FileStore({ reapInterval: 60 })
+                store: null 
+                // new FileStore({ reapInterval: 60 })
             })
         );
 
