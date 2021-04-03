@@ -1,9 +1,8 @@
-import React, { FunctionComponent, useContext } from 'react';
+import React, { FunctionComponent, useContext, useState } from 'react';
 import { View, StyleSheet, Text, Image, TouchableOpacity } from 'react-native';
 import { Message } from 'react-native-gifted-chat';
 import { Video } from 'expo-av';
 import { UserContext } from '../../Auth/Login';
-import BASE_URL from '../../BaseUrl';
 
 //style sheet
 const styles = StyleSheet.create({
@@ -50,6 +49,7 @@ type CustomMessageProps = {
 const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
     const { children, onLongPress } = props;
     const user = useContext(UserContext);
+    const [displayStatus, setDisplayStatus] = useState(false);
 
     return (
         <Message 
@@ -61,7 +61,10 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                 
                 return (
                     <View style={[styles.item]}>
-                        <TouchableOpacity onLongPress={() => onLongPress(currentMessage._id)}>
+                        <TouchableOpacity 
+                            onPress={() => setDisplayStatus(!displayStatus)}
+                            onLongPress={() => onLongPress(currentMessage._id)}
+                        >
                             <View style={[styles.balloon, {backgroundColor: isCurrentUser ? '#f5f9ff' : '#7c80ee'}]}>
                                     {currentMessage.text !== "" && <Text style={{paddingTop: 5, color:  isCurrentUser ? 'black' : 'white'}}>{currentMessage.text}</Text>}
                                     {currentMessage.hasOwnProperty('image') && currentMessage.image.length > 0 && 
@@ -80,8 +83,8 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                                         resizeMode="cover"
                                         isLooping
                                     />)}
-                                    {currentMessage.displayStatus && <Text>{currentMessage.status}</Text>}
                             </View>
+                            {displayStatus && <Text>{currentMessage.status}</Text>}
                         </TouchableOpacity>
                     </View>
                 )

@@ -42,7 +42,8 @@ export class ChatLog {
                     name: row.creator_name,
                     avatar: row.avatar_url
                 },
-                status: row.status
+                status: row.status,
+                displayStatus: false
             }
             if (row.id in map) map[row.id].push(newMessage)
             else {
@@ -95,20 +96,15 @@ export class ChatLog {
         if (messages) {
             if (message) {
                 for (const msg of messages) {
-                    msg['displayStatus'] = false;
                     if (msg._id === message._id) {
                         msg['status'] = status
-                        //only display status for last sent message
-                        msg['displayStatus'] = true;    
                     }
                 }
             } else {
                 for (const msg of messages) {
                     if (msg['status'] === status) break;
                     msg['status'] = status;
-                    msg['displayStatus'] = false;
                 }
-                messages[0]['displayStatus'] = true;
             }
             this.chatLog[groupID] = messages;
         }

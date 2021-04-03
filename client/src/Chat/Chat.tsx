@@ -116,6 +116,7 @@ const Chat = ({ route, navigation }) => {
             const instance = await ChatLog.getChatLogInstance()
             instance.updateMessageStatus(groupID, "Sent", messages[0])
             setRenderFlag(!renderFlag);
+            setPostStatus(false);
         } catch (err) {
             //TODO: display failed notification here
             console.error(err);
@@ -157,10 +158,10 @@ const Chat = ({ route, navigation }) => {
         }
     }
 
-    const handleLongPress = async (id: string) => {
+    const handleLongPress = (id: string) => {
         const options = ['Remove message', 'Edit message'];
         const cancelButtonIndex = options.length - 1;
-        await showActionSheetWithOptions({
+        showActionSheetWithOptions({
             options,
             cancelButtonIndex
         }, async (buttonIndex) => {
