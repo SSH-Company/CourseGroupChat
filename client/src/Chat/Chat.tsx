@@ -56,7 +56,11 @@ const Chat = ({ route, navigation }) => {
     //re set messages everytime a new message is received from socket
     useEffect(() => {
         resetMessages();
-    }, [renderFlag, groupID])
+    }, [renderFlag, groupID]);
+    
+    const filterOutEmptyMessages = (messages) => {
+        return messages.filter(msg => msg.text !== '' || msg.image !== '' || msg.video !== '');
+    }
 
     const resetMessages = async (fromSource: boolean = false) => {
         setLoading(true);
@@ -73,8 +77,7 @@ const Chat = ({ route, navigation }) => {
             });
             
             //we're filtering here to ensure we can retrieve empty group chats from ChatLog_View, but not render any empty messages
-            const filteredMessages = log[groupID].filter(msg => msg.text !== '' || msg.image !== '' || msg.video !== '')
-            setMessages(filteredMessages);
+            setMessages(filterOutEmptyMessages(log[groupID]));
             setNewGroup(false);
             if (postStatus) {
                 axios.post(`${BASE_URL}/api/chat/updateMessageStatus`, { groups: [groupID], status: "Read" }).catch(err => console.log(err))
@@ -113,9 +116,10 @@ const Chat = ({ route, navigation }) => {
                 await axios.post(`${BASE_URL}/api/chat`, formData)
             }
             
-            const instance = await ChatLog.getChatLogInstance()
-            instance.updateMessageStatus(groupID, "Sent", messages[0])
-            resetMessages();
+            const instance = await ChatLog.getChatLogInstance();
+            instance.updateMessageStatus(groupID, "Sent", messages[0]);
+            //update the messages
+            setMessages(filterOutEmptyMessages(instance.chatLog[groupID]));
             setPostStatus(false);
         } catch (err) {
             //TODO: display failed notification here

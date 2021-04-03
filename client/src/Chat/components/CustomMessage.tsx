@@ -38,6 +38,11 @@ const styles = StyleSheet.create({
         minWidth: 200,
         minHeight: 200,
         alignSelf: 'center'
+    },
+    status: {
+        alignSelf: 'flex-end',
+        fontSize: 10,
+        color: 'grey'
     }
 })
 
@@ -49,12 +54,12 @@ type CustomMessageProps = {
 const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
     const { children, onLongPress } = props;
     const user = useContext(UserContext);
-    const [displayStatus, setDisplayStatus] = useState(false);
+    const [displayStatus, setDisplayStatus] = useState<boolean>(false);
 
     return (
         <Message 
             {...children}
-            key={`user-key-${children['user']['_id']}-${children['currentMessage'].displayStatus}`}
+            key={`user-key-${children['user']['_id']}-${displayStatus}`}
             renderBubble={() => {
                 const currentMessage = children['currentMessage']
                 const isCurrentUser = currentMessage.user._id === user._id
@@ -84,7 +89,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                                         isLooping
                                     />)}
                             </View>
-                            {<Text>{currentMessage.status}</Text>}
+                            {displayStatus && <Text style={styles.status}>{currentMessage.status}</Text>}
                         </TouchableOpacity>
                     </View>
                 )
