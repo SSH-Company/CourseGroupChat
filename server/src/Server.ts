@@ -33,7 +33,7 @@ class CGCServer extends Server {
         
         const samlStrategy = new saml.Strategy({
             callbackUrl: '/api/login/callback',
-            entryPoint: 'https://konnect-dev.onelogin.com/trust/saml2/http-post/sso/6740884b-6011-4391-9f6a-45db07600563',
+            entryPoint: 'https://konnect1-dev.onelogin.com/trust/saml2/http-post/sso/fabacdc2-986a-4db1-a806-c9b61701ae89',
             issuer: 'dev-app-konnect'
         }, 
         (profile, done) => {
