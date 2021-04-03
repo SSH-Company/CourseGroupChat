@@ -33,12 +33,6 @@ export class ChatController {
 
     @Get(':id')
     private getLog(req: Request, res: Response) {
-        const session = req.session;
-
-        if (!session.user) {
-            return;
-        }
-
         const id = req.params.id;
         const emptyResponse = '/media/empty_profile_pic.jpg';
 
@@ -59,7 +53,7 @@ export class ChatController {
                 }
                 if (row.MESSAGE_ID) {
                     json[row.MESSAGE_TYPE] = row.MESSAGE_BODY,
-                    json['subtitle'] = row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_ID} sent a ${row.MESSAGE_TYPE}.`                        
+                    json['subtitle'] = row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === id ? 'You': row.CREATOR_ID} sent a ${row.MESSAGE_TYPE}.`                        
                 } else {
                     json['subtitle'] = `You have been added to ${json.name}!`
                 }
