@@ -115,7 +115,7 @@ const Chat = ({ route, navigation }) => {
             
             const instance = await ChatLog.getChatLogInstance()
             instance.updateMessageStatus(groupID, "Sent", messages[0])
-            setRenderFlag(!renderFlag);
+            resetMessages();
             setPostStatus(false);
         } catch (err) {
             //TODO: display failed notification here
