@@ -33,8 +33,12 @@ export class ChatController {
 
     @Get(':id')
     private getLog(req: Request, res: Response) {
-        console.log(req);
         const session = req.session;
+
+        if (!session.user) {
+            return;
+        }
+
         const id = req.params.id;
         const emptyResponse = '/media/empty_profile_pic.jpg';
 
