@@ -5,6 +5,7 @@
         "module": "commonjs",
         "removeComments": true,
         "importHelpers": true,
+        "outDir": "build",
 
         /* Module resolution options */
         "moduleResolution": "node",
