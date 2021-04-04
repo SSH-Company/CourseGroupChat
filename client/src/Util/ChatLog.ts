@@ -18,7 +18,7 @@ export function revisedRandId() {
     return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(2, 10);
 }
 
-export type MessageStatus = "Pending" | "Sent" | "Read"
+export type MessageStatus = "Pending" | "Sent"
 
 export class ChatLog {
     private static instance: ChatLog;

@@ -34,19 +34,7 @@ export class MessageModel implements MessageInterface {
                 .then(() => resolve())
                 .catch(err => reject(err))
         })
-    }
-
-    static updateStatus(groupID: string, toStatus: string, fromStatus: string): Promise<void> {
-        return new Promise((resolve, reject) => {
-            const query = ' UPDATE RT.MESSAGE SET "STATUS" = ? WHERE "RECIPIENT_GROUP_ID" = ? AND "STATUS" = ? ';
-            const params = [toStatus, groupID, fromStatus];
-
-            Database.getDB()
-                .query(query, params)
-                .then(() => resolve())
-                .catch(err => reject(err))
-        })
-    }
+    }   
 
     static delete(groupID: string, messageID: string): Promise<void> {
         const query = `DELETE FROM RT.MESSAGE WHERE "ID" = ? AND "RECIPIENT_GROUP_ID" = ? `;
@@ -68,6 +56,19 @@ export class MessageModel implements MessageInterface {
             .query(query, [id])
             .then((data: MessageInterface[]) => resolve(new MessageModel(data[0])))
             .catch(err => reject(err))
+        })
+    }
+
+    static updateStatus(groupID: string, userName: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const query = ` UPDATE RT.MESSAGE SET "STATUS" = "STATUS" || ? 
+                            WHERE "RECIPIENT_GROUP_ID" = ? AND "STATUS" NOT LIKE '% ? %'`;
+            const params = [userName, groupID, userName];
+
+            Database.getDB()
+                .query(query, params)
+                .then(() => resolve())
+                .catch(err => reject(err))
         })
     }
 }

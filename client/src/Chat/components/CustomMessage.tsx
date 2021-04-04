@@ -7,7 +7,6 @@ import { UserContext } from '../../Auth/Login';
 //style sheet
 const styles = StyleSheet.create({
     item: {
-        marginVertical: 5,
         flexDirection: 'row'
     },
     itemIn: {

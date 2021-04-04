@@ -48,7 +48,7 @@ export class ChatController {
                     name: row.VERIFIED === "Y" ? row.GROUP_ID : row.NAME,
                     avatar_url: `${BaseUrl}${row.AVATAR ? row.AVATAR : emptyResponse}`,
                     created_at: row.CREATE_DATE,
-                    status: row.STATUS || 'Read',
+                    status: row.STATUS,
                     verified: row.VERIFIED
                 }
                 if (row.MESSAGE_ID) {
@@ -110,14 +110,7 @@ export class ChatController {
 
             //find all recipients of this group chat, exclude senderID from the list
             const groupRecipients = (await UserGroupModel.getMembers(groupID.id)).map(row => row.USER_ID).filter(id => id != senderID._id);    
-                        
-            //send a message to each recipients queue
-            for (const id of groupRecipients) {
-                const queueName = `message-queue-${id}`
-                const queueData = { ...message, command: "append", groupID: groupID, senderID: senderID }
-                await publishToQueue(queueName, JSON.stringify(queueData));
-            }
-            
+             
             //store message in db
             await MessageModel.insert({ 
                 ID: message._id,
@@ -125,8 +118,15 @@ export class ChatController {
                 RECIPIENT_GROUP_ID: groupID.id, 
                 MESSAGE_BODY: messageType === "text" ? message.text : urlFilePath,
                 MESSAGE_TYPE: messageType, 
-                STATUS: 'Sent' 
-            });    
+                STATUS: `${senderID.name}, ` 
+            }); 
+
+            //send a message to each recipients queue
+            for (const id of groupRecipients) {
+                const queueName = `message-queue-${id}`
+                const queueData = { ...message, command: "append", groupID: groupID, senderID: senderID }
+                await publishToQueue(queueName, JSON.stringify(queueData));
+            }   
             
             res.status(STATUS.OK).json();
 
@@ -146,34 +146,27 @@ export class ChatController {
         const session = req.session;
         const user = session.user as UserModel;
         
-        const { groups, status } = req.body;
+        const { groupID } = req.body;
         
-        if (!Array(groups) || !['Delivered', 'Read'].includes(status)) {
+        if (!groupID) {
             res.status(STATUS.BAD_REQUEST).json({
-                message: "Request body must contain array of [group ids] / Request status must be Delivered / Read ",
+                message: "Request body must contain group ID",
                 identifier: "CC003"
             })
         }
 
         try {
-            for (const grp of groups) {
-                //find all recipients of this group chat, exclude senderID from the list
-                const groupRecipients = (await UserGroupModel.getMembers(grp)).map(row => row.USER_ID).filter(id => id != user.ID);    
-                
-                for (const id of groupRecipients) {
-                    const queueName = `message-queue-${id}`
-                    const queueData = {command: "update", groupID: grp, senderID: user.ID, status: status}
-                    await publishToQueue(queueName, JSON.stringify(queueData))
-                }
+            await MessageModel.updateStatus(groupID, user.FIRST_NAME + ' ' + user.LAST_NAME)
 
-                //TODO: handle delivered status
-                const fromStatus = {
-                    "Read": "Sent"
-                }
-
-                await MessageModel.updateStatus(grp, status, fromStatus[status])
+            //find all recipients of this group chat, exclude senderID from the list
+            const groupRecipients = (await UserGroupModel.getMembers(groupID)).map(row => row.USER_ID).filter(id => id != user.ID);    
+            
+            for (const id of groupRecipients) {
+                const queueName = `message-queue-${id}`
+                const queueData = {command: "update", groupID: groupID, senderID: user.ID, status: status}
+                await publishToQueue(queueName, JSON.stringify(queueData))
             }
-
+            
             res.status(STATUS.OK).json()
         
         } catch (err) {

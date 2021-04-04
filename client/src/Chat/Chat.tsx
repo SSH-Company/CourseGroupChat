@@ -80,7 +80,7 @@ const Chat = ({ route, navigation }) => {
             setMessages(filterOutEmptyMessages(log[groupID]));
             setNewGroup(false);
             if (postStatus) {
-                axios.post(`${BASE_URL}/api/chat/updateMessageStatus`, { groups: [groupID], status: "Read" }).catch(err => console.log(err))
+                axios.post(`${BASE_URL}/api/chat/updateMessageStatus`, { groupID: groupID }).catch(err => console.log(err))
                 setPostStatus(false);
             }   
         } else {
