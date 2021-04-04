@@ -1,10 +1,7 @@
 #!/bin/bash
 
 #get current run
-CURR="$(docker ps -qf publish=80)"
-
-#update git repo
-git pull
+CURR="$(sudo docker ps -qf publish=80)"
 
 #install dependencies
 npm --prefix ./server i
