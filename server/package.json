@@ -34,9 +34,9 @@
     "@types/node": "^14.14.10"
   },
   "scripts": {
-    "build-both": "npm run build",
+    "build-both": "npx kill-port 3000 && npm run build",
     "build": "npm i && rm -rf ./build/ && tsc && cp -rp ./src/public ./build",
-    "build-server": "npx kill-port 3000 && node build/start.js",
+    "build-server": "node build/start.js",
     "start-dev": "PORT=3000 nodemon --config \"./util/nodemon.json\"/"
   },
   "author": "Sadman Hasan",
