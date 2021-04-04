@@ -13,8 +13,8 @@ npm --prefix ./server i
 npm --prefix ./server run build
 
 #update docker image
-docker build -t /home/ubuntu/dev .
+docker build -t home/ubuntu/dev .
 
 docker kill ${CURR}
 echo "starting server"
-docker run -p 80:80 -d --restart=always /home/ubuntu/dev
+docker run -p 80:80 -d --restart=always home/ubuntu/dev
