@@ -34,7 +34,7 @@
     "@types/node": "^14.14.10"
   },
   "scripts": {
-    "build-both": "sudo killall node && npm run build",
+    "build-both": "sudo npm run build",
     "build": "npm i && rm -rf ./build/ && tsc && cp -rp ./src/public ./build",
     "build-server": "node build/start.js",
     "start-dev": "PORT=3000 nodemon --config \"./util/nodemon.json\"/"
