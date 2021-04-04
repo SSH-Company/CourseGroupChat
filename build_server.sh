@@ -4,10 +4,10 @@
 CURR="$(sudo docker ps -qf publish=80)"
 
 #install dependencies
-npm --prefix ./server i
+sudo npm --prefix ./server i
 
 #build backend
-npm --prefix ./server run build
+sudo npm --prefix ./server run build
 
 #update docker image
 sudo docker build -t home/ubuntu/dev .
