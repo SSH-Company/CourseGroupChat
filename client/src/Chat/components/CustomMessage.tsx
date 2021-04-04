@@ -55,6 +55,13 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
     const user = useContext(UserContext);
     const [displayStatus, setDisplayStatus] = useState<boolean>(false);
 
+    const prepareStatusText = (status: string) => {
+        const seenBy = status.split(',');
+        if (seenBy.length === 0) return '';
+        if (seenBy.length === 1) return 'Seen';
+        if (seenBy.length > 1) return `Seen by ${status.slice(0, status.length -1)}`;
+    }
+
     return (
         <Message 
             {...children}
@@ -88,7 +95,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                                         isLooping
                                     />)}
                             </View>
-                            {displayStatus && <Text style={styles.status}>{currentMessage.status}</Text>}
+                            {displayStatus && <Text style={styles.status}>{prepareStatusText(currentMessage.status)}</Text>}
                         </TouchableOpacity>
                     </View>
                 )

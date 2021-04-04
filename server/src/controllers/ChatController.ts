@@ -118,7 +118,7 @@ export class ChatController {
                 RECIPIENT_GROUP_ID: groupID.id, 
                 MESSAGE_BODY: messageType === "text" ? message.text : urlFilePath,
                 MESSAGE_TYPE: messageType, 
-                STATUS: `${senderID.name}, ` 
+                STATUS: '' 
             }); 
 
             //send a message to each recipients queue
