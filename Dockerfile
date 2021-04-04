@@ -9,4 +9,4 @@ RUN npm --prefix ./server i
 
 EXPOSE 80
 
-CMD [ "npm", "--prefix", "./server", "start" ]
+CMD [ "pm2-runtime", "--prefix", "./server", "start" ]
