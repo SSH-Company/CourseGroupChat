@@ -95,7 +95,8 @@ export class ChatLog {
         if (messages) {
             for (const msg of messages) {
                 if (msg._id === message._id) {
-                    msg['status'] = status
+                    msg['status'] = status;
+                    msg['displayStatus'] = true;
                 }
             }
             this.chatLog[groupID] = messages;

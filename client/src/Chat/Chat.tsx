@@ -249,6 +249,7 @@ const Chat = ({ route, navigation }) => {
                             renderMessage={props => { return ( <CustomMessage children={props} onLongPress={id => handleLongPress(id)} /> ) }}
                             renderInputToolbar={props => { return ( <CustomToolbar children={props} onImagePick={type => onImagePick(type)} /> ) }}
                             isKeyboardInternallyHandled={false}
+                            scrollToBottom
                         />
                     }
                 </DrawerLayout>

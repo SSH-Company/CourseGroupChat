@@ -58,8 +58,11 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
     const prepareStatusText = (status: string) => {
         const seenBy = status.split(',').filter(i => i !== "");
         if (seenBy.length === 0) return 'Sent';
-        if (seenBy.length === 1) return 'Seen';
-        if (seenBy.length > 1) return `Seen by ${status.slice(0, status.length -1)}`;
+        if (seenBy.length === 1) {
+            if (['Pending', 'Sent'].includes(seenBy[0])) return seenBy[0];
+            else return 'Seen';
+        }
+        if (seenBy.length > 1) return `Seen by ${status.slice(0, status.length -2)}`;
     }
 
     return (

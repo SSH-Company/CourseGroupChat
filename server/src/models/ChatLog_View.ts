@@ -35,8 +35,26 @@ export class ChatLogViewModel implements ChatLogViewInterface {
     }
 
     static getUserLog(uid: number): Promise<ChatLogViewModel[]> {
-        const query = `${SELECT} WHERE "USER_ID" = ? AND "VERIFIED" IS NOT NULL; `;
-        
+        const query = `
+        SELECT * FROM (
+            SELECT
+                "USER_ID",
+                "GROUP_ID",
+                "VERIFIED",
+                "AVATAR",
+                "CREATOR_ID",
+                "CREATOR_NAME",
+                "NAME",
+                "MESSAGE_ID",
+                "MESSAGE_BODY",
+                "MESSAGE_TYPE",
+                "STATUS",
+                "CREATE_DATE",
+                ROW_NUMBER() OVER (PARTITION BY "GROUP_ID" ORDER BY "CREATE_DATE" DESC) AS ROW_ID
+            FROM RT."CHATLOG_VIEW"
+            WHERE "USER_ID" = ? AND "VERIFIED" IS NOT NULL
+        ) WHERE ROW_ID < 10;`
+
         return new Promise((resolve, reject) => {
             Database.getDB()
                 .query(query, [uid])
@@ -49,18 +67,4 @@ export class ChatLogViewModel implements ChatLogViewInterface {
     }
 }
 
-const SELECT = ` SELECT
-"USER_ID",
-"GROUP_ID",
-"VERIFIED",
-"AVATAR",
-"CREATOR_ID",
-"CREATOR_NAME",
-"NAME",
-"MESSAGE_ID",
-"MESSAGE_BODY",
-"MESSAGE_TYPE",
-"STATUS",
-"CREATE_DATE"
-FROM RT."CHATLOG_VIEW"
-`
+
