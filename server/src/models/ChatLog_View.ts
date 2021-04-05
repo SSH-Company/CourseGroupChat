@@ -50,10 +50,10 @@ export class ChatLogViewModel implements ChatLogViewInterface {
                 "MESSAGE_TYPE",
                 "STATUS",
                 "CREATE_DATE",
-                ROW_NUMBER() OVER (PARTITION BY "GROUP_ID" ORDER BY "CREATE_DATE" DESC) AS ROW_ID
-            FROM RT."CHATLOG_VIEW"
+                ROW_NUMBER() OVER (PARTITION BY CV."GROUP_ID" ORDER BY CV."CREATE_DATE" DESC) AS ROW_ID
+            FROM RT."CHATLOG_VIEW" CV
             WHERE "USER_ID" = ? AND "VERIFIED" IS NOT NULL
-        ) WHERE ROW_ID < 10;`
+        ) CHATLOG WHERE ROW_ID < 10;`
 
         return new Promise((resolve, reject) => {
             Database.getDB()
