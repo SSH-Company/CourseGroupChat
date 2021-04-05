@@ -63,11 +63,6 @@ const Socket = ({ children }) => {
                     await ChatLog.getChatLogInstance(true);
                     setPostStatus(false);
                     break;
-                case 'update':
-                    log = await ChatLog.getChatLogInstance()
-                    log.updateMessageStatus(data.groupID, data.status)
-                    setPostStatus(false);
-                    break;
                 case 'append':
                     log = await ChatLog.getChatLogInstance()
                     const newMessage:any = [{

@@ -90,20 +90,12 @@ export class ChatLog {
         }
     }
 
-    //TODO: write a better function here to handle all use cases
-    public updateMessageStatus(groupID: string, status: MessageStatus, message?: IMessage) {
+    public updateMessageStatus(groupID: string, status: MessageStatus, message: IMessage) {
         const messages = this.chatLog[groupID]
         if (messages) {
-            if (message) {
-                for (const msg of messages) {
-                    if (msg._id === message._id) {
-                        msg['status'] = status
-                    }
-                }
-            } else {
-                for (const msg of messages) {
-                    if (msg['status'] === status) break;
-                    msg['status'] = status;
+            for (const msg of messages) {
+                if (msg._id === message._id) {
+                    msg['status'] = status
                 }
             }
             this.chatLog[groupID] = messages;

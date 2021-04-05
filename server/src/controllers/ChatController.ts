@@ -163,7 +163,7 @@ export class ChatController {
             
             for (const id of groupRecipients) {
                 const queueName = `message-queue-${id}`
-                const queueData = {command: "update", groupID: groupID, senderID: user.ID, status: status}
+                const queueData = { command: "refresh" }
                 await publishToQueue(queueName, JSON.stringify(queueData))
             }
             

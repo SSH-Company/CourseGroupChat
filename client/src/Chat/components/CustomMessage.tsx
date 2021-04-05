@@ -56,8 +56,8 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
     const [displayStatus, setDisplayStatus] = useState<boolean>(false);
 
     const prepareStatusText = (status: string) => {
-        const seenBy = status.split(',');
-        if (seenBy.length === 0) return '';
+        const seenBy = status.split(',').filter(i => i !== "");
+        if (seenBy.length === 0) return 'Sent';
         if (seenBy.length === 1) return 'Seen';
         if (seenBy.length > 1) return `Seen by ${status.slice(0, status.length -1)}`;
     }
