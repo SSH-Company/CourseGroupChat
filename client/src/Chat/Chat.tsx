@@ -18,7 +18,7 @@ import axios from 'axios';
 
 const Chat = ({ route, navigation }) => {
     const user = useContext(UserContext)
-    const { postStatus, renderFlag, setPostStatus, setRenderFlag } = useContext(RenderMessageContext);
+    const { postStatus, renderFlag, setPostStatus } = useContext(RenderMessageContext);
     const { groupID, name, avatar, verified } = route.params;
     const [group, setGroup] = useState<any>({
         id: groupID,

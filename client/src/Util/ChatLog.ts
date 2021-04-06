@@ -112,7 +112,6 @@ export class ChatLog {
             const rowCount = loadEarlier ? currMessages.length + 20 : currMessages.length;
             const response = await axios.get(`${BASE_URL}/api/chat/load-earlier-messages`, { params: { groupID, rowCount } });
             this.chatLog[groupID] = response.data;
-            return;
         } catch (err) {
             console.error('Something went wrong attempting to refresh group messages.');
         }
