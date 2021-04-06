@@ -73,7 +73,7 @@ export class ChatLogViewModel implements ChatLogViewInterface {
 
         return new Promise((resolve, reject) => {
             Database.getDB()
-                .query(query, [groupID, userID, rowCount])
+                .query(query, [groupID, userID])
                 .then((data: ChatLogViewInterface[]) => resolve(data.map(d => new ChatLogViewModel(d))))
                 .catch(err => {
                     console.log(err)
