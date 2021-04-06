@@ -60,6 +60,7 @@ const Chat = ({ route, navigation }) => {
 
     useEffect(() => {
         if (postStatus) {
+            console.log('sending update.....');
             axios.post(`${BASE_URL}/api/chat/updateMessageStatus`, { groupID: groupID })
             .catch(err => console.log(err));
             setPostStatus(false);
