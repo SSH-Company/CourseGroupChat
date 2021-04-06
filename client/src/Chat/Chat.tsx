@@ -57,6 +57,14 @@ const Chat = ({ route, navigation }) => {
     useEffect(() => {
         resetMessages();
     }, [renderFlag, groupID]);
+
+    useEffect(() => {
+        if (postStatus) {
+            axios.post(`${BASE_URL}/api/chat/updateMessageStatus`, { groupID: groupID })
+            .catch(err => console.log(err));
+            setPostStatus(false);
+        }
+    }, [postStatus, groupID]);
     
     const filterOutEmptyMessages = (messages) => {
         return messages.filter(msg => msg.text !== '' || msg.image !== '' || msg.video !== '');
@@ -78,11 +86,7 @@ const Chat = ({ route, navigation }) => {
             
             //we're filtering here to ensure we can retrieve empty group chats from ChatLog_View, but not render any empty messages
             setMessages(filterOutEmptyMessages(log[groupID]));
-            setNewGroup(false);
-            if (postStatus) {
-                axios.post(`${BASE_URL}/api/chat/updateMessageStatus`, { groupID: groupID }).catch(err => console.log(err))
-                setPostStatus(false);
-            }   
+            setNewGroup(false);   
         } else {
             setNewGroup(true);
             setMessages([]);
@@ -120,7 +124,6 @@ const Chat = ({ route, navigation }) => {
             instance.updateMessageStatus(groupID, "Sent", messages[0]);
             //update the messages
             setMessages(filterOutEmptyMessages(instance.chatLog[groupID]));
-            setPostStatus(false);
         } catch (err) {
             //TODO: display failed notification here
             console.error(err);

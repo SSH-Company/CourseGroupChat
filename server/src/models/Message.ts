@@ -61,10 +61,10 @@ export class MessageModel implements MessageInterface {
 
     static updateStatus(groupID: string, userName: string): Promise<void> {
         return new Promise((resolve, reject) => {
-            const query = ` UPDATE RT.MESSAGE SET "STATUS" = "STATUS" || ? 
-                            WHERE "RECIPIENT_GROUP_ID" = ? AND "STATUS" NOT LIKE '% ? %'`;
-            const params = [userName, groupID, userName];
-
+            const query = ` UPDATE RT.MESSAGE SET "STATUS" = "STATUS" || '${userName}' 
+                            WHERE "RECIPIENT_GROUP_ID" = ? AND "STATUS" NOT LIKE '% ${userName} %'`;
+            const params = [groupID];
+            
             Database.getDB()
                 .query(query, params)
                 .then(() => resolve())

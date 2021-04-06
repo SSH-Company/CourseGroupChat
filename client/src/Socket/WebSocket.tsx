@@ -15,7 +15,7 @@ export const RenderMessageContext = createContext({
 
 const Socket = ({ children }) => {
     const user = useContext(UserContext);
-    const [postStatus, setPostStatus] = useState(false);
+    const [postStatus, setPostStatus] = useState(true);
     const [renderFlag, setRenderFlag] = useState(false)
     const value = { postStatus, renderFlag, setPostStatus, setRenderFlag } as any
     const notificationListener = useRef<any>(null);
@@ -62,7 +62,6 @@ const Socket = ({ children }) => {
                 case 'refresh':
                     log = await ChatLog.getChatLogInstance();
                     await log.refreshGroup(data.groupID);
-                    setPostStatus(false);
                     break;
                 case 'append':
                     log = await ChatLog.getChatLogInstance()
