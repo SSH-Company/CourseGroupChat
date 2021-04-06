@@ -69,8 +69,7 @@ export class ChatLogViewModel implements ChatLogViewInterface {
     static getEarlierMessages(groupID: string, userID: string, rowCount: string): Promise<ChatLogViewModel[]> {
         const query = `SELECT * FROM RT."CHATLOG_VIEW" CV
                         WHERE CV."GROUP_ID" = ? AND CV."USER_ID" = ?
-                        ORDER BY CV."CREATE_DATE"
-                        FETCH FIRST ? ROWS ONLY;`
+                        ORDER BY CV."CREATE_DATE";`
 
         return new Promise((resolve, reject) => {
             Database.getDB()
