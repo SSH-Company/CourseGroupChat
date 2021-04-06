@@ -60,7 +60,8 @@ const Socket = ({ children }) => {
 
             switch (data.command) {
                 case 'refresh':
-                    await ChatLog.getChatLogInstance(true);
+                    log = await ChatLog.getChatLogInstance();
+                    await log.refreshGroup(data.groupID);
                     setPostStatus(false);
                     break;
                 case 'append':

@@ -37,13 +37,13 @@ const Chat = ({ route, navigation }) => {
 
     useEffect(() => {
         const backAction = () => {
-          navigation.navigate('Main');
-          return true
+            navigation.navigate('Main');
+            return true
         };
     
         const backHandler = BackHandler.addEventListener(
-          "hardwareBackPress",
-          backAction
+            "hardwareBackPress",
+            backAction
         );
     
         return () => backHandler.remove();
@@ -255,9 +255,9 @@ const Chat = ({ route, navigation }) => {
                             renderMessage={props => { return ( <CustomMessage children={props} onLongPress={id => handleLongPress(id)} /> ) }}
                             renderInputToolbar={props => { return ( <CustomToolbar children={props} onImagePick={type => onImagePick(type)} /> ) }}
                             isKeyboardInternallyHandled={false}
-                            scrollToBottom
                             loadEarlier
                             onLoadEarlier={onLoadEarlier}
+                            scrollToBottom
                         />
                     }
                 </DrawerLayout>
