@@ -300,6 +300,7 @@ export class ChatController {
     private getEarlierMessages(req: Request, res: Response) {
         const session = req.session;
         const { groupID, rowCount } = req.query;
+        const emptyResponse = '/media/empty_profile_pic.jpg';
 
         if (!groupID || !rowCount) {
             res.status(STATUS.BAD_REQUEST).json({
@@ -321,7 +322,7 @@ export class ChatController {
                         user: {
                             _id: row.CREATOR_ID,
                             name: row.CREATOR_NAME,
-                            avatar: row.AVATAR
+                            avatar: `${BaseUrl}${row.AVATAR ? row.AVATAR : emptyResponse}`
                         },
                         status: row.STATUS,
                         displayStatus: false

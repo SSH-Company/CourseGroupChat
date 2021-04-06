@@ -10,7 +10,8 @@ type GroupInfoMapType = {
     [id: string]: {
         name: string,
         avatar: string,
-        verified: 'Y' | 'N'
+        verified: 'Y' | 'N',
+        entered: boolean
     }
 }
 
@@ -51,7 +52,8 @@ export class ChatLog {
                 grpInfo[row.id] = {
                     name: row.name,
                     avatar: row.avatar_url,
-                    verified: row.verified
+                    verified: row.verified,
+                    entered: false
                 }
             }
         })
@@ -85,7 +87,8 @@ export class ChatLog {
             this.groupInfo[group.id] = {
                 name: group.name,
                 avatar: group.avatar,
-                verified: group.verified
+                verified: group.verified,
+                entered: false
             }
         }
     }
@@ -115,5 +118,10 @@ export class ChatLog {
         } catch (err) {
             console.error('Something went wrong attempting to refresh group messages.');
         }
+    }
+
+    public updateGroupEntered(groupID: string, value: boolean) {
+        this.groupInfo[groupID] = {...this.groupInfo[groupID], entered: value};
+        return;
     }
 }

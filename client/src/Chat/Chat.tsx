@@ -50,30 +50,46 @@ const Chat = ({ route, navigation }) => {
     }, []);
 
     useEffect(() => {
-        resetMessages(true);
-    }, [isFocused])
+        if (isFocused) { 
+            resetMessages(true);
+            updateMessageStatus();
+        }
+    }, [isFocused, groupID])
 
     //re set messages everytime a new message is received from socket
     useEffect(() => {
         resetMessages();
-    }, [renderFlag, groupID]);
-
-    useEffect(() => {
-        if (postStatus) {
-            console.log('sending update.....');
-            axios.post(`${BASE_URL}/api/chat/updateMessageStatus`, { groupID: groupID })
-            .catch(err => console.log(err));
-            setPostStatus(false);
-        }
-    }, [postStatus, groupID]);
+        updateMessageStatus();
+    }, [renderFlag]);
     
     const filterOutEmptyMessages = (messages) => {
         return messages.filter(msg => msg.text !== '' || msg.image !== '' || msg.video !== '');
     }
 
-    const resetMessages = async (fromSource: boolean = false) => {
+    const updateMessageStatus = async () => {
+        try {
+            const instance = await ChatLog.getChatLogInstance();
+            const groupInfo = instance.groupInfo[groupID];
+            if (!groupInfo.entered || postStatus) {
+                await axios.post(`${BASE_URL}/api/chat/updateMessageStatus`, { groupID: groupID });
+                instance.updateGroupEntered(groupID, true);
+                setPostStatus(false);
+            }
+        } catch(err) {
+            console.error(err);
+        }
+        return;
+    }
+
+    const resetMessages = async (refreshSource: boolean = false) => {
         setLoading(true);
-        const instance = await ChatLog.getChatLogInstance(fromSource);
+
+        const instance = await ChatLog.getChatLogInstance();
+
+        if (refreshSource) {
+            await instance.refreshGroup(groupID); 
+        }
+
         const log = instance.chatLog;
 
         if (groupID in log) {
