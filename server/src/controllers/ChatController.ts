@@ -31,7 +31,7 @@ const upload = multer({ storage: storage })
 @Controller('chat')
 export class ChatController {
 
-    @Get(':id')
+    @Get('log/:id')
     private getLog(req: Request, res: Response) {
         const id = req.params.id;
         const emptyResponse = '/media/empty_profile_pic.jpg';
@@ -298,20 +298,18 @@ export class ChatController {
 
     @Get('load-earlier-messages')
     private getEarlierMessages(req: Request, res: Response) {
-        
-            const session = req.session;
-            const { groupID, rowCount } = req.query;
-            console.log(req);
+        const session = req.session;
+        const { groupID, rowCount } = req.query;
 
-            if (!groupID || !rowCount) {
-                res.status(STATUS.BAD_REQUEST).json({
-                    message: "Request parameter must contain groupID and rowCount",
-                    identifier: "CC013"
-                });
-                return;
-            }
+        if (!groupID || !rowCount) {
+            res.status(STATUS.BAD_REQUEST).json({
+                message: "Request parameter must contain groupID and rowCount",
+                identifier: "CC013"
+            });
+            return;
+        }
 
-            ChatLogViewModel.getEarlierMessages(groupID, session.user.ID, rowCount)
+        ChatLogViewModel.getEarlierMessages(groupID, '1', rowCount)
             .then(data => {
                 const responseJson = [];
                 data.forEach(row => {
@@ -319,7 +317,7 @@ export class ChatController {
                         _id: row.MESSAGE_ID,
                         created_at: row.CREATE_DATE,
                         [row.MESSAGE_TYPE]: row.MESSAGE_BODY,
-                        subtitle: row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_ID} sent a ${row.MESSAGE_TYPE}.`,
+                        subtitle: row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === '1' ? 'You': row.CREATOR_ID} sent a ${row.MESSAGE_TYPE}.`,
                         user: {
                             _id: row.CREATOR_ID,
                             name: row.CREATOR_NAME,
@@ -340,7 +338,5 @@ export class ChatController {
                     identifier: "CC014"
                 })
             })
-
-        
     }
 }
