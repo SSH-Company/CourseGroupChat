@@ -301,6 +301,7 @@ export class ChatController {
         
             const session = req.session;
             const { groupID, rowCount } = req.query;
+            console.log(req);
 
             if (!groupID || !rowCount) {
                 res.status(STATUS.BAD_REQUEST).json({
