@@ -309,7 +309,7 @@ export class ChatController {
             return;
         }
 
-        ChatLogViewModel.getEarlierMessages(groupID, '1', rowCount)
+        ChatLogViewModel.getEarlierMessages(groupID, session.user.ID, rowCount)
             .then(data => {
                 const responseJson = [];
                 data.forEach(row => {
@@ -317,7 +317,7 @@ export class ChatController {
                         _id: row.MESSAGE_ID,
                         created_at: row.CREATE_DATE,
                         [row.MESSAGE_TYPE]: row.MESSAGE_BODY,
-                        subtitle: row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === '1' ? 'You': row.CREATOR_ID} sent a ${row.MESSAGE_TYPE}.`,
+                        subtitle: row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_ID} sent a ${row.MESSAGE_TYPE}.`,
                         user: {
                             _id: row.CREATOR_ID,
                             name: row.CREATOR_NAME,
