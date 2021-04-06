@@ -295,4 +295,51 @@ export class ChatController {
             })
         }
     }
+
+    @Get('load-earlier-messages')
+    private getEarlierMessages(req: Request, res: Response) {
+        
+            const session = req.session;
+            const { groupID, rowCount } = req.query;
+
+            if (!groupID || !rowCount) {
+                res.status(STATUS.BAD_REQUEST).json({
+                    message: "Request parameter must contain groupID and rowCount",
+                    identifier: "CC013"
+                });
+                return;
+            }
+
+            ChatLogViewModel.getEarlierMessages(groupID, session.user.ID, rowCount)
+            .then(data => {
+                const responseJson = [];
+                data.forEach(row => {
+                    const json = {
+                        _id: row.MESSAGE_ID,
+                        created_at: row.CREATE_DATE,
+                        [row.MESSAGE_TYPE]: row.MESSAGE_BODY,
+                        subtitle: row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_ID} sent a ${row.MESSAGE_TYPE}.`,
+                        user: {
+                            _id: row.CREATOR_ID,
+                            name: row.CREATOR_NAME,
+                            avatar: row.AVATAR
+                        },
+                        status: row.STATUS,
+                        displayStatus: false
+                    }
+                    
+                    responseJson.push(json)
+                })
+                res.status(STATUS.OK).json(responseJson)
+            })
+            .catch(err => {
+                console.error(err);
+                res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                    message: "Something went wrong while attempting to retrieve earlier messages.",
+                    identifier: "CC014"
+                })
+            })
+
+        
+    }
 }

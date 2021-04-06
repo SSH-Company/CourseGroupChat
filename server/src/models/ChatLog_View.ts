@@ -53,11 +53,28 @@ export class ChatLogViewModel implements ChatLogViewInterface {
                 ROW_NUMBER() OVER (PARTITION BY CV."GROUP_ID" ORDER BY CV."CREATE_DATE" DESC) AS ROW_ID
             FROM RT."CHATLOG_VIEW" CV
             WHERE "USER_ID" = ? AND "VERIFIED" IS NOT NULL
-        ) CHATLOG WHERE ROW_ID < 20;`
+        ) CHATLOG WHERE ROW_ID < 5;`
 
         return new Promise((resolve, reject) => {
             Database.getDB()
                 .query(query, [uid])
+                .then((data: ChatLogViewInterface[]) => resolve(data.map(d => new ChatLogViewModel(d))))
+                .catch(err => {
+                    console.log(err)
+                    reject(err)
+                })
+        })
+    }
+
+    static getEarlierMessages(groupID: string, userID: string, rowCount: string): Promise<ChatLogViewModel[]> {
+        const query = `SELECT * FROM RT."CHATLOG_VIEW" CV
+                        WHERE CV."GROUP_ID" = ? AND CV."USER_ID" = ?
+                        ORDER BY CV."CREATE_DATE"
+                        FETCH FIRST ? ROWS ONLY;`
+
+        return new Promise((resolve, reject) => {
+            Database.getDB()
+                .query(query, [groupID, userID, rowCount])
                 .then((data: ChatLogViewInterface[]) => resolve(data.map(d => new ChatLogViewModel(d))))
                 .catch(err => {
                     console.log(err)

@@ -185,6 +185,12 @@ const Chat = ({ route, navigation }) => {
         });
     }
 
+    const onLoadEarlier = async () => {
+        const log = await ChatLog.getChatLogInstance();
+        await log.refreshGroup(groupID, true);
+        setMessages(filterOutEmptyMessages(log.chatLog[groupID]));
+    }
+
     return (
         <View style={{flex: 1}}>
             {loading ?
@@ -250,6 +256,8 @@ const Chat = ({ route, navigation }) => {
                             renderInputToolbar={props => { return ( <CustomToolbar children={props} onImagePick={type => onImagePick(type)} /> ) }}
                             isKeyboardInternallyHandled={false}
                             scrollToBottom
+                            loadEarlier
+                            onLoadEarlier={onLoadEarlier}
                         />
                     }
                 </DrawerLayout>
