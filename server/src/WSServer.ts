@@ -31,7 +31,9 @@ class WSServer {
             });
             connection.on('close', function(reasonCode, description) {
                 console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
-                // this.wsServer.close();
+                try {
+                    this.wsServer.close();
+                } catch (err) { console.log('ignore this error for now.'); }
             });
         }); 
     }
