@@ -7,7 +7,8 @@ import { UserContext } from '../../Auth/Login';
 //style sheet
 const styles = StyleSheet.create({
     item: {
-        flexDirection: 'row'
+        display: 'flex',
+        flexDirection: 'column'
     },
     itemIn: {
         alignSelf: 'flex-start',
@@ -39,7 +40,6 @@ const styles = StyleSheet.create({
         alignSelf: 'center'
     },
     status: {
-        alignSelf: 'flex-end',
         fontSize: 10,
         color: 'grey'
     }
@@ -56,13 +56,13 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
     const [displayStatus, setDisplayStatus] = useState<boolean>(false);
 
     const prepareStatusText = (status: string) => {
-        const seenBy = status.split(',').filter(i => i !== "");
+        const seenBy = status.split(', ').filter(i => i !== "" && i !== `${user.name.toUpperCase()}`);
         if (seenBy.length === 0) return 'Sent';
         if (seenBy.length === 1) {
             if (['Pending', 'Sent'].includes(seenBy[0])) return seenBy[0];
             else return 'Seen';
         }
-        if (seenBy.length > 1) return `Seen by ${status.slice(0, status.length -2)}`;
+        if (seenBy.length > 1) return `Seen by ${status.slice(0, status.length)}`;
     }
 
     return (
@@ -98,8 +98,10 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                                         isLooping
                                     />)}
                             </View>
-                            {displayStatus && <Text style={styles.status}>{prepareStatusText(currentMessage.status)}</Text>}
                         </TouchableOpacity>
+                        {displayStatus && <Text style={{...styles.status, alignSelf: isCurrentUser ? 'flex-end' : 'flex-start'}}>
+                            {prepareStatusText(currentMessage.status)}
+                        </Text>}
                     </View>
                 )
             }}
