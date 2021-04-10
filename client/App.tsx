@@ -35,7 +35,7 @@ export default function App() {
                       },
                     }}
                   />
-                  <Stack.Screen name="Profile" component={Profile}/>
+                  <Stack.Screen name="Profile" component={Profile} options={{gestureDirection: 'horizontal-inverted'}}/>
                   <Stack.Screen name="GroupMembers" component={GroupMembers}/>                  
                   <Stack.Screen name="CreateGroupForm" component={CreateGroupForm}/>
                   <Stack.Screen name="Search" component={Search}/>

@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { Dimensions, View, StyleSheet, Switch } from 'react-native';
 import { ListItem, Image, Text, Header } from 'react-native-elements';
-import { AntDesign, Entypo, Ionicons, MaterialIcons } from 'react-native-vector-icons';
+import { AntDesign, Entypo, Ionicons, MaterialIcons, MaterialCommunityIcons } from 'react-native-vector-icons';
+import { DrawerLayout } from 'react-native-gesture-handler';
 import * as VideoExtensions from 'video-extensions';
 import * as Notifications from 'expo-notifications';
 
@@ -33,7 +34,7 @@ const Profile = ( {navigation} ) => {
 
     // image props.
     const imageProps = {
-        name: 'Sultan\'s Dine'
+        name: 'Konnect Person'
     }
 
     // functionalities.
@@ -59,15 +60,28 @@ const Profile = ( {navigation} ) => {
     }
 
     const setNotifications = () => {
-        setNotification(true);
-
-        Notifications.setNotificationHandler({
-            handleNotification: async () => ({
-                shouldShowAlert: false,
-                shouldPlaySound: false,
-                shouldSetBadge: false,
-            }),
-        });
+        if (!notification) {
+            setNotification(true);
+            Notifications.setNotificationHandler({
+                handleNotification: async () => ({
+                    shouldShowAlert: false,
+                    shouldPlaySound: false,
+                    shouldSetBadge: false,
+                }),
+            });
+            console.log('notifications off');
+        }
+        else {
+            setNotification(false);
+            Notifications.setNotificationHandler({
+                handleNotification: async () => ({
+                    shouldShowAlert: false,
+                    shouldPlaySound: false,
+                    shouldSetBadge: false,
+                }),
+            });
+            console.log('notifications on');
+        }
     }
 
 
@@ -75,55 +89,43 @@ const Profile = ( {navigation} ) => {
         // Daily use.
         {
             title: 'Dark Mode',         // TODO
-            icon: <MaterialIcons name={"groups"} size={iconSize}/>
+            icon: <MaterialCommunityIcons name={"theme-light-dark"} size={iconSize}/>
         },
         // Preferences.
         {
-            title: 'Notifications',     // NOW
+            title: 'Notifications',     // Make a page
             icon: <Ionicons name={"notifications"} size={iconSize}/>,
-            onPress: setNotifications
+            onPress: setNotifications,
         },
         // Account.
         {
-            title: 'Personal Information',  // NOW
-            icon: <Entypo name={"magnifying-glass"} size={iconSize}/>
+            title: 'Personal Information',  // TODO
+            icon: <Ionicons name={"person"} size={iconSize}/>
         },
         {
-            title: 'Security & Login',  // NOW
-            icon: <Ionicons name={"heart"} size={iconSize}/>
+            title: 'Friend Requests',
+            icon: <Ionicons name='person-add' size={iconSize}/>
         },
         {
-            title: 'Blocked Users', // NOW
-            icon: <Ionicons name={"settings-outline"} size={iconSize}/>
+            title: 'Blocked Users', // TODO
+            icon: <MaterialCommunityIcons name={"block-helper"} size={iconSize}/>
         },
         // Misc.            || Fill out when we have relevant material.
         {
             title: 'Report Issue',
-            icon: <MaterialIcons name={"how-to-vote"} size={iconSize}/>
+            icon: <AntDesign name={"exclamationcircleo"} size={iconSize}/>
         },
         {
             title: 'Help',
-            icon: <Ionicons name={"heart"} size={iconSize}/>
+            icon: <AntDesign name={"questioncircleo"} size={iconSize}/>
         },
         {
             title: 'Legal & Policies',
-            icon: <Ionicons name={"settings-outline"} size={iconSize}/>
+            icon: <AntDesign name={"filetext1"} size={iconSize}/>
         }
     ]
 
-    if (notification) {
-        return (
-            <View>
-                <Header
-                    centerComponent={{
-                        text: "Notifications",
-                        style: { color: "#734f96", fontSize: 20, fontWeight: "bold" },
-                    }}
-                />
-            </View>
-        )
-    }
-    return (    
+    return (
         <View>
             <View style={styles.imageContainer}>
                 { profilePicture && (
@@ -136,7 +138,7 @@ const Profile = ( {navigation} ) => {
                 <Text style={{ paddingBottom: 10, fontSize: 25 }}>{imageProps.name}</Text>
             </View>
             {settingsList.map((item, i) => (
-                <ListItem key={i}>
+                <ListItem key={i} onPress={item.onPress} underlayColor={item.color}>
                     {item.icon}
                     <ListItem.Content>
                         <ListItem.Title>{item.title}</ListItem.Title>
