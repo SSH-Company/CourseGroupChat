@@ -15,18 +15,18 @@ class Queue {
         try {
             const config = Config.getConfig().rabbit;
             const cluster = await amqp.connect(config);
-            this.channel = await cluster.createChannel();
-            
-            await this.channel.assertQueue(name, { durable: false });
+            const channel = await cluster.createChannel();
+            this.channel = {...channel};
+            await channel.assertQueue(name, { durable: false });
 
-            this.channel.consume(name, message => {
+            channel.consume(name, message => {
                 if (message !== null) {
-                    this.channel.ack(message);
+                    channel.ack(message);
                     this.connection.sendUTF(message.content)
                     return null;
                 } else {
                     console.log(message, 'Queue is empty!')
-                    this.channel.reject(message);
+                    channel.reject(message);
                 }
             }, { noAck: false });
 
@@ -38,6 +38,7 @@ class Queue {
 
     public publishToQueue = async (name, message) => {
         try {
+            console.log(this.channel);
             await this.channel?.sendToQueue(name, Buffer.from(message));
         } catch (error) {
             // handle error response
