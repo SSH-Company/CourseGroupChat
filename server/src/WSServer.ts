@@ -21,8 +21,10 @@ class WSServer {
             connection.on('message', function(message) {
                 if (message.type === 'utf8') {
                     const userID = JSON.parse(message.utf8Data).userID
-                    const queueName = `message-queue-${userID}`
-                    CONNECTIONS[userID] = new Queue(queueName, connection)
+                    if (!(userID in CONNECTIONS)) {
+                        const queueName = `message-queue-${userID}`
+                        CONNECTIONS[userID] = new Queue(queueName, connection)   
+                    }
                 }
                 else if (message.type === 'binary') {
                     console.log('Received Binary Message of ' + message.binaryData.length + ' bytes');
