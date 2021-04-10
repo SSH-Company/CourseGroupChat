@@ -11,7 +11,7 @@ import { UserModel } from '../models/User';
 import { GroupModel } from '../models/Group';
 import { UserGroupModel } from '../models/User_Group';
 import { UserGroupListModel } from '../models/UserGroupList';
-import { publishToQueue } from '../services/Queue';
+import { CONNECTIONS } from '../WSServer';
 import BaseUrl from '../BaseUrl';
 
 let storage = multer.diskStorage({
@@ -94,9 +94,10 @@ export class SearchController {
             //send a message to other group members to refresh their logs
             for(const id of recipients) {
                 await UserGroupModel.insert(id, newGroup.ID, groupName);
-                const queueName = `message-queue-${id}`
+                const exchange = `message-queue-${id}`
                 const queueData = { command: "refresh" }
-                await publishToQueue(queueName, JSON.stringify(queueData))
+                const connectionQueue = CONNECTIONS[id];
+                await connectionQueue.publishToQueue(exchange, JSON.stringify(queueData));
             }
 
             res.status(STATUS.OK).json({
@@ -135,9 +136,10 @@ export class SearchController {
             //send a message to other group members to refresh their logs
             for(const id of recipients) {
                 await UserGroupModel.insert(id, groupID, groupName);
-                const queueName = `message-queue-${id}`
+                const exchange = `message-queue-${id}`
                 const queueData = { command: "refresh" }
-                await publishToQueue(queueName, JSON.stringify(queueData))
+                const connectionQueue = CONNECTIONS[id];
+                await connectionQueue.publishToQueue(exchange, JSON.stringify(queueData));
             }
 
             res.status(STATUS.OK).json({
@@ -153,3 +155,4 @@ export class SearchController {
     }
 
 }
+

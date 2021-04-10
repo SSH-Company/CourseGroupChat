@@ -9,7 +9,7 @@ import {
 import fs from 'fs';
 import multer from 'multer';
 import * as STATUS from 'http-status-codes';
-import { publishToQueue } from '../services/Queue';
+import { CONNECTIONS } from '../WSServer';
 import { UserModel } from '../models/User';
 import { MessageModel } from '../models/Message';
 import { UserGroupModel } from '../models/User_Group';
@@ -123,9 +123,10 @@ export class ChatController {
 
             //send a message to each recipients queue
             for (const id of groupRecipients) {
-                const queueName = `message-queue-${id}`
+                const exchange = `message-queue-${id}`
                 const queueData = { ...message, command: "append", groupID: groupID, senderID: senderID }
-                await publishToQueue(queueName, JSON.stringify(queueData));
+                const connectionQueue = CONNECTIONS[id];
+                await connectionQueue.publishToQueue(exchange, JSON.stringify(queueData));
             }   
             
             res.status(STATUS.OK).json();
@@ -162,9 +163,10 @@ export class ChatController {
             const groupRecipients = (await UserGroupModel.getMembers(groupID)).map(row => row.USER_ID).filter(id => id != user.ID);    
             
             for (const id of groupRecipients) {
-                const queueName = `message-queue-${id}`
+                const exchange = `message-queue-${id}`
                 const queueData = { command: "refresh", groupID: groupID }
-                await publishToQueue(queueName, JSON.stringify(queueData))
+                const connectionQueue = CONNECTIONS[id];
+                await connectionQueue.publishToQueue(exchange, JSON.stringify(queueData));
             }
             
             res.status(STATUS.OK).json()
@@ -341,3 +343,5 @@ export class ChatController {
             })
     }
 }
+
+
