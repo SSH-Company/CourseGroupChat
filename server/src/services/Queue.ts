@@ -2,40 +2,44 @@ import amqp from 'amqplib';
 import { Config } from './Config';
 
 class Queue {
-    public readonly channel;
+    public connection;
+    public channel;
 
     constructor(exchange: string, connection: any) {  
         //setup
-        const config = Config.getConfig().rabbit;
-        amqp.connect(config, function(err0, cluster) {
-            if (err0) throw err0;
-            cluster.createChannel(function(err1, channel) {
-                if (err1) throw err1;
+        this.connection = connection;
+        this.consumeQueue(exchange);
+    }
 
-                this.channel = channel;
-                
-                channel.assertExchange(exchange, 'fanout', {
-                    durable: false
-                });
+    private consumeQueue = async (exchange) => {
+        try {
+            const config = Config.getConfig().rabbit;
+            const cluster = await amqp.connect(config);
+            this.channel = await cluster.createChannel();
 
-                channel.assertQueue('', { exclusive: true }, function(err2, q) {
-                    if (err2) throw err2;
-
-                    channel.bindQueue(q.queue, exchange, '');
-
-                    channel.consume(q.queue, function(message) {
-                        if (message !== null) {
-                            channel.ack(message);
-                            connection.sendUTF(message.content)
-                            return null;
-                        } else {
-                            console.log(message, 'Queue is empty!')
-                            channel.reject(message);
-                        }
-                    }, { noAck: true });
-                })
+            this.channel.assertExchange(exchange, 'fanout', {
+                durable: false
             });
-        });
+
+            this.channel.assertQueue('', { exclusive: true }, function(err2, q) {
+                if (err2) throw err2;
+
+                this.channel.bindQueue(q.queue, exchange, '');
+
+                this.channel.consume(q.queue, function(message) {
+                    if (message !== null) {
+                        this.channel.ack(message);
+                        this.connection.sendUTF(message.content)
+                        return null;
+                    } else {
+                        console.log(message, 'Queue is empty!')
+                        this.channel.reject(message);
+                    }
+                }, { noAck: true });
+            })
+        } catch(err) {
+            throw err;
+        }
     }
 
     public publishToQueue = async (exchange, message) => {
