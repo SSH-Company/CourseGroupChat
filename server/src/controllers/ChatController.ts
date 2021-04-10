@@ -125,7 +125,7 @@ export class ChatController {
             for (const id of groupRecipients) {
                 const exchange = `message-queue-${id}`
                 const queueData = { ...message, command: "append", groupID: groupID, senderID: senderID }
-                const connectionQueue = CONNECTIONS[id];
+                const connectionQueue = CONNECTIONS[user.ID];
                 await connectionQueue?.publishToQueue(exchange, JSON.stringify(queueData));
             }   
             
@@ -165,7 +165,7 @@ export class ChatController {
             for (const id of groupRecipients) {
                 const exchange = `message-queue-${id}`
                 const queueData = { command: "refresh", groupID: groupID }
-                const connectionQueue = CONNECTIONS[id];
+                const connectionQueue = CONNECTIONS[user.ID];
                 await connectionQueue?.publishToQueue(exchange, JSON.stringify(queueData));
             }
             

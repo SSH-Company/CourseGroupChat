@@ -13,8 +13,6 @@ class Queue {
                 if (err1) throw err1;
                 this.channel = channel;
                 
-                console.log(channel.checkExchange(exchange));
-
                 channel.assertExchange(exchange, 'fanout', {
                     durable: false
                 });

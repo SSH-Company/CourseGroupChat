@@ -71,6 +71,7 @@ export class SearchController {
     @Middleware([upload.single('avatar')])
     private async createGroup(req: Request, res: Response) {
         const session = req.session;
+        const user = session.user as UserModel;
         const recipients = JSON.parse(req.body.recipients);
         const groupName = req.body.groupName;
         const urlFilePath = req.file ? `/media/profiles/${req.file.filename}` : `/media/empty_profile_pic.jpg`;
@@ -96,7 +97,7 @@ export class SearchController {
                 await UserGroupModel.insert(id, newGroup.ID, groupName);
                 const exchange = `message-queue-${id}`
                 const queueData = { command: "refresh" }
-                const connectionQueue = CONNECTIONS[id];
+                const connectionQueue = CONNECTIONS[user.ID];
                 await connectionQueue?.publishToQueue(exchange, JSON.stringify(queueData));
             }
 
@@ -117,6 +118,8 @@ export class SearchController {
     @Post('add-members')
     private async addMembers(req: Request, res: Response) {
         try {
+            const session = req.session;
+            const user = session.user as UserModel;
             const { groupID, groupName, recipients } = req.body;
 
             if (!groupID || !groupName || !Array.isArray(recipients)) {
@@ -138,7 +141,7 @@ export class SearchController {
                 await UserGroupModel.insert(id, groupID, groupName);
                 const exchange = `message-queue-${id}`
                 const queueData = { command: "refresh" }
-                const connectionQueue = CONNECTIONS[id];
+                const connectionQueue = CONNECTIONS[user.ID];
                 await connectionQueue?.publishToQueue(exchange, JSON.stringify(queueData));
             }
 
