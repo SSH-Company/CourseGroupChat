@@ -1,7 +1,7 @@
 import Websocket from 'websocket';
 import Queue from './services/Queue';
 
-const connections = {};
+export const CONNECTIONS = {};
 
 class WSServer {
     private readonly wsServer;
@@ -22,7 +22,7 @@ class WSServer {
                 if (message.type === 'utf8') {
                     const userID = JSON.parse(message.utf8Data).userID
                     const queueName = `message-queue-${userID}`
-                    connections[userID] = new Queue(queueName, connection)
+                    CONNECTIONS[userID] = new Queue(queueName, connection)
                 }
                 else if (message.type === 'binary') {
                     console.log('Received Binary Message of ' + message.binaryData.length + ' bytes');

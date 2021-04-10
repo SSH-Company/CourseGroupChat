@@ -3,6 +3,7 @@ import { Config } from './Config';
 
 class Queue {
     private connection;
+    private channel;
 
     constructor(name: string, connection: any) {
         this.connection = connection;
@@ -14,7 +15,7 @@ class Queue {
         const config = Config.getConfig().rabbit;
         const cluster = await amqp.connect(config);
         const channel = await cluster.createChannel();
-    
+        this.channel = channel;
         await channel.assertQueue(queue, durable=durable);
     
         if (prefetch) {
@@ -37,21 +38,16 @@ class Queue {
             cluster.close(); 
         }
     }
-}
 
-//general function for publishing by queue name
-export const publishToQueue = async (queue, message, durable = false) => {
-    try {
-        const config = Config.getConfig().rabbit;
-        const cluster = await amqp.connect(config);
-        const channel = await cluster.createChannel();
-        
-        await channel.assertQueue(queue, durable= durable);
-        await channel.sendToQueue(queue, Buffer.from(message));
-    } catch (error) {
-        // handle error response
-        console.error(error, 'Unable to connect to cluster!');  
-        process.exit(1);
+    //general function for publishing by queue name
+    public publishToQueue = async (queue, message) => {
+        try {
+            await this.channel.sendToQueue(queue, Buffer.from(message));
+        } catch (error) {
+            // handle error response
+            console.error(error, 'Unable to connect to cluster!');  
+            process.exit(1);
+        }
     }
 }
 

@@ -11,7 +11,7 @@ import { UserModel } from '../models/User';
 import { GroupModel } from '../models/Group';
 import { UserGroupModel } from '../models/User_Group';
 import { UserGroupListModel } from '../models/UserGroupList';
-import { publishToQueue } from '../services/Queue';
+import { CONNECTIONS } from '../WSServer';
 import BaseUrl from '../BaseUrl';
 
 let storage = multer.diskStorage({
@@ -96,7 +96,8 @@ export class SearchController {
                 await UserGroupModel.insert(id, newGroup.ID, groupName);
                 const queueName = `message-queue-${id}`
                 const queueData = { command: "refresh" }
-                await publishToQueue(queueName, JSON.stringify(queueData))
+                const queue = CONNECTIONS[session.user.ID];
+                await queue.publishToQueue(queueName, JSON.stringify(queueData))
             }
 
             res.status(STATUS.OK).json({
@@ -116,6 +117,7 @@ export class SearchController {
     @Post('add-members')
     private async addMembers(req: Request, res: Response) {
         try {
+            const session = req.session;
             const { groupID, groupName, recipients } = req.body;
 
             if (!groupID || !groupName || !Array.isArray(recipients)) {
@@ -137,7 +139,8 @@ export class SearchController {
                 await UserGroupModel.insert(id, groupID, groupName);
                 const queueName = `message-queue-${id}`
                 const queueData = { command: "refresh" }
-                await publishToQueue(queueName, JSON.stringify(queueData))
+                const queue = CONNECTIONS[session.user.ID];
+                await queue.publishToQueue(queueName, JSON.stringify(queueData))
             }
 
             res.status(STATUS.OK).json({
