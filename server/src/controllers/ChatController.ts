@@ -162,6 +162,8 @@ export class ChatController {
             //find all recipients of this group chat, exclude senderID from the list
             const groupRecipients = (await UserGroupModel.getMembers(groupID)).map(row => row.USER_ID).filter(id => id != user.ID);    
             
+            console.log(CONNECTIONS[user.ID]);
+
             for (const id of groupRecipients) {
                 const exchange = `message-queue-${id}`
                 const queueData = { command: "refresh", groupID: groupID }

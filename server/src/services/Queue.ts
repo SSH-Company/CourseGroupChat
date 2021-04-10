@@ -11,6 +11,7 @@ class Queue {
             if (err0) throw err0;
             cluster.createChannel(function(err1, channel) {
                 if (err1) throw err1;
+
                 this.channel = channel;
                 
                 channel.assertExchange(exchange, 'fanout', {
@@ -39,6 +40,7 @@ class Queue {
 
     public publishToQueue = async (exchange, message) => {
         try {
+            console.log(this.channel);
             console.log(this.channel.checkExchange(exchange));
             this.channel.assertExchange(exchange, 'fanout', { durable: false });
             this.channel.publish(exchange, '', Buffer.from(message));
