@@ -16,7 +16,6 @@ class Queue {
             const config = Config.getConfig().rabbit;
             const cluster = await amqp.connect(config);
             this.channel = await cluster.createChannel();
-            console.log(this.channel);
             this.channel.assertExchange(exchange, 'fanout', {
                 durable: false
             });
@@ -44,8 +43,6 @@ class Queue {
 
     public publishToQueue = async (exchange, message) => {
         try {
-            console.log(this.channel);
-            console.log(this.channel.checkExchange(exchange));
             this.channel.assertExchange(exchange, 'fanout', { durable: false });
             this.channel.publish(exchange, '', Buffer.from(message));
         } catch (error) {
