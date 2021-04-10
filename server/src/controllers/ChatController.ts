@@ -144,19 +144,20 @@ export class ChatController {
     //statuses to received. Query the log for all senders of the messages.
     @Post('updateMessageStatus')
     private async updateMessageStatus(req: Request, res: Response) {
-        const session = req.session;
-        const user = session.user as UserModel;
-        
-        const { groupID } = req.body;
-        
-        if (!groupID) {
-            res.status(STATUS.BAD_REQUEST).json({
-                message: "Request body must contain group ID",
-                identifier: "CC003"
-            })
-        }
-
         try {
+            const session = req.session;
+            const user = session.user as UserModel;
+            
+            const { groupID } = req.body;
+            
+            if (!groupID) {
+                res.status(STATUS.BAD_REQUEST).json({
+                    message: "Request body must contain group ID",
+                    identifier: "CC003"
+                })
+            }
+            
+            console.log(session.user);
             await MessageModel.updateStatus(groupID, user.FIRST_NAME + ' ' + user.LAST_NAME)
 
             //find all recipients of this group chat, exclude senderID from the list
