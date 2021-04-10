@@ -25,7 +25,7 @@ class Queue {
                 if (err2) throw err2;
 
                 this.channel.bindQueue(q.queue, exchange, '');
-
+                console.log(this.channel);
                 this.channel.consume(q.queue, function(message) {
                     if (message !== null) {
                         this.channel.ack(message);
