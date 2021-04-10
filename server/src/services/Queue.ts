@@ -16,8 +16,10 @@ class Queue {
             const config = Config.getConfig().rabbit;
             const cluster = await amqp.connect(config);
             this.channel = await cluster.createChannel();
+            
             await this.channel.assertQueue(name, { durable: false });
-            this.channel.consume(name, function(message) {
+
+            this.channel.consume(name, message => {
                 if (message !== null) {
                     this.channel.ack(message);
                     this.connection.sendUTF(message.content)
@@ -36,7 +38,7 @@ class Queue {
 
     public publishToQueue = async (name, message) => {
         try {
-            this.channel.sendToQueue(name, Buffer.from(message));
+            await this.channel?.sendToQueue(name, Buffer.from(message));
         } catch (error) {
             // handle error response
             console.error(error, 'Unable to connect to cluster!');  
