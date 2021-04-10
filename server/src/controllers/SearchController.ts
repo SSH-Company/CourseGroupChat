@@ -97,7 +97,7 @@ export class SearchController {
                 const exchange = `message-queue-${id}`
                 const queueData = { command: "refresh" }
                 const connectionQueue = CONNECTIONS[id];
-                await connectionQueue.publishToQueue(exchange, JSON.stringify(queueData));
+                await connectionQueue?.publishToQueue(exchange, JSON.stringify(queueData));
             }
 
             res.status(STATUS.OK).json({
@@ -139,7 +139,7 @@ export class SearchController {
                 const exchange = `message-queue-${id}`
                 const queueData = { command: "refresh" }
                 const connectionQueue = CONNECTIONS[id];
-                await connectionQueue.publishToQueue(exchange, JSON.stringify(queueData));
+                await connectionQueue?.publishToQueue(exchange, JSON.stringify(queueData));
             }
 
             res.status(STATUS.OK).json({

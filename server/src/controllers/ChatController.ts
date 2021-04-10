@@ -126,7 +126,7 @@ export class ChatController {
                 const exchange = `message-queue-${id}`
                 const queueData = { ...message, command: "append", groupID: groupID, senderID: senderID }
                 const connectionQueue = CONNECTIONS[id];
-                await connectionQueue.publishToQueue(exchange, JSON.stringify(queueData));
+                await connectionQueue?.publishToQueue(exchange, JSON.stringify(queueData));
             }   
             
             res.status(STATUS.OK).json();
@@ -166,7 +166,7 @@ export class ChatController {
                 const exchange = `message-queue-${id}`
                 const queueData = { command: "refresh", groupID: groupID }
                 const connectionQueue = CONNECTIONS[id];
-                await connectionQueue.publishToQueue(exchange, JSON.stringify(queueData));
+                await connectionQueue?.publishToQueue(exchange, JSON.stringify(queueData));
             }
             
             res.status(STATUS.OK).json()
