@@ -45,6 +45,7 @@ class Queue {
     //general function for publishing by queue name
     public publishToQueue = async (queue, message) => {
         try {
+            console.log(`sending message ${message}`);
             await this.channel.sendToQueue(queue, Buffer.from(message));
         } catch (error) {
             // handle error response

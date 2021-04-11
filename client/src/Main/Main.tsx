@@ -47,8 +47,7 @@ const Main = ({ navigation }) => {
         verified: grpInfo.verified
       });
     });
-    const sortedList = list.sort((a, b) => new Date(b.created_at).valueOf() - new Date(a.created_at).valueOf());
-    setCompleteList(sortedList);
+    setCompleteList(list);
     setRefreshing(false);
   }
 

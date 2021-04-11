@@ -58,6 +58,8 @@ const Socket = ({ children }) => {
             const data = JSON.parse(e.data)
             var log: any;
 
+            console.log(data);
+
             switch (data.command) {
                 case 'refresh':
                     log = await ChatLog.getChatLogInstance();
