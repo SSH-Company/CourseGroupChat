@@ -7,16 +7,15 @@ export const CONNECTIONS = {};
 
 class WSServer {
     private readonly wsServer;
-    private cluster;
 
     constructor(server: any) {
         this.wsServer = new Websocket.server({ httpServer: server })
-        this.setupBrokerConnection();
         this.socketConsume();
     }
 
-    private socketConsume = () => {
-        const cluster = this.cluster;
+    private socketConsume = async () => {
+        const config = Config.getConfig().rabbit;
+        const cluster = await amqp.connect(config);
         this.wsServer.on('request', function(request) {
             // if (!this.originIsAllowed(request.origin)) {
             //   // Make sure we only accept requests from an allowed origin
@@ -48,16 +47,6 @@ class WSServer {
                 console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
             });
         }); 
-    }
-
-    public setupBrokerConnection = async () => {
-        try {
-            const config = Config.getConfig().rabbit;
-            this.cluster = await amqp.connect(config);
-        } catch (err) {
-            console.error(err, 'Unable to connect to broker service!');  
-            process.exit(1);
-        }
     }
 
     public originIsAllowed = (origin) => {
