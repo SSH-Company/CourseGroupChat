@@ -117,7 +117,7 @@ export class UserModel implements UserInterface {
     }
 
     static updateAvatar(path: string, id: string): Promise<UserModel[]> {
-        const query = `UPDATE RT.USER SET AVATAR = ? WHERE "ID" = ? ;`;
+        const query = `UPDATE RT.USER SET "AVATAR" = ? WHERE "ID" = ? ;`;
         
         return new Promise((resolve, reject) => {
             Database.getDB()
