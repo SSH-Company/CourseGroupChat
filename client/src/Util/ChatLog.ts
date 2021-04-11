@@ -1,5 +1,5 @@
 import { IMessage } from 'react-native-gifted-chat';
-import { BASE_URL } from '../BaseUrl';
+import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
 
 type RecipientMessageMapType = {
@@ -41,7 +41,7 @@ export class ChatLog {
                 user: {
                     _id: row.creator_id,
                     name: row.creator_name,
-                    avatar: row.avatar_url
+                    avatar: row.avatar_url || EMPTY_IMAGE_DIRECTORY
                 },
                 status: row.status,
                 displayStatus: false
@@ -51,7 +51,7 @@ export class ChatLog {
                 map[row.id] = [newMessage]
                 grpInfo[row.id] = {
                     name: row.name,
-                    avatar: row.avatar_url,
+                    avatar: row.avatar_url || EMPTY_IMAGE_DIRECTORY,
                     verified: row.verified,
                     entered: false
                 }
@@ -106,9 +106,18 @@ export class ChatLog {
         }
     }
 
-    public async refreshGroup(groupID: string, loadEarlier: boolean = false) {
-        //this shouldn't happen, its a fail safe
-        if (!(groupID in this.chatLog)) return;
+    public async refreshGroup(groupID: string, loadEarlier: boolean = false, name?: string, avatar?: string) {
+        //new group has been created/joined
+        if (!(groupID in this.chatLog)) {
+            this.chatLog[groupID] = []
+            this.groupInfo[groupID] = {
+                name: name,
+                avatar: avatar,
+                verified: 'N',
+                entered: true
+            }
+            return;
+        };
 
         try {
             const currMessages = this.chatLog[groupID];

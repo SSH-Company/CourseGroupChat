@@ -74,7 +74,7 @@ export class SearchController {
             const session = req.session;
             const recipients = JSON.parse(req.body.recipients);
             const groupName = req.body.groupName;
-            const urlFilePath = req.file ? `${BaseUrl}/media/profiles/${req.file.filename}` : '';
+            const urlFilePath = req.file ? `/media/profiles/${req.file.filename}` : '';
 
             if(!Array.isArray(recipients) || recipients.length === 0 || !groupName) {
                 res.status(STATUS.INTERNAL_SERVER_ERROR).json({
@@ -102,7 +102,7 @@ export class SearchController {
             res.status(STATUS.OK).json({
                 id: newGroup.ID,
                 name: groupName,
-                avatar_url: `${urlFilePath}`
+                avatar_url: urlFilePath ? `${BaseUrl}${urlFilePath}` : ''
             });
 
         } catch (err) {

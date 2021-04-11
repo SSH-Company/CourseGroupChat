@@ -11,10 +11,10 @@ import axios from 'axios';
 
 const Profile = ({ navigation }) => {
     const deviceDimensions = Dimensions.get('window')
-    const [profilePicture, setProfilePicture] = useState<any>({ uri: EMPTY_IMAGE_DIRECTORY });
     const [notification, setNotification] = useState(false);
     const [invalidImage, setInvalidImage] = useState(false);
     const { user, setUser } = useContext(UserContext);
+    const [profilePicture, setProfilePicture] = useState<any>({ uri: user.avatar });
 
     const styles = StyleSheet.create({ 
         imageContainer: {
@@ -47,11 +47,15 @@ const Profile = ({ navigation }) => {
             axios.post(`${BASE_URL}/api/profile/upload-profile-pic`, formData, { headers: { 'content-type': 'multipart/form-data' } })
             .then(res => {
                 const newAvatar = res.data.path;
+                console.log(newAvatar);
                 setUser({
                     ...user,
                     avatar: newAvatar
                 });
                 return;
+            })
+            .catch(err => {
+                console.log(err);
             })
         }
     }, [profilePicture])
@@ -70,7 +74,7 @@ const Profile = ({ navigation }) => {
                         setInvalidImage(true);
                         return;
                     }
-                    setProfilePicture(imageRes);
+                    setProfilePicture({...imageRes});
                 } 
             }
         } catch (err) {
@@ -149,7 +153,7 @@ const Profile = ({ navigation }) => {
             <View style={styles.imageContainer}>
                 {profilePicture && (
                 <Image
-                    source={{ uri: profilePicture.uri }}
+                    source={{ uri: profilePicture.uri || EMPTY_IMAGE_DIRECTORY }}
                     style={styles.imageStyle}
                     onPress={uploadImage}
                 />

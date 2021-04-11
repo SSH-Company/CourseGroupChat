@@ -38,11 +38,11 @@ export class ProfileController {
                 fs.unlinkSync(fullPath);
             }
 
-            const urlFilePath = req.file ? `${BaseUrl}/media/profiles/${req.file.filename}` : '';
+            const urlFilePath = req.file ? `/media/profiles/${req.file.filename}` : '';
             await UserModel.updateAvatar(urlFilePath, user.ID);
 
             res.status(STATUS.OK).json({
-                path: urlFilePath
+                path: urlFilePath ? `${BaseUrl}${urlFilePath}` : ''
             });
         }catch (err) {
             console.error(err);

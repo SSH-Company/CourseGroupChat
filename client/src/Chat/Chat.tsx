@@ -50,10 +50,8 @@ const Chat = ({ route, navigation }) => {
     }, []);
 
     useEffect(() => {
-        if (isFocused) { 
-            resetMessages(true);
-            updateMessageStatus();
-        }
+        resetMessages(true);
+        updateMessageStatus();
     }, [isFocused, groupID])
 
     //re set messages everytime a new message is received from socket
@@ -63,14 +61,14 @@ const Chat = ({ route, navigation }) => {
     }, [renderFlag]);
     
     const filterOutEmptyMessages = (msgs) => {
-        return msgs.filter(msg => (msg.text !== '' || msg.image !== '' || msg.video !== ''));
+        return msgs.filter(msg => msg._id && (msg.text !== '' || msg.image !== '' || msg.video !== ''));
     }
 
     const updateMessageStatus = async () => {
         try {
             const instance = await ChatLog.getChatLogInstance();
             const groupInfo = instance.groupInfo[groupID];
-            if (!groupInfo.entered || postStatus) {
+            if (groupInfo && (!groupInfo.entered || postStatus)) {
                 await axios.post(`${BASE_URL}/api/chat/updateMessageStatus`, { groupID: groupID });
                 instance.updateGroupEntered(groupID, true);
                 setPostStatus(false);
@@ -248,7 +246,7 @@ const Chat = ({ route, navigation }) => {
                                     onPress={() => navigation.navigate('Main')}
                                 />
                                 <Avatar 
-                                    source={{ uri: group.avatar }} 
+                                    source={{ uri: group.avatar || EMPTY_IMAGE_DIRECTORY }} 
                                     rounded 
                                     size={avatarSize} 
                                     containerStyle={{ marginLeft: 10, borderColor: "white", borderWidth: 1 }}/>        
