@@ -7,12 +7,16 @@ export const CONNECTIONS = {};
 
 class WSServer {
     private readonly wsServer;
-    public cluster;
+    private cluster;
 
     constructor(server: any) {
         this.wsServer = new Websocket.server({ httpServer: server })
         this.setupBrokerConnection();
-        
+        this.socketConsume();
+    }
+
+    private socketConsume = () => {
+        const cluster = this.cluster;
         this.wsServer.on('request', function(request) {
             // if (!this.originIsAllowed(request.origin)) {
             //   // Make sure we only accept requests from an allowed origin
@@ -29,7 +33,7 @@ class WSServer {
                     if (!(userID in CONNECTIONS)) {
                         //setup new connection
                         const queueName = `message-queue-${userID}`
-                        CONNECTIONS[userID] = new Queue(queueName, this.cluster, connection)   
+                        CONNECTIONS[userID] = new Queue(queueName, cluster, connection)   
                     } else {
                         //reset connection
                         CONNECTIONS[userID].setConnection(connection);
