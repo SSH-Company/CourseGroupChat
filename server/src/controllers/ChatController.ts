@@ -50,12 +50,13 @@ export class ChatController {
                     status: row.STATUS,
                     verified: row.VERIFIED
                 }
-                if (row.MESSAGE_ID && row.MESSAGE_BODY.length > 0) {
+                if (row.MESSAGE_ID && row.MESSAGE_TYPE) {
                     json[row.MESSAGE_TYPE] = row.MESSAGE_BODY,
                     json['subtitle'] = row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === id ? 'You': row.CREATOR_NAME} sent a ${row.MESSAGE_TYPE}.`                        
                 } else {
                     json['subtitle'] = `You have been added to ${json.name}!`
                 }
+                console.log(json);
                 responseJson.push(json)
             })
 

@@ -51,13 +51,13 @@ const Chat = ({ route, navigation }) => {
 
     useEffect(() => {
         resetMessages(true);
-        // updateMessageStatus();
+        updateMessageStatus();
     }, [isFocused, groupID])
 
     //re set messages everytime a new message is received from socket
     useEffect(() => {
         resetMessages();
-        // updateMessageStatus();
+        updateMessageStatus();
     }, [renderFlag]);
     
     const filterOutEmptyMessages = (msgs) => {
@@ -282,7 +282,6 @@ const Chat = ({ route, navigation }) => {
                             isKeyboardInternallyHandled={false}
                             loadEarlier
                             onLoadEarlier={onLoadEarlier}
-                            scrollToBottom
                         />
                     }
                 </DrawerLayout>
