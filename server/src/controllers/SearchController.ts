@@ -70,19 +70,18 @@ export class SearchController {
     @Post('create-group')
     @Middleware([upload.single('avatar')])
     private async createGroup(req: Request, res: Response) {
-        const session = req.session;
-        const recipients = JSON.parse(req.body.recipients);
-        const groupName = req.body.groupName;
-        const urlFilePath = req.file ? `${BaseUrl}/media/profiles/${req.file.filename}` : '';
-
-        if(!Array.isArray(recipients) || recipients.length === 0 || !groupName) {
-            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
-                message: "Request must contain array of [recipients], and a valid Group Name.",
-                identifier: "SC003"
-            })
-        }
-        
         try {
+            const session = req.session;
+            const recipients = JSON.parse(req.body.recipients);
+            const groupName = req.body.groupName;
+            const urlFilePath = req.file ? `${BaseUrl}/media/profiles/${req.file.filename}` : '';
+
+            if(!Array.isArray(recipients) || recipients.length === 0 || !groupName) {
+                res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                    message: "Request must contain array of [recipients], and a valid Group Name.",
+                    identifier: "SC003"
+                })
+            }
 
             //create new group and retrieve group ID
             const newGroup = await GroupModel.insert(urlFilePath);

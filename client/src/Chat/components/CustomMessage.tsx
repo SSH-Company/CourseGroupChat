@@ -52,7 +52,7 @@ type CustomMessageProps = {
 
 const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
     const { children, onLongPress } = props;
-    const user = useContext(UserContext);
+    const { user } = useContext(UserContext);
     const [displayStatus, setDisplayStatus] = useState<boolean>(false);
 
     const prepareStatusText = (status: string) => {

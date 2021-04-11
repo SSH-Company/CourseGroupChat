@@ -28,7 +28,10 @@ const styles = StyleSheet.create({
     }
 });
 
-export const UserContext = createContext({} as User)
+export const UserContext = createContext({
+    user: {} as User,
+    setUser: (obj: any) => {}
+})
 
 // cache to hold expo token.
 const cache = new Cache ({
@@ -51,11 +54,12 @@ Notifications.setNotificationHandler({
 const LogIn = ({ children }) => {
     const [loading, setLoading] = useState(true)
     const [newUser, setNewUser] = useState(false)
-    const [userID, setUserID] = useState({} as User);
+    const [user, setUser] = useState({} as User);
     const [sourceHTML, setSourceHTML] = useState<any>();
     const appState = useRef(AppState.currentState);
     const [expoPushToken, setExpoPushToken] = useState('');
     const responseListener = useRef<any>(null);
+    const userContextValue = { user, setUser };
 
     /*
         How it works:
@@ -174,7 +178,7 @@ const LogIn = ({ children }) => {
         try {
             const user = JSON.parse(msg);
             await ChatLog.getChatLogInstance(true, user.ID); 
-            setUserID({
+            setUser({
                 _id: user.ID,
                 name: user.FIRST_NAME + ' ' + user.LAST_NAME,
                 avatar: user.AVATAR || EMPTY_IMAGE_DIRECTORY
@@ -209,7 +213,7 @@ const LogIn = ({ children }) => {
             )
         } else {
             return (
-                <UserContext.Provider value={userID}>
+                <UserContext.Provider value={userContextValue}>
                     {children}
                 </UserContext.Provider>
             )

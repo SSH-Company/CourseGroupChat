@@ -18,7 +18,7 @@ type listtype = {
 const GroupMembers = ({ route, navigation }) => {
 
     const { id, name } = route.params;
-    const user = useContext(UserContext);
+    const { user } = useContext(UserContext);
     const [members, setMembers] = useState<listtype[]>([]);
     const [loading, setLoading] = useState(true);
     const [displayRemove, setDisplayRemove] = useState(false);

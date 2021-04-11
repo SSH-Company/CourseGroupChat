@@ -196,7 +196,7 @@ export class ChatController {
             if (message.MESSAGE_TYPE !== "text") {
                 const path = message.MESSAGE_BODY.split('messages/')[1];
                 const fullPath = `src/public/client/media/messages/${path}`;
-                await fs.unlinkSync(fullPath);
+                fs.unlinkSync(fullPath);
             }
 
             await MessageModel.delete(groupID, messageID);

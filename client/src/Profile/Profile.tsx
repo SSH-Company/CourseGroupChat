@@ -1,17 +1,20 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { Dimensions, View, StyleSheet } from 'react-native';
 import { ListItem, Image, Text } from 'react-native-elements';
 import { AntDesign, Ionicons, MaterialCommunityIcons } from 'react-native-vector-icons';
 import * as VideoExtensions from 'video-extensions';
 import * as Notifications from 'expo-notifications';
+import { UserContext } from '../Auth/Login';
 import { handleImagePick, handlePermissionRequest } from "../Util/ImagePicker";
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
+import axios from 'axios';
 
 const Profile = ({ navigation }) => {
     const deviceDimensions = Dimensions.get('window')
-    const [profilePicture, setProfilePicture] = useState({ uri: EMPTY_IMAGE_DIRECTORY });
+    const [profilePicture, setProfilePicture] = useState<any>({ uri: EMPTY_IMAGE_DIRECTORY });
     const [notification, setNotification] = useState(false);
     const [invalidImage, setInvalidImage] = useState(false);
+    const { user, setUser } = useContext(UserContext);
 
     const styles = StyleSheet.create({ 
         imageContainer: {
@@ -35,6 +38,23 @@ const Profile = ({ navigation }) => {
     const imageProps = {
         name: 'Konnect Person'
     }
+
+    useEffect(() => {
+        if (profilePicture.uri !== EMPTY_IMAGE_DIRECTORY && !invalidImage) {
+            const formData = new FormData();
+            formData.append('avatar', {...profilePicture})
+
+            axios.post(`${BASE_URL}/api/profile/upload-profile-pic`, formData, { headers: { 'content-type': 'multipart/form-data' } })
+            .then(res => {
+                const newAvatar = res.data.path;
+                setUser({
+                    ...user,
+                    avatar: newAvatar
+                });
+                return;
+            })
+        }
+    }, [profilePicture])
 
     // functionalities.
     const uploadImage = async () => {

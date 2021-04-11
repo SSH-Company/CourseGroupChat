@@ -14,7 +14,7 @@ export const RenderMessageContext = createContext({
 });
 
 const Socket = ({ children }) => {
-    const user = useContext(UserContext);
+    const { user } = useContext(UserContext);
     const [postStatus, setPostStatus] = useState(true);
     const [renderFlag, setRenderFlag] = useState(false)
     const value = { postStatus, renderFlag, setPostStatus, setRenderFlag } as any
