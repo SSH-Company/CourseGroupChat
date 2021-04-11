@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import {
     Middleware,
+    ClassMiddleware,
     Controller,
     Post,
     Get,
@@ -9,6 +10,7 @@ import {
 import fs from 'fs';
 import multer from 'multer';
 import * as STATUS from 'http-status-codes';
+import passport from 'passport';
 import { CONNECTIONS } from '../WSServer';
 import { UserModel } from '../models/User';
 import { MessageModel } from '../models/Message';
@@ -29,6 +31,7 @@ let storage = multer.diskStorage({
 const upload = multer({ storage: storage })
 
 @Controller('chat')
+@ClassMiddleware([passport.authenticate('saml')])
 export class ChatController {
 
     @Get('log/:id')
@@ -156,7 +159,7 @@ export class ChatController {
                     identifier: "CC003"
                 })
             }
-            
+
             console.log(session.user);
             await MessageModel.updateStatus(groupID, user.FIRST_NAME + ' ' + user.LAST_NAME)
 
