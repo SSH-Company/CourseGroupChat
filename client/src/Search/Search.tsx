@@ -3,7 +3,7 @@ import { Text, View, ScrollView, Platform, StyleSheet } from "react-native";
 import { Avatar, Header, SearchBar, Button } from "react-native-elements";
 import Feather from "react-native-vector-icons/Feather";
 import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
-import BASE_URL from '../../BaseUrl';
+import BASE_URL from '../BaseUrl';
 import axios from 'axios';
 
 //style sheet

@@ -1,5 +1,5 @@
 import { IMessage } from 'react-native-gifted-chat';
-import BASE_URL from '../../BaseUrl';
+import BASE_URL from '../BaseUrl';
 import axios from 'axios';
 
 type RecipientMessageMapType = {
@@ -10,7 +10,8 @@ type GroupInfoMapType = {
     [id: string]: {
         name: string,
         avatar: string,
-        verified: 'Y' | 'N'
+        verified: 'Y' | 'N',
+        entered: boolean
     }
 }
 
@@ -18,7 +19,7 @@ export function revisedRandId() {
     return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(2, 10);
 }
 
-export type MessageStatus = "Pending" | "Sent" | "Read"
+export type MessageStatus = "Pending" | "Sent"
 
 export class ChatLog {
     private static instance: ChatLog;
@@ -42,7 +43,8 @@ export class ChatLog {
                     name: row.creator_name,
                     avatar: row.avatar_url
                 },
-                status: row.status
+                status: row.status,
+                displayStatus: false
             }
             if (row.id in map) map[row.id].push(newMessage)
             else {
@@ -50,7 +52,8 @@ export class ChatLog {
                 grpInfo[row.id] = {
                     name: row.name,
                     avatar: row.avatar_url,
-                    verified: row.verified
+                    verified: row.verified,
+                    entered: false
                 }
             }
         })
@@ -65,7 +68,7 @@ export class ChatLog {
             const id = userID ? userID : this.instance.userID;
             //retrieve log
             try {
-                const res = await axios.get(`${BASE_URL}/api/chat/${id}`)
+                const res = await axios.get(`${BASE_URL}/api/chat/log/${id}`)
                 this.instance = new ChatLog(res.data, id);
                 return this.instance;    
             } catch (err) {
@@ -84,33 +87,41 @@ export class ChatLog {
             this.groupInfo[group.id] = {
                 name: group.name,
                 avatar: group.avatar,
-                verified: group.verified
+                verified: group.verified,
+                entered: false
             }
         }
     }
 
-    //TODO: write a better function here to handle all use cases
-    public updateMessageStatus(groupID: string, status: MessageStatus, message?: IMessage) {
+    public updateMessageStatus(groupID: string, status: MessageStatus, message: IMessage) {
         const messages = this.chatLog[groupID]
         if (messages) {
-            if (message) {
-                for (const msg of messages) {
-                    msg['displayStatus'] = false;
-                    if (msg._id === message._id) {
-                        msg['status'] = status
-                        //only display status for last sent message
-                        msg['displayStatus'] = true;    
-                    }
-                }
-            } else {
-                for (const msg of messages) {
-                    if (msg['status'] === status) break;
+            for (const msg of messages) {
+                if (msg._id === message._id) {
                     msg['status'] = status;
-                    msg['displayStatus'] = false;
+                    msg['displayStatus'] = true;
                 }
-                messages[0]['displayStatus'] = true;
             }
             this.chatLog[groupID] = messages;
         }
+    }
+
+    public async refreshGroup(groupID: string, loadEarlier: boolean = false) {
+        //this shouldn't happen, its a fail safe
+        if (!(groupID in this.chatLog)) return;
+
+        try {
+            const currMessages = this.chatLog[groupID];
+            const rowCount = loadEarlier ? currMessages.length + 20 : currMessages.length;
+            const response = await axios.get(`${BASE_URL}/api/chat/load-earlier-messages`, { params: { groupID, rowCount } });
+            this.chatLog[groupID] = response.data;
+        } catch (err) {
+            console.error('Something went wrong attempting to refresh group messages.');
+        }
+    }
+
+    public updateGroupEntered(groupID: string, value: boolean) {
+        this.groupInfo[groupID] = {...this.groupInfo[groupID], entered: value};
+        return;
     }
 }

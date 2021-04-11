@@ -1,13 +1,21 @@
 import Websocket from 'websocket';
-import Queue from './services/Queue';
+import { Queue } from './services/Queue';
+import { Config } from './services/Config';
+import amqp from 'amqplib';
 
-const connections = {};
+export const CONNECTIONS = {};
 
 class WSServer {
     private readonly wsServer;
 
     constructor(server: any) {
         this.wsServer = new Websocket.server({ httpServer: server })
+        this.socketConsume();
+    }
+
+    private socketConsume = async () => {
+        const config = Config.getConfig().rabbit;
+        const cluster = await amqp.connect(config);
         this.wsServer.on('request', function(request) {
             // if (!this.originIsAllowed(request.origin)) {
             //   // Make sure we only accept requests from an allowed origin
@@ -21,8 +29,14 @@ class WSServer {
             connection.on('message', function(message) {
                 if (message.type === 'utf8') {
                     const userID = JSON.parse(message.utf8Data).userID
-                    const queueName = `message-queue-${userID}`
-                    connections[userID] = new Queue(queueName, connection)
+                    if (!(userID in CONNECTIONS)) {
+                        //setup new connection
+                        const queueName = `message-queue-${userID}`
+                        CONNECTIONS[userID] = new Queue(queueName, cluster, connection)   
+                    } else {
+                        //reset connection
+                        CONNECTIONS[userID].setConnection(connection);
+                    }
                 }
                 else if (message.type === 'binary') {
                     console.log('Received Binary Message of ' + message.binaryData.length + ' bytes');

@@ -4,7 +4,7 @@ import { Header, Input, Image } from "react-native-elements";
 import * as VideoExtensions from 'video-extensions';
 import { Ionicons } from "react-native-vector-icons";
 import { handleImagePick, handlePermissionRequest } from "../Util/ImagePicker";
-import BASE_URL from '../../BaseUrl';
+import BASE_URL from '../BaseUrl';
 
 const styles = StyleSheet.create({
     imagePicker: { 

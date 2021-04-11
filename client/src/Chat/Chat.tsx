@@ -13,12 +13,12 @@ import { RenderMessageContext } from '../Socket/WebSocket';
 import { handleImagePick, handlePermissionRequest } from "../Util/ImagePicker";
 import { ChatLog, MessageStatus, revisedRandId } from '../Util/ChatLog';
 import VerifiedIcon from '../Util/CommonComponents/VerifiedIcon';
-import BASE_URL from '../../BaseUrl';
+import BASE_URL from '../BaseUrl';
 import axios from 'axios';
 
 const Chat = ({ route, navigation }) => {
     const user = useContext(UserContext)
-    const { postStatus, renderFlag, setPostStatus, setRenderFlag } = useContext(RenderMessageContext);
+    const { postStatus, renderFlag, setPostStatus } = useContext(RenderMessageContext);
     const { groupID, name, avatar, verified } = route.params;
     const [group, setGroup] = useState<any>({
         id: groupID,
@@ -37,30 +37,59 @@ const Chat = ({ route, navigation }) => {
 
     useEffect(() => {
         const backAction = () => {
-          navigation.navigate('Main');
-          return true
+            navigation.navigate('Main');
+            return true
         };
     
         const backHandler = BackHandler.addEventListener(
-          "hardwareBackPress",
-          backAction
+            "hardwareBackPress",
+            backAction
         );
     
         return () => backHandler.remove();
     }, []);
 
     useEffect(() => {
-        resetMessages(true);
-    }, [isFocused])
+        if (isFocused) { 
+            resetMessages(true);
+            updateMessageStatus();
+        }
+    }, [isFocused, groupID])
 
     //re set messages everytime a new message is received from socket
     useEffect(() => {
         resetMessages();
-    }, [renderFlag, groupID])
+        updateMessageStatus();
+    }, [renderFlag]);
+    
+    const filterOutEmptyMessages = (msgs) => {
+        return msgs.filter(msg => (msg.text !== '' || msg.image !== '' || msg.video !== ''));
+    }
 
-    const resetMessages = async (fromSource: boolean = false) => {
+    const updateMessageStatus = async () => {
+        try {
+            const instance = await ChatLog.getChatLogInstance();
+            const groupInfo = instance.groupInfo[groupID];
+            if (!groupInfo.entered || postStatus) {
+                await axios.post(`${BASE_URL}/api/chat/updateMessageStatus`, { groupID: groupID });
+                instance.updateGroupEntered(groupID, true);
+                setPostStatus(false);
+            }
+        } catch(err) {
+            console.error(err);
+        }
+        return;
+    }
+
+    const resetMessages = async (refreshSource: boolean = false) => {
         setLoading(true);
-        const instance = await ChatLog.getChatLogInstance(fromSource);
+
+        const instance = await ChatLog.getChatLogInstance();
+
+        if (refreshSource) {
+            await instance.refreshGroup(groupID); 
+        }
+
         const log = instance.chatLog;
 
         if (groupID in log) {
@@ -73,13 +102,12 @@ const Chat = ({ route, navigation }) => {
             });
             
             //we're filtering here to ensure we can retrieve empty group chats from ChatLog_View, but not render any empty messages
-            const filteredMessages = log[groupID].filter(msg => msg.text !== '' || msg.image !== '' || msg.video !== '')
-            setMessages(filteredMessages);
-            setNewGroup(false);
-            if (postStatus) {
-                axios.post(`${BASE_URL}/api/chat/updateMessageStatus`, { groups: [groupID], status: "Read" }).catch(err => console.log(err))
-                setPostStatus(false);
-            }   
+            setMessages(previousMessages => {
+                const messageIds = previousMessages.map(m => m._id);
+                const filteredMessages = filterOutEmptyMessages(log[groupID]).filter(m => !messageIds.includes(m._id));
+                return GiftedChat.append(previousMessages, filteredMessages)
+            });
+            setNewGroup(false);   
         } else {
             setNewGroup(true);
             setMessages([]);
@@ -113,9 +141,10 @@ const Chat = ({ route, navigation }) => {
                 await axios.post(`${BASE_URL}/api/chat`, formData)
             }
             
-            const instance = await ChatLog.getChatLogInstance()
-            instance.updateMessageStatus(groupID, "Sent", messages[0])
-            setRenderFlag(!renderFlag);
+            const instance = await ChatLog.getChatLogInstance();
+            instance.updateMessageStatus(groupID, "Sent", messages[0]);
+            //update the messages
+            setMessages(filterOutEmptyMessages(instance.chatLog[groupID]));
         } catch (err) {
             //TODO: display failed notification here
             console.error(err);
@@ -157,10 +186,10 @@ const Chat = ({ route, navigation }) => {
         }
     }
 
-    const handleLongPress = async (id: string) => {
+    const handleLongPress = (id: string) => {
         const options = ['Remove message', 'Edit message'];
         const cancelButtonIndex = options.length - 1;
-        await showActionSheetWithOptions({
+        showActionSheetWithOptions({
             options,
             cancelButtonIndex
         }, async (buttonIndex) => {
@@ -179,6 +208,15 @@ const Chat = ({ route, navigation }) => {
             }
         });
     }
+
+    const onLoadEarlier = async () => {
+        const log = await ChatLog.getChatLogInstance();
+        await log.refreshGroup(groupID, true);
+        setMessages(previousMessages => {
+            const messageIds = previousMessages.map(m => m._id);
+            const filteredMessages = filterOutEmptyMessages(log.chatLog[groupID]).filter(m => !messageIds.includes(m._id));
+            return GiftedChat.prepend(previousMessages, filteredMessages)
+        });}
 
     return (
         <View style={{flex: 1}}>
@@ -244,6 +282,9 @@ const Chat = ({ route, navigation }) => {
                             renderMessage={props => { return ( <CustomMessage children={props} onLongPress={id => handleLongPress(id)} /> ) }}
                             renderInputToolbar={props => { return ( <CustomToolbar children={props} onImagePick={type => onImagePick(type)} /> ) }}
                             isKeyboardInternallyHandled={false}
+                            loadEarlier
+                            onLoadEarlier={onLoadEarlier}
+                            scrollToBottom
                         />
                     }
                 </DrawerLayout>

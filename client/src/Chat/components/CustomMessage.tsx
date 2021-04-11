@@ -1,15 +1,14 @@
-import React, { FunctionComponent, useContext } from 'react';
+import React, { FunctionComponent, useContext, useState } from 'react';
 import { View, StyleSheet, Text, Image, TouchableOpacity } from 'react-native';
 import { Message } from 'react-native-gifted-chat';
 import { Video } from 'expo-av';
 import { UserContext } from '../../Auth/Login';
-import BASE_URL from '../../../BaseUrl';
 
 //style sheet
 const styles = StyleSheet.create({
     item: {
-        marginVertical: 5,
-        flexDirection: 'row'
+        display: 'flex',
+        flexDirection: 'column'
     },
     itemIn: {
         alignSelf: 'flex-start',
@@ -39,6 +38,10 @@ const styles = StyleSheet.create({
         minWidth: 200,
         minHeight: 200,
         alignSelf: 'center'
+    },
+    status: {
+        fontSize: 10,
+        color: 'grey'
     }
 })
 
@@ -50,18 +53,32 @@ type CustomMessageProps = {
 const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
     const { children, onLongPress } = props;
     const user = useContext(UserContext);
+    const [displayStatus, setDisplayStatus] = useState<boolean>(false);
+
+    const prepareStatusText = (status: string) => {
+        const seenBy = status.split(', ').filter(i => i !== "" && i !== `${user.name.toUpperCase()}`);
+        if (seenBy.length === 0) return 'Sent';
+        if (seenBy.length === 1) {
+            if (['Pending', 'Sent'].includes(seenBy[0])) return seenBy[0];
+            else return 'Seen';
+        }
+        if (seenBy.length > 1) return `Seen by ${status.slice(0, status.length)}`;
+    }
 
     return (
         <Message 
             {...children}
-            key={`user-key-${children['user']['_id']}-${children['currentMessage'].displayStatus}`}
+            key={`user-key-${children['user']['_id']}-${displayStatus}`}
             renderBubble={() => {
                 const currentMessage = children['currentMessage']
                 const isCurrentUser = currentMessage.user._id === user._id
                 
                 return (
                     <View style={[styles.item]}>
-                        <TouchableOpacity onLongPress={() => onLongPress(currentMessage._id)}>
+                        <TouchableOpacity 
+                            onPress={() => setDisplayStatus(!displayStatus)}
+                            onLongPress={() => onLongPress(currentMessage._id)}
+                        >
                             <View style={[styles.balloon, {backgroundColor: isCurrentUser ? '#f5f9ff' : '#7c80ee'}]}>
                                     {currentMessage.text !== "" && <Text style={{paddingTop: 5, color:  isCurrentUser ? 'black' : 'white'}}>{currentMessage.text}</Text>}
                                     {currentMessage.hasOwnProperty('image') && currentMessage.image.length > 0 && 
@@ -80,9 +97,11 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                                         resizeMode="cover"
                                         isLooping
                                     />)}
-                                    {currentMessage.displayStatus && <Text>{currentMessage.status}</Text>}
                             </View>
                         </TouchableOpacity>
+                        {displayStatus && <Text style={{...styles.status, alignSelf: isCurrentUser ? 'flex-end' : 'flex-start'}}>
+                            {prepareStatusText(currentMessage.status)}
+                        </Text>}
                     </View>
                 )
             }}
