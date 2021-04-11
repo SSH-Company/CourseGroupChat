@@ -35,7 +35,7 @@
   },
   "scripts": {
     "build-both": "sudo npm run build",
-    "build": "npm i && rm -rf ./build/ && tsc && cp -rp ./src/public ./build",
+    "build": "npm i && npm audit fix && rm -rf ./build/ && tsc && cp -rp ./src/public ./build",
     "build-server": "node build/start.js",
     "start-dev": "PORT=3000 nodemon --config \"./util/nodemon.json\"/"
   },

@@ -1,5 +1,5 @@
 import Websocket from 'websocket';
-import Queue from './services/Queue';
+import { Queue } from './services/Queue';
 import { Config } from './services/Config';
 import amqp from 'amqplib';
 
