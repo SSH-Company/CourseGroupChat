@@ -1,18 +1,17 @@
-import React, { useState, useRef } from 'react'
-import { Dimensions, View, StyleSheet, Switch } from 'react-native';
-import { ListItem, Image, Text, Header } from 'react-native-elements';
-import { AntDesign, Entypo, Ionicons, MaterialIcons, MaterialCommunityIcons } from 'react-native-vector-icons';
-import { DrawerLayout } from 'react-native-gesture-handler';
+import React, { useState } from 'react'
+import { Dimensions, View, StyleSheet } from 'react-native';
+import { ListItem, Image, Text } from 'react-native-elements';
+import { AntDesign, Ionicons, MaterialCommunityIcons } from 'react-native-vector-icons';
 import * as VideoExtensions from 'video-extensions';
 import * as Notifications from 'expo-notifications';
-
 import { handleImagePick, handlePermissionRequest } from "../Util/ImagePicker";
+import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 
-const Profile = ( {navigation} ) => {
+const Profile = ({ navigation }) => {
     const deviceDimensions = Dimensions.get('window')
-
-    const [profilePicture, setProfilePicture] = useState({ uri: `https://placeimg.com/140/140/any` });
+    const [profilePicture, setProfilePicture] = useState({ uri: EMPTY_IMAGE_DIRECTORY });
     const [notification, setNotification] = useState(false);
+    const [invalidImage, setInvalidImage] = useState(false);
 
     const styles = StyleSheet.create({ 
         imageContainer: {
@@ -40,6 +39,7 @@ const Profile = ( {navigation} ) => {
     // functionalities.
     const uploadImage = async () => {
         try {
+            setInvalidImage(false);
             const status = await handlePermissionRequest("library");
             if (status === "granted") {
                 const imageRes = await handleImagePick("library");
@@ -47,14 +47,13 @@ const Profile = ( {navigation} ) => {
                     const fileExtension = imageRes.type.split('/')[1];
                     const mediaType = (VideoExtensions as any).default.includes(fileExtension) ? "video" : "image";
                     if (mediaType === "video") {
-                        // TODO: handle wrong format uploads.
+                        setInvalidImage(true);
                         return;
                     }
                     setProfilePicture(imageRes);
-                }
+                } 
             }
-        }
-        catch (err) {
+        } catch (err) {
             console.log(err);
         }
     }
@@ -128,17 +127,17 @@ const Profile = ( {navigation} ) => {
     return (
         <View>
             <View style={styles.imageContainer}>
-                { profilePicture && (
+                {profilePicture && (
                 <Image
                     source={{ uri: profilePicture.uri }}
-                    style={ styles.imageStyle }
+                    style={styles.imageStyle}
                     onPress={uploadImage}
                 />
                 )}
                 <Text style={{ paddingBottom: 10, fontSize: 25 }}>{imageProps.name}</Text>
             </View>
             {settingsList.map((item, i) => (
-                <ListItem key={i} onPress={item.onPress} underlayColor={item.color}>
+                <ListItem key={i} onPress={item.onPress}>
                     {item.icon}
                     <ListItem.Content>
                         <ListItem.Title>{item.title}</ListItem.Title>

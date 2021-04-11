@@ -13,10 +13,8 @@ import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-// file imports.
 import { ChatLog } from '../Util/ChatLog';
-import BASE_URL from '../BaseUrl';
+import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from "../BaseUrl";
 
 const styles = StyleSheet.create({
     container: {
@@ -179,7 +177,7 @@ const LogIn = ({ children }) => {
             setUserID({
                 _id: user.ID,
                 name: user.FIRST_NAME + ' ' + user.LAST_NAME,
-                avatar: 'https://placeimg.com/140/140/any'
+                avatar: user.AVATAR || EMPTY_IMAGE_DIRECTORY
             })
             //redirect to Main
             setNewUser(false)
@@ -196,7 +194,7 @@ const LogIn = ({ children }) => {
             </View>
         )
     } else {
-        if (newUser) { //FIX ME
+        if (newUser) {
             return (
                 <WebView
                     javaScriptEnabled={true}

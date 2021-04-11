@@ -4,7 +4,7 @@ import { Header, Input, Image } from "react-native-elements";
 import * as VideoExtensions from 'video-extensions';
 import { Ionicons } from "react-native-vector-icons";
 import { handleImagePick, handlePermissionRequest } from "../Util/ImagePicker";
-import BASE_URL from '../BaseUrl';
+import { EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 
 const styles = StyleSheet.create({
     imagePicker: { 
@@ -16,7 +16,7 @@ const styles = StyleSheet.create({
 })
 
 const CreateGroupForm = ({ navigation }) => {
-    const [image, setImage] = useState({ uri: `${BASE_URL}/media/empty_profile_pic.jpg` });
+    const [image, setImage] = useState({ uri: EMPTY_IMAGE_DIRECTORY });
     const [groupName, setGroupName] = useState<string>();
     const [errorMessage, setErrorMessage] = useState<string>();
     const [invalidImage, setInvalidImage] = useState(false);

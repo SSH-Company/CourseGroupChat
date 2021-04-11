@@ -4,6 +4,7 @@ interface UserInterface {
     ID?: string;
     FIRST_NAME?: string;
     LAST_NAME?: string;
+    AVATAR?: string;
     EMAIL?: string;
     CREATE_DATE?: string;
     IS_ACTIVE?: "Y" | "N";
@@ -13,6 +14,7 @@ export class UserModel implements UserInterface {
     ID?: string;
     FIRST_NAME?: string;
     LAST_NAME?: string;
+    AVATAR?: string;
     EMAIL?: string;
     CREATE_DATE?: string;
     IS_ACTIVE?: "Y" | "N";
@@ -98,7 +100,7 @@ export class UserModel implements UserInterface {
     }
 
     static getMembersByGroupId(id: string): Promise<UserModel[]> {
-        const query = `SELECT u."ID", u."FIRST_NAME", u."LAST_NAME" 
+        const query = `SELECT u."ID", u."FIRST_NAME", u."LAST_NAME", u."AVATAR" 
                     FROM RT.USER_GROUP ug
                     LEFT JOIN RT.USER u on ug."USER_ID" = u."ID"
                     WHERE "GROUP_ID" = ? `;

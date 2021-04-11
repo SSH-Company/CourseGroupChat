@@ -34,7 +34,6 @@ export class ChatController {
     @Get('log/:id')
     private getLog(req: Request, res: Response) {
         const id = req.params.id;
-        const emptyResponse = '/media/empty_profile_pic.jpg';
 
         ChatLogViewModel.getUserLog(id)
         .then(data => {
@@ -46,7 +45,7 @@ export class ChatController {
                     creator_name: row.CREATOR_NAME,
                     message_id: row.MESSAGE_ID,
                     name: row.VERIFIED === "Y" ? row.GROUP_ID : row.NAME,
-                    avatar_url: `${BaseUrl}${row.AVATAR ? row.AVATAR : emptyResponse}`,
+                    avatar_url: `${row.AVATAR ? BaseUrl+row.AVATAR : ''}`,
                     created_at: row.CREATE_DATE,
                     status: row.STATUS,
                     verified: row.VERIFIED
@@ -95,7 +94,7 @@ export class ChatController {
             const senderID = {
                 _id: user.ID,
                 name: user.FIRST_NAME + ' ' + user.LAST_NAME,
-                avatar: 'https://placeimg.com/140/140/any'
+                avatar: user.AVATAR
             }
 
             let messageType: "text" | "image" | "video" = "text", 
@@ -285,7 +284,7 @@ export class ChatController {
             res.status(STATUS.OK).json(members.map(row => ({
                 id: row.ID,
                 name: row.FIRST_NAME + ' ' + row.LAST_NAME,
-                avatar_url: 'https://placeimg.com/140/140/any',
+                avatar_url: row.AVATAR,
                 checked: false
             })));
 
@@ -302,7 +301,6 @@ export class ChatController {
     private getEarlierMessages(req: Request, res: Response) {
         const session = req.session;
         const { groupID, rowCount } = req.query;
-        const emptyResponse = '/media/empty_profile_pic.jpg';
 
         if (!groupID || !rowCount) {
             res.status(STATUS.BAD_REQUEST).json({
@@ -324,7 +322,7 @@ export class ChatController {
                         user: {
                             _id: row.CREATOR_ID,
                             name: row.CREATOR_NAME,
-                            avatar: `${BaseUrl}${row.AVATAR ? row.AVATAR : emptyResponse}`
+                            avatar: `${row.AVATAR ? BaseUrl+row.AVATAR : ''}`
                         },
                         status: row.STATUS,
                         displayStatus: false

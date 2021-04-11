@@ -5,7 +5,7 @@ import { navigationRef } from '../../Util/RootNavigation';
 import { Ionicons } from "react-native-vector-icons";
 import { UserContext } from '../../Auth/Login';
 import BaseList from '../../Util/CommonComponents/BaseList';
-import BASE_URL from '../../BaseUrl';
+import { BASE_URL } from '../../BaseUrl';
 import axios from 'axios';
 
 type listtype = {
