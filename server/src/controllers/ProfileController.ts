@@ -32,7 +32,7 @@ export class ProfileController {
             const user = session.user;
 
             //remove existing profile picture from file system
-            if (user.AVATAR.trim().length) {
+            if (user.AVATAR?.trim().length) {
                 const path = user.AVATAR.split('profiles/')[1];
                 const fullPath = `src/public/client/media/profiles/${path}`;
                 fs.unlinkSync(fullPath);

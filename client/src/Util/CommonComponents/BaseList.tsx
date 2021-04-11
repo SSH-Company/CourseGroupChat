@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { ListItem, Avatar } from "react-native-elements";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import VerifiedIcon from './VerifiedIcon';
+import { EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
 
 //style sheet
 const style = StyleSheet.create({
@@ -49,7 +50,7 @@ const BaseList:FunctionComponent<BaseListProps> = (props) => {
               key={i}
               onPress={(e) => itemOnPress(l, i)}
             >
-                <Avatar rounded size="medium" source={{ uri: l.avatar_url }}/>
+                <Avatar rounded size="medium" source={{ uri: l.avatar_url || EMPTY_IMAGE_DIRECTORY }}/>
                 <ListItem.Content>
                     <View style={{ display:'flex', flexDirection: "row", justifyContent: "space-between" }}>
                     <ListItem.Title>{`${l.name}`}</ListItem.Title>
