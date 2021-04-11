@@ -69,29 +69,26 @@ const LogIn = ({ children }) => {
         and stored. The user is then redirected to the Main page.
     */
     useEffect(() => {
-        // axios.get(`${BASE_URL}/api/login`)
-        //     .then(async res => {
-        //         setSourceHTML({ html: res.data });
-        //         setNewUser(true);
-        //         setLoading(false);
-        //     })
-        //     .catch(err => {
-        //         const response = err.response;
-        //         if (response) {
-        //             switch (response.status) {
-        //                 case 302:
-        //                     setNewUser(true);
-        //                     setSourceHTML({ uri: response.data.redirect });
-        //                     setLoading(false);
-        //                     break;
-        //                 default:
-        //                     break;
-        //             }
-        //         }
-        //     })
-        tempFix();
-        setNewUser(false);
-        setLoading(false);
+        axios.get(`${BASE_URL}/api/login`)
+            .then(async res => {
+                setSourceHTML({ html: res.data });
+                setNewUser(true);
+                setLoading(false);
+            })
+            .catch(err => {
+                const response = err.response;
+                if (response) {
+                    switch (response.status) {
+                        case 302:
+                            setNewUser(true);
+                            setSourceHTML({ uri: response.data.redirect });
+                            setLoading(false);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            })
     }, [])
 
     useEffect(() => {
@@ -190,15 +187,6 @@ const LogIn = ({ children }) => {
             console.log(err);
             return
         }
-    }
-
-    const tempFix = async () => {
-        await ChatLog.getChatLogInstance(true, '2');
-        setUserID({
-            _id: '2',
-            name: 'Tanvir' + ' ' + 'Shahriar',
-            avatar: 'https://placeimg.com/140/140/any'
-        })
     }
 
     if (loading) {
