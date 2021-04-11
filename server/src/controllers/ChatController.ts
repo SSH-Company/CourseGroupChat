@@ -56,7 +56,6 @@ export class ChatController {
                 } else {
                     json['subtitle'] = `You have been added to ${json.name}!`
                 }
-                console.log(json);
                 responseJson.push(json)
             })
 
@@ -315,11 +314,15 @@ export class ChatController {
             .then(data => {
                 const responseJson = [];
                 data.forEach(row => {
+                    let subtitle = '';
+                    if (row.MESSAGE_ID && row.MESSAGE_BODY.length > 0) {
+                        subtitle = row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_NAME} sent a ${row.MESSAGE_TYPE}.`
+                    } else subtitle = `You have been added to ${row.NAME}`
                     const json = {
                         _id: row.MESSAGE_ID,
                         created_at: row.CREATE_DATE,
                         [row.MESSAGE_TYPE]: row.MESSAGE_BODY,
-                        subtitle: row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_ID} sent a ${row.MESSAGE_TYPE}.`,
+                        subtitle: subtitle,
                         user: {
                             _id: row.CREATOR_ID,
                             name: row.CREATOR_NAME,
