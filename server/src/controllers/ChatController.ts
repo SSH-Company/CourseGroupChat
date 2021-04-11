@@ -1,7 +1,6 @@
 import { Request, Response } from 'express'
 import {
     Middleware,
-    ClassMiddleware,
     Controller,
     Post,
     Get,
@@ -10,7 +9,6 @@ import {
 import fs from 'fs';
 import multer from 'multer';
 import * as STATUS from 'http-status-codes';
-import passport from 'passport';
 import { CONNECTIONS } from '../WSServer';
 import { UserModel } from '../models/User';
 import { MessageModel } from '../models/Message';
@@ -164,7 +162,7 @@ export class ChatController {
             //find all recipients of this group chat, exclude senderID from the list
             const groupRecipients = (await UserGroupModel.getMembers(groupID)).map(row => row.USER_ID).filter(id => id != user.ID);    
             
-            for (const id of [...new Set(groupRecipients)]) {
+            for (const id of groupRecipients) {
                 const queueName = `message-queue-${id}`
                 const queueData = { command: "refresh", groupID: groupID }
                 const queue = CONNECTIONS[user.ID];
