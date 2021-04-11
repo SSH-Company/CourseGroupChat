@@ -317,7 +317,7 @@ export class ChatController {
                     let subtitle = '';
                     if (row.MESSAGE_ID && row.MESSAGE_BODY.length > 0) {
                         subtitle = row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_NAME} sent a ${row.MESSAGE_TYPE}.`
-                    } else subtitle = `You have been added to ${row.NAME}`
+                    } else subtitle = `You have been added to ${row.NAME}!`
                     const json = {
                         _id: row.MESSAGE_ID,
                         created_at: row.CREATE_DATE,
@@ -331,7 +331,7 @@ export class ChatController {
                         status: row.STATUS,
                         displayStatus: false
                     }
-                    
+                    console.log(json.user);
                     responseJson.push(json)
                 })
                 res.status(STATUS.OK).json(responseJson)
