@@ -31,7 +31,6 @@ let storage = multer.diskStorage({
 const upload = multer({ storage: storage })
 
 @Controller('chat')
-@ClassMiddleware([passport.authenticate('saml')])
 export class ChatController {
 
     @Get('log/:id')
@@ -90,7 +89,7 @@ export class ChatController {
         
         try {
             const session = req.session;
-            const user = session.user as UserModel;
+            const user = session.user;
 
             const messages = JSON.parse(req.body.message);
             const message = messages.messages[0]
@@ -149,7 +148,7 @@ export class ChatController {
     private async updateMessageStatus(req: Request, res: Response) {
         try {
             const session = req.session;
-            const user = session.user as UserModel;
+            const user = session.user;
             
             const { groupID } = req.body;
             
@@ -160,7 +159,6 @@ export class ChatController {
                 })
             }
 
-            console.log(session.user);
             await MessageModel.updateStatus(groupID, user.FIRST_NAME + ' ' + user.LAST_NAME)
 
             //find all recipients of this group chat, exclude senderID from the list
