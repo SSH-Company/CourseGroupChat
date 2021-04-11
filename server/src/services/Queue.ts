@@ -1,19 +1,15 @@
-import amqp from 'amqplib';
-import { Config } from './Config';
 
 class Queue {
     private connection;
     private channel;
 
-    constructor(name: string, connection: any) {
+    constructor(name: string, cluster: any, connection: any) {
         this.connection = connection;
-        this.consumeQueue(name);
+        this.consumeQueue(name, cluster);
     }
 
-    private consumeQueue = async (queue = Config.getConfig().rabbit.queue, isNoAck = false, durable = false, prefetch = null) => {
+    private consumeQueue = async (queue, cluster, isNoAck = false, durable = false, prefetch = null) => {
     
-        const config = Config.getConfig().rabbit;
-        const cluster = await amqp.connect(config);
         const channel = await cluster.createChannel();
         this.channel = channel;
         await channel.assertQueue(queue, durable=durable);
@@ -34,8 +30,6 @@ class Queue {
                 }
              }, {noAck: isNoAck})
 
-            return () => { cluster.close(); }
-
         } catch (error) {
             console.log(error, 'Failed to consume messages from Queue!')
             cluster.close(); 
@@ -54,14 +48,9 @@ class Queue {
         }
     }
 
-    public closeChannel = async () => {
-        try {
-            await this.channel.close();
-        } catch (error) {
-            // handle error response
-            console.error(error, 'Unable to close channel!');  
-            process.exit(1);
-        }
+    public setConnection = (connection: any) => {
+        this.connection = connection;
+        return;
     }
 }
 
