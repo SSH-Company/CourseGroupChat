@@ -34,11 +34,6 @@ const Profile = ({ navigation }) => {
     // settingsList props.
     const iconSize = 20;
 
-    // image props.
-    const imageProps = {
-        name: 'Konnect Person'
-    }
-
     useEffect(() => {
         if (profilePicture.uri !== EMPTY_IMAGE_DIRECTORY && !invalidImage) {
             const formData = new FormData();
@@ -158,7 +153,7 @@ const Profile = ({ navigation }) => {
                     onPress={uploadImage}
                 />
                 )}
-                <Text style={{ paddingBottom: 10, fontSize: 25 }}>{imageProps.name}</Text>
+                <Text style={{ paddingBottom: 10, fontSize: 25 }}>{user.name}</Text>
             </View>
             {settingsList.map((item, i) => (
                 <ListItem key={i} onPress={item.onPress}>

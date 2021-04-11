@@ -51,13 +51,13 @@ const Chat = ({ route, navigation }) => {
 
     useEffect(() => {
         resetMessages(true);
-        updateMessageStatus();
+        // updateMessageStatus();
     }, [isFocused, groupID])
 
     //re set messages everytime a new message is received from socket
     useEffect(() => {
         resetMessages();
-        updateMessageStatus();
+        // updateMessageStatus();
     }, [renderFlag]);
     
     const filterOutEmptyMessages = (msgs) => {
@@ -85,7 +85,7 @@ const Chat = ({ route, navigation }) => {
         const instance = await ChatLog.getChatLogInstance();
 
         if (refreshSource) {
-            await instance.refreshGroup(groupID); 
+            await instance.refreshGroup(groupID, false, name, avatar); 
         }
 
         const log = instance.chatLog;

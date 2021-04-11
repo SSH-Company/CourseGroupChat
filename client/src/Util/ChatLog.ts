@@ -109,7 +109,18 @@ export class ChatLog {
     public async refreshGroup(groupID: string, loadEarlier: boolean = false, name?: string, avatar?: string) {
         //new group has been created/joined
         if (!(groupID in this.chatLog)) {
-            this.chatLog[groupID] = []
+            const newMessage = {
+                _id: revisedRandId(),
+                text: '',
+                subtitle: `You have been added to ${name}`,
+                createdAt: Date.now(),
+                user: {
+                    _id: this.userID,
+                    name: 'rand',
+                    avatar: ''
+                }
+            }
+            this.chatLog[groupID] = [newMessage]
             this.groupInfo[groupID] = {
                 name: name,
                 avatar: avatar,
