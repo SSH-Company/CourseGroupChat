@@ -1,5 +1,4 @@
-
-class Queue {
+export class Queue {
     private connection;
     private channel;
 
@@ -53,5 +52,3 @@ class Queue {
         return;
     }
 }
-
-export default Queue
