@@ -1,20 +1,16 @@
-import amqp from 'amqplib';
-import { Config } from './Config';
-
-class Queue {
+export class Queue {
     private connection;
+    private channel;
 
-    constructor(name: string, connection: any) {
+    constructor(name: string, cluster: any, connection: any) {
         this.connection = connection;
-        this.consumeQueue(name);
+        this.consumeQueue(name, cluster);
     }
 
-    private consumeQueue = async (queue = Config.getConfig().rabbit.queue, isNoAck = false, durable = false, prefetch = null) => {
+    private consumeQueue = async (queue, cluster, isNoAck = false, durable = false, prefetch = null) => {
     
-        const config = Config.getConfig().rabbit;
-        const cluster = await amqp.connect(config);
         const channel = await cluster.createChannel();
-    
+        this.channel = channel;
         await channel.assertQueue(queue, durable=durable);
     
         if (prefetch) {
@@ -23,36 +19,36 @@ class Queue {
     
         try {
             channel.consume(queue, message => {
-            if (message !== null) {
-                channel.ack(message);
-                this.connection.sendUTF(message.content)
-                return null;
-            } else {
-                console.log(message, 'Queue is empty!')
-                channel.reject(message);
-            }
-        }, {noAck: isNoAck})
+                if (message !== null) {
+                    channel.ack(message);
+                    this.connection.sendUTF(message.content)
+                    return null;
+                } else {
+                    console.log(message, 'Queue is empty!')
+                    channel.reject(message);
+                }
+             }, {noAck: isNoAck})
+
         } catch (error) {
             console.log(error, 'Failed to consume messages from Queue!')
             cluster.close(); 
         }
     }
-}
 
-//general function for publishing by queue name
-export const publishToQueue = async (queue, message, durable = false) => {
-    try {
-        const config = Config.getConfig().rabbit;
-        const cluster = await amqp.connect(config);
-        const channel = await cluster.createChannel();
-        
-        await channel.assertQueue(queue, durable= durable);
-        await channel.sendToQueue(queue, Buffer.from(message));
-    } catch (error) {
-        // handle error response
-        console.error(error, 'Unable to connect to cluster!');  
-        process.exit(1);
+    //general function for publishing by queue name
+    public publishToQueue = async (queue, message) => {
+        try {
+            console.log(`sending message ${message}`);
+            await this.channel.sendToQueue(queue, Buffer.from(message));
+        } catch (error) {
+            // handle error response
+            console.error(error, 'Unable to connect to cluster!');  
+            process.exit(1);
+        }
+    }
+
+    public setConnection = (connection: any) => {
+        this.connection = connection;
+        return;
     }
 }
-
-export default Queue

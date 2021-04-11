@@ -9,7 +9,7 @@ import {
 import fs from 'fs';
 import multer from 'multer';
 import * as STATUS from 'http-status-codes';
-import { publishToQueue } from '../services/Queue';
+import { CONNECTIONS } from '../WSServer';
 import { UserModel } from '../models/User';
 import { MessageModel } from '../models/Message';
 import { UserGroupModel } from '../models/User_Group';
@@ -87,7 +87,7 @@ export class ChatController {
         
         try {
             const session = req.session;
-            const user = session.user as UserModel;
+            const user = session.user;
 
             const messages = JSON.parse(req.body.message);
             const message = messages.messages[0]
@@ -125,7 +125,8 @@ export class ChatController {
             for (const id of groupRecipients) {
                 const queueName = `message-queue-${id}`
                 const queueData = { ...message, command: "append", groupID: groupID, senderID: senderID }
-                await publishToQueue(queueName, JSON.stringify(queueData));
+                const queue = CONNECTIONS[user.ID];
+                await queue.publishToQueue(queueName, JSON.stringify(queueData));
             }   
             
             res.status(STATUS.OK).json();
@@ -143,19 +144,19 @@ export class ChatController {
     //statuses to received. Query the log for all senders of the messages.
     @Post('updateMessageStatus')
     private async updateMessageStatus(req: Request, res: Response) {
-        const session = req.session;
-        const user = session.user as UserModel;
-        
-        const { groupID } = req.body;
-        
-        if (!groupID) {
-            res.status(STATUS.BAD_REQUEST).json({
-                message: "Request body must contain group ID",
-                identifier: "CC003"
-            })
-        }
-
         try {
+            const session = req.session;
+            const user = session.user;
+            
+            const { groupID } = req.body;
+            
+            if (!groupID) {
+                res.status(STATUS.BAD_REQUEST).json({
+                    message: "Request body must contain group ID",
+                    identifier: "CC003"
+                })
+            }
+
             await MessageModel.updateStatus(groupID, user.FIRST_NAME + ' ' + user.LAST_NAME)
 
             //find all recipients of this group chat, exclude senderID from the list
@@ -164,7 +165,8 @@ export class ChatController {
             for (const id of groupRecipients) {
                 const queueName = `message-queue-${id}`
                 const queueData = { command: "refresh", groupID: groupID }
-                await publishToQueue(queueName, JSON.stringify(queueData))
+                const queue = CONNECTIONS[user.ID];
+                await queue.publishToQueue(queueName, JSON.stringify(queueData))
             }
             
             res.status(STATUS.OK).json()

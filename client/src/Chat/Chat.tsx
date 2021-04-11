@@ -62,8 +62,8 @@ const Chat = ({ route, navigation }) => {
         updateMessageStatus();
     }, [renderFlag]);
     
-    const filterOutEmptyMessages = (messages) => {
-        return messages.filter(msg => msg.text !== '' || msg.image !== '' || msg.video !== '');
+    const filterOutEmptyMessages = (msgs) => {
+        return msgs.filter(msg => (msg.text !== '' || msg.image !== '' || msg.video !== ''));
     }
 
     const updateMessageStatus = async () => {
@@ -102,7 +102,11 @@ const Chat = ({ route, navigation }) => {
             });
             
             //we're filtering here to ensure we can retrieve empty group chats from ChatLog_View, but not render any empty messages
-            setMessages(filterOutEmptyMessages(log[groupID]));
+            setMessages(previousMessages => {
+                const messageIds = previousMessages.map(m => m._id);
+                const filteredMessages = filterOutEmptyMessages(log[groupID]).filter(m => !messageIds.includes(m._id));
+                return GiftedChat.append(previousMessages, filteredMessages)
+            });
             setNewGroup(false);   
         } else {
             setNewGroup(true);
@@ -208,8 +212,11 @@ const Chat = ({ route, navigation }) => {
     const onLoadEarlier = async () => {
         const log = await ChatLog.getChatLogInstance();
         await log.refreshGroup(groupID, true);
-        setMessages(filterOutEmptyMessages(log.chatLog[groupID]));
-    }
+        setMessages(previousMessages => {
+            const messageIds = previousMessages.map(m => m._id);
+            const filteredMessages = filterOutEmptyMessages(log.chatLog[groupID]).filter(m => !messageIds.includes(m._id));
+            return GiftedChat.prepend(previousMessages, filteredMessages)
+        });}
 
     return (
         <View style={{flex: 1}}>
