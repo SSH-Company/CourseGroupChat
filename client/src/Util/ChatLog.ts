@@ -1,5 +1,5 @@
 import { IMessage } from 'react-native-gifted-chat';
-import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
+import { BASE_URL } from '../BaseUrl';
 import axios from 'axios';
 
 type RecipientMessageMapType = {
@@ -41,7 +41,7 @@ export class ChatLog {
                 user: {
                     _id: row.creator_id,
                     name: row.creator_name,
-                    avatar: row.avatar_url || EMPTY_IMAGE_DIRECTORY
+                    avatar: row.avatar_url
                 },
                 status: row.status,
                 displayStatus: false
@@ -51,7 +51,7 @@ export class ChatLog {
                 map[row.id] = [newMessage]
                 grpInfo[row.id] = {
                     name: row.name,
-                    avatar: row.avatar_url || EMPTY_IMAGE_DIRECTORY,
+                    avatar: row.avatar_url,
                     verified: row.verified,
                     entered: false
                 }

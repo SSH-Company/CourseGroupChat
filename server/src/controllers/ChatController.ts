@@ -14,7 +14,6 @@ import { UserModel } from '../models/User';
 import { MessageModel } from '../models/Message';
 import { UserGroupModel } from '../models/User_Group';
 import { ChatLogViewModel } from '../models/ChatLog_View';
-import BaseUrl from '../BaseUrl';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -45,7 +44,7 @@ export class ChatController {
                     creator_name: row.CREATOR_NAME,
                     message_id: row.MESSAGE_ID,
                     name: row.VERIFIED === "Y" ? row.GROUP_ID : row.NAME,
-                    avatar_url: `${row.AVATAR ? BaseUrl+row.AVATAR : ''}`,
+                    avatar_url: row.AVATAR,
                     created_at: row.CREATE_DATE,
                     status: row.STATUS,
                     verified: row.VERIFIED
@@ -101,7 +100,7 @@ export class ChatController {
                 urlFilePath = '';
 
             if (req.file) {
-                urlFilePath = `${BaseUrl}/media/messages/${req.file.filename}`;
+                urlFilePath = `/media/messages/${req.file.filename}`;
                 //assuming file types can be "video" or "image"
                 messageType = message.hasOwnProperty('image') ? "image" : "video";
                 message[messageType] = urlFilePath
@@ -326,12 +325,11 @@ export class ChatController {
                         user: {
                             _id: row.CREATOR_ID,
                             name: row.CREATOR_NAME,
-                            avatar: `${row.AVATAR ? BaseUrl+row.AVATAR : ''}`
+                            avatar: row.AVATAR
                         },
                         status: row.STATUS,
                         displayStatus: false
                     }
-                    console.log(json.user);
                     responseJson.push(json)
                 })
                 res.status(STATUS.OK).json(responseJson)

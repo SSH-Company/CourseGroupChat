@@ -4,7 +4,7 @@ import { Header, Input, Image } from "react-native-elements";
 import * as VideoExtensions from 'video-extensions';
 import { Ionicons } from "react-native-vector-icons";
 import { handleImagePick, handlePermissionRequest } from "../Util/ImagePicker";
-import { EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
+import { EMPTY_IMAGE_DIRECTORY, BASE_URL } from '../BaseUrl';
 
 const styles = StyleSheet.create({
     imagePicker: { 
@@ -16,10 +16,11 @@ const styles = StyleSheet.create({
 })
 
 const CreateGroupForm = ({ navigation }) => {
-    const [image, setImage] = useState({ uri: EMPTY_IMAGE_DIRECTORY });
+    const [image, setImage] = useState({ uri: '' });
     const [groupName, setGroupName] = useState<string>();
     const [errorMessage, setErrorMessage] = useState<string>();
     const [invalidImage, setInvalidImage] = useState(false);
+    const [displayUploadedImage, setDisplayUploadedImage] = useState(false);
 
     const handleFormSubmit = () => {
         if (!groupName) {
@@ -49,6 +50,7 @@ const CreateGroupForm = ({ navigation }) => {
                         return;
                     }
                     setImage(imageRes);
+                    setDisplayUploadedImage(true);
                 } 
             }
         } catch (err) {
@@ -83,7 +85,7 @@ const CreateGroupForm = ({ navigation }) => {
             <View style={styles.imagePicker}>
                 {image && (
                 <Image
-                    source={{ uri: image.uri }}
+                    source={{ uri: displayUploadedImage ? image.uri : ( image.uri ? `${BASE_URL}${image.uri}` : EMPTY_IMAGE_DIRECTORY )}}
                     style={{ width: 400, height: 400, marginBottom: 10 }}
                     onPress={onImagePick}
                 />

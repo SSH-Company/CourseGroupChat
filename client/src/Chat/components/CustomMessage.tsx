@@ -3,6 +3,7 @@ import { View, StyleSheet, Text, Image, TouchableOpacity } from 'react-native';
 import { Message } from 'react-native-gifted-chat';
 import { Video } from 'expo-av';
 import { UserContext } from '../../Auth/Login';
+import { BASE_URL } from '../../BaseUrl';
 
 //style sheet
 const styles = StyleSheet.create({
@@ -83,7 +84,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                                     {currentMessage.text !== "" && <Text style={{paddingTop: 5, color:  isCurrentUser ? 'black' : 'white'}}>{currentMessage.text}</Text>}
                                     {currentMessage.hasOwnProperty('image') && currentMessage.image.length > 0 && 
                                     (<Image
-                                        source={{ uri: currentMessage.image }}
+                                        source={{ uri: `${BASE_URL + currentMessage.image}` }}
                                         style={{ width: 200, height: 200, marginBottom: 10 }}
                                     />)}
                                     {currentMessage.hasOwnProperty('video') && currentMessage.video.length > 0 &&

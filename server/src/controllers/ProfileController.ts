@@ -8,7 +8,6 @@ import fs from 'fs';
 import multer from 'multer';
 import * as STATUS from 'http-status-codes';
 import { UserModel } from '../models/User';
-import BaseUrl from '../BaseUrl';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -42,7 +41,7 @@ export class ProfileController {
             await UserModel.updateAvatar(urlFilePath, user.ID);
 
             res.status(STATUS.OK).json({
-                path: urlFilePath ? `${BaseUrl}${urlFilePath}` : ''
+                path: urlFilePath
             });
         }catch (err) {
             console.error(err);

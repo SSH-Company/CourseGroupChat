@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useContext } from 'react'
 import { Dimensions, View, StyleSheet } from 'react-native';
 import { ListItem, Image, Text } from 'react-native-elements';
 import { AntDesign, Ionicons, MaterialCommunityIcons } from 'react-native-vector-icons';
@@ -12,9 +12,10 @@ import axios from 'axios';
 const Profile = ({ navigation }) => {
     const deviceDimensions = Dimensions.get('window')
     const [notification, setNotification] = useState(false);
-    const [invalidImage, setInvalidImage] = useState(false);
     const { user, setUser } = useContext(UserContext);
     const [profilePicture, setProfilePicture] = useState<any>({ uri: user.avatar });
+    const [invalidImage, setInvalidImage] = useState(false);
+    const [displayUploadedImage, setDisplayUploadedImage] = useState(false);
 
     const styles = StyleSheet.create({ 
         imageContainer: {
@@ -34,26 +35,23 @@ const Profile = ({ navigation }) => {
     // settingsList props.
     const iconSize = 20;
 
-    useEffect(() => {
-        if (profilePicture.uri !== EMPTY_IMAGE_DIRECTORY && !invalidImage) {
-            const formData = new FormData();
-            formData.append('avatar', {...profilePicture})
+    const sendData = (image: any) => {
+        const formData = new FormData();
+        formData.append('avatar', {...image})
 
-            axios.post(`${BASE_URL}/api/profile/upload-profile-pic`, formData, { headers: { 'content-type': 'multipart/form-data' } })
-            .then(res => {
-                const newAvatar = res.data.path;
-                console.log(newAvatar);
-                setUser({
-                    ...user,
-                    avatar: newAvatar
-                });
-                return;
-            })
-            .catch(err => {
-                console.log(err);
-            })
-        }
-    }, [profilePicture])
+        axios.post(`${BASE_URL}/api/profile/upload-profile-pic`, formData, { headers: { 'content-type': 'multipart/form-data' } })
+        .then(res => {
+            const newAvatar = res.data.path;
+            setUser({
+                ...user,
+                avatar: newAvatar
+            });
+            return;
+        })
+        .catch(err => {
+            console.log(err);
+        })
+    }
 
     // functionalities.
     const uploadImage = async () => {
@@ -70,6 +68,8 @@ const Profile = ({ navigation }) => {
                         return;
                     }
                     setProfilePicture({...imageRes});
+                    sendData(imageRes);
+                    setDisplayUploadedImage(true);
                 } 
             }
         } catch (err) {
@@ -148,11 +148,12 @@ const Profile = ({ navigation }) => {
             <View style={styles.imageContainer}>
                 {profilePicture && (
                 <Image
-                    source={{ uri: profilePicture.uri || EMPTY_IMAGE_DIRECTORY }}
+                    source={{ uri: displayUploadedImage ? profilePicture.uri : ( profilePicture.uri ? `${BASE_URL+profilePicture.uri}` : EMPTY_IMAGE_DIRECTORY ) }}
                     style={styles.imageStyle}
                     onPress={uploadImage}
                 />
                 )}
+                {invalidImage && <Text style={{ color: 'red' }}>The selected file type is not accepted</Text>}
                 <Text style={{ paddingBottom: 10, fontSize: 25 }}>{user.name}</Text>
             </View>
             {settingsList.map((item, i) => (

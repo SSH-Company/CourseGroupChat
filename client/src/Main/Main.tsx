@@ -47,7 +47,7 @@ const Main = ({ navigation }) => {
         verified: grpInfo.verified
       });
     });
-    setCompleteList(list);
+    setCompleteList(list.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)));
     setRefreshing(false);
   }
 

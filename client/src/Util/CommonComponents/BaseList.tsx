@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { ListItem, Avatar } from "react-native-elements";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import VerifiedIcon from './VerifiedIcon';
-import { EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
+import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
 
 //style sheet
 const style = StyleSheet.create({

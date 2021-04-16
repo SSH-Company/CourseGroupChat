@@ -12,7 +12,6 @@ import { GroupModel } from '../models/Group';
 import { UserGroupModel } from '../models/User_Group';
 import { UserGroupListModel } from '../models/UserGroupList';
 import { CONNECTIONS } from '../WSServer';
-import BaseUrl from '../BaseUrl';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -55,7 +54,7 @@ export class SearchController {
                 res.status(STATUS.OK).json(list.map(row => ({
                     id: row.CODE,
                     name: row.VERIFIED === "Y" ? row.CODE : row.NAME,
-                    avatar_url: `${row.AVATAR ? BaseUrl+row.AVATAR : ''}`,
+                    avatar_url: row.AVATAR,
                     verified: row.VERIFIED
                 })))
             })
@@ -102,7 +101,7 @@ export class SearchController {
             res.status(STATUS.OK).json({
                 id: newGroup.ID,
                 name: groupName,
-                avatar_url: urlFilePath ? `${BaseUrl}${urlFilePath}` : ''
+                avatar_url: urlFilePath
             });
 
         } catch (err) {

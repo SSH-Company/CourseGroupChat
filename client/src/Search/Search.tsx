@@ -93,7 +93,12 @@ const Search = ({ route, navigation }) => {
             axios.post(`${BASE_URL}/api/search/create-group`, formData, { headers: { 'content-type': 'multipart/form-data' } })
                 .then(async res => {
                     const data = res.data;
-                    navigation.navigate('Chat', { groupID: data.id, name: data.name, avatar: data.avatar_url })
+                    const chatParams = {
+                        groupID: data.id,
+                        name: data.name,
+                        avatar: data.avatar_url
+                    }
+                    navigation.navigate('Chat', chatParams)
                 })
                 .catch(err => console.log(err))
         } 

@@ -178,10 +178,11 @@ const LogIn = ({ children }) => {
         try {
             const user = JSON.parse(msg);
             await ChatLog.getChatLogInstance(true, user.ID); 
+            console.log(user);
             setUser({
                 _id: user.ID,
                 name: user.FIRST_NAME + ' ' + user.LAST_NAME,
-                avatar: user.AVATAR || EMPTY_IMAGE_DIRECTORY
+                avatar: user.AVATAR
             })
             //redirect to Main
             setNewUser(false)
