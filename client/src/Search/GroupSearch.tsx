@@ -28,7 +28,7 @@ const GroupSearch = ({ navigation }) => {
         const filteredVerifiedList = verifiedList.filter(item => item.name.toLowerCase().includes(search.toLowerCase())).slice(0, 20);
         const filteredUserList = userList.filter(item => item.name.toLowerCase().includes(search.toLowerCase())).slice(0, 20);
         return filteredVerifiedList.concat(filteredUserList).sort();
-    }, [verifiedList, search])
+    }, [verifiedList, userList, search])
 
     const onItemPress = (item: listtype) => {
         navigation.navigate("Chat", { groupID: item.id, name: item.name, avatar: item.avatar_url, verified: item.verified })
