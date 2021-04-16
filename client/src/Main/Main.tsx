@@ -65,7 +65,7 @@ const Main = ({ navigation }) => {
             name={"bars"}
             color="#734f96" 
             size={25}
-            onPress={() => navigation.navigate("Profile")}  // TODO: change slide scroll from left to right
+            onPress={() => navigation.navigate("Profile", { id: 1 })}  // TODO: change slide scroll from left to right
           />
         }
         centerComponent={{
