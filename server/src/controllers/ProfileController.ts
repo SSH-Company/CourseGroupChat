@@ -57,6 +57,7 @@ export class ProfileController {
     private async getProfileById(req: Request, res: Response) {
         try {
             const profileID = req.params.id;
+            console.log(req.params);
             const user = await UserModel.getUserAccountByID(profileID);
 
             res.status(STATUS.OK).json({
