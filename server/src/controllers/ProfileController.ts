@@ -2,7 +2,8 @@ import { Request, Response } from 'express';
 import {
     Middleware,
     Controller,
-    Post
+    Post,
+    Get
 } from '@overnightjs/core';
 import fs from 'fs';
 import multer from 'multer';
@@ -48,6 +49,26 @@ export class ProfileController {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong attempting to upload profile picture.",
                 identifier: "PC001"
+            })
+        }
+    }
+
+    @Get(':id')
+    private async getProfileById(req: Request, res: Response) {
+        try {
+            const profileID = req.params.id;
+            const user = await UserModel.getUserAccountByID(profileID);
+
+            res.status(STATUS.OK).json({
+                _id: user.ID,
+                name: user.FIRST_NAME + ' ' + user.LAST_NAME,
+                avatar: user.AVATAR
+            })
+        } catch(err) {
+            console.error(err);
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong attempting to get profile page information.",
+                identifier: "PC002"
             })
         }
     }

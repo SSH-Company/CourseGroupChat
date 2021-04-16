@@ -5,7 +5,6 @@ import { ActionSheetProvider } from '@expo/react-native-action-sheet'
 import Socket from './src/Socket/WebSocket';
 import Main from './src/Main/Main';
 import Chat from './src/Chat/Chat';
-import Profile from './src/Profile/Profile';
 import GroupMembers from './src/Chat/components/GroupMembers';
 import { LogIn } from './src/Auth';
 import { 
@@ -13,6 +12,7 @@ import {
   Search, 
   GroupSearch 
 } from './src/Search';
+import { Profile, ProfileSettings } from './src/Profile';
 import { navigationRef } from './src/Util/RootNavigation';
 
 export default function App() {
@@ -35,7 +35,8 @@ export default function App() {
                       },
                     }}
                   />
-                  <Stack.Screen name="Profile" component={Profile} options={{gestureDirection: 'horizontal-inverted'}}/>
+                  <Stack.Screen name="Profile" component={Profile}/>
+                  <Stack.Screen name="ProfileSettings" component={ProfileSettings} options={{gestureDirection: 'horizontal-inverted'}}/>
                   <Stack.Screen name="GroupMembers" component={GroupMembers}/>                  
                   <Stack.Screen name="CreateGroupForm" component={CreateGroupForm}/>
                   <Stack.Screen name="Search" component={Search}/>
