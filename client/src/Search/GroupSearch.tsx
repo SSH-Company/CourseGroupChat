@@ -10,21 +10,19 @@ const GroupSearch = ({ navigation }) => {
     const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(true);
     const [verifiedList, setVerifiedList] = useState<listtype[]>([]);
+    const [userList, setUserList] = useState<listtype[]>([]);
     const searchRef = useRef(null);
 
     useEffect(() => {
         searchRef.current.focus();
-        getVerifiedList()
-    }, [])
-
-    const getVerifiedList = () => {
-        axios.get(`${BASE_URL}/api/search/all-groups`)
+        Promise.all([axios.get(`${BASE_URL}/api/search/all-groups`), axios.get(`${BASE_URL}/api/search/users`)])
             .then(res => {
-                setVerifiedList(res.data.map(row => ({...row, avatar_url: row.avatar_url ? `${BASE_URL + row.avatar_url}` : EMPTY_IMAGE_DIRECTORY })));
+                setVerifiedList(res[0].data.map(row => ({...row, avatar_url: row.avatar_url ? `${BASE_URL + row.avatar_url}` : EMPTY_IMAGE_DIRECTORY })));
+                setUserList(res[1].data.map(row => ({ ...row, checked: false, avatar_url: row.avatar_url ? `${BASE_URL + row.avatar_url}` : EMPTY_IMAGE_DIRECTORY })))
                 setLoading(false);
             })
             .catch(err => console.error(err))
-    }
+    }, []);
 
     const filteredList = useMemo<listtype[]>(() => {
         return verifiedList.filter(item => item.name.toLowerCase().includes(search.toLowerCase())).slice(0, 20);
@@ -32,6 +30,10 @@ const GroupSearch = ({ navigation }) => {
 
     const onItemPress = (item: listtype) => {
         navigation.navigate("Chat", { groupID: item.id, name: item.name, avatar: item.avatar_url, verified: item.verified })
+    }
+
+    const onProfilePress = (item: listtype) => {
+        navigation.navigate("Profile", { id: item.id });
     }
 
     return (
@@ -74,6 +76,11 @@ const GroupSearch = ({ navigation }) => {
                             title="Verified groups"
                             items={verifiedList.filter(row => row.verified === 'Y').slice(0, 10)}
                             itemOnPress={l => onItemPress(l)}
+                        />
+                        <BaseList
+                            title="Users"
+                            items={userList}
+                            itemOnPress={l => onProfilePress(l)}
                         />
                       </>
                       :

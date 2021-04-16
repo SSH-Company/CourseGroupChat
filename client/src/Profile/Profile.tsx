@@ -5,8 +5,28 @@ import { User } from 'react-native-gifted-chat';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
 
+const style = StyleSheet.create({
+    container: {
+        display: 'flex',
+        flex: 1,
+        textAlign: 'center',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    image: {
+        width: 200,
+        height: 200,
+        borderRadius: 200,
+        marginBottom: 20
+    },
+    name: {
+        fontWeight: 'bold',
+        fontSize: 20
+    }
+})
+
 const Profile = ({ route, navigation }) => {
-    const id = route.params;
+    const id = route.params.id;
 
     const [userInfo, setUserInfo] = useState<User>({} as User);
 
@@ -21,12 +41,12 @@ const Profile = ({ route, navigation }) => {
     }, [id]);
 
     return (
-        <View style={{ flex: 1 }}>
+        <View style={style.container}>
             <Image
                 source={{ uri: userInfo.avatar ? `${BASE_URL + userInfo.avatar}` : EMPTY_IMAGE_DIRECTORY }}
-                style={{ width: 400, height: 400, marginBottom: 10 }}
+                style={style.image}
             />
-            <Text style={{ fontWeight: 'bold' }}>{userInfo.name}</Text>
+            <Text style={style.name}>{userInfo.name}</Text>
         </View>
     )
 }
