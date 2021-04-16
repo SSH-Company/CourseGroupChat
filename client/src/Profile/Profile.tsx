@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import { Dimensions, View, StyleSheet } from 'react-native';
 import { ListItem, Image, Text } from 'react-native-elements';
 import { AntDesign, Ionicons, MaterialCommunityIcons } from 'react-native-vector-icons';
@@ -15,7 +15,6 @@ const Profile = ({ navigation }) => {
     const { user, setUser } = useContext(UserContext);
     const [profilePicture, setProfilePicture] = useState<any>({ uri: user.avatar });
     const [invalidImage, setInvalidImage] = useState(false);
-    const [displayUploadedImage, setDisplayUploadedImage] = useState(false);
 
     const styles = StyleSheet.create({ 
         imageContainer: {
@@ -44,7 +43,7 @@ const Profile = ({ navigation }) => {
             const newAvatar = res.data.path;
             setUser({
                 ...user,
-                avatar: newAvatar
+                avatar: newAvatar ? `${BASE_URL + newAvatar}` : profilePicture.uri
             });
             return;
         })
@@ -69,7 +68,6 @@ const Profile = ({ navigation }) => {
                     }
                     setProfilePicture({...imageRes});
                     sendData(imageRes);
-                    setDisplayUploadedImage(true);
                 } 
             }
         } catch (err) {
@@ -148,7 +146,7 @@ const Profile = ({ navigation }) => {
             <View style={styles.imageContainer}>
                 {profilePicture && (
                 <Image
-                    source={{ uri: displayUploadedImage ? profilePicture.uri : ( profilePicture.uri ? `${BASE_URL+profilePicture.uri}` : EMPTY_IMAGE_DIRECTORY ) }}
+                    source={{ uri: profilePicture.uri || EMPTY_IMAGE_DIRECTORY }}
                     style={styles.imageStyle}
                     onPress={uploadImage}
                 />

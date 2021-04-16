@@ -3,7 +3,7 @@ import { ActivityIndicator, View, ScrollView, Platform } from "react-native";
 import { SearchBar, Header } from "react-native-elements";
 import { Ionicons } from "react-native-vector-icons";
 import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
-import { BASE_URL } from '../BaseUrl';
+import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
 
 const GroupSearch = ({ navigation }) => {
@@ -20,7 +20,7 @@ const GroupSearch = ({ navigation }) => {
     const getVerifiedList = () => {
         axios.get(`${BASE_URL}/api/search/all-groups`)
             .then(res => {
-                setVerifiedList(res.data);
+                setVerifiedList(res.data.map(row => ({...row, avatar_url: row.avatar_url ? `${BASE_URL + row.avatar_url}` : EMPTY_IMAGE_DIRECTORY })));
                 setLoading(false);
             })
             .catch(err => console.error(err))

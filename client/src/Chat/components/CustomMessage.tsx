@@ -84,7 +84,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                                     {currentMessage.text !== "" && <Text style={{paddingTop: 5, color:  isCurrentUser ? 'black' : 'white'}}>{currentMessage.text}</Text>}
                                     {currentMessage.hasOwnProperty('image') && currentMessage.image.length > 0 && 
                                     (<Image
-                                        source={{ uri: `${BASE_URL + currentMessage.image}` }}
+                                        source={{ uri: currentMessage.image }}
                                         style={{ width: 200, height: 200, marginBottom: 10 }}
                                     />)}
                                     {currentMessage.hasOwnProperty('video') && currentMessage.video.length > 0 &&

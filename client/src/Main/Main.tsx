@@ -26,12 +26,15 @@ const Main = ({ navigation }) => {
   const isFocused = useIsFocused();
 
   useEffect(() => {
+    if (isFocused) resetList(true);
+  }, [isFocused])
+
+  useEffect(() => {
     // chat list.
     resetList();
-  }, [renderFlag, isFocused]) 
+  }, [renderFlag]) 
 
   const resetList = async (fromSource: boolean = false) => {
-    setRefreshing(fromSource);
     const log = await ChatLog.getChatLogInstance(fromSource);
     let list = [];
     Object.keys(log.chatLog).forEach(key => {
@@ -82,7 +85,10 @@ const Main = ({ navigation }) => {
         contentOffset={{ x: 0, y: 76 }}
         keyboardShouldPersistTaps="handled"
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => resetList(true)}/>
+          <RefreshControl refreshing={refreshing} onRefresh={() => {
+            setRefreshing(true);
+            resetList(true);
+          }}/>
         }
       >
         <SearchBar
