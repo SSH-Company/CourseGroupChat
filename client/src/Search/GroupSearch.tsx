@@ -25,7 +25,9 @@ const GroupSearch = ({ navigation }) => {
     }, []);
 
     const filteredList = useMemo<listtype[]>(() => {
-        return verifiedList.filter(item => item.name.toLowerCase().includes(search.toLowerCase())).slice(0, 20);
+        const filteredVerifiedList = verifiedList.filter(item => item.name.toLowerCase().includes(search.toLowerCase())).slice(0, 20);
+        const filteredUserList = userList.filter(item => item.name.toLowerCase().includes(search.toLowerCase())).slice(0, 20);
+        return filteredVerifiedList.concat(filteredUserList).sort();
     }, [verifiedList, search])
 
     const onItemPress = (item: listtype) => {
