@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { View, ScrollView, Platform, RefreshControl } from "react-native";
 import { Header, SearchBar } from "react-native-elements";
-import { Feather } from "react-native-vector-icons";
+import { Feather, FontAwesome } from "react-native-vector-icons";
 import { useIsFocused } from "@react-navigation/native";
 import { RenderMessageContext } from '../Socket/WebSocket';
 import { ChatLog } from '../Util/ChatLog';
@@ -26,12 +26,15 @@ const Main = ({ navigation }) => {
   const isFocused = useIsFocused();
 
   useEffect(() => {
+    if (isFocused) resetList(true);
+  }, [isFocused])
+
+  useEffect(() => {
     // chat list.
     resetList();
-  }, [renderFlag, isFocused]) 
+  }, [renderFlag]) 
 
   const resetList = async (fromSource: boolean = false) => {
-    setRefreshing(fromSource);
     const log = await ChatLog.getChatLogInstance(fromSource);
     let list = [];
     Object.keys(log.chatLog).forEach(key => {
@@ -47,7 +50,7 @@ const Main = ({ navigation }) => {
         verified: grpInfo.verified
       });
     });
-    setCompleteList(list);
+    setCompleteList(list.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)));
     setRefreshing(false);
   }
 
@@ -57,7 +60,14 @@ const Main = ({ navigation }) => {
       <Header
         placement="center"
         backgroundColor="#ccccff"
-        leftComponent={{ icon: "menu", color: "#734f96", size: 25 }}
+        leftComponent={
+          <FontAwesome
+            name={"bars"}
+            color="#734f96" 
+            size={25}
+            onPress={() => navigation.navigate("Profile")}  // TODO: change slide scroll from left to right
+          />
+        }
         centerComponent={{
           text: "Chat",
           style: { color: "#734f96", fontSize: 20, fontWeight: "bold" },
@@ -75,7 +85,10 @@ const Main = ({ navigation }) => {
         contentOffset={{ x: 0, y: 76 }}
         keyboardShouldPersistTaps="handled"
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => resetList(true)}/>
+          <RefreshControl refreshing={refreshing} onRefresh={() => {
+            setRefreshing(true);
+            resetList(true);
+          }}/>
         }
       >
         <SearchBar

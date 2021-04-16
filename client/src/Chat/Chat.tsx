@@ -13,17 +13,17 @@ import { RenderMessageContext } from '../Socket/WebSocket';
 import { handleImagePick, handlePermissionRequest } from "../Util/ImagePicker";
 import { ChatLog, MessageStatus, revisedRandId } from '../Util/ChatLog';
 import VerifiedIcon from '../Util/CommonComponents/VerifiedIcon';
-import BASE_URL from '../BaseUrl';
+import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
 
 const Chat = ({ route, navigation }) => {
-    const user = useContext(UserContext)
+    const { user } = useContext(UserContext)
     const { postStatus, renderFlag, setPostStatus } = useContext(RenderMessageContext);
     const { groupID, name, avatar, verified } = route.params;
     const [group, setGroup] = useState<any>({
         id: groupID,
         name: name || '',
-        avatar: avatar || `${BASE_URL}/media/empty_profile_pic.jpg`,
+        avatar: avatar || EMPTY_IMAGE_DIRECTORY,
         verified: verified || 'N'
     });
     const [messages, setMessages] = useState<IMessage[]>([]);
@@ -50,10 +50,8 @@ const Chat = ({ route, navigation }) => {
     }, []);
 
     useEffect(() => {
-        if (isFocused) { 
-            resetMessages(true);
-            updateMessageStatus();
-        }
+        resetMessages(true);
+        updateMessageStatus();
     }, [isFocused, groupID])
 
     //re set messages everytime a new message is received from socket
@@ -63,14 +61,14 @@ const Chat = ({ route, navigation }) => {
     }, [renderFlag]);
     
     const filterOutEmptyMessages = (msgs) => {
-        return msgs.filter(msg => (msg.text !== '' || msg.image !== '' || msg.video !== ''));
+        return msgs.filter(msg => msg._id && (msg.text?.length > 0 || msg.image?.length > 0 || msg.video?.length > 0 ));
     }
 
     const updateMessageStatus = async () => {
         try {
             const instance = await ChatLog.getChatLogInstance();
             const groupInfo = instance.groupInfo[groupID];
-            if (!groupInfo.entered || postStatus) {
+            if (groupInfo && (!groupInfo.entered || postStatus)) {
                 await axios.post(`${BASE_URL}/api/chat/updateMessageStatus`, { groupID: groupID });
                 instance.updateGroupEntered(groupID, true);
                 setPostStatus(false);
@@ -87,7 +85,7 @@ const Chat = ({ route, navigation }) => {
         const instance = await ChatLog.getChatLogInstance();
 
         if (refreshSource) {
-            await instance.refreshGroup(groupID); 
+            await instance.refreshGroup(groupID, false, name, avatar); 
         }
 
         const log = instance.chatLog;
@@ -248,7 +246,7 @@ const Chat = ({ route, navigation }) => {
                                     onPress={() => navigation.navigate('Main')}
                                 />
                                 <Avatar 
-                                    source={{ uri: group.avatar }} 
+                                    source={{ uri: group.avatar || EMPTY_IMAGE_DIRECTORY }} 
                                     rounded 
                                     size={avatarSize} 
                                     containerStyle={{ marginLeft: 10, borderColor: "white", borderWidth: 1 }}/>        
@@ -284,7 +282,6 @@ const Chat = ({ route, navigation }) => {
                             isKeyboardInternallyHandled={false}
                             loadEarlier
                             onLoadEarlier={onLoadEarlier}
-                            scrollToBottom
                         />
                     }
                 </DrawerLayout>

@@ -4,6 +4,7 @@ interface UserInterface {
     ID?: string;
     FIRST_NAME?: string;
     LAST_NAME?: string;
+    AVATAR?: string;
     EMAIL?: string;
     CREATE_DATE?: string;
     IS_ACTIVE?: "Y" | "N";
@@ -13,6 +14,7 @@ export class UserModel implements UserInterface {
     ID?: string;
     FIRST_NAME?: string;
     LAST_NAME?: string;
+    AVATAR?: string;
     EMAIL?: string;
     CREATE_DATE?: string;
     IS_ACTIVE?: "Y" | "N";
@@ -98,7 +100,7 @@ export class UserModel implements UserInterface {
     }
 
     static getMembersByGroupId(id: string): Promise<UserModel[]> {
-        const query = `SELECT u."ID", u."FIRST_NAME", u."LAST_NAME" 
+        const query = `SELECT u."ID", u."FIRST_NAME", u."LAST_NAME", u."AVATAR" 
                     FROM RT.USER_GROUP ug
                     LEFT JOIN RT.USER u on ug."USER_ID" = u."ID"
                     WHERE "GROUP_ID" = ? `;
@@ -106,6 +108,20 @@ export class UserModel implements UserInterface {
         return new Promise((resolve, reject) => {
             Database.getDB()
                 .query(query, [id])
+                .then((data:UserInterface[]) => resolve(data.map(d => new UserModel(d))))
+                .catch(err => {
+                    console.log(err)
+                    reject(err)
+                })
+        })
+    }
+
+    static updateAvatar(path: string, id: string): Promise<UserModel[]> {
+        const query = `UPDATE RT.USER SET "AVATAR" = ? WHERE "ID" = ? ;`;
+        
+        return new Promise((resolve, reject) => {
+            Database.getDB()
+                .query(query, [path, id])
                 .then((data:UserInterface[]) => resolve(data.map(d => new UserModel(d))))
                 .catch(err => {
                     console.log(err)

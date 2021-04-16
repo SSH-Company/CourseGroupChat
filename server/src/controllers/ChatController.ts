@@ -14,7 +14,6 @@ import { UserModel } from '../models/User';
 import { MessageModel } from '../models/Message';
 import { UserGroupModel } from '../models/User_Group';
 import { ChatLogViewModel } from '../models/ChatLog_View';
-import BaseUrl from '../BaseUrl';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -34,7 +33,6 @@ export class ChatController {
     @Get('log/:id')
     private getLog(req: Request, res: Response) {
         const id = req.params.id;
-        const emptyResponse = '/media/empty_profile_pic.jpg';
 
         ChatLogViewModel.getUserLog(id)
         .then(data => {
@@ -46,14 +44,14 @@ export class ChatController {
                     creator_name: row.CREATOR_NAME,
                     message_id: row.MESSAGE_ID,
                     name: row.VERIFIED === "Y" ? row.GROUP_ID : row.NAME,
-                    avatar_url: `${BaseUrl}${row.AVATAR ? row.AVATAR : emptyResponse}`,
+                    avatar_url: row.AVATAR,
                     created_at: row.CREATE_DATE,
                     status: row.STATUS,
                     verified: row.VERIFIED
                 }
-                if (row.MESSAGE_ID) {
+                if (row.MESSAGE_ID && row.MESSAGE_TYPE) {
                     json[row.MESSAGE_TYPE] = row.MESSAGE_BODY,
-                    json['subtitle'] = row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === id ? 'You': row.CREATOR_ID} sent a ${row.MESSAGE_TYPE}.`                        
+                    json['subtitle'] = row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === id ? 'You': row.CREATOR_NAME} sent a ${row.MESSAGE_TYPE}.`                        
                 } else {
                     json['subtitle'] = `You have been added to ${json.name}!`
                 }
@@ -95,14 +93,14 @@ export class ChatController {
             const senderID = {
                 _id: user.ID,
                 name: user.FIRST_NAME + ' ' + user.LAST_NAME,
-                avatar: 'https://placeimg.com/140/140/any'
+                avatar: user.AVATAR
             }
 
             let messageType: "text" | "image" | "video" = "text", 
                 urlFilePath = '';
 
             if (req.file) {
-                urlFilePath = `${BaseUrl}/media/messages/${req.file.filename}`;
+                urlFilePath = `/media/messages/${req.file.filename}`;
                 //assuming file types can be "video" or "image"
                 messageType = message.hasOwnProperty('image') ? "image" : "video";
                 message[messageType] = urlFilePath
@@ -197,7 +195,7 @@ export class ChatController {
             if (message.MESSAGE_TYPE !== "text") {
                 const path = message.MESSAGE_BODY.split('messages/')[1];
                 const fullPath = `src/public/client/media/messages/${path}`;
-                await fs.unlinkSync(fullPath);
+                fs.unlinkSync(fullPath);
             }
 
             await MessageModel.delete(groupID, messageID);
@@ -285,7 +283,7 @@ export class ChatController {
             res.status(STATUS.OK).json(members.map(row => ({
                 id: row.ID,
                 name: row.FIRST_NAME + ' ' + row.LAST_NAME,
-                avatar_url: 'https://placeimg.com/140/140/any',
+                avatar_url: row.AVATAR,
                 checked: false
             })));
 
@@ -302,7 +300,6 @@ export class ChatController {
     private getEarlierMessages(req: Request, res: Response) {
         const session = req.session;
         const { groupID, rowCount } = req.query;
-        const emptyResponse = '/media/empty_profile_pic.jpg';
 
         if (!groupID || !rowCount) {
             res.status(STATUS.BAD_REQUEST).json({
@@ -316,20 +313,23 @@ export class ChatController {
             .then(data => {
                 const responseJson = [];
                 data.forEach(row => {
+                    let subtitle = '';
+                    if (row.MESSAGE_ID && row.MESSAGE_BODY.length > 0) {
+                        subtitle = row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_NAME} sent a ${row.MESSAGE_TYPE}.`
+                    } else subtitle = `You have been added to ${row.NAME}!`
                     const json = {
                         _id: row.MESSAGE_ID,
                         created_at: row.CREATE_DATE,
                         [row.MESSAGE_TYPE]: row.MESSAGE_BODY,
-                        subtitle: row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_ID} sent a ${row.MESSAGE_TYPE}.`,
+                        subtitle: subtitle,
                         user: {
                             _id: row.CREATOR_ID,
                             name: row.CREATOR_NAME,
-                            avatar: `${BaseUrl}${row.AVATAR ? row.AVATAR : emptyResponse}`
+                            avatar: row.AVATAR
                         },
                         status: row.STATUS,
                         displayStatus: false
                     }
-                    
                     responseJson.push(json)
                 })
                 res.status(STATUS.OK).json(responseJson)

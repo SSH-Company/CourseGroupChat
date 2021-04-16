@@ -5,7 +5,7 @@ import { navigationRef } from '../../Util/RootNavigation';
 import { Ionicons } from "react-native-vector-icons";
 import { UserContext } from '../../Auth/Login';
 import BaseList from '../../Util/CommonComponents/BaseList';
-import BASE_URL from '../../BaseUrl';
+import { BASE_URL } from '../../BaseUrl';
 import axios from 'axios';
 
 type listtype = {
@@ -18,7 +18,7 @@ type listtype = {
 const GroupMembers = ({ route, navigation }) => {
 
     const { id, name } = route.params;
-    const user = useContext(UserContext);
+    const { user } = useContext(UserContext);
     const [members, setMembers] = useState<listtype[]>([]);
     const [loading, setLoading] = useState(true);
     const [displayRemove, setDisplayRemove] = useState(false);

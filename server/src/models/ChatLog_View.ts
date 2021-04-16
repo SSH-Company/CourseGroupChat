@@ -7,6 +7,7 @@ interface ChatLogViewInterface {
     AVATAR?: string;
     CREATOR_ID?: string;
     CREATOR_NAME?: string;
+    CREATOR_AVATAR?: string;
     NAME: string;
     MESSAGE_ID?: string;
     MESSAGE_BODY?: string;
@@ -22,6 +23,7 @@ export class ChatLogViewModel implements ChatLogViewInterface {
     AVATAR?: string;
     CREATOR_ID?: string;
     CREATOR_NAME?: string;
+    CREATOR_AVATAR?: string;
     NAME: string;
     MESSAGE_ID?: string;
     MESSAGE_BODY?: string;
@@ -44,6 +46,7 @@ export class ChatLogViewModel implements ChatLogViewInterface {
                 "AVATAR",
                 "CREATOR_ID",
                 "CREATOR_NAME",
+                "CREATOR_AVATAR",
                 "NAME",
                 "MESSAGE_ID",
                 "MESSAGE_BODY",

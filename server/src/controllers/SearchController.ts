@@ -12,7 +12,6 @@ import { GroupModel } from '../models/Group';
 import { UserGroupModel } from '../models/User_Group';
 import { UserGroupListModel } from '../models/UserGroupList';
 import { CONNECTIONS } from '../WSServer';
-import BaseUrl from '../BaseUrl';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -35,7 +34,7 @@ export class SearchController {
             const users = (await UserModel.getUsersForSearch(excludeIds)).map(row => ({
                 id: row.ID,
                 name: row.FIRST_NAME + ' ' + row.LAST_NAME,
-                avatar_url: 'https://placeimg.com/140/140/any'
+                avatar_url: row.AVATAR
             }));
             res.status(STATUS.OK).json(users);
         } catch (err) {
@@ -55,7 +54,7 @@ export class SearchController {
                 res.status(STATUS.OK).json(list.map(row => ({
                     id: row.CODE,
                     name: row.VERIFIED === "Y" ? row.CODE : row.NAME,
-                    avatar_url: `${BaseUrl}${row.AVATAR ? row.AVATAR : `/media/empty_profile_pic.jpg`}`,
+                    avatar_url: row.AVATAR,
                     verified: row.VERIFIED
                 })))
             })
@@ -70,19 +69,18 @@ export class SearchController {
     @Post('create-group')
     @Middleware([upload.single('avatar')])
     private async createGroup(req: Request, res: Response) {
-        const session = req.session;
-        const recipients = JSON.parse(req.body.recipients);
-        const groupName = req.body.groupName;
-        const urlFilePath = req.file ? `/media/profiles/${req.file.filename}` : `/media/empty_profile_pic.jpg`;
-
-        if(!Array.isArray(recipients) || recipients.length === 0 || !groupName) {
-            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
-                message: "Request must contain array of [recipients], and a valid Group Name.",
-                identifier: "SC003"
-            })
-        }
-        
         try {
+            const session = req.session;
+            const recipients = JSON.parse(req.body.recipients);
+            const groupName = req.body.groupName;
+            const urlFilePath = req.file ? `/media/profiles/${req.file.filename}` : '';
+
+            if(!Array.isArray(recipients) || recipients.length === 0 || !groupName) {
+                res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                    message: "Request must contain array of [recipients], and a valid Group Name.",
+                    identifier: "SC003"
+                })
+            }
 
             //create new group and retrieve group ID
             const newGroup = await GroupModel.insert(urlFilePath);
@@ -103,7 +101,7 @@ export class SearchController {
             res.status(STATUS.OK).json({
                 id: newGroup.ID,
                 name: groupName,
-                avatar_url: `${BaseUrl}${urlFilePath}`
+                avatar_url: urlFilePath
             });
 
         } catch (err) {

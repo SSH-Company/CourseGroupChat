@@ -3,7 +3,7 @@ import { Text, View, ScrollView, Platform, StyleSheet } from "react-native";
 import { Avatar, Header, SearchBar, Button } from "react-native-elements";
 import Feather from "react-native-vector-icons/Feather";
 import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
-import BASE_URL from '../BaseUrl';
+import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
 
 //style sheet
@@ -59,7 +59,7 @@ const Search = ({ route, navigation }) => {
     //retrieve data on first load
     useEffect(() => {
         axios.get(`${BASE_URL}/api/search/users`, { params: { excludeIds: existingMembers } })
-            .then(res => setSuggestions(res.data.map(row => ({ ...row, checked: false }))))
+            .then(res => setSuggestions(res.data.map(row => ({ ...row, checked: false, avatar_url: row.avatar_url ? `${BASE_URL + row.avatar_url}` : EMPTY_IMAGE_DIRECTORY }))))
             .catch(err => console.error(err))
     }, [])
 
@@ -93,7 +93,12 @@ const Search = ({ route, navigation }) => {
             axios.post(`${BASE_URL}/api/search/create-group`, formData, { headers: { 'content-type': 'multipart/form-data' } })
                 .then(async res => {
                     const data = res.data;
-                    navigation.navigate('Chat', { groupID: data.id })
+                    const chatParams = {
+                        groupID: data.id,
+                        name: data.name,
+                        avatar: data.avatar_url ? `${BASE_URL + data.avatar_url}` : EMPTY_IMAGE_DIRECTORY
+                    }
+                    navigation.navigate('Chat', chatParams)
                 })
                 .catch(err => console.log(err))
         } 
@@ -147,7 +152,7 @@ const Search = ({ route, navigation }) => {
                         <Avatar 
                             rounded 
                             size="large" 
-                            source={{ uri: l.avatar_url }} 
+                            source={{ uri: l.avatar_url || EMPTY_IMAGE_DIRECTORY }} 
                             onPress={() => toggleCheckbox(i)}/>
                         <Text style={{ fontWeight: "bold", color: "black", alignSelf: 'stretch', textAlign: 'center' }} textBreakStrategy="simple">
                             {l.name.split(" ")[0]}

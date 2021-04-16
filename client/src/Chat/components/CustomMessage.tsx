@@ -3,6 +3,7 @@ import { View, StyleSheet, Text, Image, TouchableOpacity } from 'react-native';
 import { Message } from 'react-native-gifted-chat';
 import { Video } from 'expo-av';
 import { UserContext } from '../../Auth/Login';
+import { BASE_URL } from '../../BaseUrl';
 
 //style sheet
 const styles = StyleSheet.create({
@@ -52,7 +53,7 @@ type CustomMessageProps = {
 
 const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
     const { children, onLongPress } = props;
-    const user = useContext(UserContext);
+    const { user } = useContext(UserContext);
     const [displayStatus, setDisplayStatus] = useState<boolean>(false);
 
     const prepareStatusText = (status: string) => {

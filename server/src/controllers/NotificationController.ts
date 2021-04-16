@@ -43,12 +43,12 @@ export class NotificationController {
         }
 
         // Construct a message.
-        messages.push({
-            to: pushToken,
-            sound: 'default',
-            body: 'This is a test notification',
-            data: { withSome: 'data' },
-        })
+        // messages.push({
+        //     to: pushToken,
+        //     sound: 'default',
+        //     body: 'This is a test notification',
+        //     data: { withSome: 'data' },
+        // })
 
         // Send notifications in chunks.
         let chunks = expo.chunkPushNotifications(messages);
