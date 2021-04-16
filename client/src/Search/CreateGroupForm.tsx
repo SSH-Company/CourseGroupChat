@@ -20,7 +20,6 @@ const CreateGroupForm = ({ navigation }) => {
     const [groupName, setGroupName] = useState<string>();
     const [errorMessage, setErrorMessage] = useState<string>();
     const [invalidImage, setInvalidImage] = useState(false);
-    const [displayUploadedImage, setDisplayUploadedImage] = useState(false);
 
     const handleFormSubmit = () => {
         if (!groupName) {
@@ -50,7 +49,6 @@ const CreateGroupForm = ({ navigation }) => {
                         return;
                     }
                     setImage(imageRes);
-                    setDisplayUploadedImage(true);
                 } 
             }
         } catch (err) {
@@ -85,7 +83,7 @@ const CreateGroupForm = ({ navigation }) => {
             <View style={styles.imagePicker}>
                 {image && (
                 <Image
-                    source={{ uri: displayUploadedImage ? image.uri : ( image.uri ? `${BASE_URL}${image.uri}` : EMPTY_IMAGE_DIRECTORY )}}
+                    source={{ uri: image.uri ? image.uri : EMPTY_IMAGE_DIRECTORY }}
                     style={{ width: 400, height: 400, marginBottom: 10 }}
                     onPress={onImagePick}
                 />
