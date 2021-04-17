@@ -115,6 +115,21 @@ const LogIn = ({ children }) => {
         };
       }, []);
 
+    // useEffect (() => {
+    //     tempFunc();
+    // }, []);
+
+    // const tempFunc = async () => {
+    //     setUser({
+    //         _id: 1,
+    //         name: 'Tanvir Shahriar',
+    //         avatar: 'https://placeimg.com/140/140/any'
+    //     })
+    //     await ChatLog.getChatLogInstance(true, 1);
+    //     setNewUser(false);
+    //     setLoading(false);
+    // }
+    
     // setup function for expo notifications.
     const registerForPushNotificationsAsync = async () => {
         let token;
