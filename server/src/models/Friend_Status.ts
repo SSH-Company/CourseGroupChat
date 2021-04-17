@@ -22,7 +22,7 @@ export class FriendStatusModel implements FriendStatusInterface {
                             WHERE ("SENDER" = ? AND "RECEIVER" = ?) 
                             OR ("SENDER" = ? AND "RECEIVER" = ?);`;
             const params = [userOne, userTwo, userTwo, userOne];
-
+            
             Database.getDB()
             .query(query, params)
             .then((data: FriendStatusInterface[]) => {

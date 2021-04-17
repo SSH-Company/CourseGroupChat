@@ -36,7 +36,7 @@ const Profile = ({ route, navigation }) => {
     const [friendStatus, setFriendStatus] = useState<{ sender: string | null, status: string | null }>({ sender: null, status: null });
 
     useEffect(() => {
-        axios.get(`${BASE_URL}/api/profile/${id}`, { withCredentials: true })
+        axios.get(`${BASE_URL}/api/profile/${id}`)
             .then(res => {
                 setUserInfo(res.data.user);
                 setFriendStatus(res.data.friendStatus);

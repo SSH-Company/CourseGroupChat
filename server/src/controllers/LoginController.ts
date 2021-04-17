@@ -26,7 +26,6 @@ export class LoginController {
             const user = await UserModel.getUserAccountByEmail(req.user.nameID);
             session.user = user;
             const html = `<div class="userBody">${JSON.stringify(user)}</div>`
-            console.log(req.session.user);
             res.status(STATUS.OK).send(html);
         } catch {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
