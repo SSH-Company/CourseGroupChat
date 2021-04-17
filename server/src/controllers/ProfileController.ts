@@ -58,6 +58,7 @@ export class ProfileController {
     private async getProfileById(req: Request, res: Response) {
         try {
             const session = req.session;
+            console.log(req.session);
             const profileID = req.params.id;
             const result = await Promise.all([
                 UserModel.getUserAccountByID(profileID),
