@@ -20,7 +20,10 @@ class CGCServer extends Server {
         this.app.use(
             session({
                 secret: "test",
-                cookie: { secure: false },
+                cookie: { 
+                    path: '/',
+                    secure: false
+                 },
                 resave: true,
                 saveUninitialized: true,
                 // store: null 
