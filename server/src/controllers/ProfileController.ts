@@ -9,6 +9,7 @@ import fs from 'fs';
 import multer from 'multer';
 import * as STATUS from 'http-status-codes';
 import { UserModel } from '../models/User';
+import { FriendStatusModel } from '../models/Friend_Status';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -56,14 +57,23 @@ export class ProfileController {
     @Get(':id')
     private async getProfileById(req: Request, res: Response) {
         try {
+            const session = req.session;
             const profileID = req.params.id;
-            const user = await UserModel.getUserAccountByID(profileID);
+            const result = await Promise.all([
+                UserModel.getUserAccountByID(profileID),
+                FriendStatusModel.getStatus(profileID, session.user.ID)
+            ]);
+            const user = result[0];
+            const status = result[1];
 
             res.status(STATUS.OK).json({
-                _id: user.ID,
-                name: user.FIRST_NAME + ' ' + user.LAST_NAME,
-                avatar: user.AVATAR
-            })
+                user: {
+                    _id: user.ID,
+                    name: user.FIRST_NAME + ' ' + user.LAST_NAME,
+                    avatar: user.AVATAR
+                },
+                status: status
+            });
         } catch(err) {
             console.error(err);
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Dimensions, View, StyleSheet } from 'react-native';
-import { Image, Text } from 'react-native-elements';
+import { Image, Text, Button } from 'react-native-elements';
 import { User } from 'react-native-gifted-chat';
+import { Ionicons, MaterialIcons } from "react-native-vector-icons";
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
 
@@ -21,7 +22,8 @@ const style = StyleSheet.create({
     },
     name: {
         fontWeight: 'bold',
-        fontSize: 20
+        fontSize: 20,
+        marginBottom: 20
     }
 })
 
@@ -29,16 +31,50 @@ const Profile = ({ route, navigation }) => {
     const id = route.params.id;
 
     const [userInfo, setUserInfo] = useState<User>({} as User);
+    const [friendStatus, setFriendStatus] = useState<string>();
 
     useEffect(() => {
         axios.get(`${BASE_URL}/api/profile/${id}`)
             .then(res => {
-                setUserInfo(res.data);
+                setUserInfo(res.data.user);
+                setFriendStatus(res.data.status);
             })
             .catch(err => {
                 console.log(err);
             })
     }, [id]);
+
+    const getRenderedStatus = (status: string | null) => {
+        if (status === "Accepted") {
+            return <Button 
+                icon={(
+                    <Ionicons
+                        name="checkmark-outline"
+                        size={15}
+                        color="white"
+                    />
+                )}
+                iconRight
+                title="Friends"
+            />
+        } else if (status === "Pending") {
+            return <Button 
+                icon={(
+                    <MaterialIcons
+                        name="pending"
+                        size={15}
+                        color="white"
+                    />
+                )}
+                iconRight
+                title="Pending"
+            />
+        } else {
+            return <Button 
+                title="Add Friend"
+            />
+        }
+    }
 
     return (
         <View style={style.container}>
@@ -47,6 +83,7 @@ const Profile = ({ route, navigation }) => {
                 style={style.image}
             />
             <Text style={style.name}>{userInfo.name}</Text>
+            {getRenderedStatus(friendStatus)}
         </View>
     )
 }
