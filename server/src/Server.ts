@@ -16,7 +16,7 @@ class CGCServer extends Server {
 
     constructor() {
         super(true);
-        this.app.use(cors({ origin: '*', credentials: true }))
+        this.app.use(cors({ origin: true, credentials: true }))
         this.app.use(bodyParser.json())
         this.app.use(bodyParser.urlencoded({ extended:true }))
         this.app.use(
