@@ -9,7 +9,7 @@ import fs from 'fs';
 import multer from 'multer';
 import * as STATUS from 'http-status-codes';
 import { UserModel } from '../models/User';
-import { FriendStatusModel } from '../models/Friend_Status';
+import { FriendStatusModel, FriendStatusInterface } from '../models/Friend_Status';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -82,6 +82,28 @@ export class ProfileController {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong attempting to get profile page information.",
                 identifier: "PC002"
+            })
+        }
+    }
+
+    @Post('add-friend')
+    private async sendFriendRequest(req: Request, res: Response) {
+        try {
+            const session = req.session;
+            const profileID = req.body.id;
+            const newRequest: FriendStatusInterface = {
+                SENDER: session.user.ID,
+                RECEIVER: profileID,
+                STATUS: 'Pending'
+            }
+            await FriendStatusModel.insert(newRequest);
+            res.status(STATUS.OK).json();
+
+        } catch(err) {
+            console.error(err);
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong attempting to send friend request.",
+                identifier: "PC003"
             })
         }
     }

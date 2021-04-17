@@ -32,7 +32,7 @@ const Profile = ({ route, navigation }) => {
     const id = route.params.id;
     const { user } = useContext(UserContext);
     const [userInfo, setUserInfo] = useState<User>({} as User);
-    const [friendStatus, setFriendStatus] = useState<{ sender: string, status: string }>();
+    const [friendStatus, setFriendStatus] = useState<{ sender: string | null, status: string | null }>({ sender: null, status: null });
 
     useEffect(() => {
         axios.get(`${BASE_URL}/api/profile/${id}`)
@@ -44,6 +44,12 @@ const Profile = ({ route, navigation }) => {
                 console.log(err);
             })
     }, [id]);
+
+    const addFriend = () => {
+        axios.post(`${BASE_URL}/api/profile/add-friend`, { id: id })
+            .then(() => setFriendStatus({...friendStatus, status: 'Pending'}))
+            .catch(err => console.log(err));
+    }
 
     const getRenderedStatus = (sender: string | null, status: string | null) => {
         if (status === "Accepted") {
@@ -79,6 +85,7 @@ const Profile = ({ route, navigation }) => {
         } else {
             return <Button 
                 title="Add Friend"
+                onPress={addFriend}
             />
         }
     }
@@ -90,7 +97,7 @@ const Profile = ({ route, navigation }) => {
                 style={style.image}
             />
             <Text style={style.name}>{userInfo.name}</Text>
-            {getRenderedStatus(friendStatus)}
+            {getRenderedStatus(friendStatus.sender, friendStatus.status)}
         </View>
     )
 }

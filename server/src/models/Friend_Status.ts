@@ -1,6 +1,6 @@
 import { Database } from '../services/Database';
 
-interface FriendStatusInterface {
+export interface FriendStatusInterface {
     SENDER?: string;
     RECEIVER?: string;
     STATUS?: "Pending" | "Accepted" | "Rejected";
