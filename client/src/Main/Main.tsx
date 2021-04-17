@@ -85,10 +85,28 @@ const Main = ({ navigation }) => {
         contentOffset={{ x: 0, y: 76 }}
         keyboardShouldPersistTaps="handled"
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => {
-            setRefreshing(true);
-            resetList(true);
-          }}/>
+          Platform.select({
+            ios: (
+              <RefreshControl
+                tintColor='transparent'
+                refreshing={refreshing} 
+                onRefresh={() => {
+                setRefreshing(true);
+                resetList(true);
+                }}
+              />
+            ),
+            android: (
+              <RefreshControl 
+                refreshing={refreshing} 
+                onRefresh={() => {
+                  setRefreshing(true);
+                  resetList(true);
+                }}
+              />
+            )
+          })
+          
         }
       >
         <SearchBar
