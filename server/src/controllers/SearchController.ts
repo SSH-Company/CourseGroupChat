@@ -49,6 +49,7 @@ export class SearchController {
     @Get('all-groups')
     private verifiedGroupsList(req: Request, res: Response) {
         const session = req.session;
+        console.log(req.session);
         UserGroupListModel.getUserGroupSearchList(session.user.ID)
             .then(list => {
                 res.status(STATUS.OK).json(list.map(row => ({
