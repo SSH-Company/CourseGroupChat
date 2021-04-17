@@ -8,7 +8,7 @@ import { UserContext } from '../Auth/Login';
 import { handleImagePick, handlePermissionRequest } from "../Util/ImagePicker";
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
-axios.defaults.withCredentials = true;
+axios.defaults.headers = { withCredentials: true };
 
 const ProfileSettings = ({ navigation }) => {
 

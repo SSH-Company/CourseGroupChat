@@ -1,7 +1,7 @@
 import { IMessage } from 'react-native-gifted-chat';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
-axios.defaults.withCredentials = true;
+axios.defaults.headers = { withCredentials: true };
 
 type RecipientMessageMapType = {
     [key: string]: IMessage[]

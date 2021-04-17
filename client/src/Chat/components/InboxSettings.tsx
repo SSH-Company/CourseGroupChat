@@ -6,7 +6,7 @@ import { AntDesign, Entypo, Ionicons, MaterialIcons } from 'react-native-vector-
 import { navigate } from '../../Util/RootNavigation';
 import { BASE_URL } from '../../BaseUrl';
 import axios from 'axios';
-axios.defaults.withCredentials = true;
+axios.defaults.headers = { withCredentials: true };
 
 type InboxSettingsProps = {
     group: User,

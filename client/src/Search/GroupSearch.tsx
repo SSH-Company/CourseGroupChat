@@ -5,7 +5,7 @@ import { Ionicons } from "react-native-vector-icons";
 import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
-axios.defaults.withCredentials = true;
+axios.defaults.headers = { withCredentials: true };
 
 const GroupSearch = ({ navigation }) => {
     const [search, setSearch] = useState("");

@@ -7,7 +7,7 @@ import { UserContext } from '../../Auth/Login';
 import BaseList from '../../Util/CommonComponents/BaseList';
 import { BASE_URL } from '../../BaseUrl';
 import axios from 'axios';
-axios.defaults.withCredentials = true;
+axios.defaults.headers = { withCredentials: true };
 
 type listtype = {
     id: string;

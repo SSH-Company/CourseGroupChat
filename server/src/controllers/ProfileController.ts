@@ -65,7 +65,7 @@ export class ProfileController {
             ]);
             const user = result[0];
             const friendStatus = result[1];
-
+            
             res.status(STATUS.OK).json({
                 user: {
                     _id: user.ID,
@@ -73,8 +73,8 @@ export class ProfileController {
                     avatar: user.AVATAR
                 },
                 friendStatus: {
-                    sender: friendStatus.SENDER,
-                    status: friendStatus.STATUS
+                    sender: friendStatus ? friendStatus.SENDER : null,
+                    status: friendStatus ? friendStatus.STATUS: null
                 }
             });
         } catch(err) {
