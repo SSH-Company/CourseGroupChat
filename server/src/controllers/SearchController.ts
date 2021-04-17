@@ -165,7 +165,7 @@ export class SearchController {
                 name: row.FIRST_NAME + ' ' + row.LAST_NAME,
                 avatar_url: row.AVATAR
             }));
-            console.log(users);
+            
             res.status(STATUS.OK).json(users);
         } catch (err) {
             console.error(err)
