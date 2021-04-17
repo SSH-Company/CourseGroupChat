@@ -32,15 +32,12 @@ export class SearchController {
         try {
             const session = req.session;
             const excludeIds = req.query.excludeIds || [];
-            const users = (await UserModel.getUsersForSearch(excludeIds)).map(row => {
-                if (row.ID !== session.user.ID) {
-                    return {
-                        id: row.ID,
-                        name: row.FIRST_NAME + ' ' + row.LAST_NAME,
-                        avatar_url: row.AVATAR
-                    }
-                }
-            });
+            const users = (await UserModel.getUsersForSearch(excludeIds)).map(row => ({
+                id: row.ID,
+                name: row.FIRST_NAME + ' ' + row.LAST_NAME,
+                avatar_url: row.AVATAR
+            })).filter(row => row.id !== session.user.ID);
+            
             res.status(STATUS.OK).json(users);
         } catch (err) {
             console.error(err)
