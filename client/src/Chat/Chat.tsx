@@ -279,7 +279,7 @@ const Chat = ({ route, navigation }) => {
                             onSend={messages => onSend(messages)}
                             renderMessage={props => { return ( <CustomMessage children={props} onLongPress={id => handleLongPress(id)} /> ) }}
                             renderInputToolbar={props => { return ( <CustomToolbar children={props} onImagePick={type => onImagePick(type)} /> ) }}
-                            isKeyboardInternallyHandled={false}
+                            isKeyboardInternallyHandled={true}
                             loadEarlier
                             onLoadEarlier={onLoadEarlier}
                         />
