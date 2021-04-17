@@ -22,9 +22,8 @@ export class LoginController {
     private async successLogin(req: Request, res: Response) {
         try {
             //TODO: add a service to ensure session is alive
-            let session = req.session;
             const user = await UserModel.getUserAccountByEmail(req.user.nameID);
-            session.user = user;
+            req.session.user = user;
             await req.session.save();
             const html = `<div class="userBody">${JSON.stringify(user)}</div>`
             res.status(STATUS.OK).send(html);
