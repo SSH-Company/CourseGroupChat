@@ -88,7 +88,6 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
                 <InputToolbar 
                     {...children} 
                     containerStyle={style.inputbar} 
-                    primaryStyle={{ alignItems: 'top' }}
                     renderSend={() => (
                         <Ionicons 
                             name={'mic-circle'} 
