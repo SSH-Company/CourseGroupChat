@@ -3,7 +3,8 @@ import {
     Middleware,
     Controller,
     Post,
-    Get
+    Get,
+    Put
 } from '@overnightjs/core';
 import fs from 'fs';
 import multer from 'multer';
@@ -104,6 +105,28 @@ export class ProfileController {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong attempting to send friend request.",
                 identifier: "PC003"
+            })
+        }
+    }
+
+    @Put('update-friend-status')
+    private async updateFriendStatus(req: Request, res: Response) {
+        try {
+            const session = req.session;
+            const { id, status } = req.body;
+            const newStatus: FriendStatusInterface = {
+                SENDER: id,
+                RECEIVER: session.user.ID,
+                STATUS: status
+            }
+
+            await FriendStatusModel.updateStatus(newStatus);
+            res.status(STATUS.OK).json();
+        } catch (err) {
+            console.error(err);
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong attempting to update friend status.",
+                identifier: "PC004"
             })
         }
     }

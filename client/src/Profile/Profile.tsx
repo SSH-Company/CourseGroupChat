@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Dimensions, View, StyleSheet } from 'react-native';
 import { Image, Text, Button } from 'react-native-elements';
 import { User } from 'react-native-gifted-chat';
-import { Ionicons, MaterialIcons } from "react-native-vector-icons";
+import { Ionicons } from "react-native-vector-icons";
 import { UserContext } from '../Auth/Login';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
@@ -26,6 +26,12 @@ const style = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 20,
         marginBottom: 20
+    },
+    acceptContainer: {
+        display: 'flex', 
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        minWidth: 140
     }
 })
 
@@ -48,7 +54,13 @@ const Profile = ({ route, navigation }) => {
 
     const addFriend = () => {
         axios.post(`${BASE_URL}/api/profile/add-friend`, { id: id })
-            .then(() => setFriendStatus({...friendStatus, status: 'Pending'}))
+            .then(() => setFriendStatus({...friendStatus, sender: user._id.toString(), status: 'Pending'}))
+            .catch(err => console.log(err));
+    }
+
+    const updateRequestStatus = (status: 'Accepted' | 'Rejected') => {
+        axios.put(`${BASE_URL}/api/profile/update-friend-status`, { id: id, status: status })
+            .then(() => setFriendStatus({...friendStatus, status: status}))
             .catch(err => console.log(err));
     }
 
@@ -68,20 +80,21 @@ const Profile = ({ route, navigation }) => {
         } else if (status === "Pending") {
             if (sender === user._id) {
                 return <Button 
-                    icon={(
-                        <MaterialIcons
-                            name="pending"
-                            size={15}
-                            color="white"
-                        />
-                    )}
-                    iconRight
                     title="Pending"
                 />
             } else {
-                return <Button 
-                    title="Accept request"
-                />
+                return (
+                    <View style={style.acceptContainer}>
+                        <Button 
+                            title="Accept"
+                            onPress={() => updateRequestStatus('Accepted')}
+                        />
+                        <Button 
+                            title="Cancel"
+                            onPress={() => updateRequestStatus('Rejected')}
+                        />
+                    </View>
+                )
             }
         } else {
             return <Button 
