@@ -58,7 +58,7 @@ const Search = ({ route, navigation }) => {
 
     //retrieve data on first load
     useEffect(() => {
-        axios.get(`${BASE_URL}/api/search/users`, { params: { excludeIds: existingMembers } })
+        axios.get(`${BASE_URL}/api/search/users`, { params: { excludeIds: existingMembers }, withCredentials: true })
             .then(res => setSuggestions(res.data.map(row => ({ ...row, checked: false, avatar_url: row.avatar_url ? `${BASE_URL + row.avatar_url}` : EMPTY_IMAGE_DIRECTORY }))))
             .catch(err => console.error(err))
     }, [])
