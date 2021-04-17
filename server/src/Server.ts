@@ -15,17 +15,18 @@ class CGCServer extends Server {
 
     constructor() {
         super(true);
-        this.app.use(bodyParser.json())
-        this.app.use(bodyParser.urlencoded({ extended:true }))
         this.app.use(
             session({
                 secret: "test",
+                cookie: { maxAge: 60 * 1000 * 300 },
                 resave: true,
                 saveUninitialized: true,
                 // store: null 
                 // new FileStore({ reapInterval: 60 })
             })
         );
+        this.app.use(bodyParser.json())
+        this.app.use(bodyParser.urlencoded({ extended:true }))
 
         passport.serializeUser((user, done) => {
             done(null, user);
