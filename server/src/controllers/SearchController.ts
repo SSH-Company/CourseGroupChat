@@ -37,7 +37,7 @@ export class SearchController {
                 name: row.FIRST_NAME + ' ' + row.LAST_NAME,
                 avatar_url: row.AVATAR
             })).filter(row => row.id !== session.user.ID);
-            
+
             res.status(STATUS.OK).json(users);
         } catch (err) {
             console.error(err)
@@ -152,6 +152,26 @@ export class SearchController {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong while attempting to add group members.",
                 identifier: "SC006"
+            })
+        }
+    }
+
+    @Get('friends')
+    private async friendList(req: Request, res: Response) {
+        try {
+            const session = req.session;
+            const users = (await UserModel.getFriendList(session.user.ID)).map(row => ({
+                id: row.ID,
+                name: row.FIRST_NAME + ' ' + row.LAST_NAME,
+                avatar_url: row.AVATAR
+            }));
+            
+            res.status(STATUS.OK).json(users);
+        } catch (err) {
+            console.error(err)
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong while attempting to get friend list.",
+                identifier: "SC007"
             })
         }
     }
