@@ -103,7 +103,7 @@ export class UserModel implements UserInterface {
         const query = `SELECT * FROM RT.USER u
                     WHERE (
                         SELECT "STATUS" FROM RT.FRIEND_STATUS fs
-                        where ("SENDER" = ? AND "RECEIVER" = u."ID") OR ("SENDER" = u."ID" AND "RECEIVER" = ?)
+                        WHERE ("SENDER" = ? AND "RECEIVER" = u."ID") OR ("SENDER" = u."ID" AND "RECEIVER" = ?)
                     ) = 'Accepted';`;
 
         return new Promise((resolve, reject) => {
