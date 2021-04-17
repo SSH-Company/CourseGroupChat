@@ -16,17 +16,6 @@ class CGCServer extends Server {
 
     constructor() {
         super(true);
-        this.app.use(bodyParser.json())
-        this.app.use(bodyParser.urlencoded({ extended:true }))
-        this.app.use(
-            session({
-                secret: "test",
-                resave: true,
-                saveUninitialized: true
-                // store: null 
-                // new FileStore({ reapInterval: 60 })
-            })
-        );
         const samlStrategy = new saml.Strategy({
             callbackUrl: '/api/login/callback',
             entryPoint: 'https://konnect1-dev.onelogin.com/trust/saml2/http-post/sso/fabacdc2-986a-4db1-a806-c9b61701ae89',
@@ -47,6 +36,21 @@ class CGCServer extends Server {
             done(null, user);
         });
         
+        this.app.use(bodyParser.json())
+        this.app.use(bodyParser.urlencoded({ extended:true }))
+        this.app.use(
+            session({
+                secret: "test",
+                cookie: {
+                    secure: false,
+                    maxAge: 24 * 60 * 60 * 1000
+                },
+                resave: true,
+                saveUninitialized: true,
+                store: undefined 
+                // new FileStore({ reapInterval: 60 })
+            })
+        );
         this.app.use(passport.initialize());
         this.app.use(passport.session());
     
