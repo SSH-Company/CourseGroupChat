@@ -15,10 +15,10 @@ const GroupSearch = ({ navigation }) => {
 
     useEffect(() => {
         searchRef.current.focus();
-        Promise.all([axios.get(`${BASE_URL}/api/search/all-groups`), axios.get(`${BASE_URL}/api/search/users`)])
+        Promise.all([axios.get(`${BASE_URL}/api/search/all-groups`, { withCredentials: true }), axios.get(`${BASE_URL}/api/search/users`, { withCredentials: true })])
             .then(res => {
                 setVerifiedList(res[0].data.map(row => ({...row, avatar_url: row.avatar_url ? `${BASE_URL + row.avatar_url}` : EMPTY_IMAGE_DIRECTORY })));
-                setUserList(res[1].data.map(row => ({ ...row, checked: false, avatar_url: row.avatar_url ? `${BASE_URL + row.avatar_url}` : EMPTY_IMAGE_DIRECTORY })))
+                setUserList(res[1].data.map(row => ({ ...row, avatar_url: row.avatar_url ? `${BASE_URL + row.avatar_url}` : EMPTY_IMAGE_DIRECTORY })))
                 setLoading(false);
             })
             .catch(err => console.error(err))
@@ -95,7 +95,6 @@ const GroupSearch = ({ navigation }) => {
             </ScrollView>
         </View>
     )
-    
 }
 
 export default GroupSearch

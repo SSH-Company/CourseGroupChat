@@ -25,7 +25,7 @@ class CGCServer extends Server {
                     secure: false,
                     maxAge: 24 * 60 * 60 * 1000
                 },
-                resave: false,
+                resave: true,
                 saveUninitialized: true
                 // store: null 
                 // new FileStore({ reapInterval: 60 })

@@ -72,7 +72,7 @@ const LogIn = ({ children }) => {
     */
     useEffect(() => {
         axios.get(`${BASE_URL}/api/login`)
-            .then(async res => {
+            .then(res => {
                 setSourceHTML({ html: res.data });
                 setNewUser(true);
                 setLoading(false);
@@ -102,18 +102,18 @@ const LogIn = ({ children }) => {
     }, [])
 
     // put inside login so it only checks for/generates token once per app init.
-    useEffect(() => {
-        // notifications.
-        registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+    // useEffect(() => {
+    //     // notifications.
+    //     registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
     
-        responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-          console.log(response);
-        });
+    //     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+    //       console.log(response);
+    //     });
     
-        return () => {
-          Notifications.removeNotificationSubscription(responseListener);
-        };
-      }, []);
+    //     return () => {
+    //       Notifications.removeNotificationSubscription(responseListener);
+    //     };
+    //   }, []);
 
     // setup function for expo notifications.
     const registerForPushNotificationsAsync = async () => {

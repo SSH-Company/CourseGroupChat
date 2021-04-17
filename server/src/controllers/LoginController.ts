@@ -25,7 +25,6 @@ export class LoginController {
             let session = req.session;
             const user = await UserModel.getUserAccountByEmail(req.user.nameID);
             session.user = user;
-            await req.session.save();
             const html = `<div class="userBody">${JSON.stringify(user)}</div>`
             console.log(req.session.user);
             res.status(STATUS.OK).send(html);
