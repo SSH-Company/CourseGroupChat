@@ -20,7 +20,7 @@ class CGCServer extends Server {
         this.app.use(
             session({
                 secret: "test",
-                resave: true,
+                resave: false,
                 saveUninitialized: true
                 // store: null 
                 // new FileStore({ reapInterval: 60 })
