@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Dimensions, View, StyleSheet } from 'react-native';
 import { Image, Text, Button } from 'react-native-elements';
 import { User } from 'react-native-gifted-chat';
 import { Ionicons, MaterialIcons } from "react-native-vector-icons";
+import { UserContext } from '../Auth/Login';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
 
@@ -29,22 +30,22 @@ const style = StyleSheet.create({
 
 const Profile = ({ route, navigation }) => {
     const id = route.params.id;
-
+    const { user } = useContext(UserContext);
     const [userInfo, setUserInfo] = useState<User>({} as User);
-    const [friendStatus, setFriendStatus] = useState<string>();
+    const [friendStatus, setFriendStatus] = useState<{ sender: string, status: string }>();
 
     useEffect(() => {
         axios.get(`${BASE_URL}/api/profile/${id}`)
             .then(res => {
                 setUserInfo(res.data.user);
-                setFriendStatus(res.data.status);
+                setFriendStatus(res.data.friendStatus);
             })
             .catch(err => {
                 console.log(err);
             })
     }, [id]);
 
-    const getRenderedStatus = (status: string | null) => {
+    const getRenderedStatus = (sender: string | null, status: string | null) => {
         if (status === "Accepted") {
             return <Button 
                 icon={(
@@ -58,17 +59,23 @@ const Profile = ({ route, navigation }) => {
                 title="Friends"
             />
         } else if (status === "Pending") {
-            return <Button 
-                icon={(
-                    <MaterialIcons
-                        name="pending"
-                        size={15}
-                        color="white"
-                    />
-                )}
-                iconRight
-                title="Pending"
-            />
+            if (sender === user._id) {
+                return <Button 
+                    icon={(
+                        <MaterialIcons
+                            name="pending"
+                            size={15}
+                            color="white"
+                        />
+                    )}
+                    iconRight
+                    title="Pending"
+                />
+            } else {
+                return <Button 
+                    title="Accept request"
+                />
+            }
         } else {
             return <Button 
                 title="Add Friend"

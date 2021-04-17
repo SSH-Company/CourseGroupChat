@@ -64,7 +64,7 @@ export class ProfileController {
                 FriendStatusModel.getStatus(profileID, session.user.ID)
             ]);
             const user = result[0];
-            const status = result[1];
+            const friendStatus = result[1];
 
             res.status(STATUS.OK).json({
                 user: {
@@ -72,7 +72,10 @@ export class ProfileController {
                     name: user.FIRST_NAME + ' ' + user.LAST_NAME,
                     avatar: user.AVATAR
                 },
-                status: status
+                friendStatus: {
+                    sender: friendStatus.SENDER,
+                    status: friendStatus.STATUS
+                }
             });
         } catch(err) {
             console.error(err);

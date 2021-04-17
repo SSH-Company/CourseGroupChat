@@ -16,9 +16,9 @@ export class FriendStatusModel implements FriendStatusInterface {
         Object.assign(this, raw);
     }
 
-    static getStatus(userOne: string, userTwo: string): Promise<string | null> {
+    static getStatus(userOne: string, userTwo: string): Promise<FriendStatusModel> {
         return new Promise((resolve, reject) => {
-            const query = `SELECT "STATUS" FROM RT."FRIEND_STATUS" 
+            const query = `SELECT "SENDER", "STATUS" FROM RT.FRIEND_STATUS 
                             WHERE ("SENDER" = ? AND "RECEIVER" = ?) 
                             OR ("SENDER" = ? AND "RECEIVER" = ?);`;
             const params = [userOne, userTwo, userTwo, userOne];
@@ -26,7 +26,7 @@ export class FriendStatusModel implements FriendStatusInterface {
             Database.getDB()
             .query(query, params)
             .then((data: FriendStatusInterface[]) => {
-                if (data.length > 0) resolve(data[0].STATUS)
+                if (data.length > 0) resolve(new FriendStatusModel(data[0]))
                 else resolve(null);
             })
             .catch(err => reject(err))
