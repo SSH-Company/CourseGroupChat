@@ -6,6 +6,7 @@ import { Ionicons, MaterialIcons } from "react-native-vector-icons";
 import { UserContext } from '../Auth/Login';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
+axios.defaults.withCredentials = true;
 
 const style = StyleSheet.create({
     container: {

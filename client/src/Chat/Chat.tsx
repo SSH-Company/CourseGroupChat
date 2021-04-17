@@ -15,6 +15,7 @@ import { ChatLog, MessageStatus, revisedRandId } from '../Util/ChatLog';
 import VerifiedIcon from '../Util/CommonComponents/VerifiedIcon';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
+axios.defaults.withCredentials = true;
 
 const Chat = ({ route, navigation }) => {
     const { user } = useContext(UserContext)

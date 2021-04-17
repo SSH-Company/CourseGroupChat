@@ -5,6 +5,7 @@ import { Ionicons } from "react-native-vector-icons";
 import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
+axios.defaults.withCredentials = true;
 
 const GroupSearch = ({ navigation }) => {
     const [search, setSearch] = useState("");
@@ -15,7 +16,7 @@ const GroupSearch = ({ navigation }) => {
 
     useEffect(() => {
         searchRef.current.focus();
-        Promise.all([axios.get(`${BASE_URL}/api/search/all-groups`, { withCredentials: true }), axios.get(`${BASE_URL}/api/search/users`, { withCredentials: true })])
+        Promise.all([axios.get(`${BASE_URL}/api/search/all-groups`), axios.get(`${BASE_URL}/api/search/users`)])
             .then(res => {
                 setVerifiedList(res[0].data.map(row => ({...row, avatar_url: row.avatar_url ? `${BASE_URL + row.avatar_url}` : EMPTY_IMAGE_DIRECTORY })));
                 setUserList(res[1].data.map(row => ({ ...row, avatar_url: row.avatar_url ? `${BASE_URL + row.avatar_url}` : EMPTY_IMAGE_DIRECTORY })))

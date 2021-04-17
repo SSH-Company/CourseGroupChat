@@ -12,6 +12,7 @@ import { Cache } from 'react-native-cache';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import axios from 'axios';
+axios.defaults.withCredentials = true;
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ChatLog } from '../Util/ChatLog';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from "../BaseUrl";

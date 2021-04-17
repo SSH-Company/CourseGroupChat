@@ -5,6 +5,7 @@ import Feather from "react-native-vector-icons/Feather";
 import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
+axios.defaults.withCredentials = true;
 
 //style sheet
 const style = StyleSheet.create({
