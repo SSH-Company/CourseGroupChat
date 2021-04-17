@@ -4,7 +4,8 @@ import {
     Controller,
     Post,
     Get,
-    Put
+    Put,
+    Delete
 } from '@overnightjs/core';
 import fs from 'fs';
 import multer from 'multer';
@@ -87,8 +88,8 @@ export class ProfileController {
         }
     }
 
-    @Post('add-friend')
-    private async sendFriendRequest(req: Request, res: Response) {
+    @Post('friend-request')
+    private async sendRequest(req: Request, res: Response) {
         try {
             const session = req.session;
             const profileID = req.body.id;
@@ -109,24 +110,34 @@ export class ProfileController {
         }
     }
 
-    @Put('update-friend-status')
-    private async updateFriendStatus(req: Request, res: Response) {
+    @Put('friend-request')
+    private async acceptRequest(req: Request, res: Response) {
         try {
             const session = req.session;
-            const { id, status } = req.body;
-            const newStatus: FriendStatusInterface = {
-                SENDER: id,
-                RECEIVER: session.user.ID,
-                STATUS: status
-            }
-
-            await FriendStatusModel.updateStatus(newStatus);
+            const id = req.body.id;
+            await FriendStatusModel.accept(id, session.user.ID);
             res.status(STATUS.OK).json();
         } catch (err) {
             console.error(err);
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong attempting to update friend status.",
                 identifier: "PC004"
+            })
+        }
+    }
+
+    @Delete('friend-request')
+    private async rejectRequest(req: Request, res: Response) {
+        try {
+            const session = req.session;
+            const id = req.body.id;
+            await FriendStatusModel.reject(id, session.user.ID);
+            res.status(STATUS.OK).json();
+        } catch (err) {
+            console.error(err);
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong attempting to delete friend status.",
+                identifier: "PC005"
             })
         }
     }

@@ -3,13 +3,13 @@ import { Database } from '../services/Database';
 export interface FriendStatusInterface {
     SENDER?: string;
     RECEIVER?: string;
-    STATUS?: "Pending" | "Accepted" | "Rejected";
+    STATUS?: "Pending" | "Accepted";
 }
 
 export class FriendStatusModel implements FriendStatusInterface {
     SENDER?: string;
     RECEIVER?: string;
-    STATUS?: "Pending" | "Accepted" | "Rejected";
+    STATUS?: "Pending" | "Accepted";
 
     constructor(raw: FriendStatusInterface) {
         // super();
@@ -46,11 +46,24 @@ export class FriendStatusModel implements FriendStatusInterface {
         })
     }
 
-    static updateStatus(row: FriendStatusInterface): Promise<void> {
+    static accept(sender: string, receiver: string): Promise<void> {
         return new Promise((resolve, reject) => {
-            const query = `UPDATE RT.FRIEND_STATUS SET "STATUS" = ?
+            const query = `UPDATE RT.FRIEND_STATUS SET "STATUS" = 'Accepted'
                             WHERE "SENDER" = ? AND "RECEIVER" = ?;`;
-            const params = [row.STATUS, row.SENDER, row.RECEIVER];
+            const params = [sender, receiver];
+
+            Database.getDB()
+            .query(query, params)
+            .then(() => resolve())
+            .catch(err => reject(err))
+        })
+    }
+
+    static reject(sender: string, receiver: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const query = `DELETE FROM RT.FRIEND_STATUS
+                            WHERE "SENDER" = ? AND "RECEIVER" = ?;`;
+            const params = [sender, receiver];
 
             Database.getDB()
             .query(query, params)

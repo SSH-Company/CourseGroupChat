@@ -53,14 +53,20 @@ const Profile = ({ route, navigation }) => {
     }, [id]);
 
     const addFriend = () => {
-        axios.post(`${BASE_URL}/api/profile/add-friend`, { id: id })
+        axios.post(`${BASE_URL}/api/profile/friend-request`, { id: id })
             .then(() => setFriendStatus({...friendStatus, sender: user._id.toString(), status: 'Pending'}))
             .catch(err => console.log(err));
     }
 
-    const updateRequestStatus = (status: 'Accepted' | 'Rejected') => {
-        axios.put(`${BASE_URL}/api/profile/update-friend-status`, { id: id, status: status })
-            .then(() => setFriendStatus({...friendStatus, status: status}))
+    const acceptRequest = () => {
+        axios.put(`${BASE_URL}/api/profile/friend-request`, { id: id })
+            .then(() => setFriendStatus({...friendStatus, status: 'Accepted'}))
+            .catch(err => console.log(err));
+    }
+
+    const cancelRequest = () => {
+        axios.delete(`${BASE_URL}/api/profile/friend-request`, { data: { id: id }})
+            .then(() => setFriendStatus({...friendStatus, status: null }))
             .catch(err => console.log(err));
     }
 
@@ -87,11 +93,11 @@ const Profile = ({ route, navigation }) => {
                     <View style={style.acceptContainer}>
                         <Button 
                             title="Accept"
-                            onPress={() => updateRequestStatus('Accepted')}
+                            onPress={acceptRequest}
                         />
                         <Button 
                             title="Cancel"
-                            onPress={() => updateRequestStatus('Rejected')}
+                            onPress={cancelRequest}
                         />
                     </View>
                 )
