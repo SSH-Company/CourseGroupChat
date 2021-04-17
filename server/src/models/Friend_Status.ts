@@ -3,13 +3,13 @@ import { Database } from '../services/Database';
 export interface FriendStatusInterface {
     SENDER?: string;
     RECEIVER?: string;
-    STATUS?: "Pending" | "Accepted";
+    STATUS?: "PENDING" | "ACCEPTED";
 }
 
 export class FriendStatusModel implements FriendStatusInterface {
     SENDER?: string;
     RECEIVER?: string;
-    STATUS?: "Pending" | "Accepted";
+    STATUS?: "PENDING" | "ACCEPTED";
 
     constructor(raw: FriendStatusInterface) {
         // super();
@@ -48,7 +48,7 @@ export class FriendStatusModel implements FriendStatusInterface {
 
     static accept(sender: string, receiver: string): Promise<void> {
         return new Promise((resolve, reject) => {
-            const query = `UPDATE RT.FRIEND_STATUS SET "STATUS" = 'Accepted'
+            const query = `UPDATE RT.FRIEND_STATUS SET "STATUS" = 'ACCEPTED'
                             WHERE "SENDER" = ? AND "RECEIVER" = ?;`;
             const params = [sender, receiver];
 
