@@ -20,7 +20,7 @@ class CGCServer extends Server {
         this.app.use(
             session({
                 secret: "test",
-                resave: false,
+                resave: true,
                 saveUninitialized: true
                 // store: null 
                 // new FileStore({ reapInterval: 60 })
@@ -46,8 +46,8 @@ class CGCServer extends Server {
             done(null, user);
         });
         
-        this.app.use(passport.initialize({}));
-        this.app.use(passport.session({}));
+        this.app.use(passport.initialize());
+        this.app.use(passport.session());
     
         this.setupControllers();
     }
