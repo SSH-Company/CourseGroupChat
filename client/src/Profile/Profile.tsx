@@ -54,13 +54,13 @@ const Profile = ({ route, navigation }) => {
 
     const addFriend = () => {
         axios.post(`${BASE_URL}/api/profile/friend-request`, { id: id })
-            .then(() => setFriendStatus({...friendStatus, sender: user._id as string, status: 'Pending'}))
+            .then(() => setFriendStatus({...friendStatus, sender: user._id as string, status: 'PENDING'}))
             .catch(err => console.log(err));
     }
 
     const acceptRequest = () => {
         axios.put(`${BASE_URL}/api/profile/friend-request`, { id: id })
-            .then(() => setFriendStatus({...friendStatus, status: 'Accepted'}))
+            .then(() => setFriendStatus({...friendStatus, status: 'ACCEPTED'}))
             .catch(err => console.log(err));
     }
 
@@ -71,7 +71,7 @@ const Profile = ({ route, navigation }) => {
     }
 
     const getRenderedStatus = (sender: string | null, status: string | null) => {
-        if (status === "Accepted") {
+        if (status === "ACCEPTED") {
             return <Button 
                 icon={(
                     <Ionicons
@@ -83,7 +83,7 @@ const Profile = ({ route, navigation }) => {
                 iconRight
                 title="Friends"
             />
-        } else if (status === "Pending") {
+        } else if (status === "PENDING") {
             if (sender === user._id) {
                 return <Button 
                     title="Pending"

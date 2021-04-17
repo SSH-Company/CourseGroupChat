@@ -96,7 +96,7 @@ export class ProfileController {
             const newRequest: FriendStatusInterface = {
                 SENDER: session.user.ID,
                 RECEIVER: profileID,
-                STATUS: 'Pending'
+                STATUS: 'PENDING'
             }
             await FriendStatusModel.insert(newRequest);
             res.status(STATUS.OK).json();
