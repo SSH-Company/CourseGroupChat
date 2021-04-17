@@ -54,7 +54,7 @@ const Profile = ({ route, navigation }) => {
 
     const addFriend = () => {
         axios.post(`${BASE_URL}/api/profile/friend-request`, { id: id })
-            .then(() => setFriendStatus({...friendStatus, sender: user._id.toString(), status: 'Pending'}))
+            .then(() => setFriendStatus({...friendStatus, sender: user._id as string, status: 'Pending'}))
             .catch(err => console.log(err));
     }
 
