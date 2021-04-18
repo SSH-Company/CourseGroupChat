@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { Text, View, ScrollView, Platform, StyleSheet } from "react-native";
+import { Text, View, ScrollView, Platform, StyleSheet, Dimensions } from "react-native";
 import { Avatar, Header, SearchBar, Button } from "react-native-elements";
 import Feather from "react-native-vector-icons/Feather";
 import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
@@ -50,6 +50,7 @@ const Search = ({ route, navigation }) => {
     const [search, setSearch] = useState("");
     const [displaySubmit, setDisplaySubmit] = useState(false);
     const [suggestions, setSuggestions] = useState<listtype[]>([]);
+    const dimesions = Dimensions.get('window');
     const renderLimit = 20;
 
     const filteredTable = useMemo<listtype[]>(() => {
@@ -135,6 +136,7 @@ const Search = ({ route, navigation }) => {
                     </View>
                 }
             />
+            {suggestions.length > 0 &&
             <SearchBar
                 platform={Platform.OS === "android" ? "android" : "ios"}
                 clearIcon={{ size: 30 }}
@@ -143,31 +145,38 @@ const Search = ({ route, navigation }) => {
                 onCancel={() => setSearch('')}
                 value={search}
                 style={style.search}
-            />
+            />}
             <ScrollView keyboardShouldPersistTaps="handled">
-            <View style={style.members}>
-                <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-                {suggestions.map((l, i) => ( 
-                    l.checked &&
-                    <View key={`${i}-${l.checked}`} style={style.memberItem}>
-                        <Avatar 
-                            rounded 
-                            size="large" 
-                            source={{ uri: l.avatar_url || EMPTY_IMAGE_DIRECTORY }} 
-                            onPress={() => toggleCheckbox(i)}/>
-                        <Text style={{ fontWeight: "bold", color: "black", alignSelf: 'stretch', textAlign: 'center' }} textBreakStrategy="simple">
-                            {l.name.split(" ")[0]}
-                        </Text>
-                    </View>
-                ))}
-                </ScrollView>
-            </View>
-            <BaseList
-                title="Suggested"
-                items={filteredTable}
-                itemOnPress={(l, i) => toggleCheckbox(i)}
-                checkBoxes
-            />
+                {suggestions.length > 0 &&
+                <View style={style.members}>
+                    <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+                    {suggestions.map((l, i) => ( 
+                        l.checked &&
+                        <View key={`${i}-${l.checked}`} style={style.memberItem}>
+                            <Avatar 
+                                rounded 
+                                size="large" 
+                                source={{ uri: l.avatar_url || EMPTY_IMAGE_DIRECTORY }} 
+                                onPress={() => toggleCheckbox(i)}/>
+                            <Text style={{ fontWeight: "bold", color: "black", alignSelf: 'stretch', textAlign: 'center' }} textBreakStrategy="simple">
+                                {l.name.split(" ")[0]}
+                            </Text>
+                        </View>
+                    ))}
+                    </ScrollView>
+                </View>}
+            {filteredTable.length > 0 ?
+                <BaseList
+                    title="Suggested"
+                    items={filteredTable}
+                    itemOnPress={(l, i) => toggleCheckbox(i)}
+                    checkBoxes
+                />
+                :
+                <View style={{ paddingTop: dimesions.height / 3, alignSelf: 'center' }}>
+                    <Text style={{ color: 'grey' }}>Add people to your friend list to add them to groups!</Text>
+                </View>
+            }
             </ScrollView>
         </View>
     )

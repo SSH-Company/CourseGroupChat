@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView , Button} from "react-native";
-import { Header,  } from "react-native-elements";
+import { View, ScrollView , Button, Text } from "react-native";
+import { Header } from "react-native-elements";
 import { Ionicons } from "react-native-vector-icons";
 import { navigationRef } from '../Util/RootNavigation';
 import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
