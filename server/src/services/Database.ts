@@ -39,6 +39,7 @@ export class Database {
                 }
 
                 try {
+                    console.log(cleanedStmt, params);
                     const res = await client.query(cleanedStmt, params);
                     resolve(res.rows);
                     client.release(true);
