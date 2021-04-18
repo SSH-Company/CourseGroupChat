@@ -56,7 +56,7 @@ export class ProfileController {
         }
     }
 
-    @Get(':id')
+    @Get('settings/:id')
     private async getProfileById(req: Request, res: Response) {
         try {
             const session = req.session;
