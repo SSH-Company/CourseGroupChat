@@ -142,7 +142,7 @@ export class ProfileController {
         }
     }
 
-    @Get('freind-request')
+    @Get('friend-request')
     private async getRequests(req: Request, res: Response) {
         try {
             const session = req.session;

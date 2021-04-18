@@ -12,7 +12,7 @@ const FriendRequests = ({ navigation }) => {
     const [list, setList] = useState<listtype[]>([]);
 
     useEffect(() => {
-        axios.get(`${BASE_URL}/api/profile/freind-request`)
+        axios.get(`${BASE_URL}/api/profile/friend-request`)
             .then(res => setList(res.data.map(row => ({ 
                 ...row, 
                 avatar_url: row.avatar_url ? `${BASE_URL + row.avatar_url}` : EMPTY_IMAGE_DIRECTORY,
