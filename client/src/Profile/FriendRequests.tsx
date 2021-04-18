@@ -11,15 +11,40 @@ axios.defaults.headers = { withCredentials: true };
 const FriendRequests = ({ navigation }) => {
     const [list, setList] = useState<listtype[]>([]);
 
+    const acceptRequest = (id: string, index: number) => {
+        axios.put(`${BASE_URL}/api/profile/friend-request`, { id: id })
+            .then(() => {
+                setList(prevList => {
+                    const tempList = [...prevList];
+                    tempList[index].subtitle = 'You are now friends.';
+                    tempList[index].content = null;
+                    return tempList;
+                });
+            })
+            .catch(err => console.log(err));
+    }
+
+    const cancelRequest = (id: string, index: number) => {
+        axios.delete(`${BASE_URL}/api/profile/friend-request`, { data: { id: id }})
+            .then(() => {
+                setList(prevList => {
+                    const tempList = [...prevList];
+                    tempList.splice(index, 1);
+                    return tempList;
+                });
+            })
+            .catch(err => console.log(err));
+    }
+
     useEffect(() => {
         axios.get(`${BASE_URL}/api/profile/friend-request`)
-            .then(res => setList(res.data.map(row => ({ 
+            .then(res => setList(res.data.map((row, index) => ({ 
                 ...row, 
                 avatar_url: row.avatar_url ? `${BASE_URL + row.avatar_url}` : EMPTY_IMAGE_DIRECTORY,
                 content: 
                     <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', minWidth: 150 }}>
-                        <Button title="Accept" color="green" onPress={() => {}}/>
-                        <Button title="Cancel" color="red" onPress={() => {}}/>
+                        <Button title="Accept" color="green" onPress={() => acceptRequest(row.id, index)}/>
+                        <Button title="Cancel" color="red" onPress={() => cancelRequest(row.id, index)}/>
                     </View>
             }))))
             .catch(err => console.error(err))
