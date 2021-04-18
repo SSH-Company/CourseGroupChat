@@ -69,7 +69,7 @@ const Chat = ({ route, navigation }) => {
             const instance = await ChatLog.getChatLogInstance();
             const groupInfo = instance.groupInfo[groupID];
             if (groupInfo && (!groupInfo.entered || postStatus)) {
-                await axios.post(`${BASE_URL}/api/chat/updateMessageStatus`, { groupID: groupID });
+                await axios.post(`${BASE_URL}/api/chat/updateMessageStatus`, { groupID: groupID }, { headers: { withCredentials: true } });
                 instance.updateGroupEntered(groupID, true);
                 setPostStatus(false);
             }

@@ -3,12 +3,15 @@ import {
     Middleware,
     Controller,
     Post,
-    Get
+    Get,
+    Put,
+    Delete
 } from '@overnightjs/core';
 import fs from 'fs';
 import multer from 'multer';
 import * as STATUS from 'http-status-codes';
 import { UserModel } from '../models/User';
+import { FriendStatusModel, FriendStatusInterface } from '../models/Friend_Status';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -53,22 +56,108 @@ export class ProfileController {
         }
     }
 
-    @Get(':id')
+    @Get('settings/:id')
     private async getProfileById(req: Request, res: Response) {
         try {
+            const session = req.session;
             const profileID = req.params.id;
-            const user = await UserModel.getUserAccountByID(profileID);
-
+            const result = await Promise.all([
+                UserModel.getUserAccountByID(profileID),
+                FriendStatusModel.getStatus(profileID, session.user.ID)
+            ]);
+            const user = result[0];
+            const friendStatus = result[1];
+            
             res.status(STATUS.OK).json({
-                _id: user.ID,
-                name: user.FIRST_NAME + ' ' + user.LAST_NAME,
-                avatar: user.AVATAR
-            })
+                user: {
+                    _id: user.ID,
+                    name: user.FIRST_NAME + ' ' + user.LAST_NAME,
+                    avatar: user.AVATAR
+                },
+                friendStatus: {
+                    sender: friendStatus ? friendStatus.SENDER : null,
+                    status: friendStatus ? friendStatus.STATUS: null
+                }
+            });
         } catch(err) {
             console.error(err);
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong attempting to get profile page information.",
                 identifier: "PC002"
+            })
+        }
+    }
+
+    @Post('friend-request')
+    private async sendRequest(req: Request, res: Response) {
+        try {
+            const session = req.session;
+            const profileID = req.body.id;
+            const newRequest: FriendStatusInterface = {
+                SENDER: session.user.ID,
+                RECEIVER: profileID,
+                STATUS: 'PENDING'
+            }
+            await FriendStatusModel.insert(newRequest);
+            res.status(STATUS.OK).json();
+
+        } catch(err) {
+            console.error(err);
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong attempting to send friend request.",
+                identifier: "PC003"
+            })
+        }
+    }
+
+    @Put('friend-request')
+    private async acceptRequest(req: Request, res: Response) {
+        try {
+            const session = req.session;
+            const id = req.body.id;
+            await FriendStatusModel.accept(id, session.user.ID);
+            res.status(STATUS.OK).json();
+        } catch (err) {
+            console.error(err);
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong attempting to update friend status.",
+                identifier: "PC004"
+            })
+        }
+    }
+
+    @Delete('friend-request')
+    private async rejectRequest(req: Request, res: Response) {
+        try {
+            const session = req.session;
+            const id = req.body.id;
+            await FriendStatusModel.reject(id, session.user.ID);
+            res.status(STATUS.OK).json();
+        } catch (err) {
+            console.error(err);
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong attempting to delete friend status.",
+                identifier: "PC005"
+            })
+        }
+    }
+
+    @Get('friend-request')
+    private async getRequests(req: Request, res: Response) {
+        try {
+            const session = req.session;
+            const requests = (await UserModel.getFriendRequests(session.user.ID)).map(row => ({
+                id: row.ID,
+                name: row.FIRST_NAME + ' ' + row.LAST_NAME,
+                avatar_url: row.AVATAR
+            }));
+
+            res.status(STATUS.OK).json(requests);
+        } catch (err) {
+            console.error(err);
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong attempting to get friend requests.",
+                identifier: "PC006"
             })
         }
     }

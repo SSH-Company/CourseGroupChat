@@ -12,7 +12,11 @@ import {
   Search, 
   GroupSearch 
 } from './src/Search';
-import { Profile, ProfileSettings } from './src/Profile';
+import { 
+  Profile, 
+  ProfileSettings, 
+  FriendRequests
+} from './src/Profile';
 import { navigationRef } from './src/Util/RootNavigation';
 
 export default function App() {
@@ -35,6 +39,7 @@ export default function App() {
                       },
                     }}
                   />
+                  <Stack.Screen name="FriendRequests" component={FriendRequests}/>
                   <Stack.Screen name="Profile" component={Profile}/>
                   <Stack.Screen name="ProfileSettings" component={ProfileSettings} options={{gestureDirection: 'horizontal-inverted'}}/>
                   <Stack.Screen name="GroupMembers" component={GroupMembers}/>                  

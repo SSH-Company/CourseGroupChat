@@ -23,6 +23,7 @@ export type listtype = {
     verified?: 'Y' | 'N';
     subtitle?: string;
     checked?: boolean;
+    content?: React.ReactNode;
 }
 
 type BaseListProps = {
@@ -53,8 +54,8 @@ const BaseList:FunctionComponent<BaseListProps> = (props) => {
                 <Avatar rounded size="medium" source={{ uri: l.avatar_url || EMPTY_IMAGE_DIRECTORY }}/>
                 <ListItem.Content>
                     <View style={{ display:'flex', flexDirection: "row", justifyContent: "space-between" }}>
-                    <ListItem.Title>{`${l.name}`}</ListItem.Title>
-                    {l.verified && l.verified === 'Y' && <VerifiedIcon style={{ marginLeft: 8 }}/>}
+                        <ListItem.Title>{`${l.name}`}</ListItem.Title>
+                        {l.verified && l.verified === 'Y' && <VerifiedIcon style={{ marginLeft: 8 }}/>}
                     </View>
                     {l.subtitle && <ListItem.Subtitle>{l.subtitle}</ListItem.Subtitle>}
                 </ListItem.Content>
@@ -64,6 +65,11 @@ const BaseList:FunctionComponent<BaseListProps> = (props) => {
                     checkedIcon={<Ionicons name="checkmark-circle" size={25} color="#734f96"/>} 
                     uncheckedIcon={<Ionicons name="checkmark-circle-outline" size={25} color="#734f96"/>}
                     onPress={() => itemOnPress(l, i)}/>
+                }
+                {l.content &&
+                    <View style={{ alignSelf: 'flex-end' }}>
+                        {l.content}
+                    </View>
                 }
             </ListItem>
           ))}
