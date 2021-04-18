@@ -122,7 +122,8 @@ const ProfileSettings = ({ navigation }) => {
         },
         {
             title: 'Friend Requests',
-            icon: <Ionicons name='person-add' size={iconSize}/>
+            icon: <Ionicons name='person-add' size={iconSize}/>,
+            onPress: () => { navigation.navigate('FriendRequests') }
         },
         {
             title: 'Blocked Users', // TODO

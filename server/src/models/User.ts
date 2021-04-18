@@ -117,6 +117,22 @@ export class UserModel implements UserInterface {
         })
     }
 
+    static getFriendRequests(user: string): Promise<UserModel[]> {
+        return new Promise((resolve, reject) => {
+            const query = `SELECT u."ID", u."FIRST_NAME" , u."LAST_NAME", u."AVATAR" 
+                        FROM RT.FRIEND_STATUS fs2 
+                        LEFT JOIN RT.USER u on u."ID" = fs2."SENDER" 
+                        WHERE "RECEIVER" = ? AND "STATUS" = 'PENDING'`;
+
+            Database.getDB()
+            .query(query, [user])
+            .then((data: UserInterface[]) => {
+                resolve(data.map(d => new UserModel(d)))
+            })
+            .catch(err => reject(err))
+        })
+    }
+
     static getMembersByGroupId(id: string): Promise<UserModel[]> {
         const query = `SELECT u."ID", u."FIRST_NAME", u."LAST_NAME", u."AVATAR" 
                     FROM RT.USER_GROUP ug

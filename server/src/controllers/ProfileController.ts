@@ -141,4 +141,24 @@ export class ProfileController {
             })
         }
     }
+
+    @Get('freind-request')
+    private async getRequests(req: Request, res: Response) {
+        try {
+            const session = req.session;
+            const requests = (await UserModel.getFriendRequests(session.user.ID)).map(row => ({
+                id: row.ID,
+                name: row.FIRST_NAME + ' ' + row.LAST_NAME,
+                avatar_url: row.AVATAR
+            }));
+
+            res.status(STATUS.OK).json(requests);
+        } catch (err) {
+            console.error(err);
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong attempting to get friend requests.",
+                identifier: "PC006"
+            })
+        }
+    }
 }
