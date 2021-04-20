@@ -39,7 +39,7 @@ class CGCServer extends Server {
         });
         
         const samlStrategy = new saml.Strategy({
-            callbackUrl: 'http://15.223.6.50:8080/api/login/callback',
+            callbackUrl: 'http://15.223.6.50:3000/api/login/callback',
             entryPoint: 'http://15.223.6.50:8080/simplesaml/saml2/idp/SSOService.php',
             issuer: 'saml-poc'
         }, 
