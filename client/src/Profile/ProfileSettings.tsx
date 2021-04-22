@@ -45,7 +45,7 @@ const ProfileSettings = ({ navigation }) => {
             const newAvatar = res.data.path;
             setUser({
                 ...user,
-                avatar: newAvatar ? `${BASE_URL + newAvatar}` : profilePicture.uri
+                avatar: newAvatar || profilePicture.uri
             });
             return;
         })

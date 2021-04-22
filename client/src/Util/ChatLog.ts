@@ -35,14 +35,14 @@ export class ChatLog {
             const newMessage = {
                 _id: row.message_id || revisedRandId(),
                 text: row.text || '',
-                image: row.image ? `${BASE_URL + row.image}` : '',
-                video: row.video ? `${BASE_URL + row.video}`: '',
+                image: row.image || '',
+                video: row.video || '',
                 subtitle: row.subtitle || '',
                 createdAt: row.created_at,
                 user: {
                     _id: row.creator_id,
                     name: row.creator_name,
-                    avatar: row.avatar_url ? `${BASE_URL + row.avatar_url}` : EMPTY_IMAGE_DIRECTORY
+                    avatar: row.avatar_url
                 },
                 status: row.status,
                 displayStatus: false
@@ -52,7 +52,7 @@ export class ChatLog {
                 map[row.id] = [newMessage]
                 grpInfo[row.id] = {
                     name: row.name,
-                    avatar: row.avatar_url ? `${BASE_URL + row.avatar_url}` : EMPTY_IMAGE_DIRECTORY,
+                    avatar: row.avatar_url,
                     verified: row.verified,
                     entered: false
                 }

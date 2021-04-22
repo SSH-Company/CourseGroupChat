@@ -212,7 +212,7 @@ const LogIn = ({ children }) => {
             setUser({
                 _id: user.ID,
                 name: user.FIRST_NAME + ' ' + user.LAST_NAME,
-                avatar: user.AVATAR ? `${BASE_URL + user.AVATAR}` : EMPTY_IMAGE_DIRECTORY
+                avatar: user.AVATAR || EMPTY_IMAGE_DIRECTORY
             })
             //redirect to Main
             setNewUser(false)

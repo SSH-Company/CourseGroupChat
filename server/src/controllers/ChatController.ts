@@ -14,6 +14,7 @@ import { UserModel } from '../models/User';
 import { MessageModel } from '../models/Message';
 import { UserGroupModel } from '../models/User_Group';
 import { ChatLogViewModel } from '../models/ChatLog_View';
+import BASE_URL from '../BaseUrl';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -100,7 +101,7 @@ export class ChatController {
                 urlFilePath = '';
 
             if (req.file) {
-                urlFilePath = `/media/messages/${req.file.filename}`;
+                urlFilePath = `${BASE_URL}/media/messages/${req.file.filename}`;
                 //assuming file types can be "video" or "image"
                 messageType = message.hasOwnProperty('image') ? "image" : "video";
                 message[messageType] = urlFilePath
