@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useContext, useRef } from 'react';
-import { ActivityIndicator, Text, View, Dimensions, BackHandler } from 'react-native';
+import { ActivityIndicator, Text, View, Dimensions } from 'react-native';
 import { Avatar, Button, Header } from "react-native-elements";
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
@@ -15,6 +15,7 @@ import { ChatLog, MessageStatus, revisedRandId } from '../Util/ChatLog';
 import VerifiedIcon from '../Util/CommonComponents/VerifiedIcon';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
+axios.defaults.headers = { withCredentials: true };
 
 const Chat = ({ route, navigation }) => {
     const { user } = useContext(UserContext)
@@ -35,19 +36,6 @@ const Chat = ({ route, navigation }) => {
     const giftedChatRef = useRef(null);
     const avatarSize = 25;
 
-    useEffect(() => {
-        const backAction = () => {
-            navigation.navigate('Main');
-            return true
-        };
-    
-        const backHandler = BackHandler.addEventListener(
-            "hardwareBackPress",
-            backAction
-        );
-    
-        return () => backHandler.remove();
-    }, []);
 
     useEffect(() => {
         resetMessages(true);
@@ -69,48 +57,54 @@ const Chat = ({ route, navigation }) => {
             const instance = await ChatLog.getChatLogInstance();
             const groupInfo = instance.groupInfo[groupID];
             if (groupInfo && (!groupInfo.entered || postStatus)) {
-                await axios.post(`${BASE_URL}/api/chat/updateMessageStatus`, { groupID: groupID }, { headers: { withCredentials: true } });
+                await axios.post(`${BASE_URL}/api/chat/updateMessageStatus`, { groupID: groupID });
                 instance.updateGroupEntered(groupID, true);
                 setPostStatus(false);
             }
         } catch(err) {
-            console.error(err);
+            console.log(err);
         }
         return;
     }
 
     const resetMessages = async (refreshSource: boolean = false) => {
-        setLoading(true);
+        try{
+            setLoading(true);
 
-        const instance = await ChatLog.getChatLogInstance();
+            const instance = await ChatLog.getChatLogInstance();
 
-        if (refreshSource) {
-            await instance.refreshGroup(groupID, false, name, avatar); 
+            if (refreshSource) {
+                await instance.refreshGroup(groupID, false, name, avatar); 
+            }
+
+            const log = instance.chatLog;
+
+            if (groupID in log) {
+                const groupInfo = instance.groupInfo[groupID];
+                setGroup({
+                    ...group,
+                    name: groupInfo.name,
+                    avatar: groupInfo.avatar,
+                    verified: groupInfo.verified
+                });
+                
+                //we're filtering here to ensure we can retrieve empty group chats from ChatLog_View, but not render any empty messages
+                setMessages(previousMessages => {
+                    const messageIds = previousMessages.map(m => m._id);
+                    const filteredMessages = filterOutEmptyMessages(log[groupID]).filter(m => !messageIds.includes(m._id));
+                    return GiftedChat.append(previousMessages, filteredMessages)
+                });
+                setNewGroup(false);   
+            } else {
+                setNewGroup(true);
+                setMessages([]);
+            };
+        
+            setLoading(false);
+        
+        } catch (err) {
+            return;
         }
-
-        const log = instance.chatLog;
-
-        if (groupID in log) {
-            const groupInfo = instance.groupInfo[groupID];
-            setGroup({
-                ...group,
-                name: groupInfo.name,
-                avatar: groupInfo.avatar,
-                verified: groupInfo.verified
-            });
-            
-            //we're filtering here to ensure we can retrieve empty group chats from ChatLog_View, but not render any empty messages
-            setMessages(previousMessages => {
-                const messageIds = previousMessages.map(m => m._id);
-                const filteredMessages = filterOutEmptyMessages(log[groupID]).filter(m => !messageIds.includes(m._id));
-                return GiftedChat.append(previousMessages, filteredMessages)
-            });
-            setNewGroup(false);   
-        } else {
-            setNewGroup(true);
-            setMessages([]);
-        };
-        setLoading(false);
     }
     
     const onSend = useCallback(async (messages = []) => {

@@ -3,7 +3,7 @@ import { View, StyleSheet, Text, Image, TouchableOpacity } from 'react-native';
 import { Message } from 'react-native-gifted-chat';
 import { Video } from 'expo-av';
 import { UserContext } from '../../Auth/Login';
-import { BASE_URL } from '../../BaseUrl';
+import { navigate } from '../../Util/RootNavigation';
 
 //style sheet
 const styles = StyleSheet.create({
@@ -54,7 +54,7 @@ type CustomMessageProps = {
 const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
     const { children, onLongPress } = props;
     const { user } = useContext(UserContext);
-    const [displayStatus, setDisplayStatus] = useState<boolean>(false);
+    const [messagePressed, setMessagePressed] = useState<boolean>(false);
 
     const prepareStatusText = (status: string) => {
         const seenBy = status.split(', ').filter(i => i !== "" && i !== `${user.name.toUpperCase()}`);
@@ -69,40 +69,57 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
     return (
         <Message 
             {...children}
-            key={`user-key-${children['user']['_id']}-${displayStatus}`}
+            key={`user-key-${children['user']['_id']}-${messagePressed}`}
             renderBubble={() => {
                 const currentMessage = children['currentMessage']
                 const isCurrentUser = currentMessage.user._id === user._id
                 
                 return (
                     <View style={[styles.item]}>
+
+                        {/* handle texts */}
+                        {currentMessage.text !== "" &&
+                        <>
                         <TouchableOpacity 
-                            onPress={() => setDisplayStatus(!displayStatus)}
+                            onPress={() => setMessagePressed(!messagePressed)}
                             onLongPress={() => onLongPress(currentMessage._id)}
-                        >
-                            <View style={[styles.balloon, {backgroundColor: isCurrentUser ? '#f5f9ff' : '#7c80ee'}]}>
-                                    {currentMessage.text !== "" && <Text style={{paddingTop: 5, color:  isCurrentUser ? 'black' : 'white'}}>{currentMessage.text}</Text>}
-                                    {currentMessage.hasOwnProperty('image') && currentMessage.image.length > 0 && 
-                                    (<Image
-                                        source={{ uri: currentMessage.image }}
-                                        style={{ width: 200, height: 200, marginBottom: 10 }}
-                                    />)}
-                                    {currentMessage.hasOwnProperty('video') && currentMessage.video.length > 0 &&
-                                    (<Video
-                                        style={styles.video}
-                                        source={{ uri: currentMessage.video }}
-                                        //TODO: find a good way to display loading icon
-                                        // usePoster
-                                        // posterSource={{ uri: `${BASE_URL}/media/loading_icon.jpg` }} 
-                                        useNativeControls
-                                        resizeMode="cover"
-                                        isLooping
-                                    />)}
-                            </View>
+                        >     
+                        <View style={[styles.balloon, {backgroundColor: isCurrentUser ? '#f5f9ff' : '#7c80ee'}]}>
+                            <Text style={{paddingTop: 5, color:  isCurrentUser ? 'black' : 'white'}}>{currentMessage.text}</Text>
+                        </View>
                         </TouchableOpacity>
-                        {displayStatus && <Text style={{...styles.status, alignSelf: isCurrentUser ? 'flex-end' : 'flex-start'}}>
+                        <>
+                        {messagePressed && <Text style={{...styles.status, alignSelf: isCurrentUser ? 'flex-end' : 'flex-start'}}>
                             {prepareStatusText(currentMessage.status)}
                         </Text>}
+                        </></>}
+
+                        {/* handle images */}
+                        {currentMessage.hasOwnProperty('image') && currentMessage.image.length > 0 && 
+                        (<TouchableOpacity
+                            onPress={() => navigate('FullScreenMedia', currentMessage.image)}
+                            onLongPress={() => onLongPress(currentMessage._id)}
+                        >       
+                            <Image
+                                source={{ uri: currentMessage.image }}
+                                style={{ width: 200, height: 200, marginBottom: 10, borderRadius: 20 }}
+                            />
+                        </TouchableOpacity>)}
+
+                        {/* handle videos */}
+                        {currentMessage.hasOwnProperty('video') && currentMessage.video.length > 0 &&
+                        (<View>
+                            <Video
+                                style={styles.video}
+                                source={{ uri: currentMessage.video }}
+                                //TODO: find a good way to display loading icon
+                                // usePoster
+                                // posterSource={{ uri: `${BASE_URL}/media/loading_icon.jpg` }} 
+                                useNativeControls
+                                resizeMode="cover"
+                                isLooping
+                            />
+                        </View>)}
                     </View>
                 )
             }}
