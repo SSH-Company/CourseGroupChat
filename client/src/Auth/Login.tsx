@@ -72,9 +72,8 @@ const LogIn = ({ children }) => {
         and stored. The user is then redirected to the Main page.
     */
     useEffect(() => {
-        axios.get(`${BASE_URL}/api/login`)
+        axios.get(`${BASE_URL}/api/login`, { params: { email: 'sadman.hasan@mail.utoronto.ca' } }) //{ params: { email: 'email address here' } }
             .then(res => {
-                console.log(res.data);
                 tempFunc(res.data);
                 // setSourceHTML({ html: res.data });
                 // setNewUser(true);
@@ -116,10 +115,6 @@ const LogIn = ({ children }) => {
     //     return () => {
     //       Notifications.removeNotificationSubscription(responseListener);
     //     };
-    // }, []);
-
-    // useEffect (() => {
-    //     tempFunc();
     // }, []);
 
     const tempFunc = async (user) => {

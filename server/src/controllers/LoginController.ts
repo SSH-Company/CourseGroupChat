@@ -15,7 +15,7 @@ export class LoginController {
     // @Middleware([passport.authenticate('saml')])
     private async userLogin(req: Request, res: Response) {
         let session = req.session;
-        const user = await UserModel.getUserAccountByEmail('sadman.hasan@mail.utoronto.ca');
+        const user = await UserModel.getUserAccountByEmail(req.query.email);
         session.user = user;
         res.status(STATUS.OK).json(user);
     }
