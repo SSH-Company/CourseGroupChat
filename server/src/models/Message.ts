@@ -71,6 +71,18 @@ export class MessageModel implements MessageInterface {
                 .catch(err => reject(err))
         })
     }
+
+    static getGroupImages(id: string): Promise<MessageModel[]> {
+        const query = `${SELECT} WHERE "RECIPIENT_GROUP_ID" = ? 
+                        AND "MESSAGE_TYPE" <> 'text'; `;
+
+        return new Promise((resolve, reject) => {
+            Database.getDB()
+            .query(query, [id])
+            .then((data: MessageInterface[]) => resolve(data.map(d => new MessageModel(d))))
+            .catch(err => reject(err))
+        })
+    }
 }
 
 const SELECT = `

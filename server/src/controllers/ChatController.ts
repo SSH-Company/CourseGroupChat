@@ -343,4 +343,32 @@ export class ChatController {
                 })
             })
     }
+
+    @Get('gallery/:grpId')
+    private async getGroupGallery(req: Request, res: Response) {
+        try {
+            const grpId = req.params.grpId;
+
+            if (!grpId) {
+                res.status(STATUS.BAD_REQUEST).json({
+                    message: "Request parameter must contain grpId",
+                    identifier: "CC015"
+                });
+                return;
+            }
+
+            const members = await MessageModel.getGroupImages(grpId);
+
+            res.status(STATUS.OK).json(members.map(row => ({
+                body: row.MESSAGE_BODY,
+                type: row.MESSAGE_TYPE
+            })));
+        } catch(err) {
+            console.error(err);
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong while attempting to retrieve group images/videos.",
+                identifier: "CC016"
+            })
+        }
+    }
 }

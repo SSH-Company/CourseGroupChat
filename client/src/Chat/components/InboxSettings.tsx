@@ -42,6 +42,10 @@ const InboxSettings = (props: InboxSettingsProps) => {
         navigate('GroupMembers', { id: props.group._id, name: props.group.name });
     }
 
+    const handleViewGallery = () => {
+        navigate('Gallery', props.group._id);
+    }
+
     const handleLeaveGroup = () => {
         const reqBody = {
             grpId: props.group._id,
@@ -67,7 +71,8 @@ const InboxSettings = (props: InboxSettingsProps) => {
         },
         {
             title: 'View photos and videos',
-            icon: <AntDesign name={"picture"} size={iconSize}/>
+            icon: <AntDesign name={"picture"} size={iconSize}/>,
+            onPress: handleViewGallery
         },
         {
             title: 'Search messages',

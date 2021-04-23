@@ -18,7 +18,8 @@ import {
 } from './src/Profile';
 import {
   GroupMembers,
-  FullScreenMedia
+  FullScreenMedia,
+  Gallery
 } from './src/Chat/components';
 import { navigationRef } from './src/Util/RootNavigation';
 
@@ -46,7 +47,8 @@ export default function App() {
                   <Stack.Screen name="Profile" component={Profile}/>
                   <Stack.Screen name="ProfileSettings" component={ProfileSettings} options={{gestureDirection: 'horizontal-inverted'}}/>
                   <Stack.Screen name="GroupMembers" component={GroupMembers}/>
-                  <Stack.Screen name="FullScreenMedia" component={FullScreenMedia}/>                  
+                  <Stack.Screen name="FullScreenMedia" component={FullScreenMedia}/>   
+                  <Stack.Screen name="Gallery" component={Gallery}/>               
                   <Stack.Screen name="CreateGroupForm" component={CreateGroupForm}/>
                   <Stack.Screen name="Search" component={Search}/>
                   <Stack.Screen name="GroupSearch" component={GroupSearch}/>
