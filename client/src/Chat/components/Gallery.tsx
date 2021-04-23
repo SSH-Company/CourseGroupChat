@@ -54,6 +54,7 @@ const Gallery = ({ route, navigation }) => {
                         onPress={() => navigation.navigate('FullScreenMedia', item.body)}
                     >       
                         <Image
+                            key={`${item.type}-${item.type}`}
                             source={{ uri: item.body || EMPTY_IMAGE_DIRECTORY }}
                             style={{ width: dimensions.width, height: 200, marginBottom: 10, borderRadius: 20 }}
                         />
@@ -63,7 +64,8 @@ const Gallery = ({ route, navigation }) => {
                 return (
                     <View>
                         <Video
-                            style={{ minWidth: dimensions.width }}
+                            key={`${item.type}-${item.type}`}
+                            style={{ minWidth: dimensions.width, minHeight: 200, alignSelf: 'center' }}
                             source={{ uri: item.body }}
                             useNativeControls
                             resizeMode="cover"

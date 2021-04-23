@@ -357,7 +357,7 @@ export class ChatController {
                 return;
             }
 
-            const members = await MessageModel.getGroupImages(grpId);
+            const members = await MessageModel.getGallery(grpId);
 
             res.status(STATUS.OK).json(members.map(row => ({
                 body: row.MESSAGE_BODY,

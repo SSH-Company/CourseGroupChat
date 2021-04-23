@@ -72,9 +72,9 @@ export class MessageModel implements MessageInterface {
         })
     }
 
-    static getGroupImages(id: string): Promise<MessageModel[]> {
+    static getGallery(id: string): Promise<MessageModel[]> {
         const query = `${SELECT} WHERE "RECIPIENT_GROUP_ID" = ? 
-                        AND "MESSAGE_TYPE" <> 'text'; `;
+                        AND "MESSAGE_TYPE" IN ('image', 'video'); `;
 
         return new Promise((resolve, reject) => {
             Database.getDB()
