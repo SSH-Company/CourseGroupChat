@@ -79,7 +79,7 @@ const Gallery = ({ route, navigation }) => {
     if (loading) {
         return (
             <View style={{ flex: 1, justifyContent: 'center' }}>
-                <ActivityIndicator />
+                <ActivityIndicator color="blue"/>
             </View>
         )
     } else {
