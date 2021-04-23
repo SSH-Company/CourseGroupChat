@@ -36,7 +36,6 @@ const Gallery = ({ route, navigation }) => {
         setLoading(true);
         axios.get(`${BASE_URL}/api/chat/gallery/${grpId}`)
             .then(res => {
-                console.log(res.data);
                 setList(res.data);
                 setLoading(false); 
             })
@@ -54,7 +53,6 @@ const Gallery = ({ route, navigation }) => {
                         onPress={() => navigation.navigate('FullScreenMedia', item.body)}
                     >       
                         <Image
-                            key={`${item.type}-${item.type}`}
                             source={{ uri: item.body || EMPTY_IMAGE_DIRECTORY }}
                             style={{ width: dimensions.width, height: 200, marginBottom: 10, borderRadius: 20 }}
                         />
@@ -62,16 +60,13 @@ const Gallery = ({ route, navigation }) => {
                 )
             case 'video':
                 return (
-                    <View>
-                        <Video
-                            key={`${item.type}-${item.type}`}
-                            style={{ minWidth: dimensions.width, minHeight: 200, alignSelf: 'center' }}
-                            source={{ uri: item.body }}
-                            useNativeControls
-                            resizeMode="cover"
-                            isLooping
-                        />
-                    </View>
+                    <Video
+                        style={{ minWidth: dimensions.width, minHeight: 200, alignSelf: 'center' }}
+                        source={{ uri: item.body }}
+                        useNativeControls
+                        resizeMode="cover"
+                        isLooping
+                    />
                 )
         }
     }
@@ -85,7 +80,11 @@ const Gallery = ({ route, navigation }) => {
     } else {
         return (
             <ScrollView keyboardShouldPersistTaps="handled">
-                {list.map(row => getRenderedItem(row))}
+                {list.map(row => (
+                    <View style={{ paddingBottom: 10 }} key={`${row.type}-${row.body}`}>
+                        {getRenderedItem(row)}
+                    </View>
+                ))}
             </ScrollView>
         )
     }
