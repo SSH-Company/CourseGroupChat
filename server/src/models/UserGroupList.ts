@@ -20,7 +20,7 @@ export class UserGroupListModel implements UserGroupListInterface {
         Object.assign(this, raw);
     }
 
-    static getUserGroupSearchList(uid: number): Promise<UserGroupListModel[]> {
+    static getUserGroupSearchList(uid: string): Promise<UserGroupListModel[]> {
         const query = `${SELECT} WHERE "USER_ID" = ? or ("CODE" is not null and "USER_ID" is null); `;
         
         return new Promise((resolve, reject) => {

@@ -5,14 +5,22 @@ import { ActionSheetProvider } from '@expo/react-native-action-sheet'
 import Socket from './src/Socket/WebSocket';
 import Main from './src/Main/Main';
 import Chat from './src/Chat/Chat';
-import GroupMembers from './src/Chat/components/GroupMembers';
 import { LogIn, SignUp } from './src/Auth';
 import { 
   CreateGroupForm, 
   Search, 
   GroupSearch 
 } from './src/Search';
-import { Profile, ProfileSettings } from './src/Profile';
+import { 
+  Profile, 
+  ProfileSettings, 
+  FriendRequests
+} from './src/Profile';
+import {
+  GroupMembers,
+  FullScreenMedia,
+  Gallery
+} from './src/Chat/components';
 import { navigationRef } from './src/Util/RootNavigation';
 
 export default function App() {
@@ -35,9 +43,12 @@ export default function App() {
                       },
                     }}
                   />
+                  <Stack.Screen name="FriendRequests" component={FriendRequests}/>
                   <Stack.Screen name="Profile" component={Profile}/>
                   <Stack.Screen name="ProfileSettings" component={ProfileSettings} options={{gestureDirection: 'horizontal-inverted'}}/>
-                  <Stack.Screen name="GroupMembers" component={GroupMembers}/>                  
+                  <Stack.Screen name="GroupMembers" component={GroupMembers}/>
+                  <Stack.Screen name="FullScreenMedia" component={FullScreenMedia}/>   
+                  <Stack.Screen name="Gallery" component={Gallery}/>               
                   <Stack.Screen name="CreateGroupForm" component={CreateGroupForm}/>
                   <Stack.Screen name="Search" component={Search}/>
                   <Stack.Screen name="GroupSearch" component={GroupSearch}/>

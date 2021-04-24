@@ -12,9 +12,12 @@ import * as STATUS from 'http-status-codes';
 @Controller('login')
 export class LoginController {
     @Get('')
-    @Middleware([passport.authenticate('saml')])
-    private userLogin(req: Request, res: Response) {
-        res.status(STATUS.OK).json(req.user);
+    // @Middleware([passport.authenticate('saml')])
+    private async userLogin(req: Request, res: Response) {
+        let session = req.session;
+        const user = await UserModel.getUserAccountByEmail(req.query.email);
+        session.user = user;
+        res.status(STATUS.OK).json(user);
     }
     
     @Post('callback')
@@ -25,7 +28,6 @@ export class LoginController {
             let session = req.session;
             const user = await UserModel.getUserAccountByEmail(req.user.nameID);
             session.user = user;
-            await req.session.save();
             const html = `<div class="userBody">${JSON.stringify(user)}</div>`
             res.status(STATUS.OK).send(html);
         } catch {

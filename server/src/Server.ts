@@ -1,5 +1,6 @@
 import * as express from 'express';
 import * as path from 'path';
+import cors from 'cors';
 import * as bodyParser from 'body-parser';
 import session from 'express-session';
 import { ApiController } from './controllers/ApiController';
@@ -15,6 +16,7 @@ class CGCServer extends Server {
 
     constructor() {
         super(true);
+        this.app.use(cors({ credentials: true }));
         this.app.use(bodyParser.json())
         this.app.use(bodyParser.urlencoded({ extended:true }))
         this.app.use(

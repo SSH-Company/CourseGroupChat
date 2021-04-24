@@ -14,6 +14,7 @@ import { UserModel } from '../models/User';
 import { MessageModel } from '../models/Message';
 import { UserGroupModel } from '../models/User_Group';
 import { ChatLogViewModel } from '../models/ChatLog_View';
+import BASE_URL from '../BaseUrl';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -100,7 +101,7 @@ export class ChatController {
                 urlFilePath = '';
 
             if (req.file) {
-                urlFilePath = `/media/messages/${req.file.filename}`;
+                urlFilePath = `${BASE_URL}/media/messages/${req.file.filename}`;
                 //assuming file types can be "video" or "image"
                 messageType = message.hasOwnProperty('image') ? "image" : "video";
                 message[messageType] = urlFilePath
@@ -341,5 +342,33 @@ export class ChatController {
                     identifier: "CC014"
                 })
             })
+    }
+
+    @Get('gallery/:grpId')
+    private async getGroupGallery(req: Request, res: Response) {
+        try {
+            const grpId = req.params.grpId;
+
+            if (!grpId) {
+                res.status(STATUS.BAD_REQUEST).json({
+                    message: "Request parameter must contain grpId",
+                    identifier: "CC015"
+                });
+                return;
+            }
+
+            const members = await MessageModel.getGallery(grpId);
+
+            res.status(STATUS.OK).json(members.map(row => ({
+                body: row.MESSAGE_BODY,
+                type: row.MESSAGE_TYPE
+            })));
+        } catch(err) {
+            console.error(err);
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong while attempting to retrieve group images/videos.",
+                identifier: "CC016"
+            })
+        }
     }
 }

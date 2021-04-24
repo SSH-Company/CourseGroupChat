@@ -8,6 +8,7 @@ import { UserContext } from '../Auth/Login';
 import { handleImagePick, handlePermissionRequest } from "../Util/ImagePicker";
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
+axios.defaults.headers = { withCredentials: true };
 
 const ProfileSettings = ({ navigation }) => {
 
@@ -44,7 +45,7 @@ const ProfileSettings = ({ navigation }) => {
             const newAvatar = res.data.path;
             setUser({
                 ...user,
-                avatar: newAvatar ? `${BASE_URL + newAvatar}` : profilePicture.uri
+                avatar: newAvatar || profilePicture.uri
             });
             return;
         })
@@ -121,7 +122,8 @@ const ProfileSettings = ({ navigation }) => {
         },
         {
             title: 'Friend Requests',
-            icon: <Ionicons name='person-add' size={iconSize}/>
+            icon: <Ionicons name='person-add' size={iconSize}/>,
+            onPress: () => { navigation.navigate('FriendRequests') }
         },
         {
             title: 'Blocked Users', // TODO

@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import { Request, Response } from 'express';
 import {
     Middleware,
     Controller,
@@ -12,6 +12,7 @@ import { GroupModel } from '../models/Group';
 import { UserGroupModel } from '../models/User_Group';
 import { UserGroupListModel } from '../models/UserGroupList';
 import { CONNECTIONS } from '../WSServer';
+import BASE_URL from '../BaseUrl';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -30,12 +31,14 @@ export class SearchController {
     @Get('users')
     private async searchList(req: Request, res: Response) {
         try {
+            const session = req.session;
             const excludeIds = req.query.excludeIds || [];
             const users = (await UserModel.getUsersForSearch(excludeIds)).map(row => ({
                 id: row.ID,
                 name: row.FIRST_NAME + ' ' + row.LAST_NAME,
                 avatar_url: row.AVATAR
-            }));
+            })).filter(row => row.id !== session.user.ID);
+
             res.status(STATUS.OK).json(users);
         } catch (err) {
             console.error(err)
@@ -49,7 +52,8 @@ export class SearchController {
     @Get('all-groups')
     private verifiedGroupsList(req: Request, res: Response) {
         const session = req.session;
-        UserGroupListModel.getUserGroupSearchList(session.user.ID)
+        const user = session.user as UserModel;
+        UserGroupListModel.getUserGroupSearchList(user.ID)
             .then(list => {
                 res.status(STATUS.OK).json(list.map(row => ({
                     id: row.CODE,
@@ -73,7 +77,7 @@ export class SearchController {
             const session = req.session;
             const recipients = JSON.parse(req.body.recipients);
             const groupName = req.body.groupName;
-            const urlFilePath = req.file ? `/media/profiles/${req.file.filename}` : '';
+            const urlFilePath = req.file ? `${BASE_URL}/media/profiles/${req.file.filename}` : '';
 
             if(!Array.isArray(recipients) || recipients.length === 0 || !groupName) {
                 res.status(STATUS.INTERNAL_SERVER_ERROR).json({
@@ -149,6 +153,26 @@ export class SearchController {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong while attempting to add group members.",
                 identifier: "SC006"
+            })
+        }
+    }
+
+    @Get('friends')
+    private async friendList(req: Request, res: Response) {
+        try {
+            const session = req.session;
+            const users = (await UserModel.getFriendList(session.user.ID)).map(row => ({
+                id: row.ID,
+                name: row.FIRST_NAME + ' ' + row.LAST_NAME,
+                avatar_url: row.AVATAR
+            }));
+            
+            res.status(STATUS.OK).json(users);
+        } catch (err) {
+            console.error(err)
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong while attempting to get friend list.",
+                identifier: "SC007"
             })
         }
     }

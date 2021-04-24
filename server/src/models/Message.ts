@@ -71,6 +71,18 @@ export class MessageModel implements MessageInterface {
                 .catch(err => reject(err))
         })
     }
+
+    static getGallery(id: string): Promise<MessageModel[]> {
+        const query = `${SELECT} WHERE "RECIPIENT_GROUP_ID" = ? 
+                        AND "MESSAGE_TYPE" <> ? ; `;
+
+        return new Promise((resolve, reject) => {
+            Database.getDB()
+            .query(query, [id, 'text'])
+            .then((data: MessageInterface[]) => resolve(data.map(d => new MessageModel(d))))
+            .catch(err => reject(err))
+        })
+    }
 }
 
 const SELECT = `

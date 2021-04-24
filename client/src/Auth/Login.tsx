@@ -12,6 +12,7 @@ import { Cache } from 'react-native-cache';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import axios from 'axios';
+axios.defaults.headers = { withCredentials: true };
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ChatLog } from '../Util/ChatLog';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from "../BaseUrl";
@@ -70,28 +71,29 @@ const LogIn = ({ children }) => {
         redirects to a page from where the User's database information is collected
         and stored. The user is then redirected to the Main page.
     */
-    // useEffect(() => {
-    //     axios.get(`${BASE_URL}/api/login`)
-    //         .then(async res => {
-    //             setSourceHTML({ html: res.data });
-    //             setNewUser(true);
-    //             setLoading(false);
-    //         })
-    //         .catch(err => {
-    //             const response = err.response;
-    //             if (response) {
-    //                 switch (response.status) {
-    //                     case 302:
-    //                         setNewUser(true);
-    //                         setSourceHTML({ uri: response.data.redirect });
-    //                         setLoading(false);
-    //                         break;
-    //                     default:
-    //                         break;
-    //                 }
-    //             }
-    //         })
-    // }, [])
+    useEffect(() => {
+        axios.get(`${BASE_URL}/api/login`, { params: { email: 'tanvir.shahriar@mail.utoronto.ca' } }) //{ params: { email: 'email address here' } }
+            .then(res => {
+                tempFunc(res.data);
+                // setSourceHTML({ html: res.data });
+                // setNewUser(true);
+                // setLoading(false);
+            })
+            .catch(err => {
+                const response = err.response;
+                if (response) {
+                    switch (response.status) {
+                        case 302:
+                            setNewUser(true);
+                            setSourceHTML({ uri: response.data.redirect });
+                            setLoading(false);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            })
+    }, [])
 
     useEffect(() => {
         AppState.addEventListener("change", handleAppStateChange);
@@ -102,43 +104,24 @@ const LogIn = ({ children }) => {
     }, [])
 
     // put inside login so it only checks for/generates token once per app init.
-    useEffect(() => {
-        // notifications.
-        registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+    // useEffect(() => {
+    //     // notifications.
+    //     registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
     
-        responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-          console.log(response);
-        });
+    //     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+    //       console.log(response);
+    //     });
     
-        return () => {
-          Notifications.removeNotificationSubscription(responseListener);
-        };
-    }, []);
-
-    // useEffect (() => {
-    //     tempFunc();
+    //     return () => {
+    //       Notifications.removeNotificationSubscription(responseListener);
+    //     };
     // }, []);
 
-    // const tempFunc = async () => {
-    //     setUser({
-    //         _id: 1,
-    //         name: 'Tanvir Shahriar',
-    //         avatar: 'https://placeimg.com/140/140/any'
-    //     })
-    //     await ChatLog.getChatLogInstance(true, 1);
-    //     setNewUser(false);
-    //     setLoading(false);
-    // }
-
-    useEffect (() => {
-        tempFunc();
-    }, []);
-
-    const tempFunc = async () => {
+    const tempFunc = async (user) => {
         setUser({
-            _id: 1,
-            name: 'Tanvir Shahriar',
-            avatar: 'https://placeimg.com/140/140/any'
+            _id: user.ID,
+            name: user.FIRST_NAME + ' ' + user.LAST_NAME,
+            avatar: user.AVATAR || EMPTY_IMAGE_DIRECTORY
         })
         await ChatLog.getChatLogInstance(true, 1);
         setNewUser(false);
@@ -211,7 +194,7 @@ const LogIn = ({ children }) => {
             setUser({
                 _id: user.ID,
                 name: user.FIRST_NAME + ' ' + user.LAST_NAME,
-                avatar: user.AVATAR ? `${BASE_URL + user.AVATAR}` : EMPTY_IMAGE_DIRECTORY
+                avatar: user.AVATAR || EMPTY_IMAGE_DIRECTORY
             })
             //redirect to Main
             setNewUser(false)
