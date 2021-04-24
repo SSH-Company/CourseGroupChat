@@ -135,7 +135,6 @@ export class ChatController {
                     newMessage.MESSAGE_BODY = data.Location;
                     newMessage.MESSAGE_TYPE = messageType;
                     await MessageModel.insert(newMessage);
-                    console.log(newMessage);
                 })
 
                 fs.unlinkSync(req.file.path);
@@ -211,6 +210,7 @@ export class ChatController {
     private async deleteMessage(req: Request, res: Response) {
         try{
             const { groupID, messageID } = req.body;
+            const config = Config.getConfig().s3;
 
             if (!groupID || !messageID) {
                 res.status(STATUS.BAD_REQUEST).json({
@@ -222,15 +222,36 @@ export class ChatController {
             const message = await MessageModel.getById(messageID);
 
             if (message.MESSAGE_TYPE !== "text") {
-                // const path = message.MESSAGE_BODY.split('messages/')[1];
+                const path = message.MESSAGE_BODY;
                 // const fullPath = `src/public/client/media/messages/${path}`;
                 // fs.unlinkSync(fullPath);
 
                 //remove from s3
+                const s3 = new AWS.S3({
+                    accessKeyId: config.ID,
+                    secretAccessKey: config.SECRET
+                });
+
+                const params = {
+                    Bucket: config.BUCKET_NAME,
+                    Key: path,
+                }
+
+                s3.deleteObject(params, async (err, data) => {
+                    if (err) {
+                        throw err;
+                    }
+                    
+                    await MessageModel.delete(groupID, messageID);
+                    res.status(STATUS.OK).json({ message: "successfully deleted message!" });
+                    console.log(data);
+                    return;
+                })
             }
 
             await MessageModel.delete(groupID, messageID);
             res.status(STATUS.OK).json({ message: "successfully deleted message!" });
+        
         } catch (err) {
             console.error(err);
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
