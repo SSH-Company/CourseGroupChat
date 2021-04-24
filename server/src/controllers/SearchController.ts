@@ -12,6 +12,7 @@ import { GroupModel } from '../models/Group';
 import { UserGroupModel } from '../models/User_Group';
 import { UserGroupListModel } from '../models/UserGroupList';
 import { CONNECTIONS } from '../WSServer';
+import BASE_URL from '../BaseUrl';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -76,7 +77,7 @@ export class SearchController {
             const session = req.session;
             const recipients = JSON.parse(req.body.recipients);
             const groupName = req.body.groupName;
-            const urlFilePath = req.file ? `/media/profiles/${req.file.filename}` : '';
+            const urlFilePath = req.file ? `${BASE_URL}/media/profiles/${req.file.filename}` : '';
 
             if(!Array.isArray(recipients) || recipients.length === 0 || !groupName) {
                 res.status(STATUS.INTERNAL_SERVER_ERROR).json({

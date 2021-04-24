@@ -60,8 +60,8 @@ const Search = ({ route, navigation }) => {
 
     //retrieve data on first load
     useEffect(() => {
-        axios.get(`${BASE_URL}/api/search/friends`, { params: { excludeIds: existingMembers }, withCredentials: true })
-            .then(res => setSuggestions(res.data.map(row => ({ ...row, checked: false, avatar_url: row.avatar_url ? `${BASE_URL + row.avatar_url}` : EMPTY_IMAGE_DIRECTORY }))))
+        axios.get(`${BASE_URL}/api/search/friends`, { params: { excludeIds: existingMembers } })
+            .then(res => setSuggestions(res.data.map(row => ({ ...row, checked: false }))))
             .catch(err => console.error(err))
     }, [])
 
@@ -98,7 +98,7 @@ const Search = ({ route, navigation }) => {
                     const chatParams = {
                         groupID: data.id,
                         name: data.name,
-                        avatar: data.avatar_url ? `${BASE_URL + data.avatar_url}` : EMPTY_IMAGE_DIRECTORY
+                        avatar: data.avatar_url
                     }
                     navigation.navigate('Chat', chatParams)
                 })

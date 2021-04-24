@@ -43,7 +43,7 @@ const GroupMembers = ({ route, navigation }) => {
         setLoading(true);
         axios.get(`${BASE_URL}/api/chat/group-members/${id}`)
             .then(res => {
-                setMembers(res.data.map(row => ({ ...row, checked: false, avatar_url: row.avatar_url ? `${BASE_URL + row.avatar_url}` : EMPTY_IMAGE_DIRECTORY })));
+                setMembers(res.data.map(row => ({ ...row, checked: false })));
                 setLoading(false);
             })
             .catch(err => console.log(err));

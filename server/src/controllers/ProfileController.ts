@@ -12,6 +12,7 @@ import multer from 'multer';
 import * as STATUS from 'http-status-codes';
 import { UserModel } from '../models/User';
 import { FriendStatusModel, FriendStatusInterface } from '../models/Friend_Status';
+import BASE_URL from '../BaseUrl';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -41,7 +42,7 @@ export class ProfileController {
                 fs.unlinkSync(fullPath);
             }
 
-            const urlFilePath = req.file ? `/media/profiles/${req.file.filename}` : '';
+            const urlFilePath = req.file ? `${BASE_URL}/media/profiles/${req.file.filename}` : '';
             await UserModel.updateAvatar(urlFilePath, user.ID);
 
             res.status(STATUS.OK).json({

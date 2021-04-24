@@ -4,7 +4,7 @@ import { ListItem, Image } from 'react-native-elements';
 import { User } from 'react-native-gifted-chat';
 import { AntDesign, Entypo, Ionicons, MaterialIcons } from 'react-native-vector-icons';
 import { navigate } from '../../Util/RootNavigation';
-import { BASE_URL } from '../../BaseUrl';
+import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
 import axios from 'axios';
 axios.defaults.headers = { withCredentials: true };
 
@@ -42,6 +42,10 @@ const InboxSettings = (props: InboxSettingsProps) => {
         navigate('GroupMembers', { id: props.group._id, name: props.group.name });
     }
 
+    const handleViewGallery = () => {
+        navigate('Gallery', props.group._id);
+    }
+
     const handleLeaveGroup = () => {
         const reqBody = {
             grpId: props.group._id,
@@ -67,7 +71,8 @@ const InboxSettings = (props: InboxSettingsProps) => {
         },
         {
             title: 'View photos and videos',
-            icon: <AntDesign name={"picture"} size={iconSize}/>
+            icon: <AntDesign name={"picture"} size={iconSize}/>,
+            onPress: handleViewGallery
         },
         {
             title: 'Search messages',
@@ -84,7 +89,7 @@ const InboxSettings = (props: InboxSettingsProps) => {
         <View style={styles.drawerContainer}>
             <View style={styles.imageContainer}>
                 <Image 
-                    source={{ uri: props.group.avatar as string }}
+                    source={{ uri: props.group.avatar as string || EMPTY_IMAGE_DIRECTORY }}
                     style={styles.imageStyle}
                 />
                 <Text style={{paddingBottom: 10, fontSize: 25}}>{props.group.name}</Text>

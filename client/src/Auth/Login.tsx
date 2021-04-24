@@ -72,11 +72,12 @@ const LogIn = ({ children }) => {
         and stored. The user is then redirected to the Main page.
     */
     useEffect(() => {
-        axios.get(`${BASE_URL}/api/login`)
+        axios.get(`${BASE_URL}/api/login`, { params: { email: 'sadman.hasan@mail.utoronto.ca' } }) //{ params: { email: 'email address here' } }
             .then(res => {
-                setSourceHTML({ html: res.data });
-                setNewUser(true);
-                setLoading(false);
+                tempFunc(res.data);
+                // setSourceHTML({ html: res.data });
+                // setNewUser(true);
+                // setLoading(false);
             })
             .catch(err => {
                 const response = err.response;
@@ -116,35 +117,16 @@ const LogIn = ({ children }) => {
     //     };
     // }, []);
 
-    // useEffect (() => {
-    //     tempFunc();
-    // }, []);
-
-    // const tempFunc = async () => {
-    //     setUser({
-    //         _id: 1,
-    //         name: 'Tanvir Shahriar',
-    //         avatar: 'https://placeimg.com/140/140/any'
-    //     })
-    //     await ChatLog.getChatLogInstance(true, 1);
-    //     setNewUser(false);
-    //     setLoading(false);
-    // }
-
-    // useEffect (() => {
-    //     tempFunc();
-    // }, []);
-
-    // const tempFunc = async () => {
-    //     setUser({
-    //         _id: 1,
-    //         name: 'Tanvir Shahriar',
-    //         avatar: 'https://placeimg.com/140/140/any'
-    //     })
-    //     await ChatLog.getChatLogInstance(true, 1);
-    //     setNewUser(false);
-    //     setLoading(false);
-    // }
+    const tempFunc = async (user) => {
+        setUser({
+            _id: user.ID,
+            name: user.FIRST_NAME + ' ' + user.LAST_NAME,
+            avatar: user.AVATAR || EMPTY_IMAGE_DIRECTORY
+        })
+        await ChatLog.getChatLogInstance(true, 1);
+        setNewUser(false);
+        setLoading(false);
+    }
     
     // setup function for expo notifications.
     const registerForPushNotificationsAsync = async () => {
@@ -212,7 +194,7 @@ const LogIn = ({ children }) => {
             setUser({
                 _id: user.ID,
                 name: user.FIRST_NAME + ' ' + user.LAST_NAME,
-                avatar: user.AVATAR ? `${BASE_URL + user.AVATAR}` : EMPTY_IMAGE_DIRECTORY
+                avatar: user.AVATAR || EMPTY_IMAGE_DIRECTORY
             })
             //redirect to Main
             setNewUser(false)

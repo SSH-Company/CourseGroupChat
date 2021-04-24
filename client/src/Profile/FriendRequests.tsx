@@ -39,8 +39,7 @@ const FriendRequests = ({ navigation }) => {
     useEffect(() => {
         axios.get(`${BASE_URL}/api/profile/friend-request`)
             .then(res => setList(res.data.map((row, index) => ({ 
-                ...row, 
-                avatar_url: row.avatar_url ? `${BASE_URL + row.avatar_url}` : EMPTY_IMAGE_DIRECTORY,
+                ...row,
                 content: 
                     <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', minWidth: 150 }}>
                         <Button title="Accept" color="green" onPress={() => acceptRequest(row.id, index)}/>
