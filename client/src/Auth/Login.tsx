@@ -70,28 +70,28 @@ const LogIn = ({ children }) => {
         redirects to a page from where the User's database information is collected
         and stored. The user is then redirected to the Main page.
     */
-    useEffect(() => {
-        axios.get(`${BASE_URL}/api/login`)
-            .then(async res => {
-                setSourceHTML({ html: res.data });
-                setNewUser(true);
-                setLoading(false);
-            })
-            .catch(err => {
-                const response = err.response;
-                if (response) {
-                    switch (response.status) {
-                        case 302:
-                            setNewUser(true);
-                            setSourceHTML({ uri: response.data.redirect });
-                            setLoading(false);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            })
-    }, [])
+    // useEffect(() => {
+    //     axios.get(`${BASE_URL}/api/login`)
+    //         .then(async res => {
+    //             setSourceHTML({ html: res.data });
+    //             setNewUser(true);
+    //             setLoading(false);
+    //         })
+    //         .catch(err => {
+    //             const response = err.response;
+    //             if (response) {
+    //                 switch (response.status) {
+    //                     case 302:
+    //                         setNewUser(true);
+    //                         setSourceHTML({ uri: response.data.redirect });
+    //                         setLoading(false);
+    //                         break;
+    //                     default:
+    //                         break;
+    //                 }
+    //             }
+    //         })
+    // }, [])
 
     useEffect(() => {
         AppState.addEventListener("change", handleAppStateChange);
@@ -130,20 +130,20 @@ const LogIn = ({ children }) => {
     //     setLoading(false);
     // }
 
-    // useEffect (() => {
-    //     tempFunc();
-    // }, []);
+    useEffect (() => {
+        tempFunc();
+    }, []);
 
-    // const tempFunc = async () => {
-    //     setUser({
-    //         _id: 1,
-    //         name: 'Tanvir Shahriar',
-    //         avatar: 'https://placeimg.com/140/140/any'
-    //     })
-    //     await ChatLog.getChatLogInstance(true, 1);
-    //     setNewUser(false);
-    //     setLoading(false);
-    // }
+    const tempFunc = async () => {
+        setUser({
+            _id: 1,
+            name: 'Tanvir Shahriar',
+            avatar: 'https://placeimg.com/140/140/any'
+        })
+        await ChatLog.getChatLogInstance(true, 1);
+        setNewUser(false);
+        setLoading(false);
+    }
     
     // setup function for expo notifications.
     const registerForPushNotificationsAsync = async () => {

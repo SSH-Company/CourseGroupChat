@@ -6,7 +6,7 @@ import Socket from './src/Socket/WebSocket';
 import Main from './src/Main/Main';
 import Chat from './src/Chat/Chat';
 import GroupMembers from './src/Chat/components/GroupMembers';
-import { LogIn } from './src/Auth';
+import { LogIn, SignUp } from './src/Auth';
 import { 
   CreateGroupForm, 
   Search, 
@@ -41,6 +41,7 @@ export default function App() {
                   <Stack.Screen name="CreateGroupForm" component={CreateGroupForm}/>
                   <Stack.Screen name="Search" component={Search}/>
                   <Stack.Screen name="GroupSearch" component={GroupSearch}/>
+                  <Stack.Screen name="SignUp" component={SignUp}/>
               </Stack.Navigator>
             </Socket>
         </NavigationContainer>
