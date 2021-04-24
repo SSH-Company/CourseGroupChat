@@ -12,11 +12,11 @@ import * as AWS from 'aws-sdk';
 import * as STATUS from 'http-status-codes';
 import { CONNECTIONS } from '../WSServer';
 import { Config } from '../services/Config';
+import { Bucket } from '../services/Bucket';
 import { UserModel } from '../models/User';
 import { MessageModel } from '../models/Message';
 import { UserGroupModel } from '../models/User_Group';
 import { ChatLogViewModel } from '../models/ChatLog_View';
-import BASE_URL from '../BaseUrl';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -114,10 +114,7 @@ export class ChatController {
                 messageType = message.hasOwnProperty('image') ? "image" : "video";
 
                 //upload to s3
-                const s3 = new AWS.S3({
-                    accessKeyId: config.ID,
-                    secretAccessKey: config.SECRET
-                });
+                const bucket = Bucket.getBucket().bucket;
 
                 const fileContent = fs.readFileSync(req.file.path);
 
@@ -127,7 +124,7 @@ export class ChatController {
                     Body: fileContent
                 }
 
-                s3.upload(params, async (err, data) => {
+                bucket.upload(params, async (err, data) => {
                     if (err) {
                         throw err;
                     }
@@ -223,30 +220,22 @@ export class ChatController {
 
             if (message.MESSAGE_TYPE !== "text") {
                 const path = message.MESSAGE_BODY.split('.com/')[1];
-                // const fullPath = `src/public/client/media/messages/${path}`;
-                // fs.unlinkSync(fullPath);
 
                 //remove from s3
-                const s3 = new AWS.S3({
-                    accessKeyId: config.ID,
-                    secretAccessKey: config.SECRET
-                });
+                const bucket = Bucket.getBucket().bucket;
 
                 const params = {
                     Bucket: config.BUCKET_NAME,
                     Key: path,
                 }
 
-                s3.deleteObject(params, async (err, data) => {
+                bucket.deleteObject(params, async (err, data) => {
                     if (err) {
-                        console.log(err);
                         throw err;
                     }
-                    
-                    console.log(data);
-                })
+                });
             }
-
+            
             await MessageModel.delete(groupID, messageID);
             res.status(STATUS.OK).json({ message: "successfully deleted message!" });
         
