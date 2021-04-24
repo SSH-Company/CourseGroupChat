@@ -223,6 +223,7 @@ export class ChatController {
 
             if (message.MESSAGE_TYPE !== "text") {
                 const path = message.MESSAGE_BODY.split('.com')[1];
+                console.log(path);
                 // const fullPath = `src/public/client/media/messages/${path}`;
                 // fs.unlinkSync(fullPath);
 
