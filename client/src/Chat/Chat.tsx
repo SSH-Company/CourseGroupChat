@@ -35,7 +35,7 @@ const Chat = ({ route, navigation }) => {
     const drawerRef = useRef(null);
     const giftedChatRef = useRef(null);
     const avatarSize = 25;
-
+    const [uploadProgress, setUploadProgress] = useState<number>(0);
 
     useEffect(() => {
         resetMessages(true);
@@ -127,7 +127,16 @@ const Chat = ({ route, navigation }) => {
                 formData = new FormData();
                 formData.append('media', {...messages[0].imageData});
                 formData.append('message', JSON.stringify({ messages, groupID: group }))
-                await axios.post(`${BASE_URL}/api/chat`, formData, { headers: { 'content-type': 'multipart/form-data' } })
+                await axios.post(`${BASE_URL}/api/chat`, 
+                    formData, 
+                    { 
+                        headers: { 'content-type': 'multipart/form-data' },  
+                        onUploadProgress: e => {
+                            const m = Math.round(100 * e.loaded / e.total );
+                            setUploadProgress(m)   
+                        }
+                    }
+                )
             } else {
                 formData = { message: JSON.stringify({ messages, groupID: group })}
                 await axios.post(`${BASE_URL}/api/chat`, formData)
@@ -271,7 +280,7 @@ const Chat = ({ route, navigation }) => {
                             user={user}
                             messages={messages}
                             onSend={messages => onSend(messages)}
-                            renderMessage={props => { return ( <CustomMessage children={props} onLongPress={id => handleLongPress(id)} /> ) }}
+                            renderMessage={props => { return ( <CustomMessage children={props} uploadProgress={uploadProgress} onLongPress={id => handleLongPress(id)} /> ) }}
                             renderInputToolbar={props => { return ( <CustomToolbar children={props} onImagePick={type => onImagePick(type)} /> ) }}
                             isKeyboardInternallyHandled={true}
                             loadEarlier

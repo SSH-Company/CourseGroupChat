@@ -1,5 +1,5 @@
 import { IMessage } from 'react-native-gifted-chat';
-import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
+import { BASE_URL } from '../BaseUrl';
 import axios from 'axios';
 axios.defaults.headers = { withCredentials: true };
 
@@ -16,8 +16,31 @@ type GroupInfoMapType = {
     }
 }
 
+//function taken from https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript?page=2&tab=votes#tab-top
 export function revisedRandId() {
-    return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(2, 10);
+    var len = 32;
+    var str = '';
+    var i = 0;
+    
+    for(i=0; i<len; i++) {
+        switch(Math.floor(Math.random()*3+1)) {
+            case 1: // digit
+                str += (Math.floor(Math.random()*9)).toString();
+            break;
+    
+            case 2: // small letter
+                str += String.fromCharCode(Math.floor(Math.random()*26) + 97); //'a'.charCodeAt(0));
+            break;
+    
+            case 3: // big letter
+                str += String.fromCharCode(Math.floor(Math.random()*26) + 65); //'A'.charCodeAt(0));
+            break;
+    
+            default:
+            break;
+        }
+    }
+    return str;
 }
 
 export type MessageStatus = "Pending" | "Sent"

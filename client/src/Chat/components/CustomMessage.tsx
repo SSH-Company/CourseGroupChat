@@ -48,14 +48,15 @@ const styles = StyleSheet.create({
 
 type CustomMessageProps = {
     children: any,
+    uploadProgress: number,
     onLongPress: (id: string) => any
 }
 
 const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
-    const { children, onLongPress } = props;
+    const { children, uploadProgress, onLongPress } = props;
     const { user } = useContext(UserContext);
     const [messagePressed, setMessagePressed] = useState<boolean>(false);
-
+    
     const prepareStatusText = (status: string) => {
         const seenBy = status.split(', ').filter(i => i !== "" && i !== `${user.name.toUpperCase()}`);
         if (seenBy.length === 0) return 'Sent';
@@ -69,7 +70,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
     return (
         <Message 
             {...children}
-            key={`user-key-${children['user']['_id']}-${messagePressed}`}
+            key={`${children['currentMessage']['_id']}-${messagePressed}-${uploadProgress}`}
             renderBubble={() => {
                 const currentMessage = children['currentMessage']
                 const isCurrentUser = currentMessage.user._id === user._id
@@ -78,20 +79,20 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                     <View style={[styles.item]}>
 
                         {/* handle texts */}
-                        {currentMessage.text !== "" &&
+                        {currentMessage.hasOwnProperty('text') && currentMessage.text.length > 0 &&
                         <>
-                        <TouchableOpacity 
-                            onPress={() => setMessagePressed(!messagePressed)}
-                            onLongPress={() => onLongPress(currentMessage._id)}
-                        >     
-                        <View style={[styles.balloon, {backgroundColor: isCurrentUser ? '#f5f9ff' : '#7c80ee'}]}>
-                            <Text style={{paddingTop: 5, color:  isCurrentUser ? 'black' : 'white'}}>{currentMessage.text}</Text>
-                        </View>
-                        </TouchableOpacity>
-                        <>
-                        {messagePressed && <Text style={{...styles.status, alignSelf: isCurrentUser ? 'flex-end' : 'flex-start'}}>
-                            {prepareStatusText(currentMessage.status)}
-                        </Text>}
+                            <TouchableOpacity 
+                                onPress={() => setMessagePressed(!messagePressed)}
+                                onLongPress={() => onLongPress(currentMessage._id)}
+                            >     
+                            <View style={[styles.balloon, {backgroundColor: isCurrentUser ? '#f5f9ff' : '#7c80ee'}]}>
+                                <Text style={{paddingTop: 5, color:  isCurrentUser ? 'black' : 'white'}}>{currentMessage.text}</Text>
+                            </View>
+                            </TouchableOpacity>
+                            <>
+                            {messagePressed && <Text style={{...styles.status, alignSelf: isCurrentUser ? 'flex-end' : 'flex-start'}}>
+                                {prepareStatusText(currentMessage.status)}
+                            </Text>}
                         </></>}
 
                         {/* handle images */}
@@ -108,7 +109,9 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
 
                         {/* handle videos */}
                         {currentMessage.hasOwnProperty('video') && currentMessage.video.length > 0 &&
-                        (<View>
+                        (<TouchableOpacity
+                            onLongPress={() => onLongPress(currentMessage._id)}
+                        >
                             <Video
                                 style={styles.video}
                                 source={{ uri: currentMessage.video }}
@@ -119,7 +122,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                                 resizeMode="cover"
                                 isLooping
                             />
-                        </View>)}
+                        </TouchableOpacity>)}
                     </View>
                 )
             }}
