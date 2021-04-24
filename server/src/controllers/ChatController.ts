@@ -100,21 +100,18 @@ export class ChatController {
                 avatar: user.AVATAR
             }
 
-            let messageType: "text" | "image" | "video" = "text", 
-                urlFilePath = '';
+            let messageType: "text" | "image" | "video" = "text";
 
             const newMessage = {
                 ID: message._id,
                 CREATOR_ID: senderID._id, 
-                RECIPIENT_GROUP_ID: groupID.id, 
-                MESSAGE_TYPE: messageType, 
+                RECIPIENT_GROUP_ID: groupID.id,  
                 STATUS: ''
             } as MessageModel
 
             if (req.file) {
                 //assuming file types can be "video" or "image"
                 messageType = message.hasOwnProperty('image') ? "image" : "video";
-                message[messageType] = urlFilePath
 
                 //upload to s3
                 const s3 = new AWS.S3({
@@ -134,14 +131,16 @@ export class ChatController {
                     if (err) {
                         throw err;
                     }
-
+                    message[messageType] = data.Location
                     newMessage.MESSAGE_BODY = data.Location;
+                    newMessage.MESSAGE_TYPE = messageType;
                     await MessageModel.insert(newMessage);
                     console.log(newMessage);
                 })
 
                 fs.unlinkSync(req.file.path);
             } else {
+                newMessage.MESSAGE_TYPE = messageType;
                 newMessage.MESSAGE_BODY = message.text;
                 await MessageModel.insert(newMessage);
             }
