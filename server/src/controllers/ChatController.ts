@@ -103,6 +103,14 @@ export class ChatController {
             let messageType: "text" | "image" | "video" = "text", 
                 urlFilePath = '';
 
+            const newMessage = {
+                ID: message._id,
+                CREATOR_ID: senderID._id, 
+                RECIPIENT_GROUP_ID: groupID.id, 
+                MESSAGE_TYPE: messageType, 
+                STATUS: ''
+            } as MessageModel
+
             if (req.file) {
                 //assuming file types can be "video" or "image"
                 messageType = message.hasOwnProperty('image') ? "image" : "video";
@@ -122,29 +130,24 @@ export class ChatController {
                     Body: fileContent
                 }
 
-                s3.upload(params, (err, data) => {
+                s3.upload(params, async (err, data) => {
                     if (err) {
                         throw err;
                     }
 
-                    urlFilePath = data.Location;
+                    newMessage.MESSAGE_BODY = data.Location;
+                    await MessageModel.insert(newMessage);
+                    console.log(newMessage);
                 })
 
                 fs.unlinkSync(req.file.path);
+            } else {
+                newMessage.MESSAGE_BODY = message.text;
+                await MessageModel.insert(newMessage);
             }
 
             //find all recipients of this group chat, exclude senderID from the list
             const groupRecipients = (await UserGroupModel.getMembers(groupID.id)).map(row => row.USER_ID).filter(id => id != senderID._id);    
-             
-            //store message in db
-            await MessageModel.insert({ 
-                ID: message._id,
-                CREATOR_ID: senderID._id, 
-                RECIPIENT_GROUP_ID: groupID.id, 
-                MESSAGE_BODY: messageType === "text" ? message.text : urlFilePath,
-                MESSAGE_TYPE: messageType, 
-                STATUS: '' 
-            }); 
 
             //send a message to each recipients queue
             for (const id of groupRecipients) {
