@@ -41,17 +41,14 @@ export class ProfileController {
             //remove existing profile picture from file system
             if (user.AVATAR?.trim().length) {
                 const path = user.AVATAR.split('.com/')[1];
+                console.log(path);
                 //remove from s3
                 const params = {
                     Bucket: config.BUCKET_NAME,
-                    Key: path,
+                    Key: path
                 }
 
-                bucket.deleteObject(params, async (err, data) => {
-                    if (err) {
-                        throw err;
-                    }
-                });
+                bucket.deleteObject(params);
             }
 
             const fileContent = fs.readFileSync(req.file.path);
@@ -66,6 +63,7 @@ export class ProfileController {
                 if (err) {
                     throw err;
                 }
+                
                 await UserModel.updateAvatar(data.Location, user.ID);
                 
                 fs.unlinkSync(req.file.path);
