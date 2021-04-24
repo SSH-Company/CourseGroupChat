@@ -104,7 +104,6 @@ export class ChatController {
                 urlFilePath = '';
 
             if (req.file) {
-                urlFilePath = `${BASE_URL}/media/messages/${req.file.filename}`;
                 //assuming file types can be "video" or "image"
                 messageType = message.hasOwnProperty('image') ? "image" : "video";
                 message[messageType] = urlFilePath
@@ -115,9 +114,7 @@ export class ChatController {
                     secretAccessKey: config.SECRET
                 });
 
-                console.log(req.file);
-                const fileContent = fs.readFileSync(`src/public/client/media/messages/${req.file.filename}`);
-                console.log(fileContent);
+                const fileContent = fs.readFileSync(req.file.path);
 
                 const params = {
                     Bucket: config.BUCKET_NAME,
@@ -130,10 +127,10 @@ export class ChatController {
                         throw err;
                     }
 
-                    console.log(data);
+                    urlFilePath = data.Location;
                 })
 
-                fs.unlinkSync(`src/public/client/media/messages/${req.file.filename}`);
+                fs.unlinkSync(req.file.path);
             }
 
             //find all recipients of this group chat, exclude senderID from the list
@@ -223,9 +220,11 @@ export class ChatController {
             const message = await MessageModel.getById(messageID);
 
             if (message.MESSAGE_TYPE !== "text") {
-                const path = message.MESSAGE_BODY.split('messages/')[1];
-                const fullPath = `src/public/client/media/messages/${path}`;
-                fs.unlinkSync(fullPath);
+                // const path = message.MESSAGE_BODY.split('messages/')[1];
+                // const fullPath = `src/public/client/media/messages/${path}`;
+                // fs.unlinkSync(fullPath);
+
+                //remove from s3
             }
 
             await MessageModel.delete(groupID, messageID);
