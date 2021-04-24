@@ -8,7 +8,6 @@ import {
 } from '@overnightjs/core';
 import fs from 'fs';
 import multer from 'multer';
-import * as AWS from 'aws-sdk';
 import * as STATUS from 'http-status-codes';
 import { CONNECTIONS } from '../WSServer';
 import { Config } from '../services/Config';
@@ -235,7 +234,7 @@ export class ChatController {
                     }
                 });
             }
-            
+
             await MessageModel.delete(groupID, messageID);
             res.status(STATUS.OK).json({ message: "successfully deleted message!" });
         
