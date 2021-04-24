@@ -18,6 +18,13 @@ interface RabbitConfig {
     queue: string
 }
 
+interface S3Config {
+    ID: string,
+    SECRET: string,
+    BUCKET_NAME: string,
+    REGION: string
+}
+
 export class Config {
     private static instance: Config;
 
@@ -37,11 +44,18 @@ export class Config {
             password: _config.get("rabbit.password"),
             locale: _config.get("rabbit.locale"),
             queue: _config.get("rabbit.queue")
+        },
+        this.s3 = {
+            ID: _config.get("s3.ID"),
+            SECRET: _config.get("s3.SECRET"),
+            BUCKET_NAME: _config.get("s3.BUCKET_NAME"),
+            REGION: _config.get("s3.REGION")
         }
     }
 
     public db: DBConfig;
     public rabbit: RabbitConfig;
+    public s3: S3Config;
 
     public static getConfig(): Config {
         if (!Config.instance) {

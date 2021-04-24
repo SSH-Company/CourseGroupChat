@@ -8,8 +8,10 @@ import {
 } from '@overnightjs/core';
 import fs from 'fs';
 import multer from 'multer';
+import * as AWS from 'aws-sdk';
 import * as STATUS from 'http-status-codes';
 import { CONNECTIONS } from '../WSServer';
+import { Config } from '../services/Config';
 import { UserModel } from '../models/User';
 import { MessageModel } from '../models/Message';
 import { UserGroupModel } from '../models/User_Group';
@@ -87,6 +89,7 @@ export class ChatController {
         try {
             const session = req.session;
             const user = session.user;
+            const config = Config.getConfig().s3;
 
             const messages = JSON.parse(req.body.message);
             const message = messages.messages[0]
@@ -105,6 +108,32 @@ export class ChatController {
                 //assuming file types can be "video" or "image"
                 messageType = message.hasOwnProperty('image') ? "image" : "video";
                 message[messageType] = urlFilePath
+
+                //upload to s3
+                const s3 = new AWS.S3({
+                    accessKeyId: config.ID,
+                    secretAccessKey: config.SECRET
+                });
+
+                console.log(req.file);
+                const fileContent = fs.readFileSync(`src/public/client/media/messages/${req.file.filename}`);
+                console.log(fileContent);
+
+                const params = {
+                    Bucket: config.BUCKET_NAME,
+                    Key: req.file.filename,
+                    Body: fileContent
+                }
+
+                s3.upload(params, (err, data) => {
+                    if (err) {
+                        throw err;
+                    }
+
+                    console.log(data);
+                })
+
+                fs.unlinkSync(`src/public/client/media/messages/${req.file.filename}`);
             }
 
             //find all recipients of this group chat, exclude senderID from the list

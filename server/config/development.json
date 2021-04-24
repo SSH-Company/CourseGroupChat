@@ -14,5 +14,11 @@
         "password": "password",
         "locale": "en_US",
         "queue": "MessageQueue"
+    },
+    "s3": {
+        "ID": "AKIA2G22WMUY3QTHDA2W",
+        "SECRET": "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",
+        "BUCKET_NAME": "konnect-bucket-dev-env-1",
+        "REGION": "ca-central-1"
     }
 }
