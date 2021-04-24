@@ -222,7 +222,7 @@ export class ChatController {
             const message = await MessageModel.getById(messageID);
 
             if (message.MESSAGE_TYPE !== "text") {
-                const path = message.MESSAGE_BODY;
+                const path = message.MESSAGE_BODY.split('.com')[1];
                 // const fullPath = `src/public/client/media/messages/${path}`;
                 // fs.unlinkSync(fullPath);
 
@@ -239,13 +239,11 @@ export class ChatController {
 
                 s3.deleteObject(params, async (err, data) => {
                     if (err) {
+                        console.log(err);
                         throw err;
                     }
                     
-                    await MessageModel.delete(groupID, messageID);
-                    res.status(STATUS.OK).json({ message: "successfully deleted message!" });
                     console.log(data);
-                    return;
                 })
             }
 
