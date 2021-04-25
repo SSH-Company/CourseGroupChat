@@ -72,12 +72,12 @@ const LogIn = ({ children }) => {
         and stored. The user is then redirected to the Main page.
     */
     useEffect(() => {
-        axios.get(`${BASE_URL}/api/login`) //{ params: { email: 'email address here' } }
+        axios.get(`${BASE_URL}/api/login`, { params: { email: 'sadman.hasan@mail.utoronto.ca' } }) //{ params: { email: 'email address here' } }
             .then(res => {
-                // tempFunc(res.data);
-                setSourceHTML({ html: res.data });
-                setNewUser(true);
-                setLoading(false);
+                tempFunc(res.data);
+                // setSourceHTML({ html: res.data });
+                // setNewUser(true);
+                // setLoading(false);
             })
             .catch(err => {
                 const response = err.response;
