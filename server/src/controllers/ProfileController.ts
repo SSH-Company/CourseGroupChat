@@ -38,7 +38,8 @@ export class ProfileController {
             const config = Config.getConfig().s3;
             const bucket = Bucket.getBucket().bucket;
 
-            console.log(user.AVATAR);
+            console.log(req.session);
+            console.log(user);
             //remove existing profile picture from file system
             if (user.AVATAR?.trim().length > 0) {
                 const path = user.AVATAR.split('.com/')[1];
