@@ -10,9 +10,10 @@ import {
 import fs from 'fs';
 import multer from 'multer';
 import * as STATUS from 'http-status-codes';
+import { Config } from '../services/Config';
+import { Bucket } from '../services/Bucket';
 import { UserModel } from '../models/User';
 import { FriendStatusModel, FriendStatusInterface } from '../models/Friend_Status';
-import BASE_URL from '../BaseUrl';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -33,21 +34,52 @@ export class ProfileController {
     private async uploadPicture(req: Request, res: Response) {
         try {
             const session = req.session;
-            const user = session.user;
+            const config = Config.getConfig().s3;
+            const bucket = Bucket.getBucket().bucket;
+
+            //retrieve latest user information
+            const user = await UserModel.getUserAccountByID(session.user.ID);
 
             //remove existing profile picture from file system
-            if (user.AVATAR?.trim().length) {
-                const path = user.AVATAR.split('profiles/')[1];
-                const fullPath = `src/public/client/media/profiles/${path}`;
-                fs.unlinkSync(fullPath);
+            if (user.AVATAR?.trim().length > 0) {
+                const path = user.AVATAR.split('.com/')[1];
+                //remove from s3
+                const params = {
+                    Bucket: config.BUCKET_NAME,
+                    Key: path
+                }
+
+                bucket.deleteObject(params, async (err, data) => {
+                    if (err) {
+                        throw err;
+                    }
+                });
             }
 
-            const urlFilePath = req.file ? `${BASE_URL}/media/profiles/${req.file.filename}` : '';
-            await UserModel.updateAvatar(urlFilePath, user.ID);
+            const fileContent = fs.readFileSync(req.file.path);
 
-            res.status(STATUS.OK).json({
-                path: urlFilePath
-            });
+            const params = {
+                Bucket: config.BUCKET_NAME,
+                Key: req.file.filename,
+                Body: fileContent
+            }
+
+            bucket.upload(params, async (err, data) => {
+                if (err) {
+                    throw err;
+                }
+                
+                await UserModel.updateAvatar(data.Location, user.ID);
+
+                fs.unlinkSync(req.file.path);
+
+                res.status(STATUS.OK).json({
+                    path: data.Location
+                });
+            })
+
+            return;
+
         }catch (err) {
             console.error(err);
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({

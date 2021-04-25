@@ -113,7 +113,7 @@ const Profile = ({ route, navigation }) => {
     return (
         <View style={style.container}>
             <Image
-                source={{ uri: `${userInfo.avatar}` || EMPTY_IMAGE_DIRECTORY }}
+                source={{ uri: userInfo.avatar as string || EMPTY_IMAGE_DIRECTORY }}
                 style={style.image}
             />
             <Text style={style.name}>{userInfo.name}</Text>

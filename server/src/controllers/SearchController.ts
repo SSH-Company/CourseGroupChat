@@ -5,14 +5,16 @@ import {
     Post,
     Get
 } from '@overnightjs/core';
+import fs from 'fs';
 import multer from 'multer';
 import * as STATUS from 'http-status-codes';
+import { Config } from '../services/Config';
+import { Bucket } from '../services/Bucket';
 import { UserModel } from '../models/User';
 import { GroupModel } from '../models/Group';
 import { UserGroupModel } from '../models/User_Group';
 import { UserGroupListModel } from '../models/UserGroupList';
 import { CONNECTIONS } from '../WSServer';
-import BASE_URL from '../BaseUrl';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -77,7 +79,8 @@ export class SearchController {
             const session = req.session;
             const recipients = JSON.parse(req.body.recipients);
             const groupName = req.body.groupName;
-            const urlFilePath = req.file ? `${BASE_URL}/media/profiles/${req.file.filename}` : '';
+            const config = Config.getConfig().s3;
+            const bucket = Bucket.getBucket().bucket;
 
             if(!Array.isArray(recipients) || recipients.length === 0 || !groupName) {
                 res.status(STATUS.INTERNAL_SERVER_ERROR).json({
@@ -86,28 +89,43 @@ export class SearchController {
                 })
             }
 
-            //create new group and retrieve group ID
-            const newGroup = await GroupModel.insert(urlFilePath);
-            
-            //insert sender into the new group
-            await UserGroupModel.insert(session.user.ID, newGroup.ID, groupName);
+            const fileContent = fs.readFileSync(req.file.path);
 
-            //insert members into new group
-            //send a message to other group members to refresh their logs
-            for(const id of recipients) {
-                await UserGroupModel.insert(id, newGroup.ID, groupName);
-                const queueName = `message-queue-${id}`
-                const queueData = { command: "refresh" }
-                const queue = CONNECTIONS[session.user.ID];
-                await queue.publishToQueue(queueName, JSON.stringify(queueData))
+            const params = {
+                Bucket: config.BUCKET_NAME,
+                Key: req.file.filename,
+                Body: fileContent
             }
 
-            res.status(STATUS.OK).json({
-                id: newGroup.ID,
-                name: groupName,
-                avatar_url: urlFilePath
-            });
+            bucket.upload(params, async (err, data) => {
+                if (err) {
+                    throw err;
+                }
+                
+                //create new group and retrieve group ID
+                const newGroup = await GroupModel.insert(data.Location);
+                
+                //insert sender into the new group
+                await UserGroupModel.insert(session.user.ID, newGroup.ID, groupName);
 
+                //insert members into new group
+                //send a message to other group members to refresh their logs
+                for(const id of recipients) {
+                    await UserGroupModel.insert(id, newGroup.ID, groupName);
+                    const queueName = `message-queue-${id}`
+                    const queueData = { command: "refresh" }
+                    const queue = CONNECTIONS[session.user.ID];
+                    await queue.publishToQueue(queueName, JSON.stringify(queueData))
+                }
+
+                res.status(STATUS.OK).json({
+                    id: newGroup.ID,
+                    name: groupName,
+                    avatar_url: data.Location
+                });
+            })
+
+            return;
         } catch (err) {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong while attempting to create a new group.",

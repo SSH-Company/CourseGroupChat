@@ -3,7 +3,7 @@ import { ActivityIndicator, View, ScrollView, Platform } from "react-native";
 import { SearchBar, Header } from "react-native-elements";
 import { Ionicons } from "react-native-vector-icons";
 import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
-import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
+import { BASE_URL } from '../BaseUrl';
 import axios from 'axios';
 axios.defaults.headers = { withCredentials: true };
 
@@ -89,7 +89,10 @@ const GroupSearch = ({ navigation }) => {
                       :
                       <BaseList 
                           items={filteredList}
-                          itemOnPress={l => onItemPress(l)}
+                          itemOnPress={l => {
+                            if (l.hasOwnProperty('verified')) onItemPress(l)
+                            else onProfilePress(l)
+                          }}
                       />
                     )
                 }

@@ -10,11 +10,12 @@ import fs from 'fs';
 import multer from 'multer';
 import * as STATUS from 'http-status-codes';
 import { CONNECTIONS } from '../WSServer';
+import { Config } from '../services/Config';
+import { Bucket } from '../services/Bucket';
 import { UserModel } from '../models/User';
 import { MessageModel } from '../models/Message';
 import { UserGroupModel } from '../models/User_Group';
 import { ChatLogViewModel } from '../models/ChatLog_View';
-import BASE_URL from '../BaseUrl';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -87,6 +88,7 @@ export class ChatController {
         try {
             const session = req.session;
             const user = session.user;
+            const config = Config.getConfig().s3;
 
             const messages = JSON.parse(req.body.message);
             const message = messages.messages[0]
@@ -97,28 +99,49 @@ export class ChatController {
                 avatar: user.AVATAR
             }
 
-            let messageType: "text" | "image" | "video" = "text", 
-                urlFilePath = '';
+            let messageType: "text" | "image" | "video" = "text";
+
+            const newMessage = {
+                ID: message._id,
+                CREATOR_ID: senderID._id, 
+                RECIPIENT_GROUP_ID: groupID.id,  
+                STATUS: ''
+            } as MessageModel
 
             if (req.file) {
-                urlFilePath = `${BASE_URL}/media/messages/${req.file.filename}`;
                 //assuming file types can be "video" or "image"
                 messageType = message.hasOwnProperty('image') ? "image" : "video";
-                message[messageType] = urlFilePath
+
+                //upload to s3
+                const bucket = Bucket.getBucket().bucket;
+
+                const fileContent = fs.readFileSync(req.file.path);
+
+                const params = {
+                    Bucket: config.BUCKET_NAME,
+                    Key: req.file.filename,
+                    Body: fileContent
+                }
+
+                bucket.upload(params, async (err, data) => {
+                    if (err) {
+                        throw err;
+                    }
+                    message[messageType] = data.Location
+                    newMessage.MESSAGE_BODY = data.Location;
+                    newMessage.MESSAGE_TYPE = messageType;
+                    await MessageModel.insert(newMessage);
+                })
+
+                fs.unlinkSync(req.file.path);
+            } else {
+                newMessage.MESSAGE_TYPE = messageType;
+                newMessage.MESSAGE_BODY = message.text;
+                await MessageModel.insert(newMessage);
             }
 
             //find all recipients of this group chat, exclude senderID from the list
             const groupRecipients = (await UserGroupModel.getMembers(groupID.id)).map(row => row.USER_ID).filter(id => id != senderID._id);    
-             
-            //store message in db
-            await MessageModel.insert({ 
-                ID: message._id,
-                CREATOR_ID: senderID._id, 
-                RECIPIENT_GROUP_ID: groupID.id, 
-                MESSAGE_BODY: messageType === "text" ? message.text : urlFilePath,
-                MESSAGE_TYPE: messageType, 
-                STATUS: '' 
-            }); 
 
             //send a message to each recipients queue
             for (const id of groupRecipients) {
@@ -183,6 +206,7 @@ export class ChatController {
     private async deleteMessage(req: Request, res: Response) {
         try{
             const { groupID, messageID } = req.body;
+            const config = Config.getConfig().s3;
 
             if (!groupID || !messageID) {
                 res.status(STATUS.BAD_REQUEST).json({
@@ -194,13 +218,26 @@ export class ChatController {
             const message = await MessageModel.getById(messageID);
 
             if (message.MESSAGE_TYPE !== "text") {
-                const path = message.MESSAGE_BODY.split('messages/')[1];
-                const fullPath = `src/public/client/media/messages/${path}`;
-                fs.unlinkSync(fullPath);
+                const path = message.MESSAGE_BODY.split('.com/')[1];
+
+                //remove from s3
+                const bucket = Bucket.getBucket().bucket;
+
+                const params = {
+                    Bucket: config.BUCKET_NAME,
+                    Key: path,
+                }
+
+                bucket.deleteObject(params, async (err, data) => {
+                    if (err) {
+                        throw err;
+                    }
+                });
             }
 
             await MessageModel.delete(groupID, messageID);
             res.status(STATUS.OK).json({ message: "successfully deleted message!" });
+        
         } catch (err) {
             console.error(err);
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
