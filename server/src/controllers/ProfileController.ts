@@ -34,9 +34,11 @@ export class ProfileController {
     private async uploadPicture(req: Request, res: Response) {
         try {
             const session = req.session;
-            const user = session.user;
             const config = Config.getConfig().s3;
             const bucket = Bucket.getBucket().bucket;
+
+            //retrieve latest user information
+            const user = await UserModel.getUserAccountByID(session.user.ID);
 
             //remove existing profile picture from file system
             if (user.AVATAR?.trim().length > 0) {
@@ -69,7 +71,7 @@ export class ProfileController {
                 }
                 
                 await UserModel.updateAvatar(data.Location, user.ID);
-                
+
                 fs.unlinkSync(req.file.path);
 
                 res.status(STATUS.OK).json({
