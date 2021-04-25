@@ -12,12 +12,12 @@ import * as STATUS from 'http-status-codes';
 @Controller('login')
 export class LoginController {
     @Get('')
-    @Middleware([passport.authenticate('saml')])
+    // @Middleware([passport.authenticate('saml')])
     private async userLogin(req: Request, res: Response) {
-        // let session = req.session;
-        // const user = await UserModel.getUserAccountByEmail(req.query.email);
-        // session.user = user;
-        res.status(STATUS.OK).json();
+        let session = req.session;
+        const user = await UserModel.getUserAccountByEmail(req.query.email);
+        session.user = user;
+        res.status(STATUS.OK).json(user);
     }
     
     @Post('callback')
