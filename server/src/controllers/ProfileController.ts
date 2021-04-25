@@ -53,7 +53,6 @@ export class ProfileController {
                     if (err) {
                         throw err;
                     }
-                    console.log(data);
                 });
             }
 
