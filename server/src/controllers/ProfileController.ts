@@ -38,21 +38,6 @@ export class ProfileController {
             const config = Config.getConfig().s3;
             const bucket = Bucket.getBucket().bucket;
 
-            console.log(req.session);
-            console.log(user);
-            //remove existing profile picture from file system
-            if (user.AVATAR?.trim().length > 0) {
-                const path = user.AVATAR.split('.com/')[1];
-                console.log(path);
-                //remove from s3
-                const params = {
-                    Bucket: config.BUCKET_NAME,
-                    Key: path
-                }
-
-                bucket.deleteObject(params);
-            }
-
             const fileContent = fs.readFileSync(req.file.path);
 
             const params = {
@@ -70,9 +55,28 @@ export class ProfileController {
                 
                 fs.unlinkSync(req.file.path);
 
-                res.status(STATUS.OK).json({
-                    path: data.Location
-                });
+                console.log(req.session);
+                console.log(user);
+                //remove existing profile picture from file system
+                if (user.AVATAR?.trim().length > 0) {
+                    const path = user.AVATAR.split('.com/')[1];
+                    console.log(path);
+                    //remove from s3
+                    const params = {
+                        Bucket: config.BUCKET_NAME,
+                        Key: path
+                    }
+    
+                    bucket.deleteObject(params);
+
+                    res.status(STATUS.OK).json({
+                        path: data.Location
+                    });
+                } else {
+                    res.status(STATUS.OK).json({
+                        path: data.Location
+                    });
+                }   
             })
 
             return;
