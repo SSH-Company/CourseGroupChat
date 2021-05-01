@@ -1,0 +1,60 @@
+html, body {
+	margin: 0%;
+	padding: 0%;
+    overflow-x: hidden;
+	font-family: 'Josefin Sans', sans-serif;
+}
+.header-background {
+	background: url('background.jpg');
+	background-size: cover;
+	background-repeat: no-repeat;
+	height: 100%;
+}
+.bg-light {
+	background-color: transparent!important;
+}
+.jumbotron {
+	background-color: transparent;
+	color: #fff;
+	font-size: 1.5rem;
+	padding-right: 0;
+	padding-left: 0;
+}
+.display-4 {
+	font-size: 4.5rem;
+	font-weight: 500;
+	line-height: 1.2;
+}
+.jumbotron p {
+	margin-top: 0;
+	font-size: 18px;
+	margin-bottom: 1rem;
+}
+.jumbotron img {
+	/*    width: 350px;*/
+	height: auto;
+	padding-left: 0;
+	padding-right: 0;
+}
+.btn-lg {
+	padding: .75rem 1.5rem;
+	font-size: 1.25rem;
+	line-height: 1.5;
+	border-radius: .3rem;
+	margin-top: 2rem;
+	margin-right: 1.5rem;
+}
+.btn-light {
+	color: #292b2c;
+	background-color: #fff;
+	border-color: #ccc;
+	font-size: 1.5rem;
+}
+.wow {
+	-webkit-animation-delay: 0.4s;
+}
+.screen-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
