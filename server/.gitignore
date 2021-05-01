@@ -1,4 +1,5 @@
 node_modules/**/*
-src/public/*
+src/public/client/media/*
+src/public/apis.*
 
 
