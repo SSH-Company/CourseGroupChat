@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import {
     Middleware,
+    ClassMiddleware,
     Controller,
     Post,
     Get,
@@ -8,6 +9,7 @@ import {
 } from '@overnightjs/core';
 import fs from 'fs';
 import multer from 'multer';
+import passport from 'passport';
 import * as STATUS from 'http-status-codes';
 import { CONNECTIONS } from '../WSServer';
 import { Config } from '../services/Config';
@@ -30,6 +32,7 @@ let storage = multer.diskStorage({
 const upload = multer({ storage: storage })
 
 @Controller('chat')
+@ClassMiddleware([passport.authenticate('saml', { failureRedirect: '/', failureFlash: true })])
 export class ChatController {
 
     @Get('log/:id')
