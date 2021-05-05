@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, useContext, useRef } from 'react';
 import { ActivityIndicator, Text, View, Dimensions } from 'react-native';
 import { Avatar, Button, Header } from "react-native-elements";
+import { StatusBar } from 'expo-status-bar';
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import { useActionSheet } from '@expo/react-native-action-sheet';
@@ -13,6 +14,7 @@ import { RenderMessageContext } from '../Socket/WebSocket';
 import { handleImagePick, handlePermissionRequest } from "../Util/ImagePicker";
 import { ChatLog, MessageStatus, revisedRandId } from '../Util/ChatLog';
 import VerifiedIcon from '../Util/CommonComponents/VerifiedIcon';
+import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
 axios.defaults.headers = { withCredentials: true };
@@ -221,6 +223,7 @@ const Chat = ({ route, navigation }) => {
 
     return (
         <View style={{flex: 1}}>
+            <StatusBar style="light" backgroundColor={THEME_COLORS.STATUS_BAR}/>
             {loading ?
                 <ActivityIndicator />
                 :
@@ -239,13 +242,13 @@ const Chat = ({ route, navigation }) => {
                 >   
                     <Header
                         placement="left"
-                        backgroundColor="#ccccff"
+                        backgroundColor={THEME_COLORS.HEADER}
                         leftComponent={
                             <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
                                 <Ionicons 
                                     name="arrow-back-sharp" 
                                     size={avatarSize} 
-                                    color="#734f96" 
+                                    color={THEME_COLORS.ICON_COLOR}
                                     onPress={() => navigation.navigate('Main')}
                                 />
                                 <Avatar 
@@ -257,7 +260,7 @@ const Chat = ({ route, navigation }) => {
                         }
                         centerComponent={
                             <View style={{ display:'flex', flexDirection: "row", justifyContent: "space-between" }}>
-                                <Text style={{ color: "#734f96", fontSize: 17 }}>{`${group.name}`}</Text>
+                                <Text style={{ color: THEME_COLORS.ICON_COLOR, fontSize: 17 }}>{`${group.name}`}</Text>
                                 {group.verified === 'Y' && <VerifiedIcon style={{ marginLeft: 8 }}/>}
                             </View>
                         }
@@ -265,7 +268,7 @@ const Chat = ({ route, navigation }) => {
                             !newGroup && <Ionicons 
                                 name="information-circle-outline" 
                                 size={avatarSize} 
-                                color="#734f96" 
+                                color={THEME_COLORS.ICON_COLOR} 
                                 onPress={() => drawerRef.current.openDrawer()}
                             />
                         }

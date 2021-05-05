@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { Text, View, StyleSheet } from "react-native";
 import { Header, Input, Image } from "react-native-elements";
+import { StatusBar } from 'expo-status-bar';
 import * as VideoExtensions from 'video-extensions';
 import { Ionicons } from "react-native-vector-icons";
 import { handleImagePick, handlePermissionRequest } from "../Util/ImagePicker";
-import { EMPTY_IMAGE_DIRECTORY, BASE_URL } from '../BaseUrl';
+import { THEME_COLORS } from '../Util/CommonComponents/Colors';
+import { EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 
 const styles = StyleSheet.create({
     imagePicker: { 
@@ -58,25 +60,26 @@ const CreateGroupForm = ({ navigation }) => {
 
     return (
         <View style={{ flex: 1 }}>
+            <StatusBar style="light" backgroundColor={THEME_COLORS.STATUS_BAR}/>
             <Header
                 placement="center"
-                backgroundColor="#ccccff"
+                backgroundColor={THEME_COLORS.HEADER}
                 leftComponent={
                     <Ionicons 
                     name="arrow-back-sharp" 
                     size={25} 
-                    color="#734f96" 
+                    color={THEME_COLORS.ICON_COLOR}
                     onPress={() => navigation.navigate('Main')}
                 />}
                 centerComponent={{
                     text: "Create Group",
-                    style: { color: "#734f96", fontSize: 20, fontWeight: "bold" },
+                    style: { color: THEME_COLORS.ICON_COLOR, fontSize: 20, fontWeight: "bold" },
                 }}
                 rightComponent={
                     <Ionicons 
                     name="checkmark-sharp" 
                     size={25} 
-                    color="#734f96" 
+                    color={THEME_COLORS.ICON_COLOR} 
                     onPress={() => handleFormSubmit()}
                 />}
             />

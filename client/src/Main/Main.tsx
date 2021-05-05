@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useContext } from "react";
 import { View, ScrollView, Platform, RefreshControl } from "react-native";
-import { Header, SearchBar } from "react-native-elements";
-import { Feather, FontAwesome } from "react-native-vector-icons";
+import { Header, SearchBar, Image } from "react-native-elements";
+import { Feather, Ionicons } from "react-native-vector-icons";
 import { useIsFocused } from "@react-navigation/native";
+import { StatusBar } from 'expo-status-bar';
+import { UserContext } from '../Auth/Login';
 import { RenderMessageContext } from '../Socket/WebSocket';
 import { ChatLog } from '../Util/ChatLog';
 import BaseList from '../Util/CommonComponents/BaseList';
+import { THEME_COLORS } from '../Util/CommonComponents/Colors';
+import { EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 
 export type listtype = {
   id: string;
@@ -20,6 +24,7 @@ export type listtype = {
 // landing page.
 const Main = ({ navigation }) => {
   // data arrays.
+  const { user } = useContext(UserContext);
   const { renderFlag } = useContext(RenderMessageContext);
   const [completeList, setCompleteList] = useState<listtype[]>([]);
   const [refreshing, setRefreshing] = useState(false); 
@@ -57,64 +62,61 @@ const Main = ({ navigation }) => {
   // renders header | searchbar | chat list
   return (
     <View style={{ flex: 1 }}>
+      <StatusBar style="light" backgroundColor={THEME_COLORS.STATUS_BAR}/>
       <Header
-        placement="center"
-        backgroundColor="#ccccff"
+        placement="left"
+        backgroundColor={THEME_COLORS.HEADER}
         leftComponent={
-          <FontAwesome
-            name={"bars"}
-            color="#734f96" 
-            size={25}
-            onPress={() => navigation.navigate("ProfileSettings")}  // TODO: change slide scroll from left to right
+          <Image
+            source={{ uri: user.avatar as string || EMPTY_IMAGE_DIRECTORY }}
+            style={{ width: 30, height: 30, borderRadius: 200 }}
+            onPress={() => navigation.navigate("ProfileSettings")}
           />
         }
-        centerComponent={{
-          text: "Chat",
-          style: { color: "#734f96", fontSize: 20, fontWeight: "bold" },
-        }}
+        centerComponent={
+          <SearchBar
+            platform={Platform.OS === "android" ? "android" : "ios"}
+            clearIcon={{ size: 20 }}
+            placeholder="Search"
+            onFocus={() => navigation.navigate("GroupSearch")}
+            containerStyle={{ borderRadius: 50, height: 35, justifyContent: 'center' }}
+          />
+        }
         rightComponent={
-          <Feather 
-            name={"edit"} 
-            color="#734f96" 
-            size={25} 
-            onPress={() => navigation.navigate("CreateGroupForm")}
-          />
+          <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+            <Ionicons 
+              name={"person-add"} 
+              color={THEME_COLORS.ICON_COLOR} 
+              size={20} 
+              onPress={() => console.log('clicked')}
+            />
+            <Feather 
+              name={"edit"} 
+              color={THEME_COLORS.ICON_COLOR} 
+              size={20} 
+              onPress={() => navigation.navigate("CreateGroupForm")}
+              style={{ marginLeft: 20 }}
+            />
+          </View>
         }
+        containerStyle={{ marginTop: 10 }}
+        leftContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
+        rightContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
       />
       <ScrollView
         contentOffset={{ x: 0, y: 76 }}
         keyboardShouldPersistTaps="handled"
         refreshControl={
-          Platform.select({
-            ios: (
-              <RefreshControl
-                tintColor='transparent'
-                refreshing={refreshing} 
-                onRefresh={() => {
-                setRefreshing(true);
-                resetList(true);
-                }}
-              />
-            ),
-            android: (
-              <RefreshControl 
-                refreshing={refreshing} 
-                onRefresh={() => {
-                  setRefreshing(true);
-                  resetList(true);
-                }}
-              />
-            )
-          })
-          
+          <RefreshControl 
+            tintColor={Platform.OS === "ios" ? 'transparent' : null}
+            refreshing={refreshing} 
+            onRefresh={() => {
+              setRefreshing(true);
+              resetList(true);
+            }}
+          />
         }
       >
-        <SearchBar
-          platform={Platform.OS === "android" ? "android" : "ios"}
-          clearIcon={{ size: 30 }}
-          placeholder="Search groups"
-          onFocus={() => navigation.navigate("GroupSearch")}
-        />
         <BaseList
             items={completeList}
             itemOnPress={(l, i) => {

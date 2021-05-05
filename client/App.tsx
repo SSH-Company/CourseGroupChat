@@ -33,16 +33,7 @@ export default function App() {
             <Socket>
               <Stack.Navigator initialRouteName="Main" screenOptions={{headerShown: false, cardStyle: { backgroundColor: 'white' }}}>
                   <Stack.Screen name="Main" component={Main}/>
-                  <Stack.Screen 
-                    name="Chat" 
-                    component={Chat} 
-                    options={{
-                      transitionSpec: {
-                        open: TransitionSpecs.TransitionIOSSpec,
-                        close: TransitionSpecs.TransitionIOSSpec,
-                      },
-                    }}
-                  />
+                  <Stack.Screen name="Chat" component={Chat} />
                   <Stack.Screen name="FriendRequests" component={FriendRequests}/>
                   <Stack.Screen name="Profile" component={Profile}/>
                   <Stack.Screen name="ProfileSettings" component={ProfileSettings} options={{gestureDirection: 'horizontal-inverted'}}/>

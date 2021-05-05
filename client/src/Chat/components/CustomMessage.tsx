@@ -85,8 +85,8 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                                 onPress={() => setMessagePressed(!messagePressed)}
                                 onLongPress={() => onLongPress(currentMessage._id)}
                             >     
-                            <View style={[styles.balloon, {backgroundColor: isCurrentUser ? '#f5f9ff' : '#7c80ee'}]}>
-                                <Text style={{paddingTop: 5, color:  isCurrentUser ? 'black' : 'white'}}>{currentMessage.text}</Text>
+                            <View style={[styles.balloon, {backgroundColor: isCurrentUser ? '#1F4E45' : 'white'}, { borderWidth: isCurrentUser ? null : 1 }]}>
+                                <Text style={{paddingTop: 5, color:  isCurrentUser ? 'white' : 'black'}}>{currentMessage.text}</Text>
                             </View>
                             </TouchableOpacity>
                             <>

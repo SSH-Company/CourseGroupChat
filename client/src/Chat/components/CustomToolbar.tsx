@@ -1,7 +1,8 @@
 import React, { FunctionComponent, useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { InputToolbar, Send, Actions } from 'react-native-gifted-chat';
-import { Entypo, SimpleLineIcons, Ionicons, MaterialCommunityIcons, AntDesign } from 'react-native-vector-icons';
+import { InputToolbar, Send } from 'react-native-gifted-chat';
+import { Entypo, Ionicons, MaterialCommunityIcons, AntDesign } from 'react-native-vector-icons';
+import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
 
 const style = StyleSheet.create({
     outer_container: {
@@ -78,7 +79,7 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
             <View>
                 <AntDesign
                     name="camera"
-                    color='#734f96'
+                    color={THEME_COLORS.ICON_COLOR}
                     size={27}
                     style={style.camera_icon}
                     onPress={()=>onImagePick('camera')}
@@ -91,7 +92,7 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
                     renderSend={() => (
                         <Ionicons 
                             name={'mic-circle'} 
-                            color='#734f96' 
+                            color={THEME_COLORS.ICON_COLOR}
                             size={30}
                             style={style.camera_icon}
                         /> 
@@ -103,7 +104,7 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
                 <Send {...children}>
                     <MaterialCommunityIcons 
                         name={'send-circle'} 
-                        color='#734f96' 
+                        color={THEME_COLORS.ICON_COLOR} 
                         size={35} 
                         style={style.send_icon}
                     />
@@ -111,7 +112,7 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
                     :
                 <Entypo 
                     name={'images'} 
-                    color='#734f96' 
+                    color={THEME_COLORS.ICON_COLOR} 
                     size={30} 
                     style={style.right_icon}
                     onPress={()=>onImagePick('library')}
