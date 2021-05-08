@@ -1,9 +1,8 @@
 import React, { FunctionComponent, useContext, useState } from 'react';
-import { View, StyleSheet, Text, Image, TouchableOpacity } from 'react-native';
-import { Message } from 'react-native-gifted-chat';
+import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { Message, MessageImage } from 'react-native-gifted-chat';
 import { Video } from 'expo-av';
 import { UserContext } from '../../Auth/Login';
-import { navigate } from '../../Util/RootNavigation';
 
 //style sheet
 const styles = StyleSheet.create({
@@ -99,13 +98,9 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                         {/* handle images */}
                         {currentMessage.hasOwnProperty('image') && currentMessage.image.length > 0 && 
                         (<TouchableOpacity
-                            onPress={() => navigate('FullScreenMedia', currentMessage.image)}
                             onLongPress={() => onLongPress(currentMessage._id)}
-                        >       
-                            <Image
-                                source={{ uri: currentMessage.image }}
-                                style={{ width: 200, height: 200, marginBottom: 10, borderRadius: 20 }}
-                            />
+                        >     
+                            <MessageImage currentMessage={currentMessage} />
                         </TouchableOpacity>)}
 
                         {/* handle videos */}

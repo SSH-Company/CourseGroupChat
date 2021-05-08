@@ -8,6 +8,7 @@ import {
     TouchableOpacity, 
     StyleSheet 
 } from "react-native";
+import LightBox from 'react-native-lightbox';
 import { Video } from 'expo-av';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
 import axios from 'axios';
@@ -49,14 +50,12 @@ const Gallery = ({ route, navigation }) => {
         switch(item.type) {
             case 'image':
                 return (
-                    <TouchableOpacity
-                        onPress={() => navigation.navigate('FullScreenMedia', item.body)}
-                    >       
+                    <LightBox>       
                         <Image
                             source={{ uri: item.body || EMPTY_IMAGE_DIRECTORY }}
-                            style={{ width: dimensions.width, height: 200, marginBottom: 10, borderRadius: 20 }}
+                            style={{ width: dimensions.width, height: 200, marginTop: 10, borderRadius: 20 }}
                         />
-                    </TouchableOpacity>
+                    </LightBox>
                 )
             case 'video':
                 return (
