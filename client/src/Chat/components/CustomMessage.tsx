@@ -57,15 +57,16 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
     const { user } = useContext(UserContext);
     const [messagePressed, setMessagePressed] = useState<boolean>(false);
     
-    const prepareStatusText = (status: string) => {
-        const seenBy = status.split(', ').filter(i => i !== "" && i !== `${user.name.toUpperCase()}`);
-        if (seenBy.length === 0) return 'Sent';
-        if (seenBy.length === 1) {
-            if (['Pending', 'Sent'].includes(seenBy[0])) return seenBy[0];
-            else return 'Seen';
-        }
-        if (seenBy.length > 1) return `Seen by ${status.slice(0, status.length)}`;
-    }
+    /* Text status is buggy af, comment out for now */
+    // const prepareStatusText = (status: string) => {
+    //     const seenBy = status.split(', ').filter(i => i !== "" && i !== `${user.name.toUpperCase()}`);
+    //     if (seenBy.length === 0) return 'Sent';
+    //     if (seenBy.length === 1) {
+    //         if (['Pending', 'Sent'].includes(seenBy[0])) return seenBy[0];
+    //         else return 'Seen';
+    //     }
+    //     if (seenBy.length > 1) return `Seen by ${status.slice(0, status.length)}`;
+    // }
 
     return (
         <Message 
@@ -90,9 +91,9 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                             </View>
                             </TouchableOpacity>
                             <>
-                            {messagePressed && <Text style={{...styles.status, alignSelf: isCurrentUser ? 'flex-end' : 'flex-start'}}>
+                            {/* {messagePressed && <Text style={{...styles.status, alignSelf: isCurrentUser ? 'flex-end' : 'flex-start'}}>
                                 {prepareStatusText(currentMessage.status)}
-                            </Text>}
+                            </Text>} */}
                         </></>}
 
                         {/* handle images */}

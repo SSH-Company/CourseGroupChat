@@ -283,8 +283,17 @@ const Chat = ({ route, navigation }) => {
                             user={user}
                             messages={messages}
                             onSend={messages => onSend(messages)}
-                            renderMessage={props => { return ( <CustomMessage children={props} uploadProgress={uploadProgress} onLongPress={id => handleLongPress(id)} /> ) }}
-                            renderInputToolbar={props => { return ( <CustomToolbar children={props} onImagePick={type => onImagePick(type)} /> ) }}
+                            renderMessage={props => { return ( 
+                                <CustomMessage 
+                                    children={props} 
+                                    uploadProgress={uploadProgress} 
+                                    onLongPress={id => handleLongPress(id)} 
+                                /> ) }}
+                            renderInputToolbar={props => { return ( 
+                                <CustomToolbar 
+                                    children={props} 
+                                    onImagePick={type => onImagePick(type)} 
+                                /> ) }}
                             isKeyboardInternallyHandled={true}
                             loadEarlier
                             onLoadEarlier={onLoadEarlier}

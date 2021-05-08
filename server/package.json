@@ -6,7 +6,7 @@
   "dependencies": {
     "@overnightjs/core": "^1.7.5",
     "@overnightjs/logger": "^1.2.0",
-    "amqplib": "^0.6.0",
+    "amqplib": "^0.7.1",
     "aws-sdk": "^2.892.0",
     "axios": "^0.21.1",
     "body-parser": "^1.19.0",
