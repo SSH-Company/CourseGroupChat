@@ -55,7 +55,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
     const { children, uploadProgress, onLongPress } = props;
     const { user } = useContext(UserContext);
     const [messagePressed, setMessagePressed] = useState<boolean>(false);
-    
+
     /* Text status is buggy af, comment out for now */
     // const prepareStatusText = (status: string) => {
     //     const seenBy = status.split(', ').filter(i => i !== "" && i !== `${user.name.toUpperCase()}`);
