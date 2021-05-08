@@ -22,12 +22,13 @@ axios.defaults.headers = { withCredentials: true };
 const Chat = ({ route, navigation }) => {
     const { user } = useContext(UserContext)
     const { postStatus, renderFlag, setPostStatus } = useContext(RenderMessageContext);
-    const { groupID, name, avatar, verified } = route.params;
+    const { groupID, name, avatar, verified, members } = route.params;
     const [group, setGroup] = useState<any>({
         id: groupID,
         name: name || '',
         avatar: avatar || EMPTY_IMAGE_DIRECTORY,
-        verified: verified || 'N'
+        verified: verified || 'N',
+        members: members || []
     });
     const [messages, setMessages] = useState<IMessage[]>([]);
     const [newGroup, setNewGroup] = useState<boolean>();
@@ -40,8 +41,10 @@ const Chat = ({ route, navigation }) => {
     const [uploadProgress, setUploadProgress] = useState<number>(0);
 
     useEffect(() => {
-        resetMessages(true);
-        updateMessageStatus();
+        if (groupID) {
+            resetMessages(true);
+            updateMessageStatus();
+        }
     }, [isFocused, groupID])
 
     //re set messages everytime a new message is received from socket
@@ -75,7 +78,7 @@ const Chat = ({ route, navigation }) => {
 
             const instance = await ChatLog.getChatLogInstance();
 
-            if (refreshSource) {
+            if (groupID && refreshSource) {
                 await instance.refreshGroup(groupID, false, name, avatar); 
             }
 
@@ -110,17 +113,38 @@ const Chat = ({ route, navigation }) => {
     }
     
     const onSend = useCallback(async (messages = []) => {
-        //append to Chatlog instance to save to cache
-        //store message ids, set these to pending: true
-        for (const msg of messages) msg['status'] = "Pending" as MessageStatus;
-        const instance = await ChatLog.getChatLogInstance();
-        instance.appendLog(group, messages);
-        setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
-        await sendData(messages);
+        try {
+            //append to Chatlog instance to save to cache
+            //store message ids, set these to pending: true
+            for (const msg of messages) msg['status'] = "Pending" as MessageStatus;
+            const instance = await ChatLog.getChatLogInstance();
+
+            if (!(groupID in instance.groupInfo)) {
+                //create the group in the backend
+                const res = await axios.post(`${BASE_URL}/api/search/create-group`, { recipients: members });
+                const data = res.data;
+                setGroup({
+                    ...group,
+                    groupID: data.id,
+                    name: data.name
+                });
+                setNewGroup(false);
+                instance.appendLog({ ...group, id: data.id, name: data.name }, messages);
+                setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
+                await sendData(messages, {...group, id:data.id });
+            } else {
+                instance.appendLog(group, messages);
+                setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
+                await sendData(messages);
+            }
+
+        } catch(err) {
+            console.error(err);
+        }
     }, [])
 
     //helper function for sending message to queue
-    const sendData = async (messages = []) => {
+    const sendData = async (messages = [], newGroup = group) => {
         //here we are assuming only one message is posted at a time
         try {
             const imageType = messages[0].hasOwnProperty('imageData');
@@ -128,7 +152,7 @@ const Chat = ({ route, navigation }) => {
             if (imageType) {
                 formData = new FormData();
                 formData.append('media', {...messages[0].imageData});
-                formData.append('message', JSON.stringify({ messages, groupID: group }))
+                formData.append('message', JSON.stringify({ messages, groupID: newGroup }))
                 await axios.post(`${BASE_URL}/api/chat`, 
                     formData, 
                     { 
@@ -140,14 +164,13 @@ const Chat = ({ route, navigation }) => {
                     }
                 )
             } else {
-                formData = { message: JSON.stringify({ messages, groupID: group })}
+                formData = { message: JSON.stringify({ messages, groupID: newGroup })}
                 await axios.post(`${BASE_URL}/api/chat`, formData)
             }
-            
             const instance = await ChatLog.getChatLogInstance();
-            instance.updateMessageStatus(groupID, "Sent", messages[0]);
+            // instance.updateMessageStatus(groupID, "Sent", messages[0]);
             //update the messages
-            setMessages(filterOutEmptyMessages(instance.chatLog[groupID]));
+            setMessages(filterOutEmptyMessages(instance.chatLog[newGroup.id]));
         } catch (err) {
             //TODO: display failed notification here
             console.error(err);
@@ -179,15 +202,15 @@ const Chat = ({ route, navigation }) => {
         }
     }
 
-    const handleJoinGroup = async () => {
-        try {
-            await axios.post(`${BASE_URL}/api/chat/join-group`, { id: groupID, name: group.name })
-            resetMessages(true);
-        } catch (err) {
-            console.log('unable to join group');
-            console.error(err);
-        }
-    }
+    // const handleJoinGroup = async () => {
+    //     try {
+    //         await axios.post(`${BASE_URL}/api/chat/join-group`, { id: groupID, name: group.name })
+    //         resetMessages(true);
+    //     } catch (err) {
+    //         console.log('unable to join group');
+    //         console.error(err);
+    //     }
+    // }
 
     const handleLongPress = (id: string) => {
         const options = ['Remove message', 'Edit message'];
@@ -273,32 +296,26 @@ const Chat = ({ route, navigation }) => {
                             />
                         }
                     />
-                    {newGroup ? 
-                        <View style={{ flex: 1, alignSelf: 'center', justifyContent: 'center' }}>
-                            <Button title={`Join ${group.name}`} onPress={handleJoinGroup}/>
-                        </View>
-                        :
-                        <GiftedChat
-                            ref={giftedChatRef}
-                            user={user}
-                            messages={messages}
-                            onSend={messages => onSend(messages)}
-                            renderMessage={props => { return ( 
-                                <CustomMessage 
-                                    children={props} 
-                                    uploadProgress={uploadProgress} 
-                                    onLongPress={id => handleLongPress(id)} 
-                                /> ) }}
-                            renderInputToolbar={props => { return ( 
-                                <CustomToolbar 
-                                    children={props} 
-                                    onImagePick={type => onImagePick(type)} 
-                                /> ) }}
-                            isKeyboardInternallyHandled={true}
-                            loadEarlier
-                            onLoadEarlier={onLoadEarlier}
-                        />
-                    }
+                    <GiftedChat
+                        ref={giftedChatRef}
+                        user={user}
+                        messages={messages}
+                        onSend={messages => onSend(messages)}
+                        renderMessage={props => { return ( 
+                            <CustomMessage 
+                                children={props} 
+                                uploadProgress={uploadProgress} 
+                                onLongPress={id => handleLongPress(id)} 
+                            /> ) }}
+                        renderInputToolbar={props => { return ( 
+                            <CustomToolbar 
+                                children={props} 
+                                onImagePick={type => onImagePick(type)} 
+                            /> ) }}
+                        isKeyboardInternallyHandled={true}
+                        loadEarlier
+                        onLoadEarlier={onLoadEarlier}
+                    />
                 </DrawerLayout>
             }
             

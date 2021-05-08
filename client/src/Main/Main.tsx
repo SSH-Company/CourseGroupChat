@@ -94,7 +94,7 @@ const Main = ({ navigation }) => {
               name={"edit"} 
               color={THEME_COLORS.ICON_COLOR} 
               size={20} 
-              onPress={() => navigation.navigate("CreateGroupForm")}
+              onPress={() => navigation.navigate("Search", { groupName: "New group", searchType: "create" })}
               style={{ marginLeft: 20 }}
             />
           </View>
