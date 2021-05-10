@@ -22,7 +22,7 @@ export class UserGroupModel implements UserGroupInterface {
         Object.assign(this, raw);
     }
 
-    static insert(userID: string, grpID: string, name: string): Promise<void> {
+    static insert(userID: string, grpID: string, name?: string): Promise<void> {
         return new Promise((resolve, reject) => {
             const query = `INSERT INTO RT.USER_GROUP ("USER_ID", "GROUP_ID", "NAME", "CREATE_DATE", "IS_ACTIVE") 
                             VALUES (?, ?, ?, CURRENT_TIMESTAMP, 'Y') ; `

@@ -3,6 +3,7 @@ import { Text, View, ScrollView, Platform, StyleSheet, Dimensions } from "react-
 import { Avatar, Header, SearchBar, Button } from "react-native-elements";
 import Feather from "react-native-vector-icons/Feather";
 import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
+import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
 axios.defaults.headers = { withCredentials: true };
@@ -11,7 +12,7 @@ axios.defaults.headers = { withCredentials: true };
 const style = StyleSheet.create({
     search: {},
     submit: {
-        color: '#734f96'
+        color: THEME_COLORS.ICON_COLOR
     },
     suggested: {
         fontWeight: "bold",
@@ -34,7 +35,6 @@ const style = StyleSheet.create({
 type SearchProp = {
     groupName: string,
     groupID?: string,   //required if search type === "add"
-    photo?: any,     
     searchType: "add" | "create",
     existingMembers?: string[]
 }
@@ -43,7 +43,6 @@ const Search = ({ route, navigation }) => {
     const { 
         groupName, 
         groupID = '', 
-        photo = {}, 
         searchType,
         existingMembers = []
     } = route.params as SearchProp;
@@ -83,26 +82,14 @@ const Search = ({ route, navigation }) => {
     }
 
     const handleSubmit = () => {
-        const recipients = suggestions.filter(row => row.checked).map(row => row.id)
+        const recipients = suggestions.filter(row => row.checked).map(row => ({
+            id: row.id,
+            name: row.name.split(" ")[0]
+        }))
         
         if (searchType === "create") {
-            const formData = new FormData();
-            if (photo !== '') formData.append('avatar', {...photo});
-            formData.append('recipients', JSON.stringify(recipients));
-            formData.append('groupName', groupName);
-    
-            //create the group in the backend
-            axios.post(`${BASE_URL}/api/search/create-group`, formData, { headers: { 'content-type': 'multipart/form-data' } })
-                .then(async res => {
-                    const data = res.data;
-                    const chatParams = {
-                        groupID: data.id,
-                        name: data.name,
-                        avatar: data.avatar_url
-                    }
-                    navigation.navigate('Chat', chatParams)
-                })
-                .catch(err => console.log(err))
+            const name = suggestions.filter(row => row.checked).map(row => row.name).join(", ");
+            navigation.navigate('Chat', { groupID: null, name: name, members: recipients })
         } 
         else if (searchType === "add") {
             const reqBody = {
@@ -123,15 +110,15 @@ const Search = ({ route, navigation }) => {
     return (
         <View style={{ flex: 1 }}>
             <Header
-                placement="center"
-                backgroundColor="#ccccff"
-                leftComponent={<Feather name="arrow-left" color="#734f96" size={30} onPress={() => navigation.navigate("Main")}/>}
+                placement="left"
+                backgroundColor={THEME_COLORS.HEADER}
+                leftComponent={<Feather name="arrow-left" color={THEME_COLORS.ICON_COLOR} size={25} onPress={() => navigation.navigate("Main")}/>}
                 centerComponent={{
-                    text: "Choose Members",
-                    style: { color: "#734f96", fontSize: 20, fontWeight: "bold" },
+                    text: "Create Group",
+                    style: { color: THEME_COLORS.ICON_COLOR, fontSize: 20, fontWeight: "bold" },
                 }}
                 rightComponent={displaySubmit && 
-                    <View style={{width: '60%'}}>
+                    <View>
                         <Button title="OK" onPress={() => handleSubmit()} />
                     </View>
                 }
@@ -146,7 +133,7 @@ const Search = ({ route, navigation }) => {
                 value={search}
                 style={style.search}
             />}
-            <ScrollView keyboardShouldPersistTaps="handled">
+            <ScrollView keyboardShouldPersistTaps="handled" style={{ flex: 1 }}>
                 {suggestions.length > 0 &&
                 <View style={style.members}>
                     <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>

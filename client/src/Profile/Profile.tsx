@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Dimensions, View, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Image, Text, Button } from 'react-native-elements';
 import { User } from 'react-native-gifted-chat';
 import { Ionicons } from "react-native-vector-icons";

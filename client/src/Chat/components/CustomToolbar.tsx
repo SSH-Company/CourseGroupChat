@@ -1,59 +1,39 @@
 import React, { FunctionComponent, useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { InputToolbar, Send, Actions } from 'react-native-gifted-chat';
-import { Entypo, SimpleLineIcons, Ionicons, MaterialCommunityIcons, AntDesign } from 'react-native-vector-icons';
+import { InputToolbar, Send } from 'react-native-gifted-chat';
+import { Entypo, SimpleLineIcons, Ionicons, MaterialCommunityIcons } from 'react-native-vector-icons';
+import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
 
 const style = StyleSheet.create({
-    outer_container: {
+    outerContainer: {
         display:'flex',
         flex: 1,
         flexDirection: 'row',
-        justifyContent: 'space-evenly',
-        marginBottom: 0,
+        justifyContent: 'space-evenly'
     },
-    toolbar_container: {
-        display:'flex',
+    innerContainer: { 
+        display: 'flex',
         flex: 1,
-        
+        flexDirection:'row'
     },
     //input toolbar
     inputbar: {
         backgroundColor: '#f0f0f0',
-        paddingTop: 0,
-        borderRadius: 25,
-        marginLeft: 10,
-    },
-    actionContainer: {
-        width: 44,
-        height: 44,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginLeft: 4,
-        marginRight: 4,
-        marginBottom: 0,       
+        alignSelf: 'flex-end',
+        borderTopWidth: 0,
+        borderRadius: 30,
+        marginBottom: 10,
+        marginRight: 10
     },
     //button icons
-    camera_icon: {
-        alignSelf: 'center',
+    actionIcon: {
         marginLeft: 10,
-        marginTop: 8
+        alignSelf: 'flex-start',
     },
-    right_icon: {
-        alignSelf: 'center',
+    clipIcon: {
         marginLeft: 10,
-        marginRight: 10,
-        marginTop: 5
-    },
-    send_icon: {
-        alignSelf: 'center',
-        marginLeft: 10,
-        marginRight: 10,
-        marginBottom: 5
-    },
-    mic_icon: {
-        alignSelf: 'center',
-        height: 20
-    },
+        alignSelf: 'flex-start'
+    }
 })
 
 type CustomToolbarProps = {
@@ -74,50 +54,52 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
     }, [children.text])
 
     return (
-        <View style={style.outer_container}>
-            <View>
-                <AntDesign
-                    name="camera"
-                    color='#734f96'
-                    size={27}
-                    style={style.camera_icon}
-                    onPress={()=>onImagePick('camera')}
-                />
-            </View>
-            <View style={style.toolbar_container}>
-                <InputToolbar 
-                    {...children} 
-                    containerStyle={style.inputbar} 
-                    renderSend={() => (
+        <View style={[style.outerContainer]}>
+            <InputToolbar 
+                {...children} 
+                containerStyle={{...style.inputbar, marginLeft: isTyping ? 10 : 110}}
+                renderSend={() => 
+                    isTyping ?
+                        <Send {...children}>
+                            <MaterialCommunityIcons 
+                                name={'send-circle'} 
+                                color={THEME_COLORS.ICON_COLOR} 
+                                size={40} 
+                            />
+                        </Send>
+                            :
                         <Ionicons 
                             name={'mic-circle'} 
-                            color='#734f96' 
-                            size={30}
-                            style={style.camera_icon}
-                        /> 
-                    )}
-                />
-            </View>
-            <View>
-            {isTyping?
-                <Send {...children}>
-                    <MaterialCommunityIcons 
-                        name={'send-circle'} 
-                        color='#734f96' 
-                        size={35} 
-                        style={style.send_icon}
-                    />
-                </Send>
-                    :
+                            color={THEME_COLORS.ICON_COLOR} 
+                            size={40} 
+                        />
+                }
+            />
+            {!isTyping && 
+            <View style={[style.innerContainer]}>
                 <Entypo 
-                    name={'images'} 
-                    color='#734f96' 
-                    size={30} 
-                    style={style.right_icon}
-                    onPress={()=>onImagePick('library')}
-                /> 
-            }
-            </View>
+                    name={'image'} 
+                    size={25} 
+                    color={THEME_COLORS.ICON_COLOR} 
+                    style={style.clipIcon}
+                    onPress={() => onImagePick("library")}
+                />
+                <SimpleLineIcons 
+                    name={'camera'} 
+                    size={25} 
+                    color={THEME_COLORS.ICON_COLOR} 
+                    style={style.actionIcon}
+                    onPress={() => onImagePick("camera")}
+                />
+                <SimpleLineIcons 
+                    name={'paper-clip'} 
+                    size={25} 
+                    color={THEME_COLORS.ICON_COLOR} 
+                    style={style.actionIcon}
+                    onPress={() => console.log('upload file')}
+                />
+            </View>}
+            
         </View>
     )
 }

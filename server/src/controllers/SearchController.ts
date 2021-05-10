@@ -73,57 +73,49 @@ export class SearchController {
     }
 
     @Post('create-group')
-    @Middleware([upload.single('avatar')])
     private async createGroup(req: Request, res: Response) {
         try {
             const session = req.session;
-            const recipients = JSON.parse(req.body.recipients);
-            const groupName = req.body.groupName;
-            const config = Config.getConfig().s3;
-            const bucket = Bucket.getBucket().bucket;
+            const recipients = req.body.recipients;
 
-            if(!Array.isArray(recipients) || recipients.length === 0 || !groupName) {
+            if(!Array.isArray(recipients) || recipients.length === 0) {
                 res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                     message: "Request must contain array of [recipients], and a valid Group Name.",
                     identifier: "SC003"
                 })
             }
 
-            const fileContent = fs.readFileSync(req.file.path);
+            //create new group and retrieve group ID
+            const newGroup = await GroupModel.insert();
 
-            const params = {
-                Bucket: config.BUCKET_NAME,
-                Key: req.file.filename,
-                Body: fileContent
+            //auto-generate names based on other members
+            let otherMembers = recipients.filter(row => row.id !== session.user.ID).map(d => d.name)
+            let groupName = otherMembers.length > 2 ? 
+                `${otherMembers.slice(1).join(", ")} & ${otherMembers.length - 2} others` :
+                otherMembers.join(", ")
+
+            //insert sender into the new group
+            await UserGroupModel.insert(session.user.ID, newGroup.ID, groupName);
+
+            //insert members into new group
+            //send a message to other group members to refresh their logs
+            for(const id of recipients.map(r => r.id)) {
+                let otherMembers = recipients.filter(row => row.id !== id).map(d => d.name).concat(session.user.FIRST_NAME)
+                let name = otherMembers.length > 2 ? 
+                    `${otherMembers.slice(1).join(", ")} & ${otherMembers.length - 2} others` :
+                    otherMembers.join(", ")
+    
+                await UserGroupModel.insert(id, newGroup.ID, name);
+                const queueName = `message-queue-${id}`
+                const queueData = { command: "refresh" }
+                const queue = CONNECTIONS[session.user.ID];
+                await queue.publishToQueue(queueName, JSON.stringify(queueData))
             }
 
-            bucket.upload(params, async (err, data) => {
-                if (err) {
-                    throw err;
-                }
-                
-                //create new group and retrieve group ID
-                const newGroup = await GroupModel.insert(data.Location);
-                
-                //insert sender into the new group
-                await UserGroupModel.insert(session.user.ID, newGroup.ID, groupName);
-
-                //insert members into new group
-                //send a message to other group members to refresh their logs
-                for(const id of recipients) {
-                    await UserGroupModel.insert(id, newGroup.ID, groupName);
-                    const queueName = `message-queue-${id}`
-                    const queueData = { command: "refresh" }
-                    const queue = CONNECTIONS[session.user.ID];
-                    await queue.publishToQueue(queueName, JSON.stringify(queueData))
-                }
-
-                res.status(STATUS.OK).json({
-                    id: newGroup.ID,
-                    name: groupName,
-                    avatar_url: data.Location
-                });
-            })
+            res.status(STATUS.OK).json({
+                id: newGroup.ID,
+                name: groupName
+            });
 
             return;
         } catch (err) {

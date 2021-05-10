@@ -1,9 +1,8 @@
 import React, { FunctionComponent, useContext, useState } from 'react';
-import { View, StyleSheet, Text, Image, TouchableOpacity } from 'react-native';
-import { Message } from 'react-native-gifted-chat';
+import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { Message, MessageImage } from 'react-native-gifted-chat';
 import { Video } from 'expo-av';
 import { UserContext } from '../../Auth/Login';
-import { navigate } from '../../Util/RootNavigation';
 
 //style sheet
 const styles = StyleSheet.create({
@@ -26,15 +25,6 @@ const styles = StyleSheet.create({
         paddingBottom: 15,
         borderRadius: 20
     },
-    avatar: {
-        height: 40,
-        width: 40,
-        borderRadius: 3,
-    },
-    ticks: {
-        alignSelf: 'flex-end',
-        color: '#734f96'
-    },
     video: {
         minWidth: 200,
         minHeight: 200,
@@ -56,16 +46,17 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
     const { children, uploadProgress, onLongPress } = props;
     const { user } = useContext(UserContext);
     const [messagePressed, setMessagePressed] = useState<boolean>(false);
-    
-    const prepareStatusText = (status: string) => {
-        const seenBy = status.split(', ').filter(i => i !== "" && i !== `${user.name.toUpperCase()}`);
-        if (seenBy.length === 0) return 'Sent';
-        if (seenBy.length === 1) {
-            if (['Pending', 'Sent'].includes(seenBy[0])) return seenBy[0];
-            else return 'Seen';
-        }
-        if (seenBy.length > 1) return `Seen by ${status.slice(0, status.length)}`;
-    }
+
+    /* Text status is buggy af, comment out for now */
+    // const prepareStatusText = (status: string) => {
+    //     const seenBy = status.split(', ').filter(i => i !== "" && i !== `${user.name.toUpperCase()}`);
+    //     if (seenBy.length === 0) return 'Sent';
+    //     if (seenBy.length === 1) {
+    //         if (['Pending', 'Sent'].includes(seenBy[0])) return seenBy[0];
+    //         else return 'Seen';
+    //     }
+    //     if (seenBy.length > 1) return `Seen by ${status.slice(0, status.length)}`;
+    // }
 
     return (
         <Message 
@@ -85,26 +76,22 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                                 onPress={() => setMessagePressed(!messagePressed)}
                                 onLongPress={() => onLongPress(currentMessage._id)}
                             >     
-                            <View style={[styles.balloon, {backgroundColor: isCurrentUser ? '#f5f9ff' : '#7c80ee'}]}>
-                                <Text style={{paddingTop: 5, color:  isCurrentUser ? 'black' : 'white'}}>{currentMessage.text}</Text>
+                            <View style={[styles.balloon, {backgroundColor: isCurrentUser ? '#1F4E45' : 'white'}, { borderWidth: isCurrentUser ? null : 1 }]}>
+                                <Text style={{paddingTop: 5, color:  isCurrentUser ? 'white' : 'black'}}>{currentMessage.text}</Text>
                             </View>
                             </TouchableOpacity>
                             <>
-                            {messagePressed && <Text style={{...styles.status, alignSelf: isCurrentUser ? 'flex-end' : 'flex-start'}}>
+                            {/* {messagePressed && <Text style={{...styles.status, alignSelf: isCurrentUser ? 'flex-end' : 'flex-start'}}>
                                 {prepareStatusText(currentMessage.status)}
-                            </Text>}
+                            </Text>} */}
                         </></>}
 
                         {/* handle images */}
                         {currentMessage.hasOwnProperty('image') && currentMessage.image.length > 0 && 
                         (<TouchableOpacity
-                            onPress={() => navigate('FullScreenMedia', currentMessage.image)}
                             onLongPress={() => onLongPress(currentMessage._id)}
-                        >       
-                            <Image
-                                source={{ uri: currentMessage.image }}
-                                style={{ width: 200, height: 200, marginBottom: 10, borderRadius: 20 }}
-                            />
+                        >     
+                            <MessageImage currentMessage={currentMessage} />
                         </TouchableOpacity>)}
 
                         {/* handle videos */}

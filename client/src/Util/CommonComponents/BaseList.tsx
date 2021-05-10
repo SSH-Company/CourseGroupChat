@@ -3,7 +3,8 @@ import { View, Text, StyleSheet } from "react-native";
 import { ListItem, Avatar } from "react-native-elements";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import VerifiedIcon from './VerifiedIcon';
-import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
+import { EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
+import { THEME_COLORS } from './Colors';
 
 //style sheet
 const style = StyleSheet.create({
@@ -62,8 +63,8 @@ const BaseList:FunctionComponent<BaseListProps> = (props) => {
                 {checkBoxes &&
                 <ListItem.CheckBox 
                     checked={l.checked} 
-                    checkedIcon={<Ionicons name="checkmark-circle" size={25} color="#734f96"/>} 
-                    uncheckedIcon={<Ionicons name="checkmark-circle-outline" size={25} color="#734f96"/>}
+                    checkedIcon={<Ionicons name="checkmark-circle" size={25} color={THEME_COLORS.ICON_COLOR}/>} 
+                    uncheckedIcon={<Ionicons name="checkmark-circle-outline" size={25} color={THEME_COLORS.ICON_COLOR}/>}
                     onPress={() => itemOnPress(l, i)}/>
                 }
                 {l.content &&
