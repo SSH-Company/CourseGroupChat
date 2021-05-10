@@ -96,7 +96,7 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
                     size={25} 
                     color={THEME_COLORS.ICON_COLOR} 
                     style={style.actionIcon}
-                    onPress={() => onImagePick("camera")}
+                    onPress={() => console.log('upload file')}
                 />
             </View>}
             

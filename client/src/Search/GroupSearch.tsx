@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ActivityIndicator, View, ScrollView, Platform } from "react-native";
 import { SearchBar, Header } from "react-native-elements";
 import { Ionicons } from "react-native-vector-icons";
+import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
 import { BASE_URL } from '../BaseUrl';
 import axios from 'axios';
@@ -43,12 +44,12 @@ const GroupSearch = ({ navigation }) => {
         <View style={{ flex: 1 }}>
             <Header
                 placement="center"
-                backgroundColor="#ccccff"
+                backgroundColor={THEME_COLORS.HEADER}
                 leftComponent={
                   <Ionicons 
                     name="arrow-back-sharp" 
                     size={25} 
-                    color="#734f96" 
+                    color={THEME_COLORS.ICON_COLOR} 
                     onPress={() => navigation.navigate('Main')}
                 />}
             />

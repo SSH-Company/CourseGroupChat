@@ -25,15 +25,6 @@ const styles = StyleSheet.create({
         paddingBottom: 15,
         borderRadius: 20
     },
-    avatar: {
-        height: 40,
-        width: 40,
-        borderRadius: 3,
-    },
-    ticks: {
-        alignSelf: 'flex-end',
-        color: '#734f96'
-    },
     video: {
         minWidth: 200,
         minHeight: 200,

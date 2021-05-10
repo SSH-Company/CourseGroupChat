@@ -4,6 +4,7 @@ import { Header } from "react-native-elements";
 import { navigationRef } from '../../Util/RootNavigation';
 import { Ionicons } from "react-native-vector-icons";
 import { UserContext } from '../../Auth/Login';
+import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
 import BaseList from '../../Util/CommonComponents/BaseList';
 import { BASE_URL } from '../../BaseUrl';
 import axios from 'axios';
@@ -91,7 +92,7 @@ const GroupMembers = ({ route, navigation }) => {
         <View style={{ flex: 1 }}>
             <Header
                 placement="left"
-                backgroundColor="#ccccff"
+                backgroundColor={THEME_COLORS.HEADER}
                 leftComponent={
                     <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
                         <Ionicons 

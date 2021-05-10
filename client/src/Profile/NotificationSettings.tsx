@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Switch, StyleSheet } from 'react-native';
 import { Header } from 'react-native-elements';
 import { Ionicons } from 'react-native-vector-icons';
+import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import { navigationRef } from '../Util/RootNavigation';
 
 const NotificationSettings = () => {
@@ -18,18 +19,18 @@ const NotificationSettings = () => {
         <View style={styles.container}>
             <Header
                 placement="center"
-                backgroundColor="#ccccff"
+                backgroundColor={THEME_COLORS.HEADER}
                 leftComponent = {
                     <Ionicons 
                         name="arrow-back-sharp"
                         size={25}
-                        color="#734f96"
+                        color={THEME_COLORS.ICON_COLOR}
                         // onPress={() => navigation.navigate('Profile')}
                     />
                 }
                 centerComponent={{
                     text: "Notifications",
-                    style: { color: "#734f96", fontSize: 20, fontWeight: "bold" },
+                    style: { color: THEME_COLORS.ICON_COLOR, fontSize: 20, fontWeight: "bold" },
                 }}
             />
             <Switch
