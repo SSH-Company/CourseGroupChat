@@ -1,8 +1,10 @@
 import React, { FunctionComponent, useContext, useState } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { Message, MessageImage } from 'react-native-gifted-chat';
+import { Ionicons } from "react-native-vector-icons";
 import { Video } from 'expo-av';
 import { UserContext } from '../../Auth/Login';
+import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
 
 //style sheet
 const styles = StyleSheet.create({
@@ -91,7 +93,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                         (<TouchableOpacity
                             onLongPress={() => onLongPress(currentMessage._id)}
                         >     
-                            <MessageImage currentMessage={currentMessage} />
+                            <MessageImage currentMessage={{...currentMessage, image: currentMessage.location}} />
                         </TouchableOpacity>)}
 
                         {/* handle videos */}
@@ -101,7 +103,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                         >
                             <Video
                                 style={styles.video}
-                                source={{ uri: currentMessage.video }}
+                                source={{ uri: currentMessage.location }}
                                 //TODO: find a good way to display loading icon
                                 // usePoster
                                 // posterSource={{ uri: `${BASE_URL}/media/loading_icon.jpg` }} 
@@ -109,6 +111,24 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                                 resizeMode="cover"
                                 isLooping
                             />
+                        </TouchableOpacity>)}
+
+                        {/* handle files */}
+                        {currentMessage.hasOwnProperty('file') && currentMessage.file.length > 0 &&
+                        (<TouchableOpacity
+                            onLongPress={() => onLongPress(currentMessage._id)}
+                        >
+                            <View style={[styles.balloon, 
+                                    { backgroundColor: isCurrentUser ? '#1F4E45' : 'white' }, 
+                                    { borderWidth: isCurrentUser ? null : 1 },
+                                    { display: 'flex', flexDirection: 'row' }]}>
+                                <Ionicons
+                                    name="document-attach-outline"
+                                    size={20}
+                                    color={THEME_COLORS.ICON_COLOR}
+                                />
+                                <Text style={{marginLeft: 10, paddingTop: 5, color:  isCurrentUser ? 'white' : 'black'}}>{currentMessage.file}</Text>
+                            </View>
                         </TouchableOpacity>)}
                     </View>
                 )

@@ -38,13 +38,15 @@ const style = StyleSheet.create({
 
 type CustomToolbarProps = {
     children: any,
-    onImagePick: (type: "library" | "camera") => any
+    onImagePick: (type: "library" | "camera") => any,
+    onDocumentPick: () => any
 }
 
 const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
     let {
         children,
-        onImagePick = (type) => {}
+        onImagePick = (type) => {},
+        onDocumentPick = () => {}
     } = props;
 
     const [isTyping, setIsTyping] = useState(false);
@@ -96,7 +98,7 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
                     size={25} 
                     color={THEME_COLORS.ICON_COLOR} 
                     style={style.actionIcon}
-                    onPress={() => console.log('upload file')}
+                    onPress={() => onDocumentPick()}
                 />
             </View>}
             

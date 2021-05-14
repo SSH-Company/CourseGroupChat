@@ -60,6 +60,8 @@ export class ChatLog {
                 text: row.text || '',
                 image: row.image || '',
                 video: row.video || '',
+                file: row.file || '',
+                location: row.location || '',
                 subtitle: row.subtitle || '',
                 createdAt: row.created_at,
                 user: {

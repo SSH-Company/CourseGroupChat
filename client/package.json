@@ -41,7 +41,8 @@
     "video-extensions": "^1.1.0",
     "websocket": "^1.0.33",
     "ws": "^7.4.2",
-    "xml2js": "^0.4.23"
+    "xml2js": "^0.4.23",
+    "expo-document-picker": "~8.4.1"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0",

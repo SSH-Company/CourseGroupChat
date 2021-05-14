@@ -7,6 +7,7 @@ import { DrawerLayout } from 'react-native-gesture-handler';
 import { useActionSheet } from '@expo/react-native-action-sheet';
 import { Ionicons } from "react-native-vector-icons";
 import { useIsFocused } from "@react-navigation/native";
+import * as DocumentPicker from 'expo-document-picker';
 import * as VideoExtensions from 'video-extensions';
 import { CustomMessage, CustomToolbar, InboxSettings } from './components';
 import { UserContext } from '../Auth/Login';
@@ -54,7 +55,7 @@ const Chat = ({ route, navigation }) => {
     }, [renderFlag]);
     
     const filterOutEmptyMessages = (msgs) => {
-        return msgs.filter(msg => msg._id && (msg.text?.length > 0 || msg.image?.length > 0 || msg.video?.length > 0 ));
+        return msgs.filter(msg => msg._id && (msg.text?.length > 0 || msg.image?.length > 0 || msg.video?.length > 0 || msg.file?.length > 0 ));
     }
 
     const updateMessageStatus = async () => {
@@ -147,19 +148,17 @@ const Chat = ({ route, navigation }) => {
     const sendData = async (messages = [], newGroup = group) => {
         //here we are assuming only one message is posted at a time
         try {
-            const imageType = messages[0].hasOwnProperty('imageData');
+            const fileType = messages[0].hasOwnProperty('fileData') || messages[0].hasOwnProperty('imageData');
             let formData: any;
-            if (imageType) {
+            if (fileType) {
                 formData = new FormData();
-                formData.append('media', {...messages[0].imageData});
+                formData.append('media', {...messages[0].fileData});
                 formData.append('message', JSON.stringify({ messages, groupID: newGroup }))
                 await axios.post(`${BASE_URL}/api/chat`, 
                     formData, 
-                    { 
-                        headers: { 'content-type': 'multipart/form-data' },  
-                        onUploadProgress: e => {
-                            const m = Math.round(100 * e.loaded / e.total );
-                            setUploadProgress(m)   
+                    {   headers: { 
+                            accept: "application/json",
+                            'Content-Type': 'multipart/form-data' 
                         }
                     }
                 )
@@ -189,13 +188,36 @@ const Chat = ({ route, navigation }) => {
                         _id: revisedRandId(),
                         createdAt: Date.now(),
                         [mediaType]: imageRes.uri,
-                        imageData: imageRes,
+                        location: imageRes.uri,
+                        fileData: imageRes,
                         displayStatus: true,
                         subtitle: `You sent a photo`,
                         user: user
                     }
                     onSend([newMessage]);
                 }
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    const onDocumentPick = async () => {
+        try {
+            const res = await DocumentPicker.getDocumentAsync({type: '*/*'})
+            var regex = /(?:\.([^.]+))?$/;
+            if (res) {
+                const newMessage = {
+                    _id: revisedRandId(),
+                    createdAt: Date.now(),
+                    file: res['name'],
+                    fileData: {...res, type: `application/${regex.exec(res['name'])[1]}`},
+                    location: res['uri'],
+                    displayStatus: true,
+                    subtitle: `You sent a file`,
+                    user: user
+                }
+                onSend([newMessage])
             }
         } catch (err) {
             console.log(err);
@@ -310,7 +332,8 @@ const Chat = ({ route, navigation }) => {
                         renderInputToolbar={props => { return ( 
                             <CustomToolbar 
                                 children={props} 
-                                onImagePick={type => onImagePick(type)} 
+                                onImagePick={type => onImagePick(type)}
+                                onDocumentPick={onDocumentPick} 
                             /> ) }}
                         isKeyboardInternallyHandled={true}
                         loadEarlier
