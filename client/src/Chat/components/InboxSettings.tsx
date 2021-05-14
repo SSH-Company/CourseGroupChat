@@ -4,9 +4,8 @@ import { ListItem, Image } from 'react-native-elements';
 import { User } from 'react-native-gifted-chat';
 import { AntDesign, Entypo, Ionicons, MaterialIcons } from 'react-native-vector-icons';
 import { navigate } from '../../Util/RootNavigation';
-import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
-import axios from 'axios';
-axios.defaults.headers = { withCredentials: true };
+import { handleLeaveGroup } from '../../Util/CommonFunctions';
+import { EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
 
 type InboxSettingsProps = {
     group: User,
@@ -46,14 +45,8 @@ const InboxSettings = (props: InboxSettingsProps) => {
         navigate('Gallery', props.group._id);
     }
 
-    const handleLeaveGroup = () => {
-        const reqBody = {
-            grpId: props.group._id,
-            leave: true
-        }
-        axios.delete(`${BASE_URL}/api/chat/remove-from-group`, { data: reqBody })
-            .then(props.onLeaveGroup)
-            .catch(err => console.log(err));
+    const leaveGroupWrapper = () => {
+        handleLeaveGroup([], props.group._id as string, true, props.onLeaveGroup);
     }
 
     //Menu list components
@@ -81,7 +74,7 @@ const InboxSettings = (props: InboxSettingsProps) => {
         {
             title: 'Leave Group',
             icon: <Ionicons name={"exit-outline"} size={iconSize}/>,
-            onPress: handleLeaveGroup
+            onPress: leaveGroupWrapper
         }
     ]
     

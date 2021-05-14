@@ -6,6 +6,7 @@ import { Ionicons } from "react-native-vector-icons";
 import { UserContext } from '../../Auth/Login';
 import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
 import BaseList from '../../Util/CommonComponents/BaseList';
+import { handleLeaveGroup } from '../../Util/CommonFunctions';
 import { BASE_URL } from '../../BaseUrl';
 import axios from 'axios';
 axios.defaults.headers = { withCredentials: true };
@@ -69,23 +70,13 @@ const GroupMembers = ({ route, navigation }) => {
 
     const handleRemoveUsers = async () => {
         const selections = members.filter(member => member.checked).map(row => row.id.toString());
-        const reqBody = {
-            users: selections,
-            grpId: id,
-            leave: false
-        }
-
-        try {
-            await axios.delete(`${BASE_URL}/api/chat/remove-from-group`, { data: reqBody });
+        handleLeaveGroup(selections, id, false, () => {
             //if the user also removed them selves, they have effectively left the group
             if (selections.includes(user._id.toString())) {
                 //refresh and navigate back to Main 
                 navigation.navigate('Main');
             } else setRefresh(!refresh);
-
-        } catch (err) {
-            console.log(err)
-        }
+        });
     }
 
     return (

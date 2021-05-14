@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useContext } from "react";
 import { View, ScrollView, Platform, RefreshControl } from "react-native";
 import { Header, SearchBar, Image } from "react-native-elements";
-import { Feather, Ionicons } from "react-native-vector-icons";
+import { Feather, Ionicons, FontAwesome5, MaterialCommunityIcons } from "react-native-vector-icons";
 import { useIsFocused } from "@react-navigation/native";
+import { useActionSheet } from '@expo/react-native-action-sheet';
 import { StatusBar } from 'expo-status-bar';
 import { UserContext } from '../Auth/Login';
 import { RenderMessageContext } from '../Socket/WebSocket';
 import { ChatLog } from '../Util/ChatLog';
 import BaseList from '../Util/CommonComponents/BaseList';
 import { THEME_COLORS } from '../Util/CommonComponents/Colors';
+import { handleLeaveGroup } from '../Util/CommonFunctions';
 import { EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 
 export type listtype = {
@@ -29,6 +31,7 @@ const Main = ({ navigation }) => {
   const [completeList, setCompleteList] = useState<listtype[]>([]);
   const [refreshing, setRefreshing] = useState(false); 
   const isFocused = useIsFocused();
+  const { showActionSheetWithOptions } = useActionSheet();
 
   useEffect(() => {
     if (isFocused) resetList(true);
@@ -57,6 +60,45 @@ const Main = ({ navigation }) => {
     });
     setCompleteList(list.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)));
     setRefreshing(false);
+  }
+
+  const handleLongPress = (groupID: string) => {
+    const options = ['Mute Notifications', 'Ignore messages', 'Leave Group'];
+    const icons = [
+      <FontAwesome5 
+          name={"volume-mute"} 
+          color={THEME_COLORS.ICON_COLOR} 
+          size={20}
+      />,
+      <MaterialCommunityIcons 
+          name={"cancel"} 
+          color={THEME_COLORS.ICON_COLOR} 
+          size={20}
+        />,
+      <Ionicons 
+          name={"exit-outline"} 
+          color={THEME_COLORS.ICON_COLOR} 
+          size={20}
+      />
+    ];
+    const cancelButtonIndex = options.length - 1;
+    showActionSheetWithOptions({
+        options,
+        icons,
+        cancelButtonIndex
+    }, async (buttonIndex) => {
+        switch (buttonIndex) {
+            case 0:
+                console.log('mute');
+                break;
+            case 1:
+                console.log('ignore');
+                break;
+            case 2:
+                handleLeaveGroup([], groupID, true, () => resetList(true));
+                break;
+        }
+    });
   }
 
   // renders header | searchbar | chat list
@@ -122,6 +164,7 @@ const Main = ({ navigation }) => {
             itemOnPress={(l, i) => {
                 navigation.navigate("Chat", { groupID: l.id })
             }}
+            itemOnLongPress={(l, i) => handleLongPress(l.id)}
         />
       </ScrollView>
     </View>

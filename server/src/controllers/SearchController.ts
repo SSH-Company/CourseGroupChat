@@ -94,6 +94,8 @@ export class SearchController {
                 `${otherMembers.slice(1).join(", ")} & ${otherMembers.length - 2} others` :
                 otherMembers.join(", ")
 
+            console.log(groupName);
+
             //insert sender into the new group
             await UserGroupModel.insert(session.user.ID, newGroup.ID, groupName);
 
@@ -104,6 +106,8 @@ export class SearchController {
                 let name = otherMembers.length > 2 ? 
                     `${otherMembers.slice(1).join(", ")} & ${otherMembers.length - 2} others` :
                     otherMembers.join(", ")
+
+                console.log(otherMembers, name);
     
                 await UserGroupModel.insert(id, newGroup.ID, name);
                 const queueName = `message-queue-${id}`

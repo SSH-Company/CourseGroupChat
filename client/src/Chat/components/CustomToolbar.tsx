@@ -14,7 +14,8 @@ const style = StyleSheet.create({
     innerContainer: { 
         display: 'flex',
         flex: 1,
-        flexDirection:'row'
+        flexDirection:'row',
+        marginBottom: 8 
     },
     //input toolbar
     inputbar: {
@@ -22,7 +23,6 @@ const style = StyleSheet.create({
         alignSelf: 'flex-end',
         borderTopWidth: 0,
         borderRadius: 30,
-        marginBottom: 10,
         marginRight: 10
     },
     //button icons
@@ -54,7 +54,7 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
     }, [children.text])
 
     return (
-        <View style={[style.outerContainer]}>
+        <View style={[{...style.outerContainer, position: isTyping ? 'relative' : 'absolute', bottom: isTyping ? null : 1 }]}>
             <InputToolbar 
                 {...children} 
                 containerStyle={{...style.inputbar, marginLeft: isTyping ? 10 : 110}}

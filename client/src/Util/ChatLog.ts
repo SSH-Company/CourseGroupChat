@@ -81,7 +81,7 @@ export class ChatLog {
                 }
             }
         })
-        
+
         this.chatLog = map
         this.groupInfo = grpInfo
         this.userID = userID

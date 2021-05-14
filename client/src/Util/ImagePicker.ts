@@ -28,15 +28,12 @@ export const handleImagePick = async (type: MediaType) => {
     switch (type) {
         case "camera":
             result = await ImagePicker.launchCameraAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.All,
-                allowsEditing: true
+                mediaTypes: ImagePicker.MediaTypeOptions.All
             });
             break;
         case "library":
             result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ImagePicker.MediaTypeOptions.All,
-                allowsEditing: true,
-                aspect: [4, 3],
                 quality: 1,
             });
             break;
