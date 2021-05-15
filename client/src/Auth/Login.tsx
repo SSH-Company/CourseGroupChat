@@ -4,7 +4,8 @@ import {
     StyleSheet,
     Text,
     View,
-    Platform 
+    Platform,
+    Image,
 } from 'react-native';
 import { User } from 'react-native-gifted-chat';
 import { WebView } from 'react-native-webview';
@@ -26,6 +27,11 @@ const styles = StyleSheet.create({
     horizontal: {
         flexDirection: "row",
         justifyContent: "space-around"
+    },
+    image: {
+        flex: 1,
+        resizeMode: "contain",
+        justifyContent: "center"
     }
 });
 
@@ -61,6 +67,8 @@ const LogIn = ({ children }) => {
     const [expoPushToken, setExpoPushToken] = useState('');
     const responseListener = useRef<any>(null);
     const userContextValue = { user, setUser };
+    const splash_iphone = '../../assets/iphoneX.png';
+    const splash_ipad = '../../assets/ipad.png';
 
     /*
         How it works:
@@ -205,11 +213,21 @@ const LogIn = ({ children }) => {
     }
 
     if (loading) {
-        return (
-            <View style={[styles.container, styles.horizontal]}>
-                <Text>Logging in...</Text>
-            </View>
-        )
+        if (Platform.OS == 'ios' && Platform.isPad) {
+            return (
+                <View style={[styles.container]}>
+                    <Image source={require(splash_ipad)} style={styles.image} />
+                </View>
+            )
+        }
+        else {
+            return (
+                <View style={[styles.container]}>
+                    <Image source={require(splash_iphone)} style={styles.image} />
+                </View>
+            )
+        }
+
     } else {
         if (newUser) {
             return (
