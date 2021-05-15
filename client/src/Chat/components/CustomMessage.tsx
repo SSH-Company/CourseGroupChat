@@ -1,7 +1,8 @@
 import React, { FunctionComponent, useContext, useState } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { Message, MessageImage } from 'react-native-gifted-chat';
-import { Ionicons } from "react-native-vector-icons";
+import { Feather } from "react-native-vector-icons";
+import * as FileSystem from 'expo-file-system';
 import { Video } from 'expo-av';
 import { UserContext } from '../../Auth/Login';
 import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
@@ -59,6 +60,21 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
     //     }
     //     if (seenBy.length > 1) return `Seen by ${status.slice(0, status.length)}`;
     // }
+
+    const downloadFile = async (uri: string, filename: string) => {
+        try {
+            const downloadResumable = FileSystem.createDownloadResumable(
+                uri,
+                FileSystem.documentDirectory + filename,
+                {}
+            );
+            await downloadResumable.downloadAsync();
+            //TODO: connect download status with notifications
+            console.log("download success!");
+        } catch (err) {
+            console.log(err);
+        }
+    }
 
     return (
         <Message 
@@ -122,12 +138,13 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                                     { backgroundColor: isCurrentUser ? '#1F4E45' : 'white' }, 
                                     { borderWidth: isCurrentUser ? null : 1 },
                                     { display: 'flex', flexDirection: 'row' }]}>
-                                <Ionicons
-                                    name="document-attach-outline"
+                                <Feather
+                                    name="download"
                                     size={20}
-                                    color={THEME_COLORS.ICON_COLOR}
+                                    color={isCurrentUser ? 'white' : THEME_COLORS.ICON_COLOR}
+                                    onPress={() => downloadFile(currentMessage.location, currentMessage.file)}
                                 />
-                                <Text style={{marginLeft: 10, paddingTop: 5, color:  isCurrentUser ? 'white' : 'black'}}>{currentMessage.file}</Text>
+                                <Text style={{marginLeft: 10, paddingTop: 5, color:  isCurrentUser ? 'white' : 'black', textDecorationLine: 'underline'}}>{currentMessage.file}</Text>
                             </View>
                         </TouchableOpacity>)}
                     </View>

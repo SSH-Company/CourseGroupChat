@@ -1,19 +1,16 @@
 import React, { useState, useCallback, useEffect, useContext, useRef } from 'react';
 import { ActivityIndicator, Text, View, Dimensions } from 'react-native';
-import { Avatar, Button, Header } from "react-native-elements";
+import { Avatar, Header } from "react-native-elements";
 import { StatusBar } from 'expo-status-bar';
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import { useActionSheet } from '@expo/react-native-action-sheet';
 import { Ionicons } from "react-native-vector-icons";
 import { useIsFocused } from "@react-navigation/native";
-import * as DocumentPicker from 'expo-document-picker';
-import * as VideoExtensions from 'video-extensions';
 import { CustomMessage, CustomToolbar, InboxSettings } from './components';
 import { UserContext } from '../Auth/Login';
 import { RenderMessageContext } from '../Socket/WebSocket';
-import { handleImagePick, handlePermissionRequest } from "../Util/ImagePicker";
-import { ChatLog, MessageStatus, revisedRandId } from '../Util/ChatLog';
+import { ChatLog, MessageStatus } from '../Util/ChatLog';
 import VerifiedIcon from '../Util/CommonComponents/VerifiedIcon';
 import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
@@ -176,54 +173,6 @@ const Chat = ({ route, navigation }) => {
         }
     }
 
-    const onImagePick = async (type) => {
-        try {
-            const status = await handlePermissionRequest(type);
-            if (status === "granted") {
-                const imageRes = await handleImagePick(type);
-                if (imageRes) {
-                    const fileExtension = imageRes.type.split('/')[1];
-                    const mediaType = (VideoExtensions as any).default.includes(fileExtension) ? "video" : "image";
-                    const newMessage = {
-                        _id: revisedRandId(),
-                        createdAt: Date.now(),
-                        [mediaType]: imageRes.uri,
-                        location: imageRes.uri,
-                        fileData: imageRes,
-                        displayStatus: true,
-                        subtitle: `You sent a photo`,
-                        user: user
-                    }
-                    onSend([newMessage]);
-                }
-            }
-        } catch (err) {
-            console.log(err);
-        }
-    }
-
-    const onDocumentPick = async () => {
-        try {
-            const res = await DocumentPicker.getDocumentAsync({type: '*/*'})
-            var regex = /(?:\.([^.]+))?$/;
-            if (res) {
-                const newMessage = {
-                    _id: revisedRandId(),
-                    createdAt: Date.now(),
-                    file: res['name'],
-                    fileData: {...res, type: `application/${regex.exec(res['name'])[1]}`},
-                    location: res['uri'],
-                    displayStatus: true,
-                    subtitle: `You sent a file`,
-                    user: user
-                }
-                onSend([newMessage])
-            }
-        } catch (err) {
-            console.log(err);
-        }
-    }
-
     // const handleJoinGroup = async () => {
     //     try {
     //         await axios.post(`${BASE_URL}/api/chat/join-group`, { id: groupID, name: group.name })
@@ -332,8 +281,7 @@ const Chat = ({ route, navigation }) => {
                         renderInputToolbar={props => { return ( 
                             <CustomToolbar 
                                 children={props} 
-                                onImagePick={type => onImagePick(type)}
-                                onDocumentPick={onDocumentPick} 
+                                onSend={messages => onSend(messages)}
                             /> ) }}
                         isKeyboardInternallyHandled={true}
                         loadEarlier
