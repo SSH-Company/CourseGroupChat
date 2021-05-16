@@ -1,37 +1,40 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Image, Text, Button } from 'react-native-elements';
+import { Dimensions, View, StyleSheet } from 'react-native';
+import { ListItem, Image, Text, Button } from 'react-native-elements';
 import { User } from 'react-native-gifted-chat';
-import { Ionicons } from "react-native-vector-icons";
+import { FontAwesome5, Ionicons, Entypo, AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import { UserContext } from '../Auth/Login';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
 axios.defaults.headers = { withCredentials: true };
 
-const style = StyleSheet.create({
-    container: {
-        display: 'flex',
-        flex: 1,
-        textAlign: 'center',
+
+const deviceDimensions = Dimensions.get('window')
+
+const style = StyleSheet.create({    
+    imageContainer: {
+        width: deviceDimensions.width,
+        justifyContent: 'center',
         alignItems: 'center',
-        justifyContent: 'center'
+        marginBottom: 30
     },
-    image: {
-        width: 200,
-        height: 200,
-        borderRadius: 200,
-        marginBottom: 20
+    imageStyle: {
+        width: 150,
+        height: 150,
+        marginTop: 50,
+        marginBottom: 25,
+        borderRadius: 200
     },
     name: {
         fontWeight: 'bold',
         fontSize: 20,
-        marginBottom: 20
+        marginBottom: 25
     },
     acceptContainer: {
         display: 'flex', 
         flexDirection: 'row', 
         justifyContent: 'space-between', 
-        minWidth: 140
+        minWidth: 140,
     }
 })
 
@@ -77,7 +80,7 @@ const Profile = ({ route, navigation }) => {
                     <Ionicons
                         name="checkmark-outline"
                         size={15}
-                        color="white"
+                        color="white"                        
                     />
                 )}
                 iconRight
@@ -110,14 +113,100 @@ const Profile = ({ route, navigation }) => {
         }
     }
 
+    const iconSize = 20;
+    const friendSettingsList = [
+        {
+            title: 'Mutual Friends',   
+            icon: <FontAwesome5 name={"user-friends"} size={iconSize}/>,
+            //onPress: , 
+        },
+        {
+            title: 'Common Course Groups',   
+            icon: <Ionicons name={"ios-chatbubbles"} size={iconSize}/>,
+            //onPress: ,
+        },
+        {
+            title: 'Mute Notifications',   
+            icon: <Ionicons name={"notifications-off"} size={iconSize}/>,
+            //onPress: ,
+        },
+        {
+            title: 'Ignore Messages',  
+            icon: <Entypo name={"block"} size={iconSize}/>
+            //onPress
+        },
+        {
+            title: 'Block',
+            icon: <AntDesign name='exclamation' size={iconSize}/>,
+            //onPress: () => { navigation.navigate('FriendRequests') }
+        },
+        {
+            title: 'Unfriend', 
+            icon: <MaterialCommunityIcons name={"account-cancel"} size={iconSize}/>
+            //onPress:
+        },
+    ]
+
+    const notFriendSettingsList = [
+        {
+            title: 'Mutual Friends',   
+            icon: <FontAwesome5 name={"user-friends"} size={iconSize}/>,
+            //onPress: , 
+        },
+        {
+            title: 'Common Course Groups',   
+            icon: <Ionicons name={"ios-chatbubbles"} size={iconSize}/>,
+            //onPress: ,
+        },
+        {
+            title: 'Block',
+            icon: <AntDesign name='exclamation' size={iconSize}/>,
+            //onPress: () => { navigation.navigate('FriendRequests') }
+        }
+    ]
+
+    const getSettingsList = (status: string | null) => {
+        if (status === "ACCEPTED") {
+            return (                      
+            <View>
+              
+                {friendSettingsList.map((item, i) => (
+                    <ListItem key={i} onPress={item.onPress}>
+                        {item.icon}
+                        <ListItem.Content>
+                            <ListItem.Title>{item.title}</ListItem.Title>
+                        </ListItem.Content>
+                    </ListItem>
+                ))}
+            </View>
+            )
+        } else {return (                      
+            <View>
+              
+                {notFriendSettingsList.map((item, i) => (
+                    <ListItem key={i} onPress={item.onPress}>
+                        {item.icon}
+                        <ListItem.Content>
+                            <ListItem.Title>{item.title}</ListItem.Title>
+                        </ListItem.Content>
+                    </ListItem>
+                ))}
+            </View>
+        )}
+    }
+    
+
     return (
-        <View style={style.container}>
-            <Image
-                source={{ uri: userInfo.avatar as string || EMPTY_IMAGE_DIRECTORY }}
-                style={style.image}
-            />
-            <Text style={style.name}>{userInfo.name}</Text>
-            {getRenderedStatus(friendStatus.sender, friendStatus.status)}
+        <View>
+            <View style={style.imageContainer}>
+                <Image
+                    source={{ uri: userInfo.avatar as string || EMPTY_IMAGE_DIRECTORY }}
+                    style={style.imageStyle}
+                />
+                <Text style={style.name}>{userInfo.name}</Text>
+                {getRenderedStatus(friendStatus.sender, friendStatus.status)}
+            </View>
+            {getSettingsList(friendStatus.status)}
         </View>
     )
 }
