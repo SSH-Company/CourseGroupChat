@@ -1,9 +1,9 @@
 import React, { FunctionComponent, useContext, useState } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { Message, MessageImage } from 'react-native-gifted-chat';
-import { Feather } from "react-native-vector-icons";
+import { AntDesign, Feather } from "react-native-vector-icons";
 import * as FileSystem from 'expo-file-system';
-import { Video } from 'expo-av';
+import { Audio, Video } from 'expo-av';
 import { UserContext } from '../../Auth/Login';
 import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
 
@@ -49,6 +49,13 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
     const { children, uploadProgress, onLongPress } = props;
     const { user } = useContext(UserContext);
     const [messagePressed, setMessagePressed] = useState<boolean>(false);
+    const [sound, setSound] = useState();
+
+    const playSound = async (uri: string) => {
+        const sound = await Audio.Sound.createAsync({ uri: uri });
+        setSound(sound);
+        await sound.sound.playAsync();
+    } 
 
     /* Text status is buggy af, comment out for now */
     // const prepareStatusText = (status: string) => {
@@ -145,6 +152,33 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                                     onPress={() => downloadFile(currentMessage.location, currentMessage.file)}
                                 />
                                 <Text style={{marginLeft: 10, paddingTop: 5, color:  isCurrentUser ? 'white' : 'black', textDecorationLine: 'underline'}}>{currentMessage.file}</Text>
+                            </View>
+                        </TouchableOpacity>)}
+
+                        {/* handle audio */}
+                        {currentMessage.hasOwnProperty('audio') && currentMessage.audio.length > 0 &&
+                        (<TouchableOpacity
+                            onLongPress={() => onLongPress(currentMessage._id)}
+                        >
+                            <View style={[styles.balloon, 
+                                    { backgroundColor: isCurrentUser ? '#1F4E45' : 'white' }, 
+                                    { borderWidth: isCurrentUser ? null : 1 },
+                                    { display: 'flex', flexDirection: 'row' }]}>
+                                {sound?.status.isPlaying ?
+                                    <AntDesign
+                                        name="pausecircleo"
+                                        size={20}
+                                        color={isCurrentUser ? 'white' : THEME_COLORS.ICON_COLOR}
+                                        onPress={() => sound.sound.pauseAsync()}
+                                    />
+                                    :
+                                    <AntDesign
+                                        name="play"
+                                        size={20}
+                                        color={isCurrentUser ? 'white' : THEME_COLORS.ICON_COLOR}
+                                        onPress={() => playSound(currentMessage.location)}
+                                    />
+                                }
                             </View>
                         </TouchableOpacity>)}
                     </View>

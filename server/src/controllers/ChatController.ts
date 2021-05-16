@@ -100,7 +100,7 @@ export class ChatController {
                 avatar: user.AVATAR
             }
 
-            let messageType: "text" | "image" | "video" | "file" = "text";
+            let messageType: "text" | "image" | "video" | "file" | "audio" = "text";
 
             const newMessage = {
                 ID: message._id,
@@ -113,6 +113,7 @@ export class ChatController {
                 //assuming file types can be "video", "image" or "file"
                 if (message.hasOwnProperty('image')) messageType = 'image'
                 else if (message.hasOwnProperty('video')) messageType = 'video'
+                else if (message.hasOwnProperty('audio')) messageType = 'audio'
                 else messageType = "file"
 
                 //upload to s3

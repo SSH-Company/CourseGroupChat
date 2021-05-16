@@ -1,6 +1,7 @@
 import React, { FunctionComponent, useState, useEffect, useContext } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { InputToolbar, Send } from 'react-native-gifted-chat';
+import { Audio } from 'expo-av';
 import * as DocumentPicker from 'expo-document-picker';
 import * as VideoExtensions from 'video-extensions';
 import { handleImagePick, handlePermissionRequest } from "../../Util/ImagePicker";
@@ -54,6 +55,49 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
 
     const { user } = useContext(UserContext);
     const [isTyping, setIsTyping] = useState(false);
+    const [isRecording, setIsRecording] = useState(false);
+    const [recording, setRecording] = useState();
+
+    async function startRecording() {
+        try {
+            setIsRecording(true);
+            await Audio.requestPermissionsAsync();
+            await Audio.setAudioModeAsync({
+                allowsRecordingIOS: true,
+                playsInSilentModeIOS: true,
+            }); 
+            const recording = new Audio.Recording();
+            await recording.prepareToRecordAsync(Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY);
+            await recording.startAsync(); 
+            setRecording(recording);
+        } catch (err) {
+            console.error('Failed to start recording', err);
+        }
+      }
+    
+    async function stopRecording(send: boolean) {
+        setRecording(undefined);
+        await recording.stopAndUnloadAsync();
+        const uri = recording.getURI(); 
+        console.log('Recording stopped and stored at', uri);
+        setIsRecording(false);
+        if (send) {
+            const newMessage = {
+                _id: revisedRandId(),
+                createdAt: Date.now(),
+                audio: uri,
+                location: uri,
+                fileData: {
+                    name: `audio-recording-${user._id}`,
+                    type: "audio/mp3",
+                    uri: uri
+                },
+                subtitle: `You sent a recording.`,
+                user: user
+            }
+            onSend([newMessage])
+        }
+    }
 
     useEffect(() => {
         setIsTyping(children.text.length > 0)
@@ -108,11 +152,19 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
     }
 
     return (
-        <View style={[{...style.outerContainer, position: isTyping ? 'relative' : 'absolute', bottom: isTyping ? null : 1 }]}>
+        <View style={[{...style.outerContainer, position: isRecording ? 'absolute' : isTyping ? 'relative' : 'absolute', bottom: isRecording ? 1 : isTyping ? null : 1 }]}>
             <InputToolbar 
                 {...children} 
-                containerStyle={{...style.inputbar, marginLeft: isTyping ? 10 : 110}}
+                containerStyle={{...style.inputbar, marginLeft: isRecording ? 40 : isTyping ? 10 : 110}}
                 renderSend={() => 
+                    isRecording ?
+                        <MaterialCommunityIcons 
+                            name={'send-circle'} 
+                            color={THEME_COLORS.ICON_COLOR} 
+                            size={40} 
+                            onPress={() => stopRecording(true)}
+                        />
+                        :
                     isTyping ?
                         <Send {...children}>
                             <MaterialCommunityIcons 
@@ -126,33 +178,46 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
                             name={'mic-circle'} 
                             color={THEME_COLORS.ICON_COLOR} 
                             size={40} 
+                            onPress={() => startRecording()}
                         />
                 }
             />
-            {!isTyping && 
-            <View style={[style.innerContainer]}>
-                <Entypo 
-                    name={'image'} 
-                    size={25} 
-                    color={THEME_COLORS.ICON_COLOR} 
-                    style={style.clipIcon}
-                    onPress={() => onImagePick("library")}
-                />
-                <SimpleLineIcons 
-                    name={'camera'} 
-                    size={25} 
-                    color={THEME_COLORS.ICON_COLOR} 
-                    style={style.actionIcon}
-                    onPress={() => onImagePick("camera")}
-                />
-                <SimpleLineIcons 
-                    name={'paper-clip'} 
-                    size={25} 
-                    color={THEME_COLORS.ICON_COLOR} 
-                    style={style.actionIcon}
-                    onPress={() => onDocumentPick()}
-                />
-            </View>}
+            {isRecording ?
+                <View style={[style.innerContainer]}>
+                    <Ionicons 
+                        name={'trash-outline'} 
+                        size={25} 
+                        color={THEME_COLORS.ICON_COLOR} 
+                        style={style.clipIcon}
+                        onPress={() => stopRecording(false)}
+                    />
+                </View>
+                :
+                !isTyping && 
+                <View style={[style.innerContainer]}>
+                    <Entypo 
+                        name={'image'} 
+                        size={25} 
+                        color={THEME_COLORS.ICON_COLOR} 
+                        style={style.clipIcon}
+                        onPress={() => onImagePick("library")}
+                    />
+                    <SimpleLineIcons 
+                        name={'camera'} 
+                        size={25} 
+                        color={THEME_COLORS.ICON_COLOR} 
+                        style={style.actionIcon}
+                        onPress={() => onImagePick("camera")}
+                    />
+                    <SimpleLineIcons 
+                        name={'paper-clip'} 
+                        size={25} 
+                        color={THEME_COLORS.ICON_COLOR} 
+                        style={style.actionIcon}
+                        onPress={() => onDocumentPick()}
+                    />
+                </View>
+            }
             
         </View>
     )

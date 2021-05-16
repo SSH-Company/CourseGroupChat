@@ -52,7 +52,7 @@ const Chat = ({ route, navigation }) => {
     }, [renderFlag]);
     
     const filterOutEmptyMessages = (msgs) => {
-        return msgs.filter(msg => msg._id && (msg.text?.length > 0 || msg.image?.length > 0 || msg.video?.length > 0 || msg.file?.length > 0 ));
+        return msgs.filter(msg => msg._id && (msg.text?.length > 0 || msg.image?.length > 0 || msg.video?.length > 0 || msg.file?.length > 0 || msg.audio?.length > 0 ));
     }
 
     const updateMessageStatus = async () => {
