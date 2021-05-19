@@ -1,5 +1,5 @@
-import React, { FunctionComponent, useContext, useState } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import React, { FunctionComponent, useContext, useState, useEffect } from 'react';
+import { View, StyleSheet, Text, TouchableOpacity, Slider } from 'react-native';
 import { Message, MessageImage } from 'react-native-gifted-chat';
 import { AntDesign, Feather } from "react-native-vector-icons";
 import * as FileSystem from 'expo-file-system';
@@ -49,13 +49,55 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
     const { children, uploadProgress, onLongPress } = props;
     const { user } = useContext(UserContext);
     const [messagePressed, setMessagePressed] = useState<boolean>(false);
+    
+    //States for controlling audio
+    const [refreshSound, setRefreshSound] = useState(false);
     const [sound, setSound] = useState();
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [position, setPosition] = useState(0);
+    const [soundStatus, setSoundStatus] = useState();
 
-    const playSound = async (uri: string) => {
-        const sound = await Audio.Sound.createAsync({ uri: uri });
-        setSound(sound);
-        await sound.sound.playAsync();
-    } 
+    const onPlayBackStatusUpdate = (playbackStatus) => {
+        if (!playbackStatus.isLoaded) {
+            // Update your UI for the unloaded state
+            if (playbackStatus.error) {
+              console.log(`Encountered a fatal error during playback: ${playbackStatus.error}`);
+            }
+        } else {
+            setIsPlaying(playbackStatus.isPlaying);
+            setPosition(playbackStatus.positionMillis);
+        }
+    }
+
+    useEffect(() => {
+        let mounted = true;
+
+        const loadSound = async () => {
+            const uri = children['currentMessage'].location;
+            if (uri) {
+                try {
+                    const sound = await Audio.Sound.createAsync({ uri: uri });
+                    const status = await sound.sound.getStatusAsync();
+                    if (mounted) {
+                        sound.sound.setOnPlaybackStatusUpdate(onPlayBackStatusUpdate);
+                        setSoundStatus(status);
+                        setSound(sound);
+                        setRefreshSound(!refreshSound);
+                    }
+                } catch(err) {
+                    console.log(err)
+                }
+            }
+        }
+
+        if (children['currentMessage'].audio?.length > 0) {
+            loadSound();
+        } else if (sound !== undefined) {
+            sound.sound.unloadAsync();
+        }
+
+        return () => { mounted = false; }
+    }, [])
 
     /* Text status is buggy af, comment out for now */
     // const prepareStatusText = (status: string) => {
@@ -83,10 +125,20 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
         }
     }
 
+    const millisToMinutesAndSeconds = (millis) => {
+        var minutes = Math.floor(millis / 60000);
+        var seconds = Number(((millis % 60000) / 1000).toFixed(0));
+        return (
+            seconds == 60 ?
+            (minutes+1) + ":00" :
+            minutes + ":" + (seconds < 10 ? "0" : "") + seconds
+        );
+    }
+
     return (
         <Message 
             {...children}
-            key={`${children['currentMessage']['_id']}-${messagePressed}-${uploadProgress}`}
+            key={`${children['currentMessage']['_id']}-${messagePressed}-${uploadProgress}-${isPlaying}-${refreshSound}-${position}`}
             renderBubble={() => {
                 const currentMessage = children['currentMessage']
                 const isCurrentUser = currentMessage.user._id === user._id
@@ -161,23 +213,36 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                             onLongPress={() => onLongPress(currentMessage._id)}
                         >
                             <View style={[styles.balloon, 
-                                    { backgroundColor: isCurrentUser ? '#1F4E45' : 'white' }, 
+                                    { backgroundColor: isCurrentUser ? '#1F4E45' : 'white', width: 200 }, 
                                     { borderWidth: isCurrentUser ? null : 1 },
                                     { display: 'flex', flexDirection: 'row' }]}>
-                                {sound?.status.isPlaying ?
+                                {isPlaying ?
                                     <AntDesign
                                         name="pausecircleo"
-                                        size={20}
+                                        size={30}
                                         color={isCurrentUser ? 'white' : THEME_COLORS.ICON_COLOR}
-                                        onPress={() => sound.sound.pauseAsync()}
+                                        onPress={async () => await sound.sound.pauseAsync()}
                                     />
                                     :
                                     <AntDesign
                                         name="play"
-                                        size={20}
+                                        size={30}
                                         color={isCurrentUser ? 'white' : THEME_COLORS.ICON_COLOR}
-                                        onPress={() => playSound(currentMessage.location)}
+                                        onPress={async () => await sound.sound.playAsync()}
                                     />
+                                }
+                                {sound !== undefined &&
+                                    <>
+                                        <Slider
+                                            minimumValue={0}
+                                            maximumValue={Math.max(soundStatus.durationMillis, 1, position + 1)}
+                                            value={position}
+                                            onValueChange={async e => await sound.sound.setPositionAsync(e)}
+                                            step={1}
+                                            style={{ width: 100 }}
+                                        />
+                                        <Text style={{ color: 'white', alignSelf: 'center' }}> -{millisToMinutesAndSeconds(soundStatus.durationMillis - position)}</Text>
+                                    </>
                                 }
                             </View>
                         </TouchableOpacity>)}

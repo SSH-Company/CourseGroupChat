@@ -43,23 +43,28 @@ const Main = ({ navigation }) => {
   }, [renderFlag]) 
 
   const resetList = async (fromSource: boolean = false) => {
-    const log = await ChatLog.getChatLogInstance(fromSource);
-    let list = [];
-    Object.keys(log.chatLog).forEach(key => {
-      const text = log.chatLog[key][0];
-      const grpInfo = log.groupInfo[key];
-      list.push({
-        id: key,
-        message_id: text._id,
-        name: grpInfo.name,
-        avatar_url: grpInfo.avatar,
-        subtitle: text.subtitle || text.text,
-        created_at: text.createdAt,
-        verified: grpInfo.verified
+    let mounted = true;
+    if (mounted) {
+      const log = await ChatLog.getChatLogInstance(fromSource);
+      let list = [];
+      Object.keys(log.chatLog).forEach(key => {
+        const text = log.chatLog[key][0];
+        const grpInfo = log.groupInfo[key];
+        list.push({
+          id: key,
+          message_id: text._id,
+          name: grpInfo.name,
+          avatar_url: grpInfo.avatar,
+          subtitle: text.subtitle || text.text,
+          created_at: text.createdAt,
+          verified: grpInfo.verified
+        });
       });
-    });
-    setCompleteList(list.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)));
-    setRefreshing(false);
+      setCompleteList(list.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)));
+      setRefreshing(false);
+    }
+
+    return () => { mounted = false; }
   }
 
   const handleLongPress = (groupID: string) => {
@@ -141,7 +146,7 @@ const Main = ({ navigation }) => {
             />
           </View>
         }
-        containerStyle={{ marginTop: 10 }}
+        // containerStyle={{ marginTop: 10 }}
         leftContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
         rightContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
       />
