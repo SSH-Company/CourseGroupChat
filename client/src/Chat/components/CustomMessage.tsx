@@ -1,8 +1,8 @@
 import React, { FunctionComponent, useContext, useState, useEffect } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, Slider } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, Slider, Alert } from 'react-native';
 import { Message, MessageImage } from 'react-native-gifted-chat';
 import { AntDesign, Feather } from "react-native-vector-icons";
-import * as FileSystem from 'expo-file-system';
+import * as Linking from 'expo-linking';
 import { Audio, Video } from 'expo-av';
 import { UserContext } from '../../Auth/Login';
 import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
@@ -78,12 +78,14 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                 try {
                     const sound = await Audio.Sound.createAsync({ uri: uri });
                     const status = await sound.sound.getStatusAsync();
-                    if (mounted) {
-                        sound.sound.setOnPlaybackStatusUpdate(onPlayBackStatusUpdate);
-                        setSoundStatus(status);
-                        setSound(sound);
-                        setRefreshSound(!refreshSound);
-                    }
+                    setTimeout(() => {
+                        if (mounted) {
+                            sound.sound.setOnPlaybackStatusUpdate(onPlayBackStatusUpdate);
+                            setSoundStatus(status);
+                            setSound(sound);
+                            setRefreshSound(!refreshSound);
+                        }
+                    }, 600)
                 } catch(err) {
                     console.log(err)
                 }
@@ -112,14 +114,18 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
 
     const downloadFile = async (uri: string, filename: string) => {
         try {
-            const downloadResumable = FileSystem.createDownloadResumable(
-                uri,
-                FileSystem.documentDirectory + filename,
-                {}
-            );
-            await downloadResumable.downloadAsync();
-            //TODO: connect download status with notifications
-            console.log("download success!");
+            Alert.alert(
+                "Are you sure you want to download?",
+                filename,
+                [
+                    {
+                        text: "Cancel",
+                        onPress: () => console.log("Cancel Pressed"),
+                        style: "cancel"
+                    },
+                    { text: "OK", onPress: () => Linking.openURL(uri) }
+                ]
+            )
         } catch (err) {
             console.log(err);
         }
@@ -210,6 +216,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                         {/* handle audio */}
                         {currentMessage.hasOwnProperty('audio') && currentMessage.audio.length > 0 &&
                         (<TouchableOpacity
+                            onPress={() => isPlaying ? sound?.sound.pauseAsync() : sound?.sound.playAsync()}
                             onLongPress={() => onLongPress(currentMessage._id)}
                         >
                             <View style={[styles.balloon, 
@@ -241,7 +248,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                                             step={1}
                                             style={{ width: 100 }}
                                         />
-                                        <Text style={{ color: 'white', alignSelf: 'center' }}> -{millisToMinutesAndSeconds(soundStatus.durationMillis - position)}</Text>
+                                        <Text style={{ color: 'white', alignSelf: 'center' }}>{millisToMinutesAndSeconds(soundStatus.durationMillis - position)}</Text>
                                     </>
                                 }
                             </View>

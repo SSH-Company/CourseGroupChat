@@ -51,6 +51,7 @@ const Socket = ({ children }) => {
         const socket = new WebSocket(`ws://${url}`)
 
         socket.onopen = () => {
+            console.log('socket connected');
             socket.send(JSON.stringify({userID: user._id}))
         }
 
