@@ -60,6 +60,9 @@ export class ChatLog {
                 text: row.text || '',
                 image: row.image || '',
                 video: row.video || '',
+                file: row.file || '',
+                audio: row.audio || '',
+                location: row.location || '',
                 subtitle: row.subtitle || '',
                 createdAt: row.created_at,
                 user: {
@@ -81,7 +84,7 @@ export class ChatLog {
                 }
             }
         })
-        
+
         this.chatLog = map
         this.groupInfo = grpInfo
         this.userID = userID

@@ -131,7 +131,7 @@ const LogIn = ({ children }) => {
             name: user.FIRST_NAME + ' ' + user.LAST_NAME,
             avatar: user.AVATAR || EMPTY_IMAGE_DIRECTORY
         })
-        await ChatLog.getChatLogInstance(true, 1);
+        await ChatLog.getChatLogInstance(true, user.ID);
         setNewUser(false);
         setLoading(false);
     }

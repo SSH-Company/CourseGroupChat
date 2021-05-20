@@ -11,7 +11,8 @@ interface ChatLogViewInterface {
     NAME: string;
     MESSAGE_ID?: string;
     MESSAGE_BODY?: string;
-    MESSAGE_TYPE?: "text" | "image" | "video";
+    MESSAGE_TYPE?: "text" | "image" | "video" | "file" | "audio";
+    LOCATION?: string;
     CREATE_DATE?: string;
     STATUS?: string;
 }
@@ -27,7 +28,8 @@ export class ChatLogViewModel implements ChatLogViewInterface {
     NAME: string;
     MESSAGE_ID?: string;
     MESSAGE_BODY?: string;
-    MESSAGE_TYPE?: "text" | "image" | "video";
+    MESSAGE_TYPE?: "text" | "image" | "video" | "file" | "audio";
+    LOCATION?: string;
     CREATE_DATE?: string;
     STATUS?: string;
 
@@ -51,6 +53,7 @@ export class ChatLogViewModel implements ChatLogViewInterface {
                 "MESSAGE_ID",
                 "MESSAGE_BODY",
                 "MESSAGE_TYPE",
+                "LOCATION",
                 "STATUS",
                 "CREATE_DATE",
                 ROW_NUMBER() OVER (PARTITION BY CV."GROUP_ID" ORDER BY CV."CREATE_DATE" DESC) AS ROW_ID

@@ -1,18 +1,16 @@
 import React, { useState, useCallback, useEffect, useContext, useRef } from 'react';
 import { ActivityIndicator, Text, View, Dimensions } from 'react-native';
-import { Avatar, Button, Header } from "react-native-elements";
+import { Avatar, Header } from "react-native-elements";
 import { StatusBar } from 'expo-status-bar';
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import { useActionSheet } from '@expo/react-native-action-sheet';
 import { Ionicons } from "react-native-vector-icons";
 import { useIsFocused } from "@react-navigation/native";
-import * as VideoExtensions from 'video-extensions';
 import { CustomMessage, CustomToolbar, InboxSettings } from './components';
 import { UserContext } from '../Auth/Login';
 import { RenderMessageContext } from '../Socket/WebSocket';
-import { handleImagePick, handlePermissionRequest } from "../Util/ImagePicker";
-import { ChatLog, MessageStatus, revisedRandId } from '../Util/ChatLog';
+import { ChatLog, MessageStatus } from '../Util/ChatLog';
 import VerifiedIcon from '../Util/CommonComponents/VerifiedIcon';
 import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
@@ -54,7 +52,7 @@ const Chat = ({ route, navigation }) => {
     }, [renderFlag]);
     
     const filterOutEmptyMessages = (msgs) => {
-        return msgs.filter(msg => msg._id && (msg.text?.length > 0 || msg.image?.length > 0 || msg.video?.length > 0 ));
+        return msgs.filter(msg => msg._id && (msg.text?.length > 0 || msg.image?.length > 0 || msg.video?.length > 0 || msg.file?.length > 0 || msg.audio?.length > 0 ));
     }
 
     const updateMessageStatus = async () => {
@@ -147,19 +145,17 @@ const Chat = ({ route, navigation }) => {
     const sendData = async (messages = [], newGroup = group) => {
         //here we are assuming only one message is posted at a time
         try {
-            const imageType = messages[0].hasOwnProperty('imageData');
+            const fileType = messages[0].hasOwnProperty('fileData') || messages[0].hasOwnProperty('imageData');
             let formData: any;
-            if (imageType) {
+            if (fileType) {
                 formData = new FormData();
-                formData.append('media', {...messages[0].imageData});
+                formData.append('media', {...messages[0].fileData});
                 formData.append('message', JSON.stringify({ messages, groupID: newGroup }))
                 await axios.post(`${BASE_URL}/api/chat`, 
                     formData, 
-                    { 
-                        headers: { 'content-type': 'multipart/form-data' },  
-                        onUploadProgress: e => {
-                            const m = Math.round(100 * e.loaded / e.total );
-                            setUploadProgress(m)   
+                    {   headers: { 
+                            accept: "application/json",
+                            'Content-Type': 'multipart/form-data' 
                         }
                     }
                 )
@@ -174,31 +170,6 @@ const Chat = ({ route, navigation }) => {
         } catch (err) {
             //TODO: display failed notification here
             console.error(err);
-        }
-    }
-
-    const onImagePick = async (type) => {
-        try {
-            const status = await handlePermissionRequest(type);
-            if (status === "granted") {
-                const imageRes = await handleImagePick(type);
-                if (imageRes) {
-                    const fileExtension = imageRes.type.split('/')[1];
-                    const mediaType = (VideoExtensions as any).default.includes(fileExtension) ? "video" : "image";
-                    const newMessage = {
-                        _id: revisedRandId(),
-                        createdAt: Date.now(),
-                        [mediaType]: imageRes.uri,
-                        imageData: imageRes,
-                        displayStatus: true,
-                        subtitle: `You sent a photo`,
-                        user: user
-                    }
-                    onSend([newMessage]);
-                }
-            }
-        } catch (err) {
-            console.log(err);
         }
     }
 
@@ -310,7 +281,7 @@ const Chat = ({ route, navigation }) => {
                         renderInputToolbar={props => { return ( 
                             <CustomToolbar 
                                 children={props} 
-                                onImagePick={type => onImagePick(type)} 
+                                onSend={messages => onSend(messages)}
                             /> ) }}
                         isKeyboardInternallyHandled={true}
                         loadEarlier

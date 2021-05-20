@@ -95,7 +95,7 @@ const Search = ({ route, navigation }) => {
             const reqBody = {
                 groupID: groupID,
                 groupName: groupName,
-                recipients: recipients
+                recipients: recipients.map(d => d.id)
             }
 
             //add the members in the backend

@@ -47,6 +47,7 @@ export class ChatController {
                     message_id: row.MESSAGE_ID,
                     name: row.VERIFIED === "Y" ? row.GROUP_ID : row.NAME,
                     avatar_url: row.AVATAR,
+                    location: row.LOCATION,
                     created_at: row.CREATE_DATE,
                     status: row.STATUS,
                     verified: row.VERIFIED
@@ -55,11 +56,11 @@ export class ChatController {
                     json[row.MESSAGE_TYPE] = row.MESSAGE_BODY,
                     json['subtitle'] = row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === id ? 'You': row.CREATOR_NAME} sent a ${row.MESSAGE_TYPE}.`                        
                 } else {
-                    json['subtitle'] = `You have been added to ${json.name}!`
+                    json['subtitle'] = `You have joined to ${json.name}!`
                 }
                 responseJson.push(json)
             })
-
+            
             res.status(STATUS.OK).json(responseJson)
         })
         .catch(err => {
@@ -99,7 +100,7 @@ export class ChatController {
                 avatar: user.AVATAR
             }
 
-            let messageType: "text" | "image" | "video" = "text";
+            let messageType: "text" | "image" | "video" | "file" | "audio" = "text";
 
             const newMessage = {
                 ID: message._id,
@@ -107,10 +108,13 @@ export class ChatController {
                 RECIPIENT_GROUP_ID: groupID.id,  
                 STATUS: ''
             } as MessageModel
-
+            
             if (req.file) {
-                //assuming file types can be "video" or "image"
-                messageType = message.hasOwnProperty('image') ? "image" : "video";
+                //assuming file types can be "video", "image" or "file"
+                if (message.hasOwnProperty('image')) messageType = 'image'
+                else if (message.hasOwnProperty('video')) messageType = 'video'
+                else if (message.hasOwnProperty('audio')) messageType = 'audio'
+                else messageType = "file"
 
                 //upload to s3
                 const bucket = Bucket.getBucket().bucket;
@@ -127,8 +131,10 @@ export class ChatController {
                     if (err) {
                         throw err;
                     }
-                    message[messageType] = data.Location
-                    newMessage.MESSAGE_BODY = data.Location;
+                    message[messageType] = req.file.originalname;
+                    message.location = data.Location;
+                    newMessage.LOCATION = data.Location;
+                    newMessage.MESSAGE_BODY = req.file.originalname;
                     newMessage.MESSAGE_TYPE = messageType;
                     await MessageModel.insert(newMessage);
                 })
@@ -354,7 +360,7 @@ export class ChatController {
                     let subtitle = '';
                     if (row.MESSAGE_ID && row.MESSAGE_BODY.length > 0) {
                         subtitle = row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_NAME} sent a ${row.MESSAGE_TYPE}.`
-                    } else subtitle = `You have been added to ${row.NAME}!`
+                    } else subtitle = `You have joined ${row.NAME}!`
                     const json = {
                         _id: row.MESSAGE_ID,
                         created_at: row.CREATE_DATE,
@@ -365,6 +371,7 @@ export class ChatController {
                             name: row.CREATOR_NAME,
                             avatar: row.AVATAR
                         },
+                        location: row.LOCATION,
                         status: row.STATUS,
                         displayStatus: false
                     }

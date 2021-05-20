@@ -33,6 +33,7 @@ type BaseListProps = {
     
     //this is required if renderBasedOnCheckbox is set to true
     itemOnPress?: (item: listtype, index: number) => any,
+    itemOnLongPress?: (item: listtype, index: number) => any,
     checkBoxes?: boolean   
 }
 
@@ -41,6 +42,7 @@ const BaseList:FunctionComponent<BaseListProps> = (props) => {
         title = '',
         items = [],
         itemOnPress = (item: listtype, index: number) => {},
+        itemOnLongPress = (item: listtype, index: number) => {},
         checkBoxes = false
     } = props;
     
@@ -51,6 +53,7 @@ const BaseList:FunctionComponent<BaseListProps> = (props) => {
             <ListItem
               key={i}
               onPress={(e) => itemOnPress(l, i)}
+              onLongPress={e => itemOnLongPress(l, i)}
             >
                 <Avatar rounded size="medium" source={{ uri: l.avatar_url || EMPTY_IMAGE_DIRECTORY }}/>
                 <ListItem.Content>
