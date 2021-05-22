@@ -20,6 +20,8 @@ const Settings = ({ navigation }) => {
     const { user, setUser } = useContext(UserContext);
     const [profilePicture, setProfilePicture] = useState<any>({ uri: user.avatar });
     const [invalidImage, setInvalidImage] = useState(false);
+    const [lightboxOpened, setLightboxopened] = useState(false);
+    const dimensions = Dimensions.get('window');
 
     const styles = StyleSheet.create({ 
         imageStyle: {
@@ -159,10 +161,10 @@ const Settings = ({ navigation }) => {
                                 color={THEME_COLORS.ICON_COLOR} 
                                 onPress={() => navigation.navigate('Main')}
                             />
-                            <Lightbox navigator={navigator}>
+                            <Lightbox activeProps={{ resizeMode: 'contain', flex: 1, height: dimensions.height }} onOpen={() => setLightboxopened(true)} onClose={() => setLightboxopened(false)}>
                                 <Image
                                     source={{ uri: profilePicture.uri || EMPTY_IMAGE_DIRECTORY }}
-                                    style={styles.imageStyle}
+                                    style={lightboxOpened ? {height: dimensions.height, width: dimensions.width, resizeMode: 'contain'} : styles.imageStyle}
                                 />
                             </Lightbox>
                         </View>
