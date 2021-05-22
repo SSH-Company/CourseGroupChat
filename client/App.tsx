@@ -12,7 +12,7 @@ import {
 } from './src/Search';
 import { 
   Profile, 
-  ProfileSettings, 
+  Settings, 
   FriendRequests
 } from './src/Profile';
 import {
@@ -34,7 +34,7 @@ export default function App() {
                   <Stack.Screen name="Chat" component={Chat} />
                   <Stack.Screen name="FriendRequests" component={FriendRequests}/>
                   <Stack.Screen name="Profile" component={Profile}/>
-                  <Stack.Screen name="ProfileSettings" component={ProfileSettings} options={{gestureDirection: 'horizontal-inverted'}}/>
+                  <Stack.Screen name="Settings" component={Settings} options={{gestureDirection: 'horizontal-inverted'}}/>
                   <Stack.Screen name="GroupMembers" component={GroupMembers}/> 
                   <Stack.Screen name="Gallery" component={Gallery}/>
                   <Stack.Screen name="Search" component={Search}/>
