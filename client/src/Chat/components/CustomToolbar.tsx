@@ -61,8 +61,8 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
     const [timer, setTimer] = useState(0);
 
     useEffect(() => {
-        //max duration is 1 minute
-        if (((timer / 60000) >= 1) && recording) {
+        //max duration is 3 minutes
+        if (((timer / 60000) >= 3) && recording) {
             stopRecording(true);
             return;
         }
