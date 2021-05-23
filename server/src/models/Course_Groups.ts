@@ -1,6 +1,5 @@
 import { Database } from '../services/Database';
 
-//TODO: this view isn't connected to anything yet, might need to get rid of it later
 interface CourseGroupsInterface {
     CODE?: string;
     NAME?: string;
@@ -17,6 +16,15 @@ export class CourseGroupsModel implements CourseGroupsInterface {
     constructor(raw: CourseGroupsInterface) {
         // super();
         Object.assign(this, raw);
+    }
+
+    static getAllGroups(): Promise<CourseGroupsModel[]> {
+        return new Promise((resolve, reject) => {
+            Database.getDB()
+                .query(SELECT)
+                .then((data: CourseGroupsInterface[]) => resolve(data.map(d => new CourseGroupsModel(d))))
+                .catch(err => reject(err))
+        })
     }
 }
 

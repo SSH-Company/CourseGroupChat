@@ -13,6 +13,7 @@ import * as STATUS from 'http-status-codes';
 import { Config } from '../services/Config';
 import { Bucket } from '../services/Bucket';
 import { UserModel } from '../models/User';
+import { ChatLogViewModel } from '../models/ChatLog_View';
 import { FriendStatusModel, FriendStatusInterface } from '../models/Friend_Status';
 
 let storage = multer.diskStorage({
@@ -194,4 +195,24 @@ export class ProfileController {
             })
         }
     }
+
+    @Get('course-groups')
+    private async getCourseGroups(req: Request, res: Response) {
+        try {
+            const session = req.session;
+            const enrolledGroups = (await ChatLogViewModel.getEnrolledGroups(session.user.ID)).map(d => ({
+                id: d.GROUP_ID,
+                name: d.NAME
+            }));
+            
+            res.status(STATUS.OK).json(enrolledGroups)
+        } catch (err) {
+            console.error(err);
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong attempting to get enrolled course groups.",
+                identifier: "PC007"
+            })
+        }
+    }
 }
+

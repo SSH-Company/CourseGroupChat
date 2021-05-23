@@ -1,32 +1,16 @@
 import { Request, Response } from 'express';
 import {
-    Middleware,
     Controller,
     Post,
     Get
 } from '@overnightjs/core';
-import fs from 'fs';
-import multer from 'multer';
 import * as STATUS from 'http-status-codes';
-import { Config } from '../services/Config';
-import { Bucket } from '../services/Bucket';
 import { UserModel } from '../models/User';
 import { GroupModel } from '../models/Group';
 import { UserGroupModel } from '../models/User_Group';
-import { UserGroupListModel } from '../models/UserGroupList';
+import { ChatLogViewModel } from '../models/ChatLog_View';
+import { CourseGroupsModel } from '../models/Course_Groups';
 import { CONNECTIONS } from '../WSServer';
-
-let storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'src/public/client/media/profiles/')
-    },
-    filename: function (req, file, cb) {
-        const extension = file.mimetype.split('/')[1];
-        cb(null, file.fieldname + '-' + Date.now() + '.' + extension)
-    }
-})
-
-const upload = multer({ storage: storage })
 
 @Controller('search')
 export class SearchController {
@@ -52,14 +36,14 @@ export class SearchController {
     }
 
     @Get('all-groups')
-    private verifiedGroupsList(req: Request, res: Response) {
+    private allGroupsList(req: Request, res: Response) {
         const session = req.session;
         const user = session.user as UserModel;
-        UserGroupListModel.getUserGroupSearchList(user.ID)
+        ChatLogViewModel.getAllGroups(user.ID)
             .then(list => {
                 res.status(STATUS.OK).json(list.map(row => ({
-                    id: row.CODE,
-                    name: row.VERIFIED === "Y" ? row.CODE : row.NAME,
+                    id: row.GROUP_ID,
+                    name: row.VERIFIED === "Y" ? row.GROUP_ID : row.NAME,
                     avatar_url: row.AVATAR,
                     verified: row.VERIFIED
                 })))
@@ -191,4 +175,25 @@ export class SearchController {
         }
     }
 
+    @Get('verified-groups')
+    private async allVerifiedGroupsList(req: Request, res: Response) {
+        try {
+            const verifiedGroups = (await CourseGroupsModel.getAllGroups()).map(d => ({
+                id: d.CODE,
+                avatar: d.AVATAR,
+                name: d.CODE,
+                verified: 'Y'
+            }))
+
+            res.status(STATUS.OK).json(verifiedGroups)
+        } catch (err) {
+            console.error(err)
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong while attempting to get verified groups list.",
+                identifier: "SC008"
+            })
+        }
+    }
 }
+
+

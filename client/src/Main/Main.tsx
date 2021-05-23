@@ -117,7 +117,7 @@ const Main = ({ navigation }) => {
           <Image
             source={{ uri: user.avatar as string || EMPTY_IMAGE_DIRECTORY }}
             style={{ width: 30, height: 30, borderRadius: 200 }}
-            onPress={() => navigation.navigate("ProfileSettings")}
+            onPress={() => navigation.navigate("Settings")}
           />
         }
         centerComponent={
