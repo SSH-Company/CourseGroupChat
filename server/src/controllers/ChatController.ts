@@ -258,7 +258,7 @@ export class ChatController {
         
         try {
             const session = req.session;
-            const { id, name } = req.body;
+            const { id, name, verified = 'N' } = req.body;
             
             if (typeof id !== 'string' || id === ''
                 || typeof name !== 'string' || name === ''
@@ -269,10 +269,23 @@ export class ChatController {
                 })
                 return;
             }
+
+            if (verified === 'Y') {
+                const enrolledGroups = await ChatLogViewModel.getEnrolledGroups(session.user.ID);
+                if (enrolledGroups.length >= 8) {
+                    res.status(STATUS.OK).json({
+                        status: 'warning'
+                    })
+                    return
+                }
+            }
             
             //insert user into the group
             await UserGroupModel.insert(session.user.ID, id, name);
-            res.status(STATUS.OK).json();
+            res.status(STATUS.OK).json({
+                status: 'success'
+            });
+
         } catch(err) {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong while attempting to join new group.",

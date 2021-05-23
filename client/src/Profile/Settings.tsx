@@ -15,7 +15,6 @@ axios.defaults.headers = { withCredentials: true };
 
 const Settings = ({ navigation }) => {
 
-    const deviceDimensions = Dimensions.get('window')
     const [notification, setNotification] = useState(false);
     const { user, setUser } = useContext(UserContext);
     const [profilePicture, setProfilePicture] = useState<any>({ uri: user.avatar });
@@ -114,7 +113,7 @@ const Settings = ({ navigation }) => {
         {
             title: 'Course group chats',
             icon: <Feather name={"book-open"} size={iconSize}/>,
-            onPress: () => console.log('course group chats')
+            onPress: () => navigation.navigate('CourseGroups')
         },
         {
             title: 'Notifications & Sounds',

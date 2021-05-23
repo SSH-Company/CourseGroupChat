@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { View, ScrollView , Button } from "react-native";
 import { Header } from "react-native-elements";
 import { Ionicons } from "react-native-vector-icons";
-import { navigationRef } from '../Util/RootNavigation';
-import { THEME_COLORS } from '../Util/CommonComponents/Colors';
-import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
-import { BASE_URL } from '../BaseUrl';
+import { navigationRef } from '../../Util/RootNavigation';
+import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
+import BaseList, { listtype } from '../../Util/CommonComponents/BaseList';
+import { BASE_URL } from '../../BaseUrl';
 import axios from 'axios';
 axios.defaults.headers = { withCredentials: true };
 
@@ -61,7 +61,7 @@ const FriendRequests = ({ navigation }) => {
                             name="arrow-back-sharp" 
                             size={30} 
                             color="#734f96" 
-                            onPress={() => navigationRef.current.goBack()}
+                            onPress={() => navigation.goBack()}
                         />
                     </View>
                 }
