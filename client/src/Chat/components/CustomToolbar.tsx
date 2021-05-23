@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useState, useEffect, useContext } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Alert } from 'react-native';
 import { InputToolbar, Send } from 'react-native-gifted-chat';
 import { Audio } from 'expo-av';
 import * as DocumentPicker from 'expo-document-picker';
@@ -9,6 +9,7 @@ import { revisedRandId } from '../../Util/ChatLog';
 import { UserContext } from '../../Auth/Login';
 import { Entypo, SimpleLineIcons, Ionicons, MaterialCommunityIcons } from 'react-native-vector-icons';
 import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
+import { millisToMinutesAndSeconds } from '../../Util/CommonFunctions';
 
 const style = StyleSheet.create({
     outerContainer: {
@@ -57,8 +58,17 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
     const [isTyping, setIsTyping] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
     const [recording, setRecording] = useState();
+    const [timer, setTimer] = useState(0);
 
-    async function startRecording() {
+    useEffect(() => {
+        //max duration is 3 minutes
+        if (((timer / 60000) >= 3) && recording) {
+            stopRecording(true);
+            return;
+        }
+    }, [timer, recording])
+
+    const startRecording = async () => {
         try {
             setIsRecording(true);
             await Audio.requestPermissionsAsync();
@@ -68,34 +78,36 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
             }); 
             const recording = new Audio.Recording();
             await recording.prepareToRecordAsync(Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY);
-            await recording.startAsync(); 
+            await recording.startAsync();
+            recording.setOnRecordingStatusUpdate(recordingStatus => setTimer(recordingStatus.durationMillis)); 
             setRecording(recording);
         } catch (err) {
             console.error('Failed to start recording', err);
         }
-      }
+    }
     
-    async function stopRecording(send: boolean) {
+    const stopRecording = async (send: boolean) => {
         setRecording(undefined);
-        await recording.stopAndUnloadAsync();
-        const uri = recording.getURI(); 
-        console.log('Recording stopped and stored at', uri);
-        setIsRecording(false);
-        if (send) {
-            const newMessage = {
-                _id: revisedRandId(),
-                createdAt: Date.now(),
-                audio: uri,
-                location: uri,
-                fileData: {
-                    name: `audio-recording-${user._id}`,
-                    type: "audio/mp3",
-                    uri: uri
-                },
-                subtitle: `You sent a recording.`,
-                user: user
+        if (recording) {
+            await recording.stopAndUnloadAsync();
+            const uri = recording.getURI();
+            setIsRecording(false);
+            if (send) {
+                const newMessage = {
+                    _id: revisedRandId(),
+                    createdAt: Date.now(),
+                    audio: uri,
+                    location: uri,
+                    fileData: {
+                        name: `audio-recording-${user._id}`,
+                        type: "audio/mp3",
+                        uri: uri
+                    },
+                    subtitle: `You sent an audio clip.`,
+                    user: user
+                }
+                onSend([newMessage])
             }
-            onSend([newMessage])
         }
     }
 
@@ -134,6 +146,18 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
             const res = await DocumentPicker.getDocumentAsync({type: '*/*'})
             var regex = /(?:\.([^.]+))?$/;
             if (res) {
+                //check file size
+                const sizeInMB = Number((res['size'] / (1024 * 1024)).toFixed(2))
+                
+                if (sizeInMB > 25) {
+                    Alert.alert(
+                        'Failed to upload files',
+                        'The file you have selected is too large. The maximum size is 25MB.',
+                        [{ text: 'Close', style: 'destructive' }]
+                    )
+                    return;
+                }
+
                 const newMessage = {
                     _id: revisedRandId(),
                     createdAt: Date.now(),
@@ -155,6 +179,7 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
         <View style={[{...style.outerContainer, position: isRecording ? 'absolute' : isTyping ? 'relative' : 'absolute', bottom: isRecording ? 1 : isTyping ? null : 1 }]}>
             <InputToolbar 
                 {...children} 
+                placeholder={isRecording ? millisToMinutesAndSeconds(timer) : 'Type a message...'}
                 containerStyle={{...style.inputbar, marginLeft: isRecording ? 40 : isTyping ? 10 : 110}}
                 renderSend={() => 
                     isRecording ?

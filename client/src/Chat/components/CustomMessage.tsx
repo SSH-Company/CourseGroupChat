@@ -6,6 +6,7 @@ import * as Linking from 'expo-linking';
 import { Audio, Video } from 'expo-av';
 import { UserContext } from '../../Auth/Login';
 import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
+import { millisToMinutesAndSeconds } from '../../Util/CommonFunctions';
 
 //style sheet
 const styles = StyleSheet.create({
@@ -129,16 +130,6 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
         } catch (err) {
             console.log(err);
         }
-    }
-
-    const millisToMinutesAndSeconds = (millis) => {
-        var minutes = Math.floor(millis / 60000);
-        var seconds = Number(((millis % 60000) / 1000).toFixed(0));
-        return (
-            seconds == 60 ?
-            (minutes+1) + ":00" :
-            minutes + ":" + (seconds < 10 ? "0" : "") + seconds
-        );
     }
 
     return (
