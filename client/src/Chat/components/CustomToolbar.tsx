@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useState, useEffect, useContext } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Alert } from 'react-native';
 import { InputToolbar, Send } from 'react-native-gifted-chat';
 import { Audio } from 'expo-av';
 import * as DocumentPicker from 'expo-document-picker';
@@ -58,7 +58,7 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
     const [isRecording, setIsRecording] = useState(false);
     const [recording, setRecording] = useState();
 
-    async function startRecording() {
+    const startRecording = async () => {
         try {
             setIsRecording(true);
             await Audio.requestPermissionsAsync();
@@ -75,7 +75,7 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
         }
       }
     
-    async function stopRecording(send: boolean) {
+    const stopRecording = async (send: boolean) => {
         setRecording(undefined);
         await recording.stopAndUnloadAsync();
         const uri = recording.getURI(); 
@@ -134,6 +134,18 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
             const res = await DocumentPicker.getDocumentAsync({type: '*/*'})
             var regex = /(?:\.([^.]+))?$/;
             if (res) {
+                //check file size
+                const sizeInMB = Number((res['size'] / (1024 * 1024)).toFixed(2))
+                
+                if (sizeInMB > 25) {
+                    Alert.alert(
+                        'Failed to upload files',
+                        'The file you have selected is too large. The maximum size is 25MB.',
+                        [{ text: 'Close', style: 'destructive' }]
+                    )
+                    return;
+                }
+
                 const newMessage = {
                     _id: revisedRandId(),
                     createdAt: Date.now(),
