@@ -66,7 +66,7 @@ const GroupSearch = ({ route, navigation }) => {
                     }
                 } else {
                     Alert.alert(
-                        "Cannot join more courses.",
+                        `Failed to join ${id}`,
                         'You are already enrolled in the maximum(8) number of courses. Please leave a group to join a new one.',
                         [{ text: "OK", style: "cancel" }]
                     )
