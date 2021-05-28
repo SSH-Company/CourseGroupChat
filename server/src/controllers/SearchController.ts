@@ -9,6 +9,7 @@ import { UserModel } from '../models/User';
 import { GroupModel } from '../models/Group';
 import { UserGroupModel } from '../models/User_Group';
 import { ChatLogViewModel } from '../models/ChatLog_View';
+import { UserRelationModel } from '../models/User_Relation';
 import { CourseGroupsModel } from '../models/Course_Groups';
 import { CONNECTIONS } from '../WSServer';
 
@@ -175,6 +176,27 @@ export class SearchController {
         }
     }
 
+    @Get('friend-search')
+    private async friendSearchList(req: Request, res: Response) {
+        try {
+            const session = req.session;
+            const users = (await UserRelationModel.getUserRelation(session.user.ID)).map(row => ({
+                id: row.USER_TWO,
+                name: row.USER_TWO_FIRST_NAME + ' ' + row.USER_TWO_LAST_NAME,
+                avatar_url: row.USER_TWO_AVATAR,
+                friendStatus: row.STATUS
+            }));
+            
+            res.status(STATUS.OK).json(users);
+        } catch (err) {
+            console.error(err)
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong while attempting to get friend list.",
+                identifier: "SC008"
+            })
+        }
+    }
+
     @Get('verified-groups')
     private async allVerifiedGroupsList(req: Request, res: Response) {
         try {
@@ -190,7 +212,7 @@ export class SearchController {
             console.error(err)
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong while attempting to get verified groups list.",
-                identifier: "SC008"
+                identifier: "SC009"
             })
         }
     }

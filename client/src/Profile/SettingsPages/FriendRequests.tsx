@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { View, ScrollView , Button } from "react-native";
 import { Header } from "react-native-elements";
 import { Ionicons } from "react-native-vector-icons";
-import { navigationRef } from '../../Util/RootNavigation';
 import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
 import BaseList, { listtype } from '../../Util/CommonComponents/BaseList';
 import { BASE_URL } from '../../BaseUrl';

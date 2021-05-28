@@ -13,7 +13,6 @@ const GroupSearch = ({ route, navigation }) => {
     const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(true);
     const [verifiedList, setVerifiedList] = useState<listtype[]>([]);
-    const [enrollCount, setEnrollCount] = useState(enrolledGroups.length);
     const searchRef = useRef(null);
 
     useEffect(() => {

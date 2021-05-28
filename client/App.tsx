@@ -9,7 +9,8 @@ import { LogIn } from './src/Auth';
 import { 
   Search, 
   GroupSearch,
-  CourseSearch 
+  CourseSearch,
+  FriendSearch 
 } from './src/Search';
 import { 
   Profile, 
@@ -43,6 +44,7 @@ export default function App() {
                   <Stack.Screen name="Search" component={Search}/>
                   <Stack.Screen name="GroupSearch" component={GroupSearch}/>
                   <Stack.Screen name="CourseSearch" component={CourseSearch}/>
+                  <Stack.Screen name="FriendSearch" component={FriendSearch}/>
               </Stack.Navigator>
             </Socket>
         </NavigationContainer>

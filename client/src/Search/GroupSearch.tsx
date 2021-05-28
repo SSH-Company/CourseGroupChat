@@ -36,10 +36,6 @@ const GroupSearch = ({ navigation }) => {
         navigation.navigate("Chat", { groupID: item.id, name: item.name, avatar: item.avatar_url, verified: item.verified })
     }
 
-    const onProfilePress = (item: listtype) => {
-        navigation.navigate("Profile", { id: item.id });
-    }
-
     return (
         <View style={{ flex: 1 }}>
             <Header
@@ -84,7 +80,8 @@ const GroupSearch = ({ navigation }) => {
                         <BaseList
                             title="Users"
                             items={userList}
-                            itemOnPress={l => onProfilePress(l)}
+                            itemOnPress={l => navigation.navigate('Profile', { id: l.id })}
+                            onAvatarClick={id => navigation.navigate('Profile', { id })}
                         />
                       </>
                       :
@@ -92,7 +89,7 @@ const GroupSearch = ({ navigation }) => {
                           items={filteredList}
                           itemOnPress={l => {
                             if (l.hasOwnProperty('verified')) onItemPress(l)
-                            else onProfilePress(l)
+                            else navigation.navigate("Profile", { id: l.id });
                           }}
                       />
                     )

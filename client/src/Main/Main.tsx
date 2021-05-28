@@ -135,7 +135,7 @@ const Main = ({ navigation }) => {
               name={"person-add"} 
               color={THEME_COLORS.ICON_COLOR} 
               size={20} 
-              onPress={() => console.log('clicked')}
+              onPress={() => navigation.navigate("FriendSearch")}
             />
             <Feather 
               name={"edit"} 
