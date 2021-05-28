@@ -78,7 +78,6 @@ const Welcome = () => {
                 <Button
                     title='NEXT'
                     style={styles.button}
-                    color
                     
                 />
             </ImageBackground>
