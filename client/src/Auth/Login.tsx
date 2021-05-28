@@ -2,10 +2,9 @@ import React, { useRef, useEffect, useState, createContext } from 'react';
 import { 
     AppState,
     StyleSheet,
-    Text,
     View,
     Platform,
-    Image,
+    Image
 } from 'react-native';
 import { User } from 'react-native-gifted-chat';
 import { WebView } from 'react-native-webview';
@@ -17,6 +16,7 @@ axios.defaults.headers = { withCredentials: true };
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ChatLog } from '../Util/ChatLog';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from "../BaseUrl";
+import Welcome from './Welcome';
 
 const styles = StyleSheet.create({
     container: {
@@ -231,16 +231,7 @@ const LogIn = ({ children }) => {
     } else {
         if (newUser) {
             return (
-                <WebView
-                    javaScriptEnabled={true}
-                    domStorageEnabled={true}
-                    originWhitelist={["*"]}
-                    source={{...sourceHTML}}
-                    style={{ marginTop: 30 }}
-                    onNavigationStateChange={handleNavigationStateChange}
-                    injectedJavaScript={`window.ReactNativeWebView.postMessage(document.getElementsByClassName('userBody')[0].innerHTML);`}
-                    onMessage={(e) => handleMessage(e.nativeEvent.data)}
-                />
+                <Welcome />
             )
         } else {
             return (
@@ -253,6 +244,19 @@ const LogIn = ({ children }) => {
 }
 
 export default LogIn
+
+
+
+{/* <WebView
+javaScriptEnabled={true}
+domStorageEnabled={true}
+originWhitelist={["*"]}
+source={{...sourceHTML}}
+style={{ marginTop: 30 }}
+onNavigationStateChange={handleNavigationStateChange}
+injectedJavaScript={`window.ReactNativeWebView.postMessage(document.getElementsByClassName('userBody')[0].innerHTML);`}
+onMessage={(e) => handleMessage(e.nativeEvent.data)}
+/> */}
 
 
 

@@ -126,7 +126,7 @@ const Main = ({ navigation }) => {
             clearIcon={{ size: 20 }}
             placeholder="Search"
             onFocus={() => navigation.navigate("GroupSearch")}
-            containerStyle={{ borderRadius: 50, height: 35, justifyContent: 'center' }}
+            containerStyle={{ borderRadius: 50, height: 35, justifyContent: 'center', backgroundColor: 'white' }}
           />
         }
         rightComponent={
@@ -146,7 +146,6 @@ const Main = ({ navigation }) => {
             />
           </View>
         }
-        // containerStyle={{ marginTop: 10 }}
         leftContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
         rightContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
       />
