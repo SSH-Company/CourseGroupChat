@@ -92,6 +92,10 @@ const GroupSearch = ({ route, navigation }) => {
                     color={THEME_COLORS.ICON_COLOR} 
                     onPress={() => navigation.goBack()}
                 />}
+                centerComponent={{
+                    text: "Join a course group chat",
+                    style: { fontWeight: "bold", color: "black", fontSize: 25 }
+                }}
             />
             <ScrollView
                 keyboardShouldPersistTaps="handled"

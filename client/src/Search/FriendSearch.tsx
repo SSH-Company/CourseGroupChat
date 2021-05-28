@@ -23,7 +23,7 @@ const FriendSearch = ({ navigation }) => {
                     const users = res.data;
                     if (users?.length > 0) {
                         setFriendList(users.map((row, index) => {
-                            let subtitle = null, content = <Button title="Send" onPress={() => sendFriendRequest(row.id, index)}/>;
+                            let subtitle = null, content = <Ionicons name="person-add-outline" size={25} onPress={() => sendFriendRequest(row.id, index)}/>;
                             switch (row.friendStatus) {
                                 case 'ACCEPTED':
                                     subtitle = 'You are already friends',
@@ -84,7 +84,7 @@ const FriendSearch = ({ navigation }) => {
     return (
         <View style={{ flex: 1 }}>
             <Header
-                placement="center"
+                placement="left"
                 backgroundColor={THEME_COLORS.HEADER}
                 leftComponent={
                   <Ionicons 
@@ -93,6 +93,10 @@ const FriendSearch = ({ navigation }) => {
                     color={THEME_COLORS.ICON_COLOR} 
                     onPress={() => navigation.goBack()}
                 />}
+                centerComponent={{
+                    text: "Add Friend",
+                    style: { fontWeight: "bold", color: "black", fontSize: 25 }
+                }}
             />
             <ScrollView
                 keyboardShouldPersistTaps="handled"
@@ -101,7 +105,7 @@ const FriendSearch = ({ navigation }) => {
                     ref={searchRef}
                     platform={Platform.OS === "android" ? "android" : "ios"}
                     clearIcon={{ size: 30 }}
-                    placeholder="Search for course group chats"
+                    placeholder="Search..."
                     onChangeText={(text) => setSearch(text)}
                     onCancel={() => searchRef.current.clear()}
                     value={search}
