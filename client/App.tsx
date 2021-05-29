@@ -33,7 +33,7 @@ export default function App() {
         <NavigationContainer ref={navigationRef}>
             <Socket>
               <Stack.Navigator initialRouteName="Main" screenOptions={{headerShown: false, cardStyle: { backgroundColor: 'white' }}}>
-                  <Stack.Screen name="Main" component={Main}/>
+                  <Stack.Screen name="Main" component={Main} options={{ headerStyle: { backgroundColor: '#E7D2C9' } }}/>
                   <Stack.Screen name="Chat" component={Chat} />
                   <Stack.Screen name="FriendRequests" component={FriendRequests}/>
                   <Stack.Screen name="CourseGroups" component={CourseGroups}/>

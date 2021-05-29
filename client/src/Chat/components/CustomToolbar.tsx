@@ -145,7 +145,7 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
         try {
             const res = await DocumentPicker.getDocumentAsync({type: '*/*'})
             var regex = /(?:\.([^.]+))?$/;
-            if (res) {
+            if (res.hasOwnProperty('size') && res['size'] > 0) {
                 //check file size
                 const sizeInMB = Number((res['size'] / (1024 * 1024)).toFixed(2))
                 

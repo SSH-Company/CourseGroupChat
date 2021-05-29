@@ -417,7 +417,7 @@ export class ChatController {
             const members = await MessageModel.getGallery(grpId);
 
             res.status(STATUS.OK).json(members.map(row => ({
-                body: row.MESSAGE_BODY,
+                body: row.LOCATION,
                 type: row.MESSAGE_TYPE
             })));
         } catch(err) {

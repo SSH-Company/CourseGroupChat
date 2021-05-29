@@ -1,9 +1,8 @@
 import React, { useState, useContext } from 'react'
 import { Dimensions, View, StyleSheet } from 'react-native';
 import { Header, ListItem, Image, Text } from 'react-native-elements';
-import { Entypo, Ionicons, MaterialIcons, Feather } from 'react-native-vector-icons';
+import { Entypo, Ionicons, MaterialIcons, Feather, AntDesign } from 'react-native-vector-icons';
 import Lightbox from 'react-native-lightbox';
-import { StatusBar } from 'expo-status-bar';
 import * as VideoExtensions from 'video-extensions';
 import * as Notifications from 'expo-notifications';
 import { UserContext } from '../Auth/Login';
@@ -147,17 +146,19 @@ const Settings = ({ navigation }) => {
 
     return (
         <View>
-            <StatusBar style="light" backgroundColor={THEME_COLORS.STATUS_BAR}/>
             {profilePicture && (
                 <Header
                     placement="left"
                     backgroundColor={"white"}
+                    statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
+                    containerStyle={{ minHeight: 150 }}
                     leftComponent={
                         <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                            <Ionicons 
-                                name="arrow-back-sharp" 
+                            <AntDesign 
+                                name="left" 
                                 size={25} 
-                                color={THEME_COLORS.ICON_COLOR} 
+                                color={THEME_COLORS.ICON_COLOR}
+                                style={{ paddingRight: 10 }} 
                                 onPress={() => navigation.navigate('Main')}
                             />
                             <Lightbox activeProps={{ resizeMode: 'contain', flex: 1, height: dimensions.height }} onOpen={() => setLightboxopened(true)} onClose={() => setLightboxopened(false)}>
@@ -175,14 +176,14 @@ const Settings = ({ navigation }) => {
                         <MaterialIcons 
                             name="edit" 
                             size={30}
-                            style={styles.componentStyle} 
+                            style={[styles.componentStyle, { paddingRight: 12 }]} 
                             color={THEME_COLORS.ICON_COLOR} 
-                            onPress={() => navigation.navigate('Main')}
                         />
                     }
                 />
             )}
             <View style={{ marginBottom: 50 }}>
+                <Text style={{ marginLeft: 5, fontWeight: 'bold', fontSize: 18 }}>Manage your Cirkle</Text>
                 {sectionOne.map((item, i) => (
                     <ListItem key={`${i}-${item.title}`} onPress={item.onPress} bottomDivider>
                         {item.icon}

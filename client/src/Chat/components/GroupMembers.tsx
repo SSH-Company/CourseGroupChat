@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { ActivityIndicator, BackHandler, View, ScrollView } from "react-native";
 import { Header } from "react-native-elements";
 import { navigationRef } from '../../Util/RootNavigation';
-import { Ionicons } from "react-native-vector-icons";
+import { Ionicons, AntDesign } from "react-native-vector-icons";
 import { UserContext } from '../../Auth/Login';
 import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
 import BaseList from '../../Util/CommonComponents/BaseList';
@@ -83,20 +83,21 @@ const GroupMembers = ({ route, navigation }) => {
         <View style={{ flex: 1 }}>
             <Header
                 placement="left"
-                backgroundColor={THEME_COLORS.HEADER}
+                backgroundColor={"white"}
+                statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
                 leftComponent={
                     <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
-                        <Ionicons 
-                            name="arrow-back-sharp" 
-                            size={30} 
-                            color="#734f96" 
+                        <AntDesign 
+                            name="left" 
+                            size={25} 
+                            color={THEME_COLORS.ICON_COLOR} 
                             onPress={() => navigationRef.current.goBack()}
                         />
                     </View>
                 }
                 centerComponent={{
                     text: "Members",
-                    style: { fontWeight: "bold", color: "white", fontSize: 25 }
+                    style: { fontWeight: "bold", color: THEME_COLORS.ICON_COLOR, fontSize: 25 }
                 }}
                 rightComponent={
                     <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly' }}>
@@ -104,14 +105,14 @@ const GroupMembers = ({ route, navigation }) => {
                         <Ionicons
                             name="person-remove-sharp"
                             size={30}
-                            color="#734f96"
+                            color={THEME_COLORS.ICON_COLOR}
                             style={{ paddingRight: 10 }}
                             onPress={handleRemoveUsers}
                         />}
                         <Ionicons
                             name="person-add"
-                            size={30}
-                            color="#734f96"
+                            size={25}
+                            color={THEME_COLORS.ICON_COLOR}
                             onPress={() => navigation.navigate('Search', 
                                 {   groupName: name, 
                                     groupID: id, 
@@ -121,6 +122,9 @@ const GroupMembers = ({ route, navigation }) => {
                         />
                     </View>
                 }
+                leftContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
+                centerContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
+                rightContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
             />
             {loading ?
                 <ActivityIndicator />

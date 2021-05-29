@@ -11,12 +11,12 @@ import { WebView } from 'react-native-webview';
 import { Cache } from 'react-native-cache';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
+import { ChatLog } from '../Util/ChatLog';
+import Welcome from './Welcome';
+import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from "../BaseUrl";
 import axios from 'axios';
 axios.defaults.headers = { withCredentials: true };
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ChatLog } from '../Util/ChatLog';
-import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from "../BaseUrl";
-import Welcome from './Welcome';
 
 const styles = StyleSheet.create({
     container: {
@@ -79,29 +79,7 @@ const LogIn = ({ children }) => {
         redirects to a page from where the User's database information is collected
         and stored. The user is then redirected to the Main page.
     */
-    useEffect(() => {
-        axios.get(`${BASE_URL}/api/login`, { params: { email: 'sadman.hasan@mail.utoronto.ca' } }) //{ params: { email: 'email address here' } }
-            .then(res => {
-                tempFunc(res.data);
-                // setSourceHTML({ html: res.data });
-                // setNewUser(true);
-                // setLoading(false);
-            })
-            .catch(err => {
-                const response = err.response;
-                if (response) {
-                    switch (response.status) {
-                        case 302:
-                            setNewUser(true);
-                            setSourceHTML({ uri: response.data.redirect });
-                            setLoading(false);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            })
-    }, [])
+    
 
     useEffect(() => {
         AppState.addEventListener("change", handleAppStateChange);
@@ -124,6 +102,30 @@ const LogIn = ({ children }) => {
     //       Notifications.removeNotificationSubscription(responseListener);
     //     };
     // }, []);
+
+    const handleLogin = (email: string) => {
+        axios.get(`${BASE_URL}/api/login`, { params: { email } }) //{ params: { email: 'email address here' } }
+            .then(res => {
+                tempFunc(res.data);
+                // setSourceHTML({ html: res.data });
+                // setNewUser(true);
+                // setLoading(false);
+            })
+            .catch(err => {
+                const response = err.response;
+                if (response) {
+                    switch (response.status) {
+                        case 302:
+                            setNewUser(true);
+                            setSourceHTML({ uri: response.data.redirect });
+                            setLoading(false);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            })
+    }
 
     const tempFunc = async (user) => {
         setUser({
@@ -213,25 +215,22 @@ const LogIn = ({ children }) => {
     }
 
     if (loading) {
-        if (Platform.OS == 'ios' && Platform.isPad) {
-            return (
-                <View style={[styles.container]}>
-                    <Image source={require(splash_ipad)} style={styles.image} />
-                </View>
-            )
-        }
-        else {
-            return (
-                <View style={[styles.container]}>
-                    <Image source={require(splash_iphone)} style={styles.image} />
-                </View>
-            )
-        }
-
+        return (
+            <Welcome onSubmitPress={email => handleLogin(email)}/>
+        )
     } else {
         if (newUser) {
             return (
-                <Welcome />
+                <WebView
+                    javaScriptEnabled={true}
+                    domStorageEnabled={true}
+                    originWhitelist={["*"]}
+                    source={{...sourceHTML}}
+                    style={{ marginTop: 30 }}
+                    onNavigationStateChange={handleNavigationStateChange}
+                    injectedJavaScript={`window.ReactNativeWebView.postMessage(document.getElementsByClassName('userBody')[0].innerHTML);`}
+                    onMessage={(e) => handleMessage(e.nativeEvent.data)}
+                /> 
             )
         } else {
             return (
@@ -246,17 +245,6 @@ const LogIn = ({ children }) => {
 export default LogIn
 
 
-
-{/* <WebView
-javaScriptEnabled={true}
-domStorageEnabled={true}
-originWhitelist={["*"]}
-source={{...sourceHTML}}
-style={{ marginTop: 30 }}
-onNavigationStateChange={handleNavigationStateChange}
-injectedJavaScript={`window.ReactNativeWebView.postMessage(document.getElementsByClassName('userBody')[0].innerHTML);`}
-onMessage={(e) => handleMessage(e.nativeEvent.data)}
-/> */}
 
 
 

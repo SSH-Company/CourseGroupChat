@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView, Button, Text, ActivityIndicator, Platform, StyleSheet } from "react-native";
 import { Header, ListItem, SearchBar } from "react-native-elements";
-import { Ionicons, MaterialIcons } from "react-native-vector-icons";
+import { MaterialIcons, AntDesign } from "react-native-vector-icons";
 import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
 import { handleLeaveGroup } from '../../Util/CommonFunctions';
 import { BASE_URL } from '../../BaseUrl';
@@ -49,15 +49,16 @@ const CourseGroups = ({ navigation }) => {
                 <Header
                     placement="left"
                     backgroundColor={"white"}
+                    statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
                     leftComponent={
                         <View style={{ display: "flex", flexDirection: "row", alignItems: 'center' }}>
-                            <Ionicons 
-                                name="arrow-back-sharp" 
+                            <AntDesign 
+                                name="left" 
                                 size={30} 
                                 color={THEME_COLORS.ICON_COLOR} 
                                 onPress={() => navigation.goBack()}
                             />
-                            <Text style={{ fontWeight: "bold", color: "black", fontSize: 25 }}>Course Group Chats</Text>
+                            <Text style={{ fontWeight: "bold", color: "black", fontSize: 25, paddingLeft: 10 }}>Course Group Chats</Text>
                         </View>
                     }
                 />

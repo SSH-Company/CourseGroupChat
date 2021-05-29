@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Switch, StyleSheet } from 'react-native';
 import { Header } from 'react-native-elements';
-import { Ionicons } from 'react-native-vector-icons';
+import { AntDesign } from 'react-native-vector-icons';
 import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import { navigationRef } from '../Util/RootNavigation';
 
@@ -20,9 +20,10 @@ const NotificationSettings = () => {
             <Header
                 placement="center"
                 backgroundColor={THEME_COLORS.HEADER}
+                statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
                 leftComponent = {
-                    <Ionicons 
-                        name="arrow-back-sharp"
+                    <AntDesign 
+                        name="left"
                         size={25}
                         color={THEME_COLORS.ICON_COLOR}
                         // onPress={() => navigation.navigate('Profile')}

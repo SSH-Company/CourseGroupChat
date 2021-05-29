@@ -31,6 +31,7 @@ type BaseListProps = {
     title?: string,
     items: listtype[],
     onAvatarClick?: (id: string) => any,
+    topDivider?: boolean,
     //this is required if renderBasedOnCheckbox is set to true
     itemOnPress?: (item: listtype, index: number) => any,
     itemOnLongPress?: (item: listtype, index: number) => any,
@@ -42,6 +43,7 @@ const BaseList:FunctionComponent<BaseListProps> = (props) => {
         title = '',
         items = [],
         onAvatarClick = (id: string) => {},
+        topDivider = false,
         itemOnPress = (item: listtype, index: number) => {},
         itemOnLongPress = (item: listtype, index: number) => {},
         checkBoxes = false
@@ -55,6 +57,7 @@ const BaseList:FunctionComponent<BaseListProps> = (props) => {
               key={i}
               onPress={(e) => itemOnPress(l, i)}
               onLongPress={e => itemOnLongPress(l, i)}
+              topDivider={topDivider}
             >
                 <Avatar 
                     rounded 

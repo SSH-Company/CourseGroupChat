@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ActivityIndicator, View, ScrollView, Platform } from "react-native";
-import { SearchBar, Header, Button } from "react-native-elements";
-import { Ionicons, MaterialIcons } from "react-native-vector-icons";
+import { ActivityIndicator, View, ScrollView, Platform, Button } from "react-native";
+import { SearchBar, Header } from "react-native-elements";
+import { Ionicons, AntDesign } from "react-native-vector-icons";
 import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
 import { BASE_URL } from '../BaseUrl';
@@ -31,7 +31,7 @@ const FriendSearch = ({ navigation }) => {
                                     break;
                                 case 'PENDING':
                                     subtitle = 'Request status is pending',
-                                    content = <MaterialIcons name="pending" size={35} color="blue"/>
+                                    content = <Button title="Cancel" color="blue" onPress={() => {}}/>
                                     break;
                                 default:
                                     break;
@@ -67,7 +67,7 @@ const FriendSearch = ({ navigation }) => {
                         list[index] = {
                             ...list[index],
                             subtitle: 'You have sent a friend request',
-                            content: <MaterialIcons name="pending" size={35} color="blue"/>
+                            content: <Button title="Cancel" color="blue" onPress={() => {}}/>
                         }
                         return list
                     });
@@ -85,10 +85,11 @@ const FriendSearch = ({ navigation }) => {
         <View style={{ flex: 1 }}>
             <Header
                 placement="left"
-                backgroundColor={THEME_COLORS.HEADER}
+                backgroundColor={"white"}
+                statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
                 leftComponent={
-                  <Ionicons 
-                    name="arrow-back-sharp" 
+                  <AntDesign 
+                    name="left" 
                     size={25} 
                     color={THEME_COLORS.ICON_COLOR} 
                     onPress={() => navigation.goBack()}
@@ -97,6 +98,8 @@ const FriendSearch = ({ navigation }) => {
                     text: "Add Friend",
                     style: { fontWeight: "bold", color: "black", fontSize: 25 }
                 }}
+                leftContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
+                centerContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
             />
             <ScrollView
                 keyboardShouldPersistTaps="handled"

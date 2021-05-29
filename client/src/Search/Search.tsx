@@ -112,6 +112,7 @@ const Search = ({ route, navigation }) => {
             <Header
                 placement="left"
                 backgroundColor={THEME_COLORS.HEADER}
+                statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
                 leftComponent={<Feather name="arrow-left" color={THEME_COLORS.ICON_COLOR} size={25} onPress={() => navigation.navigate("Main")}/>}
                 centerComponent={{
                     text: "Create Group",
