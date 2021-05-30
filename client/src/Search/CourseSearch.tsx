@@ -25,7 +25,6 @@ const CourseSearch = ({ route, navigation }) => {
                         const inGroup = enrolledGroups.includes(row.id)
                         const temp = {
                             ...row,
-                            subtitle: inGroup ? 'You have joined this group' : null,
                             content: inGroup ?
                             <Ionicons name="checkmark" size={35} color="green"/>
                             :
@@ -57,7 +56,6 @@ const CourseSearch = ({ route, navigation }) => {
                             const list = [...prevList];
                             list[index] = {
                                 ...list[index],
-                                subtitle: 'You have joined this group',
                                 content: <Ionicons name="checkmark" size={35} color="green"/>
                             }
                             return list
@@ -121,11 +119,13 @@ const CourseSearch = ({ route, navigation }) => {
                       <>
                         <BaseList
                             items={verifiedList.slice(0, 20)}
+                            subtitleStyle={{ fontSize: 12 }}
                         />
                       </>
                       :
                       <BaseList 
                           items={filteredList}
+                          subtitleStyle={{ fontSize: 12 }}
                       />
                     )
                 }

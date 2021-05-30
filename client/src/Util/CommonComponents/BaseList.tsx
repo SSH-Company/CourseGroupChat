@@ -32,6 +32,7 @@ type BaseListProps = {
     items: listtype[],
     onAvatarClick?: (id: string) => any,
     topDivider?: boolean,
+    subtitleStyle?: any,
     //this is required if renderBasedOnCheckbox is set to true
     itemOnPress?: (item: listtype, index: number) => any,
     itemOnLongPress?: (item: listtype, index: number) => any,
@@ -44,6 +45,7 @@ const BaseList:FunctionComponent<BaseListProps> = (props) => {
         items = [],
         onAvatarClick = (id: string) => {},
         topDivider = false,
+        subtitleStyle = {},
         itemOnPress = (item: listtype, index: number) => {},
         itemOnLongPress = (item: listtype, index: number) => {},
         checkBoxes = false
@@ -70,7 +72,7 @@ const BaseList:FunctionComponent<BaseListProps> = (props) => {
                         <ListItem.Title>{l.name}</ListItem.Title>
                         {l.verified && l.verified === 'Y' && <VerifiedIcon style={{ marginLeft: 8 }}/>}
                     </View>
-                    {l.subtitle && <ListItem.Subtitle>{l.subtitle}</ListItem.Subtitle>}
+                    {l.subtitle && <ListItem.Subtitle style={subtitleStyle}>{l.subtitle}</ListItem.Subtitle>}
                 </ListItem.Content>
                 {checkBoxes &&
                 <ListItem.CheckBox 

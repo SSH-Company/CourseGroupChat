@@ -271,7 +271,7 @@ export class ChatController {
             }
 
             if (verified === 'Y') {
-                const enrolledGroups = await ChatLogViewModel.getEnrolledGroups(session.user.ID);
+                const enrolledGroups = await UserGroupModel.getEnrolledCourses(session.user.ID);
                 if (enrolledGroups.length >= 8) {
                     res.status(STATUS.OK).json({
                         status: 'warning'

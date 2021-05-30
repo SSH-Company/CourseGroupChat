@@ -204,6 +204,7 @@ export class SearchController {
                 id: d.CODE,
                 avatar: d.AVATAR,
                 name: d.CODE,
+                subtitle: d.NAME,
                 verified: 'Y'
             }))
 
