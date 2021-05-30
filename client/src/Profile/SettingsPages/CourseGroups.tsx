@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, Button, Text, ActivityIndicator, Platform, StyleSheet } from "react-native";
-import { Header, ListItem, SearchBar } from "react-native-elements";
-import { Ionicons, MaterialIcons } from "react-native-vector-icons";
+import { View, ScrollView, Text, ActivityIndicator, Platform, StyleSheet } from "react-native";
+import { Header, ListItem, SearchBar, Avatar, Button } from "react-native-elements";
+import { MaterialIcons, AntDesign } from "react-native-vector-icons";
 import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
 import { handleLeaveGroup } from '../../Util/CommonFunctions';
-import { BASE_URL } from '../../BaseUrl';
+import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
 import axios from 'axios';
 axios.defaults.headers = { withCredentials: true };
 
@@ -49,39 +49,50 @@ const CourseGroups = ({ navigation }) => {
                 <Header
                     placement="left"
                     backgroundColor={"white"}
+                    statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
                     leftComponent={
                         <View style={{ display: "flex", flexDirection: "row", alignItems: 'center' }}>
-                            <Ionicons 
-                                name="arrow-back-sharp" 
-                                size={30} 
+                            <AntDesign 
+                                name="left" 
+                                size={25} 
                                 color={THEME_COLORS.ICON_COLOR} 
                                 onPress={() => navigation.goBack()}
                             />
-                            <Text style={{ fontWeight: "bold", color: "black", fontSize: 25 }}>Course Group Chats</Text>
+                            <Text style={{ fontWeight: "bold", color: "black", fontSize: 25, paddingLeft: 10 }}>Course Group Chats</Text>
                         </View>
                     }
                 />
-                <Text style={{ marginLeft: 5, marginTop: 20, color: "black", fontSize: 20 }}>You are enrolled in</Text>
-                <ScrollView keyboardShouldPersistTaps="handled">
-                    {groups.map(group => (
-                        <ListItem key={`${group.id}`} bottomDivider>
-                            <MaterialIcons 
-                                name="groups" 
-                                size={30} 
-                                color={THEME_COLORS.ICON_COLOR} 
-                            />
-                            <ListItem.Content>
-                                <ListItem.Title style={{ fontSize: 15 }}>{group.name}</ListItem.Title>
-                            </ListItem.Content>
-                            <Button 
-                                title="x" 
-                                color="red" 
-                                onPress={() => handleLeaveGroup([], group.id, true, () => setLoading(true))} />
-                        </ListItem>
-                    ))}
-                </ScrollView>
+                {groups.length === 0 ?
+                    <View style={{ flex: 1, justifyContent: 'center' }}>
+                        <Text style={{ color: "black", fontSize: 20, padding: 40, textAlign: 'center' }}>You are not enrolled in any course group chats. Join now to connect with your friends!</Text>
+                    </View>
+                    :
+                    <>
+                        <Text style={{ marginLeft: 5, marginTop: 20, color: "black", fontSize: 20 }}>You are enrolled in</Text>
+                        <ScrollView keyboardShouldPersistTaps="handled">
+                            {groups.map((group, index) => (
+                                <ListItem key={`${group.id}`} topDivider={index > 0}>
+                                    <Avatar
+                                        source={{ uri: EMPTY_IMAGE_DIRECTORY }}
+                                        rounded
+                                        size={50}
+                                    />
+                                    <ListItem.Content>
+                                        <ListItem.Title style={{ fontSize: 15 }}>{group.id}</ListItem.Title>
+                                        <ListItem.Subtitle style={{ fontSize: 10 }}>{group.name}</ListItem.Subtitle>
+                                    </ListItem.Content>
+                                    <Button 
+                                        title="X"
+                                        onPress={() => handleLeaveGroup([], group.id, true, () => setLoading(true))} 
+                                        buttonStyle={{ borderRadius: 100, backgroundColor: '#915A3C' }}
+                                    />
+                                </ListItem>
+                            ))}
+                        </ScrollView>
+                    </>
+                }
                 <View style={{ marginBottom: 100 }}>
-                    <Text style={{ textAlign: 'center' }}>You can enroll in upto 8 course group chats at a time</Text>
+                    <Text style={{ textAlign: 'center', marginBottom: 10 }}>Max 8 course group chats can be added at a time</Text>
                     <SearchBar
                         platform={Platform.OS === "android" ? "android" : "ios"}
                         placeholder="Add new course group chat"

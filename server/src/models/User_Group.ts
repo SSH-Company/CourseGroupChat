@@ -67,4 +67,22 @@ export class UserGroupModel implements UserGroupInterface {
                 })
         })
     }
+
+    static getEnrolledCourses(uid: string): Promise<UserGroupModel[]> {
+        const query = `SELECT UG."GROUP_ID", CG."NAME" FROM RT.USER_GROUP UG
+                        LEFT JOIN RT."COURSE_GROUPS" CG ON UG."GROUP_ID" = CG."CODE"
+                        WHERE CG."CODE" IS NOT NULL AND UG."USER_ID" = ? ;`
+        
+        return new Promise((resolve, reject) => {
+            Database.getDB()
+                .query(query, [uid])
+                .then((data:UserGroupModel[]) => {
+                    resolve(data.map((d: UserGroupInterface) => new UserGroupModel(d)))
+                })
+                .catch(err => {
+                    console.error(err)
+                    reject(err)
+                })
+        })
+    }
 }

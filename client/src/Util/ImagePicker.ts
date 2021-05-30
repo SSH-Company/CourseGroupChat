@@ -54,3 +54,5 @@ export const handleImagePick = async (type: MediaType) => {
     }
 };
 
+export const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg' , 'bmp' , 'gif' , 'webp'];
+

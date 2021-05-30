@@ -1,14 +1,11 @@
 import React, { useState, useContext } from 'react'
 import { Dimensions, View, StyleSheet } from 'react-native';
 import { Header, ListItem, Image, Text } from 'react-native-elements';
-import { Entypo, Ionicons, MaterialIcons, Feather } from 'react-native-vector-icons';
-import Lightbox from 'react-native-lightbox';
-import { StatusBar } from 'expo-status-bar';
-import * as VideoExtensions from 'video-extensions';
+import { Entypo, Ionicons, MaterialIcons, Feather, AntDesign } from 'react-native-vector-icons';
+import LightBox from 'react-native-lightbox';
 import * as Notifications from 'expo-notifications';
 import { UserContext } from '../Auth/Login';
-import { handleImagePick, handlePermissionRequest } from "../Util/ImagePicker";
-import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
+import { EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import axios from 'axios';
 axios.defaults.headers = { withCredentials: true };
@@ -16,9 +13,7 @@ axios.defaults.headers = { withCredentials: true };
 const Settings = ({ navigation }) => {
 
     const [notification, setNotification] = useState(false);
-    const { user, setUser } = useContext(UserContext);
-    const [profilePicture, setProfilePicture] = useState<any>({ uri: user.avatar });
-    const [invalidImage, setInvalidImage] = useState(false);
+    const { user } = useContext(UserContext);
     const [lightboxOpened, setLightboxopened] = useState(false);
     const dimensions = Dimensions.get('window');
 
@@ -37,47 +32,6 @@ const Settings = ({ navigation }) => {
 
     // settingsList props.
     const iconSize = 15;
-
-    const sendData = (image: any) => {
-        const formData = new FormData();
-        formData.append('avatar', {...image})
-
-        axios.post(`${BASE_URL}/api/profile/upload-profile-pic`, formData, { headers: { 'content-type': 'multipart/form-data' } })
-        .then(res => {
-            const newAvatar = res.data.path;
-            setUser({
-                ...user,
-                avatar: newAvatar || profilePicture.uri
-            });
-            return;
-        })
-        .catch(err => {
-            console.log(err);
-        })
-    }
-
-    // functionalities.
-    const uploadImage = async () => {
-        try {
-            setInvalidImage(false);
-            const status = await handlePermissionRequest("library");
-            if (status === "granted") {
-                const imageRes = await handleImagePick("library");
-                if (imageRes) {
-                    const fileExtension = imageRes.type.split('/')[1];
-                    const mediaType = (VideoExtensions as any).default.includes(fileExtension) ? "video" : "image";
-                    if (mediaType === "video") {
-                        setInvalidImage(true);
-                        return;
-                    }
-                    setProfilePicture({...imageRes});
-                    sendData(imageRes);
-                } 
-            }
-        } catch (err) {
-            console.log(err);
-        }
-    }
 
     const setNotifications = () => {
         if (!notification) {
@@ -147,42 +101,43 @@ const Settings = ({ navigation }) => {
 
     return (
         <View>
-            <StatusBar style="light" backgroundColor={THEME_COLORS.STATUS_BAR}/>
-            {profilePicture && (
-                <Header
-                    placement="left"
-                    backgroundColor={"white"}
-                    leftComponent={
-                        <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                            <Ionicons 
-                                name="arrow-back-sharp" 
-                                size={25} 
-                                color={THEME_COLORS.ICON_COLOR} 
-                                onPress={() => navigation.navigate('Main')}
-                            />
-                            <Lightbox activeProps={{ resizeMode: 'contain', flex: 1, height: dimensions.height }} onOpen={() => setLightboxopened(true)} onClose={() => setLightboxopened(false)}>
-                                <Image
-                                    source={{ uri: profilePicture.uri || EMPTY_IMAGE_DIRECTORY }}
-                                    style={lightboxOpened ? {height: dimensions.height, width: dimensions.width, resizeMode: 'contain'} : styles.imageStyle}
-                                />
-                            </Lightbox>
-                        </View>
-                    }
-                    centerComponent={
-                        <Text style={[styles.componentStyle, { fontWeight: 'bold', fontSize: 20 }]}>{user.name}</Text>
-                    }
-                    rightComponent={
-                        <MaterialIcons 
-                            name="edit" 
-                            size={30}
-                            style={styles.componentStyle} 
-                            color={THEME_COLORS.ICON_COLOR} 
+            <Header
+                placement="left"
+                backgroundColor={"white"}
+                statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
+                containerStyle={{ minHeight: 150 }}
+                leftComponent={
+                    <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                        <AntDesign 
+                            name="left" 
+                            size={25} 
+                            color={THEME_COLORS.ICON_COLOR}
+                            style={{ paddingRight: 10 }} 
                             onPress={() => navigation.navigate('Main')}
                         />
-                    }
-                />
-            )}
+                        <LightBox activeProps={{ resizeMode: 'contain', flex: 1, height: dimensions.height }} onOpen={() => setLightboxopened(true)} onClose={() => setLightboxopened(false)}>
+                            <Image
+                                source={{ uri: user.avatar || EMPTY_IMAGE_DIRECTORY }}
+                                style={lightboxOpened ? {height: dimensions.height, width: dimensions.width, resizeMode: 'contain'} : styles.imageStyle}
+                            />
+                        </LightBox>
+                    </View>
+                }
+                centerComponent={
+                    <Text style={[styles.componentStyle, { fontWeight: 'bold', fontSize: 20 }]}>{user.name}</Text>
+                }
+                rightComponent={
+                    <MaterialIcons 
+                        name="edit" 
+                        size={30}
+                        style={[styles.componentStyle, { paddingRight: 12 }]} 
+                        color={THEME_COLORS.ICON_COLOR} 
+                        onPress={() => navigation.navigate('EditProfile')}
+                    />
+                }
+            />
             <View style={{ marginBottom: 50 }}>
+                <Text style={{ marginLeft: 5, fontWeight: 'bold', fontSize: 18 }}>Manage your Cirkle</Text>
                 {sectionOne.map((item, i) => (
                     <ListItem key={`${i}-${item.title}`} onPress={item.onPress} bottomDivider>
                         {item.icon}

@@ -2,21 +2,21 @@ import React, { useRef, useEffect, useState, createContext } from 'react';
 import { 
     AppState,
     StyleSheet,
-    Text,
     View,
     Platform,
-    Image,
+    Image
 } from 'react-native';
-import { User } from 'react-native-gifted-chat';
+// import { User } from 'react-native-gifted-chat';
 import { WebView } from 'react-native-webview';
 import { Cache } from 'react-native-cache';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
+import { ChatLog } from '../Util/ChatLog';
+import Welcome from './Welcome';
+import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from "../BaseUrl";
 import axios from 'axios';
 axios.defaults.headers = { withCredentials: true };
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ChatLog } from '../Util/ChatLog';
-import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from "../BaseUrl";
 
 const styles = StyleSheet.create({
     container: {
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
 });
 
 export const UserContext = createContext({
-    user: {} as User,
+    user: {} as any,
     setUser: (obj: any) => {}
 })
 
@@ -61,7 +61,7 @@ Notifications.setNotificationHandler({
 const LogIn = ({ children }) => {
     const [loading, setLoading] = useState(true)
     const [newUser, setNewUser] = useState(false)
-    const [user, setUser] = useState({} as User);
+    const [user, setUser] = useState({});
     const [sourceHTML, setSourceHTML] = useState<any>();
     const appState = useRef(AppState.currentState);
     const [expoPushToken, setExpoPushToken] = useState('');
@@ -79,29 +79,7 @@ const LogIn = ({ children }) => {
         redirects to a page from where the User's database information is collected
         and stored. The user is then redirected to the Main page.
     */
-    useEffect(() => {
-        axios.get(`${BASE_URL}/api/login`, { params: { email: 'sadman.hasan@mail.utoronto.ca' } }) //{ params: { email: 'email address here' } }
-            .then(res => {
-                tempFunc(res.data);
-                // setSourceHTML({ html: res.data });
-                // setNewUser(true);
-                // setLoading(false);
-            })
-            .catch(err => {
-                const response = err.response;
-                if (response) {
-                    switch (response.status) {
-                        case 302:
-                            setNewUser(true);
-                            setSourceHTML({ uri: response.data.redirect });
-                            setLoading(false);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            })
-    }, [])
+    
 
     useEffect(() => {
         AppState.addEventListener("change", handleAppStateChange);
@@ -125,11 +103,36 @@ const LogIn = ({ children }) => {
     //     };
     // }, []);
 
+    const handleLogin = (email: string) => {
+        axios.get(`${BASE_URL}/api/login`, { params: { email } }) //{ params: { email: 'email address here' } }
+            .then(res => {
+                tempFunc(res.data);
+                // setSourceHTML({ html: res.data });
+                // setNewUser(true);
+                // setLoading(false);
+            })
+            .catch(err => {
+                const response = err.response;
+                if (response) {
+                    switch (response.status) {
+                        case 302:
+                            setNewUser(true);
+                            setSourceHTML({ uri: response.data.redirect });
+                            setLoading(false);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            })
+    }
+
     const tempFunc = async (user) => {
         setUser({
             _id: user.ID,
             name: user.FIRST_NAME + ' ' + user.LAST_NAME,
-            avatar: user.AVATAR || EMPTY_IMAGE_DIRECTORY
+            avatar: user.AVATAR || EMPTY_IMAGE_DIRECTORY,
+            email: user.EMAIL
         })
         await ChatLog.getChatLogInstance(true, user.ID);
         setNewUser(false);
@@ -213,21 +216,9 @@ const LogIn = ({ children }) => {
     }
 
     if (loading) {
-        if (Platform.OS == 'ios' && Platform.isPad) {
-            return (
-                <View style={[styles.container]}>
-                    <Image source={require(splash_ipad)} style={styles.image} />
-                </View>
-            )
-        }
-        else {
-            return (
-                <View style={[styles.container]}>
-                    <Image source={require(splash_iphone)} style={styles.image} />
-                </View>
-            )
-        }
-
+        return (
+            <Welcome onSubmitPress={email => handleLogin(email)}/>
+        )
     } else {
         if (newUser) {
             return (
@@ -240,7 +231,7 @@ const LogIn = ({ children }) => {
                     onNavigationStateChange={handleNavigationStateChange}
                     injectedJavaScript={`window.ReactNativeWebView.postMessage(document.getElementsByClassName('userBody')[0].innerHTML);`}
                     onMessage={(e) => handleMessage(e.nativeEvent.data)}
-                />
+                /> 
             )
         } else {
             return (
@@ -253,6 +244,8 @@ const LogIn = ({ children }) => {
 }
 
 export default LogIn
+
+
 
 
 

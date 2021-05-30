@@ -1,11 +1,10 @@
 import React, { useState, useCallback, useEffect, useContext, useRef } from 'react';
 import { ActivityIndicator, Text, View, Dimensions } from 'react-native';
 import { Avatar, Header } from "react-native-elements";
-import { StatusBar } from 'expo-status-bar';
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import { useActionSheet } from '@expo/react-native-action-sheet';
-import { Ionicons } from "react-native-vector-icons";
+import { Ionicons, AntDesign } from "react-native-vector-icons";
 import { useIsFocused } from "@react-navigation/native";
 import { CustomMessage, CustomToolbar, InboxSettings } from './components';
 import { UserContext } from '../Auth/Login';
@@ -217,7 +216,6 @@ const Chat = ({ route, navigation }) => {
 
     return (
         <View style={{flex: 1}}>
-            <StatusBar style="light" backgroundColor={THEME_COLORS.STATUS_BAR}/>
             {loading ?
                 <ActivityIndicator />
                 :
@@ -237,11 +235,12 @@ const Chat = ({ route, navigation }) => {
                     <Header
                         placement="left"
                         backgroundColor={THEME_COLORS.HEADER}
+                        statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
                         leftComponent={
                             <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
-                                <Ionicons 
-                                    name="arrow-back-sharp" 
-                                    size={avatarSize} 
+                                <AntDesign 
+                                    name="left" 
+                                    size={20} 
                                     color={THEME_COLORS.ICON_COLOR}
                                     onPress={() => navigation.navigate('Main')}
                                 />
@@ -266,6 +265,9 @@ const Chat = ({ route, navigation }) => {
                                 onPress={() => drawerRef.current.openDrawer()}
                             />
                         }
+                        leftContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
+                        centerContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
+                        rightContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
                     />
                     <GiftedChat
                         ref={giftedChatRef}

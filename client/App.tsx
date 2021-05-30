@@ -9,13 +9,15 @@ import { LogIn } from './src/Auth';
 import { 
   Search, 
   GroupSearch,
-  CourseSearch 
+  CourseSearch,
+  FriendSearch 
 } from './src/Search';
 import { 
   Profile, 
   Settings, 
   FriendRequests,
-  CourseGroups
+  CourseGroups,
+  EditProfile
 } from './src/Profile';
 import {
   GroupMembers,
@@ -33,9 +35,10 @@ export default function App() {
             <Socket>
               <Stack.Navigator initialRouteName="Main" screenOptions={{headerShown: false, cardStyle: { backgroundColor: 'white' }}}>
                   <Stack.Screen name="Main" component={Main}/>
-                  <Stack.Screen name="Chat" component={Chat} />
+                  <Stack.Screen name="Chat" component={Chat}/>
                   <Stack.Screen name="FriendRequests" component={FriendRequests}/>
                   <Stack.Screen name="CourseGroups" component={CourseGroups}/>
+                  <Stack.Screen name="EditProfile" component={EditProfile}/>
                   <Stack.Screen name="Profile" component={Profile}/>
                   <Stack.Screen name="Settings" component={Settings} options={{gestureDirection: 'horizontal-inverted'}}/>
                   <Stack.Screen name="GroupMembers" component={GroupMembers}/> 
@@ -43,6 +46,7 @@ export default function App() {
                   <Stack.Screen name="Search" component={Search}/>
                   <Stack.Screen name="GroupSearch" component={GroupSearch}/>
                   <Stack.Screen name="CourseSearch" component={CourseSearch}/>
+                  <Stack.Screen name="FriendSearch" component={FriendSearch}/>
               </Stack.Navigator>
             </Socket>
         </NavigationContainer>

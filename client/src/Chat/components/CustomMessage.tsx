@@ -144,7 +144,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                     <View style={[styles.item]}>
 
                         {/* handle texts */}
-                        {currentMessage.hasOwnProperty('text') && currentMessage.text.length > 0 &&
+                        {currentMessage.hasOwnProperty('text') && currentMessage?.text?.length > 0 &&
                         <>
                             <TouchableOpacity 
                                 onPress={() => setMessagePressed(!messagePressed)}
@@ -161,7 +161,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                         </></>}
 
                         {/* handle images */}
-                        {currentMessage.hasOwnProperty('image') && currentMessage.image.length > 0 && 
+                        {currentMessage.hasOwnProperty('image') && currentMessage?.image?.length > 0 && 
                         (<TouchableOpacity
                             onLongPress={() => onLongPress(currentMessage._id)}
                         >     
@@ -169,7 +169,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                         </TouchableOpacity>)}
 
                         {/* handle videos */}
-                        {currentMessage.hasOwnProperty('video') && currentMessage.video.length > 0 &&
+                        {currentMessage.hasOwnProperty('video') && currentMessage?.video?.length > 0 &&
                         (<TouchableOpacity
                             onLongPress={() => onLongPress(currentMessage._id)}
                         >
@@ -186,7 +186,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                         </TouchableOpacity>)}
 
                         {/* handle files */}
-                        {currentMessage.hasOwnProperty('file') && currentMessage.file.length > 0 &&
+                        {currentMessage.hasOwnProperty('file') && currentMessage?.file?.length > 0 &&
                         (<TouchableOpacity
                             onLongPress={() => onLongPress(currentMessage._id)}
                         >
@@ -205,7 +205,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                         </TouchableOpacity>)}
 
                         {/* handle audio */}
-                        {currentMessage.hasOwnProperty('audio') && currentMessage.audio.length > 0 &&
+                        {currentMessage.hasOwnProperty('audio') && currentMessage?.audio?.length > 0 &&
                         (<TouchableOpacity
                             onPress={() => isPlaying ? sound?.sound.pauseAsync() : sound?.sound.playAsync()}
                             onLongPress={() => onLongPress(currentMessage._id)}

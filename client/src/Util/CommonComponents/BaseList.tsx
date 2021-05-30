@@ -30,7 +30,9 @@ export type listtype = {
 type BaseListProps = {
     title?: string,
     items: listtype[],
-    
+    onAvatarClick?: (id: string) => any,
+    topDivider?: boolean,
+    subtitleStyle?: any,
     //this is required if renderBasedOnCheckbox is set to true
     itemOnPress?: (item: listtype, index: number) => any,
     itemOnLongPress?: (item: listtype, index: number) => any,
@@ -41,6 +43,9 @@ const BaseList:FunctionComponent<BaseListProps> = (props) => {
     let {
         title = '',
         items = [],
+        onAvatarClick = (id: string) => {},
+        topDivider = false,
+        subtitleStyle = {},
         itemOnPress = (item: listtype, index: number) => {},
         itemOnLongPress = (item: listtype, index: number) => {},
         checkBoxes = false
@@ -54,14 +59,20 @@ const BaseList:FunctionComponent<BaseListProps> = (props) => {
               key={i}
               onPress={(e) => itemOnPress(l, i)}
               onLongPress={e => itemOnLongPress(l, i)}
+              topDivider={topDivider}
             >
-                <Avatar rounded size="medium" source={{ uri: l.avatar_url || EMPTY_IMAGE_DIRECTORY }}/>
+                <Avatar 
+                    rounded 
+                    size="medium" 
+                    source={{ uri: l.avatar_url || EMPTY_IMAGE_DIRECTORY }}
+                    onPress={() => onAvatarClick(l.id)}
+                />
                 <ListItem.Content>
                     <View style={{ display:'flex', flexDirection: "row", justifyContent: "space-between" }}>
-                        <ListItem.Title>{`${l.name}`}</ListItem.Title>
+                        <ListItem.Title>{l.name}</ListItem.Title>
                         {l.verified && l.verified === 'Y' && <VerifiedIcon style={{ marginLeft: 8 }}/>}
                     </View>
-                    {l.subtitle && <ListItem.Subtitle>{l.subtitle}</ListItem.Subtitle>}
+                    {l.subtitle && <ListItem.Subtitle style={subtitleStyle}>{l.subtitle}</ListItem.Subtitle>}
                 </ListItem.Content>
                 {checkBoxes &&
                 <ListItem.CheckBox 

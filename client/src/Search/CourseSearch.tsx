@@ -1,19 +1,18 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ActivityIndicator, View, ScrollView, Platform, Alert } from "react-native";
-import { SearchBar, Header, Button } from "react-native-elements";
-import { Ionicons } from "react-native-vector-icons";
+import { ActivityIndicator, View, ScrollView, Platform, Alert, Button } from "react-native";
+import { SearchBar, Header } from "react-native-elements";
+import { Ionicons, AntDesign } from "react-native-vector-icons";
 import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
 import { BASE_URL } from '../BaseUrl';
 import axios from 'axios';
 axios.defaults.headers = { withCredentials: true };
 
-const GroupSearch = ({ route, navigation }) => {
+const CourseSearch = ({ route, navigation }) => {
     const { enrolledGroups } = route.params;
     const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(true);
     const [verifiedList, setVerifiedList] = useState<listtype[]>([]);
-    const [enrollCount, setEnrollCount] = useState(enrolledGroups.length);
     const searchRef = useRef(null);
 
     useEffect(() => {
@@ -26,7 +25,6 @@ const GroupSearch = ({ route, navigation }) => {
                         const inGroup = enrolledGroups.includes(row.id)
                         const temp = {
                             ...row,
-                            subtitle: inGroup ? 'You have joined this group' : null,
                             content: inGroup ?
                             <Ionicons name="checkmark" size={35} color="green"/>
                             :
@@ -58,7 +56,6 @@ const GroupSearch = ({ route, navigation }) => {
                             const list = [...prevList];
                             list[index] = {
                                 ...list[index],
-                                subtitle: 'You have joined this group',
                                 content: <Ionicons name="checkmark" size={35} color="green"/>
                             }
                             return list
@@ -84,15 +81,23 @@ const GroupSearch = ({ route, navigation }) => {
     return (
         <View style={{ flex: 1 }}>
             <Header
-                placement="center"
-                backgroundColor={THEME_COLORS.HEADER}
+                placement="left"
+                backgroundColor={"white"}
+                statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
                 leftComponent={
-                  <Ionicons 
-                    name="arrow-back-sharp" 
-                    size={25} 
-                    color={THEME_COLORS.ICON_COLOR} 
-                    onPress={() => navigation.goBack()}
-                />}
+                    <AntDesign 
+                        name="left" 
+                        size={25} 
+                        color={THEME_COLORS.ICON_COLOR} 
+                        onPress={() => navigation.goBack()}
+                    />
+                }
+                centerComponent={{
+                    text: "Join a course group chat",
+                    style: { fontWeight: "bold", color: "black", fontSize: 25 }
+                }}
+                leftContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
+                centerContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
             />
             <ScrollView
                 keyboardShouldPersistTaps="handled"
@@ -114,11 +119,13 @@ const GroupSearch = ({ route, navigation }) => {
                       <>
                         <BaseList
                             items={verifiedList.slice(0, 20)}
+                            subtitleStyle={{ fontSize: 12 }}
                         />
                       </>
                       :
                       <BaseList 
                           items={filteredList}
+                          subtitleStyle={{ fontSize: 12 }}
                       />
                     )
                 }
@@ -127,4 +134,4 @@ const GroupSearch = ({ route, navigation }) => {
     )
 }
 
-export default GroupSearch
+export default CourseSearch

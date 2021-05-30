@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView , Button } from "react-native";
 import { Header } from "react-native-elements";
-import { Ionicons } from "react-native-vector-icons";
-import { navigationRef } from '../../Util/RootNavigation';
+import { Ionicons, AntDesign } from "react-native-vector-icons";
 import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
 import BaseList, { listtype } from '../../Util/CommonComponents/BaseList';
 import { BASE_URL } from '../../BaseUrl';
@@ -53,22 +52,26 @@ const FriendRequests = ({ navigation }) => {
     return (
         <View>
             <Header
-                placement="center"
-                backgroundColor={THEME_COLORS.HEADER}
+                placement="left"
+                backgroundColor={"white"}
+                statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
                 leftComponent={
                     <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
-                        <Ionicons 
-                            name="arrow-back-sharp" 
-                            size={30} 
-                            color="#734f96" 
+                        <AntDesign 
+                            name="left" 
+                            size={25} 
+                            color={THEME_COLORS.ICON_COLOR} 
                             onPress={() => navigation.goBack()}
                         />
                     </View>
                 }
                 centerComponent={{
                     text: "Friend Requests",
-                    style: { fontWeight: "bold", color: "white", fontSize: 25 }
+                    style: { fontWeight: "bold", color: "black", fontSize: 25 }
                 }}
+                leftContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
+                centerContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
+                rightContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
             />
             <ScrollView keyboardShouldPersistTaps="handled">
                 <BaseList

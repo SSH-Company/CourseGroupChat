@@ -89,20 +89,6 @@ export class ChatLogViewModel implements ChatLogViewInterface {
         })
     }
 
-    static getEnrolledGroups(userID: string): Promise<ChatLogViewModel[]> {
-        return new Promise((resolve, reject) => {
-            const query = `SELECT DISTINCT "GROUP_ID", "NAME" FROM RT."CHATLOG_VIEW" CV
-                            WHERE "USER_ID" = ? AND "VERIFIED" = 'Y';`
-            Database.getDB()
-                .query(query, [userID])
-                .then((data: ChatLogViewInterface[]) => resolve(data.map(d => new ChatLogViewModel(d))))
-                .catch(err => {
-                    console.log(err)
-                    reject(err)
-                })
-        })
-    }
-
     static getAllGroups(userID: string): Promise<ChatLogViewModel[]> {
         return new Promise((resolve, reject) => {
             const query = `SELECT DISTINCT "GROUP_ID", "NAME", "AVATAR", "VERIFIED" FROM RT."CHATLOG_VIEW" CV

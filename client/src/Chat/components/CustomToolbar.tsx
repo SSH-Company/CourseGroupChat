@@ -4,7 +4,7 @@ import { InputToolbar, Send } from 'react-native-gifted-chat';
 import { Audio } from 'expo-av';
 import * as DocumentPicker from 'expo-document-picker';
 import * as VideoExtensions from 'video-extensions';
-import { handleImagePick, handlePermissionRequest } from "../../Util/ImagePicker";
+import { handleImagePick, handlePermissionRequest, IMAGE_EXTENSIONS } from "../../Util/ImagePicker";
 import { revisedRandId } from '../../Util/ChatLog';
 import { UserContext } from '../../Auth/Login';
 import { Entypo, SimpleLineIcons, Ionicons, MaterialCommunityIcons } from 'react-native-vector-icons';
@@ -122,7 +122,17 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
                 const imageRes = await handleImagePick(type);
                 if (imageRes) {
                     const fileExtension = imageRes.type.split('/')[1];
-                    const mediaType = (VideoExtensions as any).default.includes(fileExtension) ? "video" : "image";
+                    let mediaType = '';
+                    if (IMAGE_EXTENSIONS.includes(fileExtension)) mediaType = "image"
+                    else if ((VideoExtensions as any).default.includes(fileExtension)) mediaType = "video"
+                    else {
+                        Alert.alert(
+                            `Failed to upload file`,
+                            `Sorry, this file format is not supported.`,
+                            [{ text: "OK", style: "cancel" }]
+                        )
+                        return;
+                    }
                     const newMessage = {
                         _id: revisedRandId(),
                         createdAt: Date.now(),
@@ -145,7 +155,7 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
         try {
             const res = await DocumentPicker.getDocumentAsync({type: '*/*'})
             var regex = /(?:\.([^.]+))?$/;
-            if (res) {
+            if (res.hasOwnProperty('size') && res['size'] > 0) {
                 //check file size
                 const sizeInMB = Number((res['size'] / (1024 * 1024)).toFixed(2))
                 

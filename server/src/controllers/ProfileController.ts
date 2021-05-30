@@ -13,8 +13,8 @@ import * as STATUS from 'http-status-codes';
 import { Config } from '../services/Config';
 import { Bucket } from '../services/Bucket';
 import { UserModel } from '../models/User';
-import { ChatLogViewModel } from '../models/ChatLog_View';
 import { FriendStatusModel, FriendStatusInterface } from '../models/Friend_Status';
+import { UserGroupModel } from '../models/User_Group';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -200,7 +200,7 @@ export class ProfileController {
     private async getCourseGroups(req: Request, res: Response) {
         try {
             const session = req.session;
-            const enrolledGroups = (await ChatLogViewModel.getEnrolledGroups(session.user.ID)).map(d => ({
+            const enrolledGroups = (await UserGroupModel.getEnrolledCourses(session.user.ID)).map(d => ({
                 id: d.GROUP_ID,
                 name: d.NAME
             }));

@@ -4,9 +4,7 @@ import {
     Dimensions, 
     View, 
     ScrollView, 
-    Image, 
-    TouchableOpacity, 
-    StyleSheet 
+    Image
 } from "react-native";
 import LightBox from 'react-native-lightbox';
 import { Video } from 'expo-av';
@@ -18,14 +16,6 @@ type ListType = {
     body: string,
     type: 'image' | 'video'
 }
-
-// const styles = StyleSheet.create({
-//     video: {
-//         minWidth: 200,
-//         minHeight: 200,
-//         alignSelf: 'center'
-//     }
-// })
 
 const Gallery = ({ route, navigation }) => {
     const grpId = route.params;
@@ -53,7 +43,7 @@ const Gallery = ({ route, navigation }) => {
                     <LightBox>       
                         <Image
                             source={{ uri: item.body || EMPTY_IMAGE_DIRECTORY }}
-                            style={{ width: dimensions.width, height: 200, marginTop: 10, borderRadius: 20 }}
+                            style={{ width: dimensions.width, height: 200, marginTop: 10 }}
                         />
                     </LightBox>
                 )

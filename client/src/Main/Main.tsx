@@ -4,7 +4,6 @@ import { Header, SearchBar, Image } from "react-native-elements";
 import { Feather, Ionicons, FontAwesome5, MaterialCommunityIcons } from "react-native-vector-icons";
 import { useIsFocused } from "@react-navigation/native";
 import { useActionSheet } from '@expo/react-native-action-sheet';
-import { StatusBar } from 'expo-status-bar';
 import { UserContext } from '../Auth/Login';
 import { RenderMessageContext } from '../Socket/WebSocket';
 import { ChatLog } from '../Util/ChatLog';
@@ -109,33 +108,35 @@ const Main = ({ navigation }) => {
   // renders header | searchbar | chat list
   return (
     <View style={{ flex: 1 }}>
-      <StatusBar style="light" backgroundColor={THEME_COLORS.STATUS_BAR}/>
       <Header
         placement="left"
         backgroundColor={THEME_COLORS.HEADER}
+        statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
+        containerStyle={{ minHeight: 100 }}
         leftComponent={
-          <Image
-            source={{ uri: user.avatar as string || EMPTY_IMAGE_DIRECTORY }}
-            style={{ width: 30, height: 30, borderRadius: 200 }}
-            onPress={() => navigation.navigate("Settings")}
-          />
+          <View style={{ paddingRight: 10 }}>
+            <Image
+              source={{ uri: user.avatar as string || EMPTY_IMAGE_DIRECTORY }}
+              style={{ width: 40, height: 40, borderRadius: 200 }}
+              onPress={() => navigation.navigate("Settings")}
+            />
+          </View>
         }
         centerComponent={
           <SearchBar
             platform={Platform.OS === "android" ? "android" : "ios"}
-            clearIcon={{ size: 20 }}
             placeholder="Search"
             onFocus={() => navigation.navigate("GroupSearch")}
-            containerStyle={{ borderRadius: 50, height: 35, justifyContent: 'center' }}
+            containerStyle={{ borderRadius: 50, height: 35, justifyContent: 'center', backgroundColor: 'white' }}
           />
         }
         rightComponent={
-          <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+          <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingRight: 5 }}>
             <Ionicons 
               name={"person-add"} 
               color={THEME_COLORS.ICON_COLOR} 
               size={20} 
-              onPress={() => console.log('clicked')}
+              onPress={() => navigation.navigate("FriendSearch")}
             />
             <Feather 
               name={"edit"} 
@@ -146,8 +147,8 @@ const Main = ({ navigation }) => {
             />
           </View>
         }
-        // containerStyle={{ marginTop: 10 }}
         leftContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
+        centerContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
         rightContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
       />
       <ScrollView
@@ -170,6 +171,7 @@ const Main = ({ navigation }) => {
                 navigation.navigate("Chat", { groupID: l.id })
             }}
             itemOnLongPress={(l, i) => handleLongPress(l.id)}
+            topDivider
         />
       </ScrollView>
     </View>
