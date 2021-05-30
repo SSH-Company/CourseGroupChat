@@ -16,7 +16,8 @@ import {
   Profile, 
   Settings, 
   FriendRequests,
-  CourseGroups
+  CourseGroups,
+  EditProfile
 } from './src/Profile';
 import {
   GroupMembers,
@@ -33,10 +34,11 @@ export default function App() {
         <NavigationContainer ref={navigationRef}>
             <Socket>
               <Stack.Navigator initialRouteName="Main" screenOptions={{headerShown: false, cardStyle: { backgroundColor: 'white' }}}>
-                  <Stack.Screen name="Main" component={Main} options={{ headerStyle: { backgroundColor: '#E7D2C9' } }}/>
-                  <Stack.Screen name="Chat" component={Chat} />
+                  <Stack.Screen name="Main" component={Main}/>
+                  <Stack.Screen name="Chat" component={Chat}/>
                   <Stack.Screen name="FriendRequests" component={FriendRequests}/>
                   <Stack.Screen name="CourseGroups" component={CourseGroups}/>
+                  <Stack.Screen name="EditProfile" component={EditProfile}/>
                   <Stack.Screen name="Profile" component={Profile}/>
                   <Stack.Screen name="Settings" component={Settings} options={{gestureDirection: 'horizontal-inverted'}}/>
                   <Stack.Screen name="GroupMembers" component={GroupMembers}/> 
