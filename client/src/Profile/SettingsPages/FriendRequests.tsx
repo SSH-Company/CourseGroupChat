@@ -53,7 +53,7 @@ const FriendRequests = ({ navigation }) => {
         <View>
             <Header
                 placement="left"
-                backgroundColor={"white"}
+                backgroundColor={THEME_COLORS.HEADER}
                 statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
                 leftComponent={
                     <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
