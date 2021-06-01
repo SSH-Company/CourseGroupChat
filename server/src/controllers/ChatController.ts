@@ -44,6 +44,7 @@ export class ChatController {
                     id: row.GROUP_ID,
                     creator_id: row.CREATOR_ID,
                     creator_name: row.CREATOR_NAME,
+                    creator_avatar: row.CREATOR_AVATAR,
                     message_id: row.MESSAGE_ID,
                     name: row.VERIFIED === "Y" ? row.GROUP_ID : row.NAME,
                     avatar_url: row.AVATAR,
@@ -382,7 +383,7 @@ export class ChatController {
                         user: {
                             _id: row.CREATOR_ID,
                             name: row.CREATOR_NAME,
-                            avatar: row.AVATAR
+                            avatar: row.CREATOR_AVATAR
                         },
                         location: row.LOCATION,
                         status: row.STATUS,

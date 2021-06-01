@@ -68,7 +68,7 @@ export class ChatLog {
                 user: {
                     _id: row.creator_id,
                     name: row.creator_name,
-                    avatar: row.avatar_url
+                    avatar: row.creator_avatar
                 },
                 status: row.status,
                 displayStatus: false
