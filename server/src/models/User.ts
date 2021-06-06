@@ -6,8 +6,9 @@ interface UserInterface {
     LAST_NAME?: string;
     AVATAR?: string;
     EMAIL?: string;
+    PASSWORD?: string;
     CREATE_DATE?: string;
-    IS_ACTIVE?: "Y" | "N";
+    VERIFIED?: "Y" | "N";
 }
 
 export class UserModel implements UserInterface {
@@ -16,23 +17,24 @@ export class UserModel implements UserInterface {
     LAST_NAME?: string;
     AVATAR?: string;
     EMAIL?: string;
+    PASSWORD?: string;
     CREATE_DATE?: string;
-    IS_ACTIVE?: "Y" | "N";
+    VERIFIED?: "Y" | "N";
 
     constructor(raw: UserInterface) {
         // super();
         Object.assign(this, raw);
     }
 
-    static insert(user: UserInterface): Promise<void> {
-        const query = `INSERT INTO RT.USER ("FIRST_NAME", "LAST_NAME", "EMAIL", "CREATE_DATE", "IS_ACTIVE") 
-        VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?);`
-        const params = [user.FIRST_NAME, user.LAST_NAME, user.EMAIL, user.IS_ACTIVE];
+    static insert(user: UserInterface): Promise<UserModel> {
+        const query = `INSERT INTO RT.USER ("FIRST_NAME", "LAST_NAME", "EMAIL", "PASSWORD", "CREATE_DATE", "VERIFIED") 
+        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?) RETURNING *;`
+        const params = [user.FIRST_NAME, user.LAST_NAME, user.EMAIL, user.PASSWORD, user.VERIFIED];
         
         return new Promise((resolve, reject) => {
             Database.getDB()
                 .query(query, params)
-                .then(() => resolve())
+                .then((data: UserInterface[]) => resolve(new UserModel(data[0])))
                 .catch(err => reject(err))
         })
     }
@@ -58,7 +60,7 @@ export class UserModel implements UserInterface {
         })
     }
 
-    static getUserAccountByEmail(email: string): Promise<UserModel> {
+    static getUserAccountByEmail(email: string): Promise<UserModel | null> {
         const query = `SELECT * FROM RT.USER WHERE lower("EMAIL") = ?;`
 
         return new Promise((resolve, reject) => {
@@ -66,9 +68,7 @@ export class UserModel implements UserInterface {
                 .query(query, [email.trim().toLowerCase()])
                 .then((data:UserInterface[]) => {
                     if (data.length === 0) {
-                        reject({
-                            message: 'Invalid user id.'
-                        })
+                        resolve(null);
                     }
                     resolve(new UserModel(data[0]))
                 })
@@ -156,6 +156,20 @@ export class UserModel implements UserInterface {
         return new Promise((resolve, reject) => {
             Database.getDB()
                 .query(query, [path, id])
+                .then((data:UserInterface[]) => resolve(data.map(d => new UserModel(d))))
+                .catch(err => {
+                    console.log(err)
+                    reject(err)
+                })
+        })
+    }
+
+    static updateVerified(verified: "Y" | "N", id: string): Promise<UserModel[]> {
+        const query = `UPDATE RT.USER SET "VERIFIED" = ? WHERE "ID" = ? ;`;
+        
+        return new Promise((resolve, reject) => {
+            Database.getDB()
+                .query(query, [verified, id])
                 .then((data:UserInterface[]) => resolve(data.map(d => new UserModel(d))))
                 .catch(err => {
                     console.log(err)

@@ -104,7 +104,7 @@ const LogIn = ({ children }) => {
     // }, []);
 
     const handleLogin = (email: string) => {
-        axios.get(`${BASE_URL}/api/login`, { params: { email } }) //{ params: { email: 'email address here' } }
+        axios.get(`${BASE_URL}/api/auth`, { params: { email } }) //{ params: { email: 'email address here' } }
             .then(res => {
                 tempFunc(res.data);
                 // setSourceHTML({ html: res.data });
