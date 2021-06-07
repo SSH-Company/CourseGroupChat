@@ -45,8 +45,9 @@ export class AuthController {
     @Post('login')
     private async login(req: Request, res: Response) {
         try {
+            const session = req.session;
             const { email = '', password = '' } = req.body;
-
+            
             if (email === '' || password === '') {
                 res.status(STATUS.BAD_REQUEST).json({
                     message: "Required parameters - email, password"
@@ -73,6 +74,9 @@ export class AuthController {
                 })
             }
 
+            //save session data
+            session.user = user;
+
             res.status(STATUS.OK).json({
                 _id: user.ID,
                 name: user.FIRST_NAME + ' ' + user.LAST_NAME,
@@ -90,6 +94,8 @@ export class AuthController {
     @Post('signup')
     private async signUp(req: Request, res: Response) {
         try {
+            const session = req.session;
+
             const { firstName = '', lastName = '', email = '', password = '' } = req.body;
             
             if (firstName === '' || lastName === '' || email === '' || password === '') {
@@ -126,6 +132,9 @@ export class AuthController {
 
             const user = await UserModel.insert(newUser);
 
+            //save session data
+            session.user = user;
+
             //store the hash in account verification table
             const newAccount = {
                 USER_ID: user.ID,
@@ -144,7 +153,11 @@ export class AuthController {
             await CMail.createMail().sendMail(mail);
 
             res.status(STATUS.OK).json({
-                message: "New user has been added."
+                _id: user.ID,
+                name: user.FIRST_NAME + ' ' + user.LAST_NAME,
+                avatar: user.AVATAR,
+                email: user.EMAIL,
+                verified: user.VERIFIED
             })
         } catch (err) {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
