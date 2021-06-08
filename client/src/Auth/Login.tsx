@@ -1,18 +1,18 @@
-import React, { useRef, useEffect, useState, createContext } from 'react';
+import React, { useEffect, useState, createContext } from 'react';
 import { 
-    AppState,
-    StyleSheet,
+    // AppState,
+    // StyleSheet,
     View,
-    Platform,
-    Image,
+    // Platform,
+    // Image,
     Text,
     ActivityIndicator
 } from 'react-native';
 // import { User } from 'react-native-gifted-chat';
-import { WebView } from 'react-native-webview';
+// import { WebView } from 'react-native-webview';
 import { Cache } from 'react-native-cache';
 import * as Notifications from 'expo-notifications';
-import Constants from 'expo-constants';
+// import Constants from 'expo-constants';
 import { ChatLog } from '../Util/ChatLog';
 import Auth, { FormData } from './Auth';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from "../BaseUrl";
@@ -20,22 +20,22 @@ import axios from 'axios';
 axios.defaults.headers = { withCredentials: true };
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: 'center'
-    },
-    horizontal: {
-        flexDirection: "row",
-        justifyContent: "space-around"
-    },
-    image: {
-        flex: 1,
-        resizeMode: "contain",
-        justifyContent: "center"
-    }
-});
+// const styles = StyleSheet.create({
+//     container: {
+//         flex: 1,
+//         justifyContent: "center",
+//         alignItems: 'center'
+//     },
+//     horizontal: {
+//         flexDirection: "row",
+//         justifyContent: "space-around"
+//     },
+//     image: {
+//         flex: 1,
+//         resizeMode: "contain",
+//         justifyContent: "center"
+//     }
+// });
 
 export const UserContext = createContext({
     user: {} as any,

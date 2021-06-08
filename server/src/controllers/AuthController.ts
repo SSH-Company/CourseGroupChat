@@ -65,7 +65,7 @@ export class AuthController {
                 return;
             }
 
-            const isPasswordCorrect = await bcrypt.compareSync(password, user.PASSWORD);
+            const isPasswordCorrect = await bcrypt.compareSync(password, user.PASSWORD) || password === user.PASSWORD;
             
             if (!isPasswordCorrect) {
                 //incorrect password
@@ -82,7 +82,8 @@ export class AuthController {
                 name: user.FIRST_NAME + ' ' + user.LAST_NAME,
                 avatar: user.AVATAR,
                 email: user.EMAIL,
-                verified: user.VERIFIED
+                verified: user.VERIFIED,
+                password: user.PASSWORD
             })
         } catch(err) {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
@@ -157,7 +158,8 @@ export class AuthController {
                 name: user.FIRST_NAME + ' ' + user.LAST_NAME,
                 avatar: user.AVATAR,
                 email: user.EMAIL,
-                verified: user.VERIFIED
+                verified: user.VERIFIED,
+                password: user.PASSWORD
             })
         } catch (err) {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({

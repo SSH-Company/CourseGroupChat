@@ -31,9 +31,9 @@ const styles = StyleSheet.create({
     input: {
         borderWidth: 1,
         borderColor: 'black',
-        minWidth: 250,
         marginRight: 10,
-        marginBottom: 10
+        marginBottom: 10,
+        padding: 10
     }
 })
 
