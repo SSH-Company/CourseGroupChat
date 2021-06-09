@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { View, ScrollView, Platform, RefreshControl } from "react-native";
-import { Header, SearchBar, Image } from "react-native-elements";
+import { Header, SearchBar, Image, Button } from "react-native-elements";
 import { Feather, Ionicons, FontAwesome5, MaterialCommunityIcons } from "react-native-vector-icons";
 import { useIsFocused } from "@react-navigation/native";
 import { useActionSheet } from '@expo/react-native-action-sheet';
@@ -114,7 +114,7 @@ const Main = ({ navigation }) => {
         statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
         containerStyle={{ minHeight: 100 }}
         leftComponent={
-          <View style={{ paddingRight: 10 }}>
+          <View>
             <Image
               source={{ uri: user.avatar as string || EMPTY_IMAGE_DIRECTORY }}
               style={{ width: 40, height: 40, borderRadius: 200 }}
@@ -137,13 +137,6 @@ const Main = ({ navigation }) => {
               color={THEME_COLORS.ICON_COLOR} 
               size={20} 
               onPress={() => navigation.navigate("FriendSearch")}
-            />
-            <Feather 
-              name={"edit"} 
-              color={THEME_COLORS.ICON_COLOR} 
-              size={20} 
-              onPress={() => navigation.navigate("Search", { groupName: "New group", searchType: "create" })}
-              style={{ marginLeft: 20 }}
             />
           </View>
         }
@@ -174,6 +167,26 @@ const Main = ({ navigation }) => {
             topDivider
         />
       </ScrollView>
+      <View style={{ alignSelf: 'flex-end', justifyContent: 'flex-end', paddingRight: 35, paddingBottom: 35 }}>
+            <Button
+              icon={
+                <Feather 
+                  name={"edit"} 
+                  color={THEME_COLORS.ICON_COLOR} 
+                  size={25} 
+                />
+              }
+              buttonStyle={{ width: 60, 
+                height: 60, 
+                borderRadius: 200, 
+                backgroundColor: THEME_COLORS.HEADER,
+                shadowOffset:{  width: 10,  height: 10,  },
+                shadowColor: 'black',
+                shadowOpacity: 1.0,
+              }}
+              onPress={() => navigation.navigate("Search", { groupName: "New group", searchType: "create" })}
+            />
+      </View>
     </View>
   );
 };

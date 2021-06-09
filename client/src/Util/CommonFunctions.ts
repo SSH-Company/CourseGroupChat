@@ -10,7 +10,7 @@ export const handleLeaveGroup = (users: string[], groupID: string, leave: boolea
         grpId: groupID,
         leave: leave
     } })
-    .then(() => onSuccess)
+    .then(() => onSuccess())
     .catch(err => console.log(err));
 }
 
@@ -24,3 +24,4 @@ export const millisToMinutesAndSeconds = (millis) => {
         minutes + ":" + (seconds < 10 ? "0" : "") + seconds
     );
 }
+

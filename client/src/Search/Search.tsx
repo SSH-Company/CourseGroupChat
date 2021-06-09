@@ -115,7 +115,7 @@ const Search = ({ route, navigation }) => {
                 statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
                 leftComponent={<Feather name="arrow-left" color={THEME_COLORS.ICON_COLOR} size={25} onPress={() => navigation.navigate("Main")}/>}
                 centerComponent={{
-                    text: "Create Group",
+                    text: "Send Message",
                     style: { color: THEME_COLORS.ICON_COLOR, fontSize: 20, fontWeight: "bold" },
                 }}
                 rightComponent={displaySubmit && 

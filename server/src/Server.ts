@@ -30,27 +30,27 @@ class CGCServer extends Server {
             })
         );
 
-        passport.serializeUser((user, done) => {
-            done(null, user);
-        });
+        // passport.serializeUser((user, done) => {
+        //     done(null, user);
+        // });
         
-        passport.deserializeUser((user, done) => {
-            done(null, user);
-        });
+        // passport.deserializeUser((user, done) => {
+        //     done(null, user);
+        // });
         
-        const samlStrategy = new saml.Strategy({
-            callbackUrl: '/api/login/callback',
-            entryPoint: 'https://konnect1-dev.onelogin.com/trust/saml2/http-post/sso/fabacdc2-986a-4db1-a806-c9b61701ae89',
-            issuer: 'dev-app-konnect'
-        }, 
-        (profile, done) => {
-            console.log(profile);
-            return done(null, profile);
-        })
+        // const samlStrategy = new saml.Strategy({
+        //     callbackUrl: '/api/login/callback',
+        //     entryPoint: 'https://konnect1-dev.onelogin.com/trust/saml2/http-post/sso/fabacdc2-986a-4db1-a806-c9b61701ae89',
+        //     issuer: 'dev-app-konnect'
+        // }, 
+        // (profile, done) => {
+        //     console.log(profile);
+        //     return done(null, profile);
+        // })
 
-        passport.use('saml', samlStrategy);
-        this.app.use(passport.initialize({}));
-        this.app.use(passport.session({}));
+        // passport.use('saml', samlStrategy);
+        // this.app.use(passport.initialize({}));
+        // this.app.use(passport.session({}));
     
         this.setupControllers();
     }

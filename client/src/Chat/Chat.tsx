@@ -1,11 +1,10 @@
 import React, { useState, useCallback, useEffect, useContext, useRef } from 'react';
-import { ActivityIndicator, Text, View, Dimensions } from 'react-native';
+import { ActivityIndicator, Text, View, Dimensions, Clipboard } from 'react-native';
 import { Avatar, Header } from "react-native-elements";
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import { useActionSheet } from '@expo/react-native-action-sheet';
 import { Ionicons, AntDesign } from "react-native-vector-icons";
-import { useIsFocused } from "@react-navigation/native";
 import { CustomMessage, CustomToolbar, InboxSettings } from './components';
 import { UserContext } from '../Auth/Login';
 import { RenderMessageContext } from '../Socket/WebSocket';
@@ -31,7 +30,6 @@ const Chat = ({ route, navigation }) => {
     const [newGroup, setNewGroup] = useState<boolean>();
     const [loading, setLoading] = useState(true);
     const { showActionSheetWithOptions } = useActionSheet();
-    const isFocused = useIsFocused();
     const drawerRef = useRef(null);
     const giftedChatRef = useRef(null);
     const avatarSize = 25;
@@ -39,48 +37,69 @@ const Chat = ({ route, navigation }) => {
 
     useEffect(() => {
         if (groupID) {
-            resetMessages(true);
-            updateMessageStatus();
+            resetMessages();
+            // updateMessageStatus();
         }
-    }, [isFocused, groupID])
+    }, [groupID])
 
     //re set messages everytime a new message is received from socket
+    // useEffect(() => {
+    //     resetMessages();
+    //     updateMessageStatus();
+    // }, [renderFlag]);
+
     useEffect(() => {
-        resetMessages();
-        updateMessageStatus();
-    }, [renderFlag]);
-    
+        //this function is only triggered when the view is first loaded
+        if (messages.length > 0) {
+            appendReceviedMessage();
+        }
+    }, [renderFlag])
+
     const filterOutEmptyMessages = (msgs) => {
         return msgs.filter(msg => msg._id && (msg.text?.length > 0 || msg.image?.length > 0 || msg.video?.length > 0 || msg.file?.length > 0 || msg.audio?.length > 0 ));
     }
 
-    const updateMessageStatus = async () => {
+    // const updateMessageStatus = async () => {
+    //     try {
+    //         const instance = await ChatLog.getChatLogInstance();
+    //         const groupInfo = instance.groupInfo[groupID];
+    //         if (groupInfo && (!groupInfo.entered || postStatus)) {
+    //             await axios.post(`${BASE_URL}/api/chat/updateMessageStatus`, { groupID: groupID });
+    //             instance.updateGroupEntered(groupID, true);
+    //             setPostStatus(false);
+    //         }
+    //     } catch(err) {
+    //         console.log(err);
+    //     }
+    //     return;
+    // }
+
+    const appendReceviedMessage = async () => {
+        //retrieve last message in this group and append to messages
         try {
-            const instance = await ChatLog.getChatLogInstance();
-            const groupInfo = instance.groupInfo[groupID];
-            if (groupInfo && (!groupInfo.entered || postStatus)) {
-                await axios.post(`${BASE_URL}/api/chat/updateMessageStatus`, { groupID: groupID });
-                instance.updateGroupEntered(groupID, true);
-                setPostStatus(false);
+            const log = (await ChatLog.getChatLogInstance()).chatLog;
+            if (groupID && groupID in log) {
+                const lastMessage = log[groupID][0];
+                if (Object.keys(lastMessage).length > 0) {
+                    setMessages(previousMessages => {
+                        const filteredMessages = filterOutEmptyMessages([lastMessage]);
+                        return GiftedChat.append(previousMessages, filteredMessages)
+                    });
+                }
             }
-        } catch(err) {
-            console.log(err);
+        } catch (err) {
+            console.log('Failed to refresh from last received message')
         }
-        return;
     }
 
-    const resetMessages = async (refreshSource: boolean = false) => {
+    const resetMessages = async () => {
         try{
             setLoading(true);
 
             const instance = await ChatLog.getChatLogInstance();
-
-            if (groupID && refreshSource) {
-                await instance.refreshGroup(groupID, false, name, avatar); 
-            }
-
+            await instance.refreshGroup(groupID, false, name, avatar); 
             const log = instance.chatLog;
-
+            
             if (groupID in log) {
                 const groupInfo = instance.groupInfo[groupID];
                 setGroup({
@@ -89,7 +108,7 @@ const Chat = ({ route, navigation }) => {
                     avatar: groupInfo.avatar,
                     verified: groupInfo.verified
                 });
-                
+
                 //we're filtering here to ensure we can retrieve empty group chats from ChatLog_View, but not render any empty messages
                 setMessages(previousMessages => {
                     const messageIds = previousMessages.map(m => m._id);
@@ -102,8 +121,7 @@ const Chat = ({ route, navigation }) => {
                 setMessages([]);
             };
         
-            setLoading(false);
-        
+            setLoading(false); 
         } catch (err) {
             return;
         }
@@ -182,8 +200,10 @@ const Chat = ({ route, navigation }) => {
     //     }
     // }
 
-    const handleLongPress = (id: string) => {
-        const options = ['Remove message', 'Edit message'];
+    const handleLongPress = (id: string, isCurrentUser: boolean, copyString: string | null) => {
+        const options = ['Forward Message'];
+        if (copyString) options.push('Copy Text');
+        if (isCurrentUser) options.push('Delete Message');
         const cancelButtonIndex = options.length - 1;
         showActionSheetWithOptions({
             options,
@@ -191,18 +211,29 @@ const Chat = ({ route, navigation }) => {
         }, async (buttonIndex) => {
             switch (buttonIndex) {
                 case 0:
-                    const reqBody = {
-                        groupID: groupID,
-                        messageID: id
-                    }
-                    await axios.delete(`${BASE_URL}/api/chat`, { data: reqBody });
-                    resetMessages(true);
+                    console.log('forward here');
                     break;
                 case 1:
-                    console.log('edit here');
+                    if (copyString) Clipboard.setString(copyString) 
+                    else if (isCurrentUser) deleteMessage(id)
+                    break;
+                case 2:
+                    deleteMessage(id);
                     break;
             }
         });
+    }
+
+    const deleteMessage = async (id: string) => {
+        const reqBody = {
+            groupID: groupID,
+            messageID: id
+        }
+        await axios.delete(`${BASE_URL}/api/chat`, { data: reqBody });
+        const instance = await ChatLog.getChatLogInstance();
+        await instance.refreshGroup(groupID, false, name, avatar);
+        setMessages(filterOutEmptyMessages(instance.chatLog[groupID]));
+        return;
     }
 
     const onLoadEarlier = async () => {
@@ -212,7 +243,8 @@ const Chat = ({ route, navigation }) => {
             const messageIds = previousMessages.map(m => m._id);
             const filteredMessages = filterOutEmptyMessages(log.chatLog[groupID]).filter(m => !messageIds.includes(m._id));
             return GiftedChat.prepend(previousMessages, filteredMessages)
-        });}
+        });
+    }
 
     return (
         <View style={{flex: 1}}>
@@ -248,7 +280,9 @@ const Chat = ({ route, navigation }) => {
                                     source={{ uri: group.avatar || EMPTY_IMAGE_DIRECTORY }} 
                                     rounded 
                                     size={avatarSize} 
-                                    containerStyle={{ marginLeft: 10, borderColor: "white", borderWidth: 1 }}/>        
+                                    containerStyle={{ marginLeft: 10, borderColor: "white", borderWidth: 1 }}
+                                    onPress={() => drawerRef.current.openDrawer()}
+                                />        
                             </View>
                         }
                         centerComponent={
@@ -278,7 +312,7 @@ const Chat = ({ route, navigation }) => {
                             <CustomMessage 
                                 children={props} 
                                 uploadProgress={uploadProgress} 
-                                onLongPress={id => handleLongPress(id)} 
+                                onLongPress={(id, isCurrentUser, copyString) => handleLongPress(id, isCurrentUser, copyString)} 
                             /> ) }}
                         renderInputToolbar={props => { return ( 
                             <CustomToolbar 
