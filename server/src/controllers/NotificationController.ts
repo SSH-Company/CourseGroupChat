@@ -1,11 +1,14 @@
 import { Request, Response } from 'express';
 import {
+    ClassMiddleware,
     Controller,
     Post
 } from '@overnightjs/core';
+import { userAuthMiddleWare } from '../services/UserAuth';
 import * as STATUS from 'http-status-codes';
 import { Expo } from 'expo-server-sdk';
 
+@ClassMiddleware([userAuthMiddleWare])
 @Controller('notification')
 export class NotificationController {
     //TODO: convert this function into a shareable service

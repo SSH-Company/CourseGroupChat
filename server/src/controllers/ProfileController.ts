@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import {
+    ClassMiddleware,
     Middleware,
     Controller,
     Post,
@@ -10,6 +11,7 @@ import {
 import fs from 'fs';
 import multer from 'multer';
 import * as STATUS from 'http-status-codes';
+import { userAuthMiddleWare } from '../services/UserAuth';
 import { Config } from '../services/Config';
 import { Bucket } from '../services/Bucket';
 import { UserModel } from '../models/User';
@@ -28,6 +30,7 @@ let storage = multer.diskStorage({
 
 const upload = multer({ storage: storage })
 
+@ClassMiddleware([userAuthMiddleWare])
 @Controller('profile')
 export class ProfileController {
     @Post('upload-profile-pic')

@@ -76,6 +76,7 @@ export class AuthController {
 
             //save session data
             session.user = user;
+            session.lastAccess = (new Date()).toString();
 
             res.status(STATUS.OK).json({
                 _id: user.ID,
@@ -135,6 +136,7 @@ export class AuthController {
 
             //save session data
             session.user = user;
+            session.lastAccess = (new Date()).toString();
 
             //store the hash in account verification table
             const newAccount = {

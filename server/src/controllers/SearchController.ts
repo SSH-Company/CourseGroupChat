@@ -1,10 +1,12 @@
 import { Request, Response } from 'express';
 import {
+    ClassMiddleware,
     Controller,
     Post,
     Get
 } from '@overnightjs/core';
 import * as STATUS from 'http-status-codes';
+import { userAuthMiddleWare } from '../services/UserAuth';
 import { UserModel } from '../models/User';
 import { GroupModel } from '../models/Group';
 import { UserGroupModel } from '../models/User_Group';
@@ -13,6 +15,7 @@ import { UserRelationModel } from '../models/User_Relation';
 import { CourseGroupsModel } from '../models/Course_Groups';
 import { CONNECTIONS } from '../WSServer';
 
+@ClassMiddleware([userAuthMiddleWare])
 @Controller('search')
 export class SearchController {
     @Get('users')

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import {
+    ClassMiddleware,
     Middleware,
     Controller,
     Post,
@@ -12,6 +13,7 @@ import * as STATUS from 'http-status-codes';
 import { CONNECTIONS } from '../WSServer';
 import { Config } from '../services/Config';
 import { Bucket } from '../services/Bucket';
+import { userAuthMiddleWare } from '../services/UserAuth';
 import { UserModel } from '../models/User';
 import { MessageModel } from '../models/Message';
 import { UserGroupModel } from '../models/User_Group';
@@ -29,6 +31,7 @@ let storage = multer.diskStorage({
 
 const upload = multer({ storage: storage })
 
+@ClassMiddleware([userAuthMiddleWare])
 @Controller('chat')
 export class ChatController {
 

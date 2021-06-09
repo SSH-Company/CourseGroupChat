@@ -4,6 +4,7 @@ import { Avatar, Header, SearchBar, Button } from "react-native-elements";
 import Feather from "react-native-vector-icons/Feather";
 import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
 import { THEME_COLORS } from '../Util/CommonComponents/Colors';
+import { handleError } from "../Util/CommonFunctions";
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
 axios.defaults.headers = { withCredentials: true };
@@ -61,7 +62,7 @@ const Search = ({ route, navigation }) => {
     useEffect(() => {
         axios.get(`${BASE_URL}/api/search/friends`, { params: { excludeIds: existingMembers } })
             .then(res => setSuggestions(res.data.map(row => ({ ...row, checked: false }))))
-            .catch(err => console.error(err))
+            .catch(err => handleError(err))
     }, [])
 
     useEffect(() => {
@@ -103,7 +104,7 @@ const Search = ({ route, navigation }) => {
                 .then(res => {
                     navigation.navigate('Chat', { groupID: groupID })
                 })
-                .catch(err => console.log(err))
+                .catch(err => handleError(err))
         }   
     }
 

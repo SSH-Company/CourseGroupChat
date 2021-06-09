@@ -7,8 +7,6 @@ import * as Notifications from 'expo-notifications';
 import { UserContext } from '../Auth/Login';
 import { EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import { THEME_COLORS } from '../Util/CommonComponents/Colors';
-import axios from 'axios';
-axios.defaults.headers = { withCredentials: true };
 
 const Settings = ({ navigation }) => {
 
