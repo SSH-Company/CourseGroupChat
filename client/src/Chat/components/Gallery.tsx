@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import LightBox from 'react-native-lightbox';
 import { Video } from 'expo-av';
+import { handleError } from '../../Util/CommonFunctions';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
 import axios from 'axios';
 axios.defaults.headers = { withCredentials: true };
@@ -31,7 +32,7 @@ const Gallery = ({ route, navigation }) => {
                 setLoading(false); 
             })
             .catch(err => {
-                console.log(err);
+                handleError(err);
                 return;
             });
     }, [grpId])

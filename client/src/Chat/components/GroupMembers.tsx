@@ -6,7 +6,7 @@ import { Ionicons, AntDesign } from "react-native-vector-icons";
 import { UserContext } from '../../Auth/Login';
 import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
 import BaseList from '../../Util/CommonComponents/BaseList';
-import { handleLeaveGroup } from '../../Util/CommonFunctions';
+import { handleLeaveGroup, handleError } from '../../Util/CommonFunctions';
 import { BASE_URL } from '../../BaseUrl';
 import axios from 'axios';
 axios.defaults.headers = { withCredentials: true };
@@ -48,7 +48,7 @@ const GroupMembers = ({ route, navigation }) => {
                 setMembers(res.data.map(row => ({ ...row, checked: false })));
                 setLoading(false);
             })
-            .catch(err => console.log(err));
+            .catch(err => handleError(err));
     }, [id, refresh])
 
     useEffect(() => {

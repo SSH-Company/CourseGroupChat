@@ -15,6 +15,7 @@ import { Cache } from 'react-native-cache';
 import * as Notifications from 'expo-notifications';
 // import Constants from 'expo-constants';
 import { ChatLog } from '../Util/ChatLog';
+import { handleError } from '../Util/CommonFunctions';
 import Auth, { FormData } from './Auth';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from "../BaseUrl";
 import axios from 'axios';
@@ -116,29 +117,6 @@ const LogIn = ({ children }) => {
             .finally(() => {
                 setLoading(false)
             })
-    }
-
-    const handleError = (error: any) => {
-        const response = error.response;
-        if (response) {
-            switch(response.status) {
-                case 400:
-                    Alert.alert(
-                        'There was an error!',
-                        response.data.message
-                    )
-                    break;
-                case 409:
-                    Alert.alert(
-                        'There was an error!',
-                        response.data.message
-                    )
-                    break;
-                default: 
-                    console.error(response.data)
-                    break;
-            }
-        }
     }
 
     if (loading) {

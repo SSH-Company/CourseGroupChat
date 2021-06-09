@@ -1,14 +1,16 @@
 import { Request, Response } from 'express'
 import {
-    Middleware,
     Controller,
     Get,
-    Post
+    Post,
+    Delete
 } from '@overnightjs/core';
 import { CMail } from '../services/CMail';
+import { Session } from '../services/Session';
 import { UserModel } from '../models/User';
+import { Exception } from '../services/Exception';
 import { AccountVerificationModel } from '../models/Account_Verification';
-import passport from 'passport';
+// import passport from 'passport';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import * as path from 'path';
@@ -16,36 +18,36 @@ import * as STATUS from 'http-status-codes';
 
 @Controller('auth')
 export class AuthController {
-    @Get('')
-    // @Middleware([passport.authenticate('saml')])
-    private async userLogin(req: Request, res: Response) {
-        let session = req.session;
-        const user = await UserModel.getUserAccountByEmail(req.query.email);
-        session.user = user;
-        res.status(STATUS.OK).json(user);
-    }
+    // @Get('')
+    // // @Middleware([passport.authenticate('saml')])
+    // private async userLogin(req: Request, res: Response) {
+    //     let session = Session.getSession(req);
+    //     const user = await UserModel.getUserAccountByEmail(req.query.email);
+    //     session.user = user;
+    //     res.status(STATUS.OK).json(user);
+    // }
     
-    @Post('callback')
-    @Middleware([passport.authenticate('saml', { failureRedirect: '/', failureFlash: true })])
-    private async successLogin(req: Request, res: Response) {
-        try {
-            //TODO: add a service to ensure session is alive
-            let session = req.session;
-            const user = await UserModel.getUserAccountByEmail(req.user.nameID);
-            session.user = user;
-            const html = `<div class="userBody">${JSON.stringify(user)}</div>`
-            res.status(STATUS.OK).send(html);
-        } catch {
-            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
-                message: "Something went wrong attempting to retrieve user information."
-            })
-        }
-    }
+    // @Post('callback')
+    // @Middleware([passport.authenticate('saml', { failureRedirect: '/', failureFlash: true })])
+    // private async successLogin(req: Request, res: Response) {
+    //     try {
+    //         //TODO: add a service to ensure session is alive
+    //         let session = Session.getSession(req);
+    //         const user = await UserModel.getUserAccountByEmail(req.user.nameID);
+    //         session.user = user;
+    //         const html = `<div class="userBody">${JSON.stringify(user)}</div>`
+    //         res.status(STATUS.OK).send(html);
+    //     } catch {
+    //         res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+    //             message: "Something went wrong attempting to retrieve user information."
+    //         })
+    //     }
+    // }
 
     @Post('login')
     private async login(req: Request, res: Response) {
         try {
-            const session = req.session;
+            const session = Session.getSession(req);
             const { email = '', password = '' } = req.body;
             
             if (email === '' || password === '') {
@@ -76,6 +78,7 @@ export class AuthController {
 
             //save session data
             session.user = user;
+            session.lastAccess = (new Date()).toString();
 
             res.status(STATUS.OK).json({
                 _id: user.ID,
@@ -95,7 +98,7 @@ export class AuthController {
     @Post('signup')
     private async signUp(req: Request, res: Response) {
         try {
-            const session = req.session;
+            const session = Session.getSession(req);
 
             const { firstName = '', lastName = '', email = '', password = '' } = req.body;
             
@@ -135,6 +138,7 @@ export class AuthController {
 
             //save session data
             session.user = user;
+            session.lastAccess = (new Date()).toString();
 
             //store the hash in account verification table
             const newAccount = {
@@ -213,4 +217,37 @@ export class AuthController {
             })
         }
     }
+
+    @Delete('logout')
+    private async logout(req: Request, res: Response) {
+        const session = Session.getSession(req);
+
+        new Promise((resolve, reject) => {
+            let session = Session.getSession(req);
+            if (session) {
+                session.destroy((err) => {
+                    if (err) {
+                        reject(
+                            new Exception({
+                                message: "Failed to destroy session",
+                                identifier: "AC011",
+                                trace: err
+                            })
+                        )
+                        return;
+                    }
+                    resolve('Success');
+                })               
+            }
+        })
+        .then(() => {
+            res.status(STATUS.OK).json({
+                message: "Logout success"
+            })
+        })
+        .catch(err => {
+            res.status(err.status).json(err);
+        })
+    }
 }
+

@@ -6,6 +6,7 @@ import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
 import { BASE_URL } from '../BaseUrl';
 import axios from 'axios';
+import { handleError } from '../Util/CommonFunctions';
 axios.defaults.headers = { withCredentials: true };
 
 const GroupSearch = ({ navigation }) => {
@@ -23,7 +24,7 @@ const GroupSearch = ({ navigation }) => {
                 setUserList(res[1].data)
                 setLoading(false);
             })
-            .catch(err => console.error(err))
+            .catch(err => handleError(err))
     }, []);
 
     const filteredList = useMemo<listtype[]>(() => {

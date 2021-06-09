@@ -4,6 +4,7 @@ import { SearchBar, Header } from "react-native-elements";
 import { Ionicons, AntDesign } from "react-native-vector-icons";
 import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
+import { handleError } from '../Util/CommonFunctions';
 import { BASE_URL } from '../BaseUrl';
 import axios from 'axios';
 axios.defaults.headers = { withCredentials: true };
@@ -35,7 +36,7 @@ const CourseSearch = ({ route, navigation }) => {
                     setLoading(false);
                 }
             })
-            .catch(err => console.error(err))
+            .catch(err => handleError(err))
 
         return () => { mounted = false; }
     }, []);
@@ -72,7 +73,7 @@ const CourseSearch = ({ route, navigation }) => {
             })
             .catch(err => {
                 console.log('unable to join group');
-                console.error(err);
+                handleError(err);
             })
         
         return () => { mounted = false; }

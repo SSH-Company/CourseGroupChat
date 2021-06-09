@@ -11,6 +11,7 @@ import { RenderMessageContext } from '../Socket/WebSocket';
 import { ChatLog, MessageStatus } from '../Util/ChatLog';
 import VerifiedIcon from '../Util/CommonComponents/VerifiedIcon';
 import { THEME_COLORS } from '../Util/CommonComponents/Colors';
+import { handleError } from '../Util/CommonFunctions';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
 axios.defaults.headers = { withCredentials: true };
@@ -154,7 +155,7 @@ const Chat = ({ route, navigation }) => {
             }
 
         } catch(err) {
-            console.error(err);
+            handleError(err);
         }
     }, [])
 
@@ -186,7 +187,7 @@ const Chat = ({ route, navigation }) => {
             setMessages(filterOutEmptyMessages(instance.chatLog[newGroup.id]));
         } catch (err) {
             //TODO: display failed notification here
-            console.error(err);
+            handleError(err);
         }
     }
 
@@ -225,15 +226,19 @@ const Chat = ({ route, navigation }) => {
     }
 
     const deleteMessage = async (id: string) => {
-        const reqBody = {
-            groupID: groupID,
-            messageID: id
+        try {
+            const reqBody = {
+                groupID: groupID,
+                messageID: id
+            }
+            await axios.delete(`${BASE_URL}/api/chat`, { data: reqBody });
+            const instance = await ChatLog.getChatLogInstance();
+            await instance.refreshGroup(groupID, false, name, avatar);
+            setMessages(filterOutEmptyMessages(instance.chatLog[groupID]));
+            return;
+        } catch (err) {
+            handleError(err)
         }
-        await axios.delete(`${BASE_URL}/api/chat`, { data: reqBody });
-        const instance = await ChatLog.getChatLogInstance();
-        await instance.refreshGroup(groupID, false, name, avatar);
-        setMessages(filterOutEmptyMessages(instance.chatLog[groupID]));
-        return;
     }
 
     const onLoadEarlier = async () => {
