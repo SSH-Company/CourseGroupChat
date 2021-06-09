@@ -12,6 +12,7 @@ import fs from 'fs';
 import multer from 'multer';
 import * as STATUS from 'http-status-codes';
 import { userAuthMiddleWare } from '../services/UserAuth';
+import { Session } from '../services/Session';
 import { Config } from '../services/Config';
 import { Bucket } from '../services/Bucket';
 import { UserModel } from '../models/User';
@@ -37,7 +38,7 @@ export class ProfileController {
     @Middleware([upload.single('avatar')])
     private async uploadPicture(req: Request, res: Response) {
         try {
-            const session = req.session;
+            const session = Session.getSession(req);
             const config = Config.getConfig().s3;
             const bucket = Bucket.getBucket().bucket;
 
@@ -96,7 +97,7 @@ export class ProfileController {
     @Get('settings/:id')
     private async getProfileById(req: Request, res: Response) {
         try {
-            const session = req.session;
+            const session = Session.getSession(req);
             const profileID = req.params.id;
             const result = await Promise.all([
                 UserModel.getUserAccountByID(profileID),
@@ -128,7 +129,7 @@ export class ProfileController {
     @Post('friend-request')
     private async sendRequest(req: Request, res: Response) {
         try {
-            const session = req.session;
+            const session = Session.getSession(req);
             const profileID = req.body.id;
             const newRequest: FriendStatusInterface = {
                 SENDER: session.user.ID,
@@ -150,7 +151,7 @@ export class ProfileController {
     @Put('friend-request')
     private async acceptRequest(req: Request, res: Response) {
         try {
-            const session = req.session;
+            const session = Session.getSession(req);
             const id = req.body.id;
             await FriendStatusModel.accept(id, session.user.ID);
             res.status(STATUS.OK).json();
@@ -166,7 +167,7 @@ export class ProfileController {
     @Delete('friend-request')
     private async rejectRequest(req: Request, res: Response) {
         try {
-            const session = req.session;
+            const session = Session.getSession(req);
             const id = req.body.id;
             await FriendStatusModel.reject(id, session.user.ID);
             res.status(STATUS.OK).json();
@@ -182,7 +183,7 @@ export class ProfileController {
     @Get('friend-request')
     private async getRequests(req: Request, res: Response) {
         try {
-            const session = req.session;
+            const session = Session.getSession(req);
             const requests = (await UserModel.getFriendRequests(session.user.ID)).map(row => ({
                 id: row.ID,
                 name: row.FIRST_NAME + ' ' + row.LAST_NAME,
@@ -202,7 +203,7 @@ export class ProfileController {
     @Get('course-groups')
     private async getCourseGroups(req: Request, res: Response) {
         try {
-            const session = req.session;
+            const session = Session.getSession(req);
             const enrolledGroups = (await UserGroupModel.getEnrolledCourses(session.user.ID)).map(d => ({
                 id: d.GROUP_ID,
                 name: d.NAME

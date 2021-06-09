@@ -11,6 +11,7 @@ import fs from 'fs';
 import multer from 'multer';
 import * as STATUS from 'http-status-codes';
 import { CONNECTIONS } from '../WSServer';
+import { Session } from '../services/Session';
 import { Config } from '../services/Config';
 import { Bucket } from '../services/Bucket';
 import { userAuthMiddleWare } from '../services/UserAuth';
@@ -91,7 +92,7 @@ export class ChatController {
     private async submitMessage(req: Request, res: Response) {
         
         try {
-            const session = req.session;
+            const session = Session.getSession(req);
             const user = session.user;
             const config = Config.getConfig().s3;
 
@@ -177,7 +178,7 @@ export class ChatController {
     @Post('updateMessageStatus')
     private async updateMessageStatus(req: Request, res: Response) {
         try {
-            const session = req.session;
+            const session = Session.getSession(req);
             const user = session.user;
             
             const { groupID } = req.body;
@@ -261,7 +262,7 @@ export class ChatController {
     private async joinGroup(req: Request, res: Response) {
         
         try {
-            const session = req.session;
+            const session = Session.getSession(req);
             const { id, name, verified = 'N' } = req.body;
             
             if (typeof id !== 'string' || id === ''
@@ -301,7 +302,7 @@ export class ChatController {
     @Delete('remove-from-group')
     private async removeFromGroup(req: Request, res: Response) {
         try {
-            const session = req.session;
+            const session = Session.getSession(req);
             const { users, grpId, leave } = req.body;
 
             if (!grpId || leave === undefined) {
@@ -359,7 +360,7 @@ export class ChatController {
 
     @Get('load-earlier-messages')
     private getEarlierMessages(req: Request, res: Response) {
-        const session = req.session;
+        const session = Session.getSession(req);
         const { groupID, rowCount } = req.query;
 
         if (!groupID || !rowCount) {

@@ -6,6 +6,7 @@ import {
     Post
 } from '@overnightjs/core';
 import { CMail } from '../services/CMail';
+import { Session } from '../services/Session';
 import { UserModel } from '../models/User';
 import { AccountVerificationModel } from '../models/Account_Verification';
 import passport from 'passport';
@@ -19,7 +20,7 @@ export class AuthController {
     @Get('')
     // @Middleware([passport.authenticate('saml')])
     private async userLogin(req: Request, res: Response) {
-        let session = req.session;
+        let session = Session.getSession(req);
         const user = await UserModel.getUserAccountByEmail(req.query.email);
         session.user = user;
         res.status(STATUS.OK).json(user);
@@ -30,7 +31,7 @@ export class AuthController {
     private async successLogin(req: Request, res: Response) {
         try {
             //TODO: add a service to ensure session is alive
-            let session = req.session;
+            let session = Session.getSession(req);
             const user = await UserModel.getUserAccountByEmail(req.user.nameID);
             session.user = user;
             const html = `<div class="userBody">${JSON.stringify(user)}</div>`
@@ -45,7 +46,7 @@ export class AuthController {
     @Post('login')
     private async login(req: Request, res: Response) {
         try {
-            const session = req.session;
+            const session = Session.getSession(req);
             const { email = '', password = '' } = req.body;
             
             if (email === '' || password === '') {
@@ -96,7 +97,7 @@ export class AuthController {
     @Post('signup')
     private async signUp(req: Request, res: Response) {
         try {
-            const session = req.session;
+            const session = Session.getSession(req);
 
             const { firstName = '', lastName = '', email = '', password = '' } = req.body;
             
