@@ -6,7 +6,8 @@ import {
     // Platform,
     // Image,
     Text,
-    ActivityIndicator
+    ActivityIndicator,
+    Alert
 } from 'react-native';
 // import { User } from 'react-native-gifted-chat';
 // import { WebView } from 'react-native-webview';
@@ -71,8 +72,8 @@ const LogIn = ({ children }) => {
     // const [expoPushToken, setExpoPushToken] = useState('');
     // const responseListener = useRef<any>(null);
     const userContextValue = { user, setUser };
-    const splash_iphone = '../../assets/iphoneX.png';
-    const splash_ipad = '../../assets/ipad.png';
+    // const splash_iphone = '../../assets/iphoneX.png';
+    // const splash_ipad = '../../assets/ipad.png';
 
     useEffect(() => {
         checkIfUserLoggedIn();
@@ -110,11 +111,34 @@ const LogIn = ({ children }) => {
                 setNewUser(false);
             })
             .catch(err => {
-                console.log(err)
+                handleError(err)
             })
             .finally(() => {
                 setLoading(false)
             })
+    }
+
+    const handleError = (error: any) => {
+        const response = error.response;
+        if (response) {
+            switch(response.status) {
+                case 400:
+                    Alert.alert(
+                        'There was an error!',
+                        response.data.message
+                    )
+                    break;
+                case 409:
+                    Alert.alert(
+                        'There was an error!',
+                        response.data.message
+                    )
+                    break;
+                default: 
+                    console.error(response.data)
+                    break;
+            }
+        }
     }
 
     if (loading) {
