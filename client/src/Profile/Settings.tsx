@@ -4,9 +4,23 @@ import { Header, ListItem, Image, Text } from 'react-native-elements';
 import { Entypo, Ionicons, MaterialIcons, Feather, AntDesign } from 'react-native-vector-icons';
 import LightBox from 'react-native-lightbox';
 import * as Notifications from 'expo-notifications';
+import { Restart } from 'fiction-expo-restart';
+import { Cache } from 'react-native-cache';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UserContext } from '../Auth/Login';
-import { EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
+import { EMPTY_IMAGE_DIRECTORY, BASE_URL } from '../BaseUrl';
 import { THEME_COLORS } from '../Util/CommonComponents/Colors';
+import { handleError } from '../Util/CommonFunctions';
+import axios from 'axios';
+axios.defaults.headers = { withCredentials: true };
+
+const cache = new Cache ({
+    namespace: "cirkle",
+    policy: {
+        maxEntries: 10
+    },
+    backend: AsyncStorage
+});
 
 const Settings = ({ navigation }) => {
 
@@ -54,6 +68,17 @@ const Settings = ({ navigation }) => {
             });
             console.log('notifications on');
         }
+    }
+
+    const handleLogout = () => {
+        axios.delete(`${BASE_URL}/api/auth/logout`)
+            .then(async () => {
+                await cache.clearAll();
+                Restart();
+            })
+            .catch(err => {
+                handleError(err)
+            })
     }
 
     const sectionOne = [
@@ -157,7 +182,7 @@ const Settings = ({ navigation }) => {
                 ))}
             </View>
             <View>
-                <ListItem key={`0-logout`} onPress={() => console.log('logout')} bottomDivider>
+                <ListItem key={`0-logout`} onPress={handleLogout} bottomDivider>
                     <MaterialIcons 
                         name="logout" 
                         size={20}
