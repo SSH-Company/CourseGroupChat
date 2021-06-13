@@ -118,23 +118,23 @@ const Profile = ({ route, navigation }) => {
         {
             title: 'Mutual Friends',   
             icon: <FontAwesome5 name={"user-friends"} size={iconSize}/>,
-            //onPress: , 
+            onPress: () => navigation.navigate('MutualFriends', { id: id }) 
         },
         {
             title: 'Common Course Groups',   
             icon: <Ionicons name={"ios-chatbubbles"} size={iconSize}/>,
-            //onPress: ,
+            onPress: () => navigation.navigate('CommonCourseGroups', { id: id })
         },
         {
             title: 'Mute Notifications',   
             icon: <Ionicons name={"notifications-off"} size={iconSize}/>,
             //onPress: ,
         },
-        {
-            title: 'Ignore Messages',  
-            icon: <Entypo name={"block"} size={iconSize}/>
-            //onPress
-        },
+        // {
+        //     title: 'Ignore Messages',  
+        //     icon: <Entypo name={"block"} size={iconSize}/>
+        //     //onPress
+        // },
         {
             title: 'Block',
             icon: <AntDesign name='exclamation' size={iconSize}/>,
@@ -151,12 +151,12 @@ const Profile = ({ route, navigation }) => {
         {
             title: 'Mutual Friends',   
             icon: <FontAwesome5 name={"user-friends"} size={iconSize}/>,
-            //onPress: , 
+            onPress: () => navigation.navigate('MutualFriends', { id: id }) 
         },
         {
             title: 'Common Course Groups',   
             icon: <Ionicons name={"ios-chatbubbles"} size={iconSize}/>,
-            //onPress: ,
+            onPress: () => navigation.navigate('CommonCourseGroups', { id: id })
         },
         {
             title: 'Block',
