@@ -6,6 +6,7 @@ import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
 import { handleLeaveGroup } from '../../Util/CommonFunctions';
 import { BASE_URL } from '../../BaseUrl';
 import axios from 'axios';
+import { BackHandler } from 'react-native';
 axios.defaults.headers = { withCredentials: true };
 
 const styles = StyleSheet.create ({
@@ -71,9 +72,9 @@ const MutualFriends = ({ route, navigation }) => {
                                         source={{ uri: friends.avatar }}
                                         rounded
                                         size={50}
+                                        onPress={() => navigation.navigate("Profile", { id: friends.id })}                                        
                                     />
-                            <ListItem.Content>
-                                    
+                            <ListItem.Content>                                    
                                 <ListItem.Title style={{ fontSize: 16 * deviceDimensions.fontScale}}>{friends.name}</ListItem.Title>
                             </ListItem.Content>
                         </ListItem>
