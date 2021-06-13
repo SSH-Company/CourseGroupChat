@@ -1,10 +1,13 @@
 import { Request, Response } from 'express';
 import {
+    ClassMiddleware,
     Controller,
     Post,
     Get
 } from '@overnightjs/core';
 import * as STATUS from 'http-status-codes';
+import { userAuthMiddleWare } from '../services/UserAuth';
+import { Session } from '../services/Session';
 import { UserModel } from '../models/User';
 import { GroupModel } from '../models/Group';
 import { UserGroupModel } from '../models/User_Group';
@@ -13,12 +16,13 @@ import { UserRelationModel } from '../models/User_Relation';
 import { CourseGroupsModel } from '../models/Course_Groups';
 import { CONNECTIONS } from '../WSServer';
 
+@ClassMiddleware([userAuthMiddleWare])
 @Controller('search')
 export class SearchController {
     @Get('users')
     private async searchList(req: Request, res: Response) {
         try {
-            const session = req.session;
+            const session = Session.getSession(req);
             const excludeIds = req.query.excludeIds || [];
             const users = (await UserModel.getUsersForSearch(excludeIds)).map(row => ({
                 id: row.ID,
@@ -38,7 +42,7 @@ export class SearchController {
 
     @Get('all-groups')
     private allGroupsList(req: Request, res: Response) {
-        const session = req.session;
+        const session = Session.getSession(req);
         const user = session.user as UserModel;
         ChatLogViewModel.getAllGroups(user.ID)
             .then(list => {
@@ -60,7 +64,7 @@ export class SearchController {
     @Post('create-group')
     private async createGroup(req: Request, res: Response) {
         try {
-            const session = req.session;
+            const session = Session.getSession(req);
             const recipients = req.body.recipients;
 
             if(!Array.isArray(recipients) || recipients.length === 0) {
@@ -118,7 +122,7 @@ export class SearchController {
     @Post('add-members')
     private async addMembers(req: Request, res: Response) {
         try {
-            const session = req.session;
+            const session = Session.getSession(req);
             const { groupID, groupName, recipients } = req.body;
 
             if (!groupID || !groupName || !Array.isArray(recipients)) {
@@ -159,7 +163,7 @@ export class SearchController {
     @Get('friends')
     private async friendList(req: Request, res: Response) {
         try {
-            const session = req.session;
+            const session = Session.getSession(req);
             const users = (await UserModel.getFriendList(session.user.ID)).map(row => ({
                 id: row.ID,
                 name: row.FIRST_NAME + ' ' + row.LAST_NAME,
@@ -179,7 +183,7 @@ export class SearchController {
     @Get('friend-search')
     private async friendSearchList(req: Request, res: Response) {
         try {
-            const session = req.session;
+            const session = Session.getSession(req);
             const users = (await UserRelationModel.getUserRelation(session.user.ID)).map(row => ({
                 id: row.USER_TWO,
                 name: row.USER_TWO_FIRST_NAME + ' ' + row.USER_TWO_LAST_NAME,

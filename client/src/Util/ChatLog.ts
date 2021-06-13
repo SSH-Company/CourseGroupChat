@@ -1,4 +1,5 @@
 import { IMessage } from 'react-native-gifted-chat';
+import { handleError } from '../Util/CommonFunctions';
 import { BASE_URL } from '../BaseUrl';
 import axios from 'axios';
 axios.defaults.headers = { withCredentials: true };
@@ -68,7 +69,7 @@ export class ChatLog {
                 user: {
                     _id: row.creator_id,
                     name: row.creator_name,
-                    avatar: row.avatar_url
+                    avatar: row.creator_avatar
                 },
                 status: row.status,
                 displayStatus: false
@@ -99,7 +100,7 @@ export class ChatLog {
                 this.instance = new ChatLog(res.data, id);
                 return this.instance;    
             } catch (err) {
-                console.error('Something went wrong attempting to fetch chat log.');
+                handleError(err)
             }
         } else {
             return this.instance
@@ -163,7 +164,7 @@ export class ChatLog {
             const response = await axios.get(`${BASE_URL}/api/chat/load-earlier-messages`, { params: { groupID, rowCount } });
             this.chatLog[groupID] = response.data;
         } catch (err) {
-            console.error('Something went wrong attempting to refresh group messages.');
+            handleError(err)
         }
     }
 

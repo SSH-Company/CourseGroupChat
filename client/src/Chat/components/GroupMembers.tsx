@@ -6,7 +6,7 @@ import { Ionicons, AntDesign } from "react-native-vector-icons";
 import { UserContext } from '../../Auth/Login';
 import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
 import BaseList from '../../Util/CommonComponents/BaseList';
-import { handleLeaveGroup } from '../../Util/CommonFunctions';
+import { handleLeaveGroup, handleError } from '../../Util/CommonFunctions';
 import { BASE_URL } from '../../BaseUrl';
 import axios from 'axios';
 axios.defaults.headers = { withCredentials: true };
@@ -48,7 +48,7 @@ const GroupMembers = ({ route, navigation }) => {
                 setMembers(res.data.map(row => ({ ...row, checked: false })));
                 setLoading(false);
             })
-            .catch(err => console.log(err));
+            .catch(err => handleError(err));
     }, [id, refresh])
 
     useEffect(() => {
@@ -83,7 +83,7 @@ const GroupMembers = ({ route, navigation }) => {
         <View style={{ flex: 1 }}>
             <Header
                 placement="left"
-                backgroundColor={"white"}
+                backgroundColor={THEME_COLORS.HEADER}
                 statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
                 leftComponent={
                     <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>

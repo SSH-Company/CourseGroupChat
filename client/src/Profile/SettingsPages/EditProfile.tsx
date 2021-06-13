@@ -3,10 +3,10 @@ import { View, Image, Dimensions, Alert } from 'react-native';
 import { Header, Input, Button } from 'react-native-elements';
 import LightBox from 'react-native-lightbox';
 import { AntDesign, MaterialIcons } from "react-native-vector-icons";
-import * as VideoExtensions from 'video-extensions';
 import { handleImagePick, handlePermissionRequest, IMAGE_EXTENSIONS } from "../../Util/ImagePicker";
 import { UserContext } from '../../Auth/Login';
 import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
+import { handleError } from '../../Util/CommonFunctions';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
 import axios from 'axios';
 axios.defaults.headers = { withCredentials: true };
@@ -31,7 +31,7 @@ const EditProfile = ({ navigation }) => {
                 return;
             })
             .catch(err => {
-                console.log(err);
+                handleError(err);
             })
     }
 

@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
 type CustomMessageProps = {
     children: any,
     uploadProgress: number,
-    onLongPress: (id: string) => any
+    onLongPress: (id: string, isCurrentUser: boolean, copyString?: string) => any
 }
 
 const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
@@ -148,7 +148,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                         <>
                             <TouchableOpacity 
                                 onPress={() => setMessagePressed(!messagePressed)}
-                                onLongPress={() => onLongPress(currentMessage._id)}
+                                onLongPress={() => onLongPress(currentMessage._id, isCurrentUser, currentMessage.text)}
                             >     
                             <View style={[styles.balloon, {backgroundColor: isCurrentUser ? '#1F4E45' : 'white'}, { borderWidth: isCurrentUser ? null : 1 }]}>
                                 <Text style={{paddingTop: 5, color:  isCurrentUser ? 'white' : 'black'}}>{currentMessage.text}</Text>
@@ -163,7 +163,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                         {/* handle images */}
                         {currentMessage.hasOwnProperty('image') && currentMessage?.image?.length > 0 && 
                         (<TouchableOpacity
-                            onLongPress={() => onLongPress(currentMessage._id)}
+                            onLongPress={() => onLongPress(currentMessage._id, isCurrentUser)}
                         >     
                             <MessageImage currentMessage={{...currentMessage, image: currentMessage.location}} />
                         </TouchableOpacity>)}
@@ -171,7 +171,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                         {/* handle videos */}
                         {currentMessage.hasOwnProperty('video') && currentMessage?.video?.length > 0 &&
                         (<TouchableOpacity
-                            onLongPress={() => onLongPress(currentMessage._id)}
+                            onLongPress={() => onLongPress(currentMessage._id, isCurrentUser)}
                         >
                             <Video
                                 style={styles.video}
@@ -188,7 +188,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                         {/* handle files */}
                         {currentMessage.hasOwnProperty('file') && currentMessage?.file?.length > 0 &&
                         (<TouchableOpacity
-                            onLongPress={() => onLongPress(currentMessage._id)}
+                            onLongPress={() => onLongPress(currentMessage._id, isCurrentUser)}
                         >
                             <View style={[styles.balloon, 
                                     { backgroundColor: isCurrentUser ? '#1F4E45' : 'white' }, 
@@ -208,7 +208,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                         {currentMessage.hasOwnProperty('audio') && currentMessage?.audio?.length > 0 &&
                         (<TouchableOpacity
                             onPress={() => isPlaying ? sound?.sound.pauseAsync() : sound?.sound.playAsync()}
-                            onLongPress={() => onLongPress(currentMessage._id)}
+                            onLongPress={() => onLongPress(currentMessage._id, isCurrentUser)}
                         >
                             <View style={[styles.balloon, 
                                     { backgroundColor: isCurrentUser ? '#1F4E45' : 'white', width: 200 }, 

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView, Text, ActivityIndicator, Platform, StyleSheet } from "react-native";
 import { Header, ListItem, SearchBar, Avatar, Button } from "react-native-elements";
-import { MaterialIcons, AntDesign } from "react-native-vector-icons";
+import { AntDesign } from "react-native-vector-icons";
 import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
-import { handleLeaveGroup } from '../../Util/CommonFunctions';
+import { handleLeaveGroup, handleError } from '../../Util/CommonFunctions';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
 import axios from 'axios';
 axios.defaults.headers = { withCredentials: true };
@@ -36,7 +36,7 @@ const CourseGroups = ({ navigation }) => {
                     setLoading(false);
                 }
             })
-            .catch(err => console.log(err))
+            .catch(err => handleError(err))
 
         return () => { mounted = false; }
     }, [loading, groups])
@@ -48,7 +48,7 @@ const CourseGroups = ({ navigation }) => {
             <View style={{ flex: 1 }}>
                 <Header
                     placement="left"
-                    backgroundColor={"white"}
+                    backgroundColor={THEME_COLORS.HEADER}
                     statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
                     leftComponent={
                         <View style={{ display: "flex", flexDirection: "row", alignItems: 'center' }}>

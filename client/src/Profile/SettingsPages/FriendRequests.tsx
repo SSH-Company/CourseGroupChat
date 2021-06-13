@@ -4,6 +4,7 @@ import { Header } from "react-native-elements";
 import { Ionicons, AntDesign } from "react-native-vector-icons";
 import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
 import BaseList, { listtype } from '../../Util/CommonComponents/BaseList';
+import { handleError } from '../../Util/CommonFunctions';
 import { BASE_URL } from '../../BaseUrl';
 import axios from 'axios';
 axios.defaults.headers = { withCredentials: true };
@@ -21,7 +22,7 @@ const FriendRequests = ({ navigation }) => {
                     return tempList;
                 });
             })
-            .catch(err => console.log(err));
+            .catch(err => handleError(err));
     }
 
     const cancelRequest = (id: string, index: number) => {
@@ -33,7 +34,7 @@ const FriendRequests = ({ navigation }) => {
                     return tempList;
                 });
             })
-            .catch(err => console.log(err));
+            .catch(err => handleError(err));
     }
 
     useEffect(() => {
@@ -46,14 +47,14 @@ const FriendRequests = ({ navigation }) => {
                         <Button title="Cancel" color="red" onPress={() => cancelRequest(row.id, index)}/>
                     </View>
             }))))
-            .catch(err => console.error(err))
+            .catch(err => handleError(err))
     }, [])
 
     return (
         <View>
             <Header
                 placement="left"
-                backgroundColor={"white"}
+                backgroundColor={THEME_COLORS.HEADER}
                 statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
                 leftComponent={
                     <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>

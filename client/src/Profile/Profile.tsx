@@ -4,6 +4,7 @@ import { ListItem, Image, Text, Button } from 'react-native-elements';
 import { User } from 'react-native-gifted-chat';
 import { FontAwesome5, Ionicons, Entypo, AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import { UserContext } from '../Auth/Login';
+import { handleError } from '../Util/CommonFunctions';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
 axios.defaults.headers = { withCredentials: true };
@@ -51,26 +52,26 @@ const Profile = ({ route, navigation }) => {
                 setFriendStatus(res.data.friendStatus);
             })
             .catch(err => {
-                console.log(err);
+                handleError(err);
             })
     }, [id]);
 
     const addFriend = () => {
         axios.post(`${BASE_URL}/api/profile/friend-request`, { id: id })
             .then(() => setFriendStatus({...friendStatus, sender: user._id as string, status: 'PENDING'}))
-            .catch(err => console.log(err));
+            .catch(err => handleError(err));
     }
 
     const acceptRequest = () => {
         axios.put(`${BASE_URL}/api/profile/friend-request`, { id: id })
             .then(() => setFriendStatus({...friendStatus, status: 'ACCEPTED'}))
-            .catch(err => console.log(err));
+            .catch(err => handleError(err));
     }
 
     const cancelRequest = () => {
         axios.delete(`${BASE_URL}/api/profile/friend-request`, { data: { id: id }})
             .then(() => setFriendStatus({...friendStatus, status: null }))
-            .catch(err => console.log(err));
+            .catch(err => handleError(err));
     }
 
     const getRenderedStatus = (sender: string | null, status: string | null) => {
