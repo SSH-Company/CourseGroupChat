@@ -4,7 +4,7 @@ import * as Notifications from 'expo-notifications';
 import { UserContext } from '../Auth/Login';
 import { ChatLog } from '../Util/ChatLog';
 import { navigationRef, navigate } from '../Util/RootNavigation';
-import { BASE_URL } from '../BaseUrl';
+import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 
 export const RenderMessageContext = createContext({
     postStatus: false,
@@ -34,7 +34,7 @@ const Socket = ({ children }) => {
         return () => { notificationListener.current.remove() }
     }, [])
 
-    const schedulePushNotification = async (group: User, text: string) => {
+    const triggerNotification = async (group: User, text: string) => {
         await Notifications.scheduleNotificationAsync({
             content: {
               title: group.name as string,
@@ -49,6 +49,8 @@ const Socket = ({ children }) => {
     const websocketConnect = () => {
         const url = BASE_URL.split('//')[1]
         const socket = new WebSocket(`ws://${url}`)
+        //check current view the user is in
+        const currentRoute = navigationRef.current.getCurrentRoute(); 
 
         socket.onopen = () => {
             console.log('socket connected');
@@ -70,7 +72,7 @@ const Socket = ({ children }) => {
                         _id: data._id,
                         text: data.text || '',
                         createdAt: data.createdAt || Date.now(),
-                        user: {...data.senderID}
+                        user: {...data.senderID, avatar: data.senderID.avatar || EMPTY_IMAGE_DIRECTORY }
                     }]
                     //check if message contains image/video
                     let mediaType = ''
@@ -89,20 +91,27 @@ const Socket = ({ children }) => {
                     const notificationBody = newMessage[0].subtitle || newMessage[0].text
                     console.log(notificationBody)
 
-                    //check current view the user is in
-                    const currentRoute = navigationRef.current.getCurrentRoute(); 
-
                     //only notify if this groups view is not open
                     if (currentRoute.name === 'Chat') {
-                        if (data.groupID.id !== currentRoute.params.groupID.id)
-                            await schedulePushNotification(data.groupID, notificationBody);
-                    } else await schedulePushNotification(data.groupID, notificationBody);
+                        if (data.groupID.id !== currentRoute.params.groupID) {
+                            await triggerNotification(data.groupID, notificationBody);
+                        }
+                    } else await triggerNotification(data.groupID, notificationBody);
 
                     break;
                 default:
                     break;
             }
-            setRenderFlag(prevFlag => !prevFlag)
+            console.log(currentRoute.name)
+            if (currentRoute.name === 'Chat') {
+                if (data.groupID.id === currentRoute.params.groupID) {
+                    console.log('re rendering...')
+                    setRenderFlag(prevFlag => !prevFlag)
+                }
+            } else {
+                console.log('re rendering...')
+                setRenderFlag(prevFlag => !prevFlag)
+            }
         }
 
         socket.onclose = (e: any) => {

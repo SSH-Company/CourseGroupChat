@@ -37,10 +37,8 @@ const Chat = ({ route, navigation }) => {
     const [uploadProgress, setUploadProgress] = useState<number>(0);
 
     useEffect(() => {
-        if (groupID) {
-            resetMessages();
-            // updateMessageStatus();
-        }
+        resetMessages();
+        // updateMessageStatus();
     }, [groupID])
 
     //re set messages everytime a new message is received from socket
@@ -98,7 +96,7 @@ const Chat = ({ route, navigation }) => {
             setLoading(true);
 
             const instance = await ChatLog.getChatLogInstance();
-            await instance.refreshGroup(groupID, false, name, avatar); 
+            if (groupID) await instance.refreshGroup(groupID, false, name, avatar); 
             const log = instance.chatLog;
             
             if (groupID in log) {
@@ -310,7 +308,11 @@ const Chat = ({ route, navigation }) => {
                     />
                     <GiftedChat
                         ref={giftedChatRef}
-                        user={user}
+                        user={{
+                            _id: user._id,
+                            name: user.name,
+                            avatar: user.avatar
+                        }}
                         messages={messages}
                         onSend={messages => onSend(messages)}
                         renderMessage={props => { return ( 
