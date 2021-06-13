@@ -85,7 +85,7 @@ const Search = ({ route, navigation }) => {
     const handleSubmit = () => {
         const recipients = suggestions.filter(row => row.checked).map(row => ({
             id: row.id,
-            name: row.name.split(" ")[0]
+            name: row.name
         }))
         
         if (searchType === "create") {

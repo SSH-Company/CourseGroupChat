@@ -19,13 +19,12 @@ axios.defaults.headers = { withCredentials: true };
 const Chat = ({ route, navigation }) => {
     const { user } = useContext(UserContext)
     const { postStatus, renderFlag, setPostStatus } = useContext(RenderMessageContext);
-    const { groupID, name, avatar, verified, members } = route.params;
     const [group, setGroup] = useState<any>({
-        id: groupID,
-        name: name || '',
-        avatar: avatar || EMPTY_IMAGE_DIRECTORY,
-        verified: verified || 'N',
-        members: members || []
+        id: route.params.groupID,
+        name: route.params.name || '',
+        avatar: route.params.avatar || EMPTY_IMAGE_DIRECTORY,
+        verified: route.params.verified || 'N',
+        members: route.params.members || []
     });
     const [messages, setMessages] = useState<IMessage[]>([]);
     const [newGroup, setNewGroup] = useState<boolean>();
@@ -39,7 +38,7 @@ const Chat = ({ route, navigation }) => {
     useEffect(() => {
         resetMessages();
         // updateMessageStatus();
-    }, [groupID])
+    }, [route.params.groupID])
 
     //re set messages everytime a new message is received from socket
     // useEffect(() => {
@@ -77,8 +76,8 @@ const Chat = ({ route, navigation }) => {
         //retrieve last message in this group and append to messages
         try {
             const log = (await ChatLog.getChatLogInstance()).chatLog;
-            if (groupID && groupID in log) {
-                const lastMessage = log[groupID][0];
+            if (group.id && group.id in log) {
+                const lastMessage = log[group.id][0];
                 if (Object.keys(lastMessage).length > 0) {
                     setMessages(previousMessages => {
                         const filteredMessages = filterOutEmptyMessages([lastMessage]);
@@ -96,11 +95,11 @@ const Chat = ({ route, navigation }) => {
             setLoading(true);
 
             const instance = await ChatLog.getChatLogInstance();
-            if (groupID) await instance.refreshGroup(groupID, false, name, avatar); 
+            if (group.id) await instance.refreshGroup(group.id, false, group.name, group.avatar); 
             const log = instance.chatLog;
             
-            if (groupID in log) {
-                const groupInfo = instance.groupInfo[groupID];
+            if (group.id in log) {
+                const groupInfo = instance.groupInfo[group.id];
                 setGroup({
                     ...group,
                     name: groupInfo.name,
@@ -111,7 +110,7 @@ const Chat = ({ route, navigation }) => {
                 //we're filtering here to ensure we can retrieve empty group chats from ChatLog_View, but not render any empty messages
                 setMessages(previousMessages => {
                     const messageIds = previousMessages.map(m => m._id);
-                    const filteredMessages = filterOutEmptyMessages(log[groupID]).filter(m => !messageIds.includes(m._id));
+                    const filteredMessages = filterOutEmptyMessages(log[group.id]).filter(m => !messageIds.includes(m._id));
                     return GiftedChat.append(previousMessages, filteredMessages)
                 });
                 setNewGroup(false);   
@@ -132,26 +131,19 @@ const Chat = ({ route, navigation }) => {
             //store message ids, set these to pending: true
             for (const msg of messages) msg['status'] = "Pending" as MessageStatus;
             const instance = await ChatLog.getChatLogInstance();
-
-            if (!(groupID in instance.groupInfo)) {
+            if (!(group.id in instance.groupInfo)) {
                 //create the group in the backend
-                const res = await axios.post(`${BASE_URL}/api/search/create-group`, { recipients: members });
+                const res = await axios.post(`${BASE_URL}/api/search/create-group`, { recipients: group.members });
                 const data = res.data;
-                setGroup({
-                    ...group,
-                    groupID: data.id,
-                    name: data.name
-                });
-                setNewGroup(false);
-                instance.appendLog({ ...group, id: data.id, name: data.name }, messages);
-                setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
+                //refresh log since new group has been created, and navigate to it
+                await ChatLog.getChatLogInstance(true);
                 await sendData(messages, {...group, id:data.id });
+                navigation.push('Chat', { groupID: data.id, name: data.name })
             } else {
                 instance.appendLog(group, messages);
                 setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
                 await sendData(messages);
             }
-
         } catch(err) {
             handleError(err);
         }
@@ -226,13 +218,13 @@ const Chat = ({ route, navigation }) => {
     const deleteMessage = async (id: string) => {
         try {
             const reqBody = {
-                groupID: groupID,
+                groupID: group.id,
                 messageID: id
             }
             await axios.delete(`${BASE_URL}/api/chat`, { data: reqBody });
             const instance = await ChatLog.getChatLogInstance();
-            await instance.refreshGroup(groupID, false, name, avatar);
-            setMessages(filterOutEmptyMessages(instance.chatLog[groupID]));
+            await instance.refreshGroup(group.id, false, group.name, group.avatar);
+            setMessages(filterOutEmptyMessages(instance.chatLog[group.id]));
             return;
         } catch (err) {
             handleError(err)
@@ -241,10 +233,10 @@ const Chat = ({ route, navigation }) => {
 
     const onLoadEarlier = async () => {
         const log = await ChatLog.getChatLogInstance();
-        await log.refreshGroup(groupID, true);
+        await log.refreshGroup(group.id, true);
         setMessages(previousMessages => {
             const messageIds = previousMessages.map(m => m._id);
-            const filteredMessages = filterOutEmptyMessages(log.chatLog[groupID]).filter(m => !messageIds.includes(m._id));
+            const filteredMessages = filterOutEmptyMessages(log.chatLog[group.id]).filter(m => !messageIds.includes(m._id));
             return GiftedChat.prepend(previousMessages, filteredMessages)
         });
     }

@@ -108,7 +108,7 @@ const Socket = ({ children }) => {
                     console.log('re rendering...')
                     setRenderFlag(prevFlag => !prevFlag)
                 }
-            } else {
+            } else {  
                 console.log('re rendering...')
                 setRenderFlag(prevFlag => !prevFlag)
             }
