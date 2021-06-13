@@ -124,7 +124,7 @@ const Main = ({ navigation }) => {
         }
         centerComponent={
           <SearchBar
-            platform={Platform.OS === "android" ? "android" : "ios"}
+            platform={"android"}
             placeholder="Search"
             onFocus={() => navigation.navigate("GroupSearch")}
             containerStyle={{ borderRadius: 50, height: 35, justifyContent: 'center', backgroundColor: 'white' }}

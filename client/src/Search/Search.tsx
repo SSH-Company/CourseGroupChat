@@ -85,7 +85,7 @@ const Search = ({ route, navigation }) => {
     const handleSubmit = () => {
         const recipients = suggestions.filter(row => row.checked).map(row => ({
             id: row.id,
-            name: row.name.split(" ")[0]
+            name: row.name
         }))
         
         if (searchType === "create") {
@@ -127,7 +127,7 @@ const Search = ({ route, navigation }) => {
             />
             {suggestions.length > 0 &&
             <SearchBar
-                platform={Platform.OS === "android" ? "android" : "ios"}
+                platform={"android"}
                 clearIcon={{ size: 30 }}
                 placeholder="Search contacts"
                 onChangeText={(text) => setSearch(text)}
