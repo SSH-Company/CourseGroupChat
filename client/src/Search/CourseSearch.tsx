@@ -105,7 +105,7 @@ const CourseSearch = ({ route, navigation }) => {
             >
                 <SearchBar
                     ref={searchRef}
-                    platform={Platform.OS === "android" ? "android" : "ios"}
+                    platform={"android"}
                     clearIcon={{ size: 30 }}
                     placeholder="Search for course group chats"
                     onChangeText={(text) => setSearch(text)}

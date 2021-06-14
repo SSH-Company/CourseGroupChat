@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, Text, ActivityIndicator, Platform, StyleSheet } from "react-native";
+import { View, ScrollView, Text, ActivityIndicator, StyleSheet } from "react-native";
 import { Header, ListItem, SearchBar, Avatar, Button } from "react-native-elements";
 import { AntDesign } from "react-native-vector-icons";
 import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
@@ -94,7 +94,7 @@ const CourseGroups = ({ navigation }) => {
                 <View style={{ marginBottom: 100 }}>
                     <Text style={{ textAlign: 'center', marginBottom: 10 }}>Max 8 course group chats can be added at a time</Text>
                     <SearchBar
-                        platform={Platform.OS === "android" ? "android" : "ios"}
+                        platform={"android"}
                         placeholder="Add new course group chat"
                         containerStyle={style.searchBar}
                         onFocus={() => navigation.navigate('CourseSearch', { enrolledGroups: groups.map(g => g.id) })}

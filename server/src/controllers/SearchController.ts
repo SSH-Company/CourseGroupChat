@@ -91,7 +91,7 @@ export class SearchController {
             //insert members into new group
             //send a message to other group members to refresh their logs
             for(const id of recipients.map(r => r.id)) {
-                let otherMembers = recipients.filter(row => row.id !== id).map(d => d.name).concat(session.user.FIRST_NAME)
+                let otherMembers = recipients.filter(row => row.id !== id).map(d => d.name).concat(session.user.FIRST_NAME + ' ' + session.user.LAST_NAME)
                 let name = otherMembers.length > 2 ? 
                     `${otherMembers.slice(1).join(", ")} & ${otherMembers.length - 2} others` :
                     otherMembers.join(", ")

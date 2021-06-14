@@ -28,7 +28,7 @@ const Settings = ({ navigation }) => {
     const { user } = useContext(UserContext);
     const [lightboxOpened, setLightboxopened] = useState(false);
     const dimensions = Dimensions.get('window');
-
+    
     const styles = StyleSheet.create({ 
         imageStyle: {
             width: 70,
@@ -38,7 +38,8 @@ const Settings = ({ navigation }) => {
         },
         componentStyle: {
             flex: 1, 
-            textAlignVertical: 'center'
+            textAlignVertical: 'center',
+            justifyContent: 'center'
         }
     })
 

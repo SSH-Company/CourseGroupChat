@@ -56,7 +56,7 @@ const GroupSearch = ({ navigation }) => {
             >
                 <SearchBar
                     ref={searchRef}
-                    platform={Platform.OS === "android" ? "android" : "ios"}
+                    platform={"android"}
                     clearIcon={{ size: 30 }}
                     placeholder="Search for groups"
                     onChangeText={(text) => setSearch(text)}
