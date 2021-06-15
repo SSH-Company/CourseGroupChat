@@ -13,8 +13,8 @@ export class CMail {
             secure: false,
             requireTLS: true,
             auth: {
-                user: "ssh.company2021@gmail.com",
-                pass: "howtosmokeweed@101"
+                user: "cirkle.app@gmail.com",
+                pass: "biriyaniKhabo123"
             }
         })
     }
