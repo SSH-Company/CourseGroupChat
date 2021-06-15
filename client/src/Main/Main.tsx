@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
-import { View, ScrollView, Platform, RefreshControl, TouchableHighlight } from "react-native";
-import { Header, SearchBar, Image, ListItem, Avatar, Button, Text} from "react-native-elements";
+import { View, ScrollView, Platform, RefreshControl } from "react-native";
+import { Header, SearchBar, Image, ListItem, Button } from "react-native-elements";
 import { AntDesign, Feather, Ionicons, FontAwesome5, MaterialCommunityIcons } from "react-native-vector-icons";
 import { useIsFocused } from "@react-navigation/native";
 import { useActionSheet } from '@expo/react-native-action-sheet';
@@ -35,19 +35,6 @@ const Main = ({ navigation }) => {
   const [friendBar, setFriendBar] = useState(false);
   const isFocused = useIsFocused();
   const { showActionSheetWithOptions } = useActionSheet();
-  const rightButtons = [
-    <Button
-      icon={
-        <AntDesign
-          name="delete"
-          size={35}
-          color="white"
-        />
-      }
-      iconRight
-      // title="Button with icon component"
-    />
-  ];
 
   useEffect(() => {
     if (isFocused) resetList(true);
@@ -134,87 +121,95 @@ const Main = ({ navigation }) => {
     });
   }
 
-  const releaseAction = () => {
-    setFriendBar(false);
-  }
-
   // renders header | searchbar | chat list
-  if (friendBar) {
-    return ( 
-      <View style={{ flex: 1 }}>
-        <Header
-          placement="left"
-          backgroundColor={THEME_COLORS.HEADER}
-          statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
-          containerStyle={{ minHeight: 100 }}
-          leftComponent={
-            <View>
-              <Image
-                source={{ uri: user.avatar as string || EMPTY_IMAGE_DIRECTORY }}
-                style={{ width: 40, height: 40, borderRadius: 200 }}
-                onPress={() => navigation.navigate("Settings")}
-              />
-            </View>
-          }
-          centerComponent={
-            <SearchBar
-              platform={Platform.OS === "android" ? "android" : "ios"}
-              placeholder="Search"
-              onFocus={() => navigation.navigate("GroupSearch")}
-              containerStyle={{ borderRadius: 50, height: 35, justifyContent: 'center', backgroundColor: 'white' }}
+  return ( 
+    <View style={{ flex: 1 }}>
+      <Header
+        placement="left"
+        backgroundColor={THEME_COLORS.HEADER}
+        statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
+        containerStyle={{ minHeight: 100 }}
+        leftComponent={
+          <View>
+            <Image
+              source={{ uri: user.avatar as string || EMPTY_IMAGE_DIRECTORY }}
+              style={{ width: 40, height: 40, borderRadius: 200 }}
+              onPress={() => navigation.navigate("Settings")}
             />
-          }
-          rightComponent={
-            <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingRight: 5 }}>
-              <Ionicons 
-                name={"person-add"} 
-                color={THEME_COLORS.ICON_COLOR} 
-                size={20} 
-                onPress={() => navigation.navigate("FriendSearch")}
-              />
-            </View>
-          }
-          leftContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
-          centerContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
-          rightContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
-        />
-        <ScrollView
-          contentOffset={{ x: 0, y: 76 }}
-          keyboardShouldPersistTaps="handled"
-          refreshControl={
-            <RefreshControl 
-              tintColor={Platform.OS === "ios" ? 'transparent' : null}
-              refreshing={refreshing} 
-              onRefresh={() => {
-                setRefreshing(true);
-                resetList(true);
-              }}
-            />
-          }
-        >
-        <Swipeable
-          rightContent = {rightButtons}  
-          onRightActionRelease = {releaseAction}
-          rightActionActivationDistance = {275}
-        >
-          <ListItem
-            key='friendBar'
-            onPress={() => navigation.navigate("FriendRequests")}
-            topDivider={false}
-          >
-            <AntDesign
-              name={"exclamationcircleo"} 
+          </View>
+        }
+        centerComponent={
+          <SearchBar
+            platform={"android"}
+            placeholder="Search"
+            onFocus={() => navigation.navigate("GroupSearch")}
+            containerStyle={{ borderRadius: 50, height: 35, justifyContent: 'center', backgroundColor: 'white' }}
+          />
+        }
+        rightComponent={
+          <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingRight: 5 }}>
+            <Ionicons 
+              name={"person-add"} 
               color={THEME_COLORS.ICON_COLOR} 
-              size={20}
+              size={20} 
+              onPress={() => navigation.navigate("FriendSearch")}
             />
-            <ListItem.Content>
-                <View style={{ display:'flex', flexDirection: "row", justifyContent: "space-between" }}>
-                    <ListItem.Title>You have a new friend request!</ListItem.Title>
-                </View>
-            </ListItem.Content>
-            <ListItem.Chevron size={25}/>
-          </ListItem>
-        </Swipeable>
+          </View>
+        }
+        leftContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
+        centerContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
+        rightContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
+      />
+      <ScrollView
+        contentOffset={{ x: 0, y: 76 }}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={
+          <RefreshControl 
+            tintColor={Platform.OS === "ios" ? 'transparent' : null}
+            refreshing={refreshing} 
+            onRefresh={() => {
+              setRefreshing(true);
+              resetList(true);
+            }}
+          />
+        }
+      >
+          {friendBar &&
+          <Swipeable
+            key={`swipeable-${friendBar}`}
+            rightContent = {
+              <Button
+                icon={
+                  <AntDesign
+                    name="delete"
+                    size={35}
+                    color="white"
+                  />
+                }
+                iconRight
+                // title="Button with icon component"
+              />}  
+            onRightActionRelease = {() => setFriendBar(false)}
+            rightActionActivationDistance = {275}
+          >
+            <ListItem
+              key={`friendBar-${friendBar}`}
+              onPress={() => navigation.navigate("FriendRequests")}
+              topDivider={false}
+            >
+              <AntDesign
+                name={"exclamationcircleo"} 
+                color={THEME_COLORS.ICON_COLOR} 
+                size={20}
+              />
+              <ListItem.Content>
+                  <View style={{ display:'flex', flexDirection: "row", justifyContent: "space-between" }}>
+                      <ListItem.Title>You have a new friend request!</ListItem.Title>
+                  </View>
+              </ListItem.Content>
+              <ListItem.Chevron size={25}/>
+            </ListItem>
+          </Swipeable>}
           <BaseList
               items={completeList}
               itemOnPress={(l, i) => {
@@ -222,116 +217,30 @@ const Main = ({ navigation }) => {
               }}
               itemOnLongPress={(l, i) => handleLongPress(l.id)}
               topDivider
-          />
-        </ScrollView>
-        <View style={{ alignSelf: 'flex-end', justifyContent: 'flex-end', paddingRight: 35, paddingBottom: 35 }}>
-              <Button
-                icon={
-                  <Feather 
-                    name={"edit"} 
-                    color={THEME_COLORS.ICON_COLOR} 
-                    size={25} 
-                  />
-                }
-                buttonStyle={{ width: 60, 
-                  height: 60, 
-                  borderRadius: 200, 
-                  backgroundColor: THEME_COLORS.HEADER,
-                  shadowOffset:{  width: 10,  height: 10,  },
-                  shadowColor: 'black',
-                  shadowOpacity: 1.0,
-                }}
-                onPress={() => navigation.navigate("Search", { groupName: "New group", searchType: "create" })}
-              />
-        </View>
-      </View>
-    );
-  }
-  else {
-    return (
-      <View style={{ flex: 1 }}>
-        <Header
-          placement="left"
-          backgroundColor={THEME_COLORS.HEADER}
-          statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
-          containerStyle={{ minHeight: 100 }}
-          leftComponent={
-            <View>
-              <Image
-                source={{ uri: user.avatar as string || EMPTY_IMAGE_DIRECTORY }}
-                style={{ width: 40, height: 40, borderRadius: 200 }}
-                onPress={() => navigation.navigate("Settings")}
-              />
-            </View>
-          }
-          centerComponent={
-            <SearchBar
-              platform={Platform.OS === "android" ? "android" : "ios"}
-              placeholder="Search"
-              onFocus={() => navigation.navigate("GroupSearch")}
-              containerStyle={{ borderRadius: 50, height: 35, justifyContent: 'center', backgroundColor: 'white' }}
             />
-          }
-          rightComponent={
-            <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingRight: 5 }}>
-              <Ionicons 
-                name={"person-add"} 
-                color={THEME_COLORS.ICON_COLOR} 
-                size={20} 
-                onPress={() => navigation.navigate("FriendSearch")}
-              />
-            </View>
-          }
-          leftContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
-          centerContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
-          rightContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
-        />
-        <ScrollView
-          contentOffset={{ x: 0, y: 76 }}
-          keyboardShouldPersistTaps="handled"
-          refreshControl={
-            <RefreshControl 
-              tintColor={Platform.OS === "ios" ? 'transparent' : null}
-              refreshing={refreshing} 
-              onRefresh={() => {
-                setRefreshing(true);
-                resetList(true);
+      </ScrollView>
+      <View style={{ alignSelf: 'flex-end', justifyContent: 'flex-end', paddingRight: 35, paddingBottom: 35 }}>
+            <Button
+              icon={
+                <Feather 
+                  name={"edit"} 
+                  color={THEME_COLORS.ICON_COLOR} 
+                  size={25} 
+                />
+              }
+              buttonStyle={{ width: 60, 
+                height: 60, 
+                borderRadius: 200, 
+                backgroundColor: THEME_COLORS.HEADER,
+                shadowOffset:{  width: 10,  height: 10,  },
+                shadowColor: 'black',
+                shadowOpacity: 1.0,
               }}
+              onPress={() => navigation.navigate("Search", { groupName: "New group", searchType: "create" })}
             />
-          }
-        >
-        <BaseList
-            items={completeList}
-            itemOnPress={(l, i) => {
-                navigation.navigate("Chat", { groupID: l.id })
-            }}
-            itemOnLongPress={(l, i) => handleLongPress(l.id)}
-            topDivider
-        />
-        </ScrollView>
-        <View style={{ alignSelf: 'flex-end', justifyContent: 'flex-end', paddingRight: 35, paddingBottom: 35 }}>
-              <Button
-                icon={
-                  <Feather 
-                    name={"edit"} 
-                    color={THEME_COLORS.ICON_COLOR} 
-                    size={25} 
-                  />
-                }
-                buttonStyle={{ width: 60, 
-                  height: 60, 
-                  borderRadius: 200, 
-                  backgroundColor: THEME_COLORS.HEADER,
-                  shadowOffset:{  width: 10,  height: 10,  },
-                  shadowColor: 'black',
-                  shadowOpacity: 1.0,
-                }}
-                onPress={() => navigation.navigate("Search", { groupName: "New group", searchType: "create" })}
-              />
-        </View>
       </View>
-    );
-  }
+    </View>
+  );
 };
 
 export default Main;

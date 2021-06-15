@@ -7,7 +7,7 @@ import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
 import { BASE_URL } from '../BaseUrl';
 import axios from 'axios';
 import { handleError } from '../Util/CommonFunctions';
-axios.defaults.headers = { withCredentials: true };
+
 
 const GroupSearch = ({ navigation }) => {
     const [search, setSearch] = useState("");

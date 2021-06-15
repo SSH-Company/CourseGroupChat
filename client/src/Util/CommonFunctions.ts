@@ -2,7 +2,7 @@ import { Alert } from 'react-native';
 import { Restart } from 'fiction-expo-restart';
 import { BASE_URL } from '../BaseUrl';
 import axios from 'axios';
-axios.defaults.headers = { withCredentials: true };
+
 
 // Parameters: group ID - string, leave: boolean
 // returns null

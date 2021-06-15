@@ -19,7 +19,7 @@ import { handleError } from '../Util/CommonFunctions';
 import Auth, { FormData } from './Auth';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from "../BaseUrl";
 import axios from 'axios';
-axios.defaults.headers = { withCredentials: true };
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // const styles = StyleSheet.create({
