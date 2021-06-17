@@ -7,12 +7,14 @@ import {
     // Image,
     Text,
     ActivityIndicator,
-    Alert
+    Alert,
+    Button
 } from 'react-native';
 // import { User } from 'react-native-gifted-chat';
 // import { WebView } from 'react-native-webview';
 import { Cache } from 'react-native-cache';
 import * as Notifications from 'expo-notifications';
+import { Restart } from 'fiction-expo-restart';
 // import Constants from 'expo-constants';
 import { ChatLog } from '../Util/ChatLog';
 import { handleError } from '../Util/CommonFunctions';
@@ -119,6 +121,11 @@ const LogIn = ({ children }) => {
             })
     }
 
+    const handleLogout = async () => {
+        await cache.clearAll();
+        Restart();
+    }
+
     if (loading) {
         return (
             <View style={{ flex: 1, alignContent: 'center', justifyContent: 'center' }}>
@@ -149,6 +156,7 @@ const LogIn = ({ children }) => {
                         <Text style={{ fontWeight: 'bold', fontSize: 25, textAlign: 'center', textAlignVertical: 'center' }}>
                             Looks like your account isn't verified. Please retry after verifying your email.
                         </Text>
+                        <Button title={'Logout'} onPress={handleLogout}/>
                     </View>
                 )
             }

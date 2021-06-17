@@ -149,7 +149,7 @@ export class AuthController {
             await AccountVerificationModel.insert(newAccount);
 
             //send the user an email with verification link attached
-            const link = `https://cirkle.ca/api/auth/verify?userId=${user.ID}&token=${uniqueVerificationLink}`
+            const link = `https://cirkle.ca/verify/${user.ID}/${uniqueVerificationLink}`
             const mail = {
                 to: email,
                 subject: "Cirkle - Verify your email",
@@ -177,10 +177,28 @@ export class AuthController {
     private async verify(req: Request, res: Response) {
         try {
             const { userId = '', token = '' } = req.query;
-
+            
             if (userId === '' || token === '') {
                 res.status(STATUS.BAD_REQUEST).json({
                     message: "Required parameters - userId, token"
+                })
+                return;
+            }
+
+            //check if user ID is valid
+            const userAccount = await UserModel.getUserAccountByID(userId);
+
+            if (!userAccount) {
+                res.status(STATUS.BAD_REQUEST).json({
+                    message: "This user ID is not recognised by our system."
+                })
+                return;
+            }
+
+            //check if this user is already verified
+            if (userAccount.VERIFIED === 'Y') {
+                res.status(STATUS.OK).json({
+                    status: "success"
                 })
                 return;
             }
@@ -190,7 +208,7 @@ export class AuthController {
 
             if (!account) {
                 res.status(STATUS.BAD_REQUEST).json({
-                    message: "This user ID is not recognised by our system."
+                    message: "Unable to find token related to this user ID."
                 })
                 return;
             }
@@ -204,12 +222,16 @@ export class AuthController {
                 await UserModel.updateVerified('Y', userId);
                 await AccountVerificationModel.deleteByUserId(userId);
 
-                res.sendFile(path.join(__dirname, '../public/client/verified.html'))
+                // res.sendFile(path.join(__dirname, '../public/client/verified.html'))
+                res.status(STATUS.OK).json({
+                    status: "expired"
+                })
                 return;
-            } else {
-                res.sendFile(path.join(__dirname, '../public/client/timeout.html'))
             }
 
+            res.status(STATUS.OK).json({
+                status: "success"
+            })
         } catch(err) {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong attempting to verify your account.",
