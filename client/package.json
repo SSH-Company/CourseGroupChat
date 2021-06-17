@@ -39,11 +39,16 @@
     "react-native-safe-area-context": "^3.1.9",
     "react-native-screens": "^2.16.1",
     "react-native-svg": "^12.1.0",
+    "react-native-swipeable": "^0.6.0",
     "react-native-vector-icons": "^7.1.0",
     "react-native-web": "~0.13.12",
     "react-native-webview": "^11.2.3",
     "react-native-xml2js": "^1.0.3",
+
     "react-router-dom": "^5.2.0",
+
+    "react-swipeable-list": "^1.4.0",
+
     "video-extensions": "^1.1.0",
     "websocket": "^1.0.33",
     "ws": "^7.4.2",
