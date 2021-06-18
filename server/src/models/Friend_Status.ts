@@ -59,11 +59,11 @@ export class FriendStatusModel implements FriendStatusInterface {
         })
     }
 
-    static reject(sender: string, receiver: string): Promise<void> {
+    static reject(sender: string, receiver: string, receivertwo: string, sendertwo:string): Promise<void> {
         return new Promise((resolve, reject) => {
             const query = `DELETE FROM RT.FRIEND_STATUS
-                            WHERE "SENDER" = ? AND "RECEIVER" = ?;`;
-            const params = [sender, receiver];
+                            WHERE ("SENDER" = ? AND "RECEIVER" = ?) OR ("RECEIVER" =? AND "SENDER"=?) ;`;
+            const params = [sender, receiver, receivertwo, sendertwo];
 
             Database.getDB()
             .query(query, params)
