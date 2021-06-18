@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
     },
     background: {
         flex: 1,
-        resizeMode: 'stretch',
+        resizeMode: 'cover',
         justifyContent: 'center',
     },
     title: {
@@ -118,14 +118,14 @@ const Auth = (props: AuthProps) => {
                                 placeholder="First Name"
                                 style={styles.input}
                                 value={form.firstName} 
-                                onChangeText={text => setForm({ ...form, firstName: text.trim() })}
+                                onChangeText={text => setForm({ ...form, firstName: text })}
                             />
                             {errors.firstName && errorMsg('First name cannot be empty.')}
                             <TextInput 
                                 placeholder="Last Name"
                                 style={styles.input}
                                 value={form.lastName} 
-                                onChangeText={text => setForm({ ...form, lastName: text.trim() })}
+                                onChangeText={text => setForm({ ...form, lastName: text })}
                             />
                             {errors.lastName && errorMsg('Last name cannot be empty.')}
                         </>
@@ -134,7 +134,7 @@ const Auth = (props: AuthProps) => {
                         placeholder="Enter your email"
                         style={styles.input}
                         value={form.email} 
-                        onChangeText={text => setForm({ ...form, email: text.trim() })}
+                        onChangeText={text => setForm({ ...form, email: text })}
                     />
                     {errors.email && errorMsg('Please enter a valid Uoft email address.')}
                     <TextInput 
@@ -142,7 +142,7 @@ const Auth = (props: AuthProps) => {
                         style={styles.input}
                         value={form.password}
                         secureTextEntry
-                        onChangeText={text => setForm({ ...form, password: text.trim() })}
+                        onChangeText={text => setForm({ ...form, password: text })}
                     />
                     {errors.password && errorMsg('Password cannot be empty.')}
                     <Button

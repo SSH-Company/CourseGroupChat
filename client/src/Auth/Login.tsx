@@ -19,9 +19,9 @@ import { Restart } from 'fiction-expo-restart';
 import { ChatLog } from '../Util/ChatLog';
 import { handleError } from '../Util/CommonFunctions';
 import Auth, { FormData } from './Auth';
+import Unverified from './Unverified';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from "../BaseUrl";
 import axios from 'axios';
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // const styles = StyleSheet.create({
@@ -67,7 +67,7 @@ Notifications.setNotificationHandler({
 const LogIn = ({ children }) => {
     const [loading, setLoading] = useState(true)
     const [newUser, setNewUser] = useState(false)
-    const [user, setUser] = useState({});
+    const [user, setUser] = useState({} as any);
     const [verifiedUser, setVerifiedUser] = useState<'Y' | 'N'>('N');
     const [pageType, setPageType] = useState<"login" | "signup">("login");
     // const [sourceHTML, setSourceHTML] = useState<any>();
@@ -87,7 +87,7 @@ const LogIn = ({ children }) => {
             //check if users data can be found in phone storage
             const email = await cache.get('email'),
             password = await cache.get('password')
-            if (email && password) {
+            if (email?.length > 0 && password?.length > 0) {
                 handleSubmit({ email, password }, "login");
             } else {
                 setNewUser(true);
@@ -152,12 +152,7 @@ const LogIn = ({ children }) => {
             } else {
                 //return unverified page
                 return (
-                    <View style={{ flex: 1, alignContent: 'center', justifyContent: 'center' }}>
-                        <Text style={{ fontWeight: 'bold', fontSize: 25, textAlign: 'center', textAlignVertical: 'center' }}>
-                            Looks like your account isn't verified. Please retry after verifying your email.
-                        </Text>
-                        <Button title={'Logout'} onPress={handleLogout}/>
-                    </View>
+                    <Unverified userId={user.ID} handleLogout={handleLogout}/>
                 )
             }
         }
