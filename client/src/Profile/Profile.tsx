@@ -27,14 +27,19 @@ const style = StyleSheet.create({
     },
     name: {
         fontWeight: 'bold',
-        fontSize: 20,
+        fontSize: 20*deviceDimensions.fontScale,
         marginBottom: 25
     },
     acceptContainer: {
         display: 'flex', 
         flexDirection: 'row', 
-        justifyContent: 'space-between', 
-        minWidth: 140,
+        justifyContent: 'space-evenly', 
+        // minWidth: 150,
+        // width: deviceDimensions.scale*60,
+        // alignItems: 'center',
+        // flexGrow: 1,
+        // flex: 1,
+        // maxWidth: deviceDimensions.scale*1    
     }
 })
 
@@ -73,6 +78,12 @@ const Profile = ({ route, navigation }) => {
             .catch(err => console.log(err));
     }
 
+    // const cancelRequest = () => {
+    //     axios.delete(`${BASE_URL}/api/profile/sent-friend-request`, { data: { id: id }})
+    //         .then(() => setFriendStatus({...friendStatus, status: null }))
+    //         .catch(err => console.log(err));
+    // }
+
     const getRenderedStatus = (sender: string | null, status: string | null) => {
         if (status === "ACCEPTED") {
             return <Button 
@@ -88,20 +99,32 @@ const Profile = ({ route, navigation }) => {
             />
         } else if (status === "PENDING") {
             if (sender === user._id) {
-                return <Button 
-                    title="Pending"
-                />
+                return(
+                <View>
+                    <Text style={{ color: "grey", fontSize: 12*deviceDimensions.fontScale, marginBottom: deviceDimensions.scale*2}}> You sent {userInfo.name} a friend request</Text>                    
+                    <View style={style.acceptContainer}>                        
+                        <Button
+                        title="Cancel Request"
+                        onPress={cancelRequest}
+                        />  
+                    </View>
+                </View>
+                
+                )
             } else {
                 return (
-                    <View style={style.acceptContainer}>
-                        <Button 
-                            title="Accept"
-                            onPress={acceptRequest}
-                        />
-                        <Button 
-                            title="Cancel"
-                            onPress={cancelRequest}
-                        />
+                    <View>
+                        <Text style={{ color: "grey", fontSize: 12*deviceDimensions.fontScale, marginBottom: deviceDimensions.scale*2}}> {userInfo.name} sent you a friend request</Text>
+                        <View style={style.acceptContainer}>                        
+                            <Button 
+                                title="Accept"
+                                onPress={acceptRequest}
+                            />
+                            <Button 
+                                title="Cancel"
+                                onPress={cancelRequest}
+                            />
+                        </View>
                     </View>
                 )
             }
@@ -112,7 +135,14 @@ const Profile = ({ route, navigation }) => {
             />
         }
     }
-
+    // const unfriend = (sender: string | null) => {
+    //     if (sender === user._id) {
+    //         return cancelRequest
+    //     }
+    //     else {
+    //         return denyRequest
+    //     }
+    // }
     const iconSize = 20;
     const friendSettingsList = [
         {
@@ -135,15 +165,15 @@ const Profile = ({ route, navigation }) => {
         //     icon: <Entypo name={"block"} size={iconSize}/>
         //     //onPress
         // },
-        {
-            title: 'Block',
-            icon: <AntDesign name='exclamation' size={iconSize}/>,
-            //onPress: () => { navigation.navigate('FriendRequests') }
-        },
+        // {
+        //     title: 'Block',
+        //     icon: <AntDesign name='exclamation' size={iconSize}/>,
+        //     //onPress: () => { navigation.navigate('FriendRequests') }
+        // },
         {
             title: 'Unfriend', 
-            icon: <MaterialCommunityIcons name={"account-cancel"} size={iconSize}/>
-            //onPress:
+            icon: <MaterialCommunityIcons name={"account-cancel"} size={iconSize}/>,
+            onPress: cancelRequest
         },
     ]
 
@@ -158,11 +188,11 @@ const Profile = ({ route, navigation }) => {
             icon: <Ionicons name={"ios-chatbubbles"} size={iconSize}/>,
             onPress: () => navigation.navigate('CommonCourseGroups', { id: id })
         },
-        {
-            title: 'Block',
-            icon: <AntDesign name='exclamation' size={iconSize}/>,
-            //onPress: () => { navigation.navigate('FriendRequests') }
-        }
+        // {
+        //     title: 'Block',
+        //     icon: <AntDesign name='exclamation' size={iconSize}/>,
+        //     //onPress: () => { navigation.navigate('FriendRequests') }
+        // }
     ]
 
     const getSettingsList = (status: string | null) => {

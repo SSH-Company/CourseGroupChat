@@ -167,11 +167,11 @@ export class ProfileController {
     }
 
     @Delete('friend-request')
-    private async rejectRequest(req: Request, res: Response) {
+    private async deleteRequest(req: Request, res: Response) {
         try {
             const session = Session.getSession(req);
             const id = req.body.id;
-            await FriendStatusModel.reject(id, session.user.ID);
+            await FriendStatusModel.reject(id, session.user.ID, id, session.user.ID);
             res.status(STATUS.OK).json();
         } catch (err) {
             console.error(err);
