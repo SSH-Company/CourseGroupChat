@@ -119,8 +119,6 @@ export class AuthController {
                 return;
             } 
 
-            //generate verification link
-            const uniqueVerificationLink = crypto.randomBytes(64).toString('hex');
 
             //hash the password
             const hash = await bcrypt.hashSync(password, 8);
@@ -140,22 +138,7 @@ export class AuthController {
             session.user = user;
             session.lastAccess = (new Date()).toString();
 
-            //store the hash in account verification table
-            const newAccount = {
-                USER_ID: user.ID,
-                VERIFICATION_ID: uniqueVerificationLink
-            } as AccountVerificationModel;
-            
-            await AccountVerificationModel.insert(newAccount);
-
-            //send the user an email with verification link attached
-            const link = `https://cirkle.ca/verify/${user.ID}/${uniqueVerificationLink}`
-            const mail = {
-                to: email,
-                subject: "Cirkle - Verify your email",
-                html: `Hello,<br> Please Click on the link to verify your email.<br><a href=${link}>Click here to verify</a>`
-            }
-            await CMail.createMail().sendMail(mail);
+            await this.sendVerificationMail(user.ID, email);
 
             res.status(STATUS.OK).json({
                 _id: user.ID,
@@ -216,7 +199,7 @@ export class AuthController {
             const timestamp = (new Date(account.CREATE_DATE)).getTime() / 1000;
             const current = (new Date()).getTime() / 1000;
             
-            //check if the verification id match and the token has not expired (7 days limit)
+            //check if the verification id match and the token has not expired (7 days limit 604800)
             if (account.VERIFICATION_ID === token && Math.abs(current - timestamp) < 604800) {
                 //update VERIFIED status on user model and remove the hash string from DB
                 await UserModel.updateVerified('Y', userId);
@@ -224,14 +207,16 @@ export class AuthController {
 
                 // res.sendFile(path.join(__dirname, '../public/client/verified.html'))
                 res.status(STATUS.OK).json({
-                    status: "expired"
+                    status: "success"
                 })
                 return;
-            }
+            } else {
+                await AccountVerificationModel.deleteByUserId(userId);
 
-            res.status(STATUS.OK).json({
-                status: "success"
-            })
+                res.status(STATUS.OK).json({
+                    status: "expired"
+                });
+            } 
         } catch(err) {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong attempting to verify your account.",
@@ -270,6 +255,73 @@ export class AuthController {
         .catch(err => {
             res.status(err.status).json(err);
         })
+    }
+
+    @Post('resend-verification')
+    private async resendVerification(req: Request, res: Response) {
+        try {
+            const { userId = '' } = req.body;
+
+            if (userId === '') {
+                res.status(STATUS.BAD_REQUEST).json(
+                    new Exception({
+                        message: "Request body must contain userId",
+                        identifier: "AC012"
+                    })
+                )
+            }
+
+            const user = await UserModel.getUserAccountByID(userId);
+
+            if (!user || !user.EMAIL) {
+                res.status(STATUS.BAD_REQUEST).json(
+                    new Exception({
+                        message: "This user id / email does not exist.",
+                        identifier: "AC013"
+                    })
+                )
+            }
+
+            await this.sendVerificationMail(user.ID, user.EMAIL);           
+
+            res.status(STATUS.OK).json({
+                email: user.EMAIL,
+                message: "Success"
+            });
+
+        } catch (err) {
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json(
+                new Exception({
+                    message: "Failed to resend verification email.",
+                    identifier: "AC014",
+                    trace: err
+                })
+            )
+        }
+    }
+
+    private async sendVerificationMail(id: string, email: string) {
+        //generate verification link
+        const uniqueVerificationLink = crypto.randomBytes(64).toString('hex');
+
+        //store the hash in account verification table
+        const newAccount = {
+            USER_ID: id,
+            VERIFICATION_ID: uniqueVerificationLink
+        } as AccountVerificationModel;
+
+        await AccountVerificationModel.insert(newAccount);
+
+        //send the user an email with verification link attached
+        const link = `https://cirkle.ca/verify/${id}/${uniqueVerificationLink}`
+        const mail = {
+            to: email,
+            subject: "Cirkle - Verify your email",
+            html: `Hello,<br> Please Click on the link to verify your email.<br><a href=${link}>Click here to verify</a>`
+        }
+        await CMail.createMail().sendMail(mail);  
+
+        return;
     }
 }
 

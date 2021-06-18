@@ -118,14 +118,14 @@ const Auth = (props: AuthProps) => {
                                 placeholder="First Name"
                                 style={styles.input}
                                 value={form.firstName} 
-                                onChangeText={text => setForm({ ...form, firstName: text })}
+                                onChangeText={text => setForm({ ...form, firstName: text.trim() })}
                             />
                             {errors.firstName && errorMsg('First name cannot be empty.')}
                             <TextInput 
                                 placeholder="Last Name"
                                 style={styles.input}
                                 value={form.lastName} 
-                                onChangeText={text => setForm({ ...form, lastName: text })}
+                                onChangeText={text => setForm({ ...form, lastName: text.trim() })}
                             />
                             {errors.lastName && errorMsg('Last name cannot be empty.')}
                         </>
@@ -134,7 +134,7 @@ const Auth = (props: AuthProps) => {
                         placeholder="Enter your email"
                         style={styles.input}
                         value={form.email} 
-                        onChangeText={text => setForm({ ...form, email: text })}
+                        onChangeText={text => setForm({ ...form, email: text.trim() })}
                     />
                     {errors.email && errorMsg('Please enter a valid Uoft email address.')}
                     <TextInput 
@@ -142,7 +142,7 @@ const Auth = (props: AuthProps) => {
                         style={styles.input}
                         value={form.password}
                         secureTextEntry
-                        onChangeText={text => setForm({ ...form, password: text })}
+                        onChangeText={text => setForm({ ...form, password: text.trim() })}
                     />
                     {errors.password && errorMsg('Password cannot be empty.')}
                     <Button
