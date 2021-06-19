@@ -227,7 +227,6 @@ export class AuthController {
 
     @Delete('logout')
     private async logout(req: Request, res: Response) {
-        const session = Session.getSession(req);
 
         new Promise((resolve, reject) => {
             let session = Session.getSession(req);
@@ -302,52 +301,124 @@ export class AuthController {
 
     @Post("generate-reset-link")
     private async generateResetLink(req: Request, res: Response) {
-        const { email = '' } = req.body;
+        try {
+            const { email = '' } = req.body;
 
-        if (email === '') {
-            res.status(STATUS.BAD_REQUEST).json(
+            if (email === '') {
+                res.status(STATUS.BAD_REQUEST).json(
+                    new Exception({
+                        message: "Request body must contain email",
+                        identifier: "AC015"
+                    })
+                )
+            }
+
+            const user = await UserModel.getUserAccountByEmail(email);
+
+            if (!user) {
+                res.status(STATUS.BAD_REQUEST).json(
+                    new Exception({
+                        message: "This user id / email does not exist.",
+                        identifier: "AC016"
+                    })
+                )
+            }
+            
+            //generate verification link
+            const uniqueVerificationLink = crypto.randomBytes(64).toString('hex');
+            
+            //store the hash in account verification table
+            const newAccount = {
+                USER_ID: user.ID,
+                VERIFICATION_ID: uniqueVerificationLink
+            } as AccountVerificationModel;
+
+            await AccountVerificationModel.insert(newAccount);
+
+            //send the user an email with verification link attached
+            const link = `https://cirkle.ca/resetPassword/${user.ID}/${uniqueVerificationLink}`
+            const mail = {
+                to: user.EMAIL,
+                subject: "Cirkle - Reset your password",
+                html: `Hello,<br> Please Click on the link to reset your password.<br><a href=${link}>Click here to reset.</a>`
+            }
+
+            await CMail.createMail().sendMail(mail); 
+
+            res.status(STATUS.OK).json({
+                message: "success"
+            })
+        } catch (err) {
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json(
                 new Exception({
-                    message: "Request body must contain email",
-                    identifier: "AC015"
+                    message: "Failed to send reset password email.",
+                    identifier: "AC017",
+                    trace: err
                 })
             )
         }
+    }
 
-        const user = await UserModel.getUserAccountByEmail(email);
+    @Post('reset-password')
+    private async resetPassword(req: Request, res: Response) {
+        try {
+            const { userId = '', token = '', password = '' } = req.body;
 
-        if (!user) {
-            res.status(STATUS.BAD_REQUEST).json(
+            if (userId === '' || token === '' || password === '') {
+                res.status(STATUS.BAD_REQUEST).json(
+                    new Exception({
+                        message: "Required parameters include userId, token, password, retypePassword",
+                        identifier: "AC018"
+                    })
+                )
+                return;
+            }
+
+            //ensure token is valid
+
+            //check token against user id
+            const account = await AccountVerificationModel.getUserAccountByID(userId);
+
+            if (!account) {
+                res.status(STATUS.BAD_REQUEST).json(
+                    new Exception({
+                        message: "Unable to find token related to this user ID.",
+                        identifier: "AC019"
+                    })
+                )
+                return;
+            }
+
+            const timestamp = (new Date(account.CREATE_DATE)).getTime() / 1000;
+            const current = (new Date()).getTime() / 1000;
+
+            await AccountVerificationModel.deleteByUserId(userId);
+
+            //check if the verification id match and the token has not expired (1 day limit)
+            if (account.VERIFICATION_ID === token && Math.abs(current - timestamp) < 86400) {
+                //create new password and update user pass
+                //hash the password
+                const hash = await bcrypt.hashSync(password, 8);
+                await UserModel.updatePassword(hash, account.USER_ID);
+
+                res.status(STATUS.OK).json({
+                    status: "success"
+                })
+                return;
+            } else {
+                res.status(STATUS.OK).json({
+                    status: "expired"
+                });
+            }
+        } catch (err) {
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json(
                 new Exception({
-                    message: "This user id / email does not exist.",
-                    identifier: "AC016"
+                    message: "Failed to reset password.",
+                    identifier: "AC017",
+                    trace: err
                 })
             )
         }
-        
-        //generate verification link
-        const uniqueVerificationLink = crypto.randomBytes(64).toString('hex');
-        
-        //store the hash in account verification table
-        const newAccount = {
-            USER_ID: user.ID,
-            VERIFICATION_ID: uniqueVerificationLink
-        } as AccountVerificationModel;
-
-        await AccountVerificationModel.insert(newAccount);
-
-        //send the user an email with verification link attached
-        const link = `https://cirkle.ca/resetPassword/${user.ID}/${uniqueVerificationLink}`
-        const mail = {
-            to: user.EMAIL,
-            subject: "Cirkle - Reset your password",
-            html: `Hello,<br> Please Click on the link to reset your password.<br><a href=${link}>Click here to reset.</a>`
-        }
-
-        await CMail.createMail().sendMail(mail); 
-
-        res.status(STATUS.OK).json({
-            message: "success"
-        })
     }
 
     private async sendVerificationMail(id: string, email: string) {
