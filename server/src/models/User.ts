@@ -177,4 +177,20 @@ export class UserModel implements UserInterface {
                 })
         })
     }
+
+    static updatePassword(hash: string, id: string): Promise<UserModel[]> {
+        const query = `UPDATE RT.USER SET "PASSWORD" = ? WHERE "ID" = ? ;`;
+        
+        return new Promise((resolve, reject) => {
+            Database.getDB()
+                .query(query, [hash, id])
+                .then((data:UserInterface[]) => resolve(data.map(d => new UserModel(d))))
+                .catch(err => {
+                    console.log(err)
+                    reject(err)
+                })
+        })
+    }
 }
+
+

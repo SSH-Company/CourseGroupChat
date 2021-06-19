@@ -7,7 +7,7 @@ import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import { handleError } from "../Util/CommonFunctions";
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
-axios.defaults.headers = { withCredentials: true };
+
 
 //style sheet
 const style = StyleSheet.create({
@@ -91,8 +91,7 @@ const Search = ({ route, navigation }) => {
         if (searchType === "create") {
             const name = suggestions.filter(row => row.checked).map(row => row.name).join(", ");
             navigation.navigate('Chat', { groupID: null, name: name, members: recipients })
-        } 
-        else if (searchType === "add") {
+        } else if (searchType === "add") {
             const reqBody = {
                 groupID: groupID,
                 groupName: groupName,

@@ -12,7 +12,7 @@ import { EMPTY_IMAGE_DIRECTORY, BASE_URL } from '../BaseUrl';
 import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import { handleError } from '../Util/CommonFunctions';
 import axios from 'axios';
-axios.defaults.headers = { withCredentials: true };
+
 
 const cache = new Cache ({
     namespace: "cirkle",

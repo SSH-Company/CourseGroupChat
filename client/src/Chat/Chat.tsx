@@ -14,7 +14,7 @@ import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import { handleError } from '../Util/CommonFunctions';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
-axios.defaults.headers = { withCredentials: true };
+
 
 const Chat = ({ route, navigation }) => {
     const { user } = useContext(UserContext)
@@ -318,7 +318,6 @@ const Chat = ({ route, navigation }) => {
                                 children={props} 
                                 onSend={messages => onSend(messages)}
                             /> ) }}
-                        isKeyboardInternallyHandled={true}
                         loadEarlier
                         onLoadEarlier={onLoadEarlier}
                     />

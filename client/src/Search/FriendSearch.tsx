@@ -7,7 +7,7 @@ import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
 import { handleError } from '../Util/CommonFunctions';
 import { BASE_URL } from '../BaseUrl';
 import axios from 'axios';
-axios.defaults.headers = { withCredentials: true };
+
 
 const FriendSearch = ({ navigation }) => {
     const [search, setSearch] = useState("");

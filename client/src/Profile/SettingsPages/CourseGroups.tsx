@@ -6,7 +6,7 @@ import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
 import { handleLeaveGroup, handleError } from '../../Util/CommonFunctions';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
 import axios from 'axios';
-axios.defaults.headers = { withCredentials: true };
+
 
 type CourseGroups = {
     id: string,

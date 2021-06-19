@@ -9,7 +9,7 @@ import BaseList from '../../Util/CommonComponents/BaseList';
 import { handleLeaveGroup, handleError } from '../../Util/CommonFunctions';
 import { BASE_URL } from '../../BaseUrl';
 import axios from 'axios';
-axios.defaults.headers = { withCredentials: true };
+
 
 type listtype = {
     id: string;
