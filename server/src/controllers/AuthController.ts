@@ -300,6 +300,56 @@ export class AuthController {
         }
     }
 
+    @Post("generate-reset-link")
+    private async generateResetLink(req: Request, res: Response) {
+        const { email = '' } = req.body;
+
+        if (email === '') {
+            res.status(STATUS.BAD_REQUEST).json(
+                new Exception({
+                    message: "Request body must contain email",
+                    identifier: "AC015"
+                })
+            )
+        }
+
+        const user = await UserModel.getUserAccountByEmail(email);
+
+        if (!user) {
+            res.status(STATUS.BAD_REQUEST).json(
+                new Exception({
+                    message: "This user id / email does not exist.",
+                    identifier: "AC016"
+                })
+            )
+        }
+        
+        //generate verification link
+        const uniqueVerificationLink = crypto.randomBytes(64).toString('hex');
+        
+        //store the hash in account verification table
+        const newAccount = {
+            USER_ID: user.ID,
+            VERIFICATION_ID: uniqueVerificationLink
+        } as AccountVerificationModel;
+
+        await AccountVerificationModel.insert(newAccount);
+
+        //send the user an email with verification link attached
+        const link = `https://cirkle.ca/resetPassword/${user.ID}/${uniqueVerificationLink}`
+        const mail = {
+            to: user.EMAIL,
+            subject: "Cirkle - Reset your password",
+            html: `Hello,<br> Please Click on the link to reset your password.<br><a href=${link}>Click here to reset.</a>`
+        }
+
+        await CMail.createMail().sendMail(mail); 
+
+        res.status(STATUS.OK).json({
+            message: "success"
+        })
+    }
+
     private async sendVerificationMail(id: string, email: string) {
         //generate verification link
         const uniqueVerificationLink = crypto.randomBytes(64).toString('hex');
@@ -324,4 +374,7 @@ export class AuthController {
         return;
     }
 }
+
+
+
 
