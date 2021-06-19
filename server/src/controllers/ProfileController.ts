@@ -18,6 +18,8 @@ import { Bucket } from '../services/Bucket';
 import { UserModel } from '../models/User';
 import { FriendStatusModel, FriendStatusInterface } from '../models/Friend_Status';
 import { UserGroupModel } from '../models/User_Group';
+import { CommonGroupsModel } from '../models/Common_Groups';
+import { MutualFriendsModel } from '../models/Mutual_Friends';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -165,11 +167,11 @@ export class ProfileController {
     }
 
     @Delete('friend-request')
-    private async rejectRequest(req: Request, res: Response) {
+    private async deleteRequest(req: Request, res: Response) {
         try {
             const session = Session.getSession(req);
             const id = req.body.id;
-            await FriendStatusModel.reject(id, session.user.ID);
+            await FriendStatusModel.reject(id, session.user.ID, id, session.user.ID);
             res.status(STATUS.OK).json();
         } catch (err) {
             console.error(err);
@@ -215,6 +217,62 @@ export class ProfileController {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong attempting to get enrolled course groups.",
                 identifier: "PC007"
+            })
+        }
+    }
+
+    @Get('mutual-course-groups')
+    private async getMutualCourseGroups(req: Request, res: Response) {
+        try {
+            const session = req.session;
+            const userTwo = req.query.id;
+            const mutualGroups = await CommonGroupsModel.getMutualCourseGroups(session.user.ID, userTwo);
+            const listed = mutualGroups.map(row => ({
+                id: row.CODES.split(','),
+                name: row.NAMES.split(',')
+            }))
+            const id = listed[0].id
+            const name = listed[0].name
+            const result = Array.from(
+                id.map((e, i) => ({id: e, name: name[i]}))
+                    .reduce((a, b) => a.set(b.id, (a.get(b.id) || []).concat(b.name)), new Map))
+                .map(([k, v]) => ({id:k, name: v.join()}));
+
+            res.status(STATUS.OK).json(result);
+        } catch (err) {
+            console.error(err);
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong attempting to get enrolled course groups.",
+                identifier: "PC007"
+            })
+        }
+    }
+
+    @Get('mutual-friends')
+    private async getMutualFriends(req: Request, res: Response) {
+        try {
+            const session = req.session;
+            const userTwo = req.query.id;
+            const mutualFriends = await MutualFriendsModel.getMutualFriends(session.user.ID, userTwo);
+            const listed = mutualFriends.map(row => ({
+                avatar: row.MUTUAL_FRIEND_AVATARS.split(','),
+                name: row.MUTUAL_FRIENDS_NAMES.split(','),
+                ids: row.MUTUAL_FRIEND_IDS.split(',')
+            }))
+            const avatar = listed[0].avatar
+            const name = listed[0].name
+            const id = listed[0].ids
+            const result = Array.from(
+                avatar.map((e, i) => ({avatar: e, name: name[i], id: id[i]}))
+                    .reduce((a, b) => a.set(b.avatar, (a.get(b.avatar) || []).concat(b.name, b.id)), new Map))
+                .map(([k, v]) => ({avatar:k, name: v.join().split(',')[0], id:v.join().split(',')[1]}));
+
+            res.status(STATUS.OK).json(result);
+        } catch (err) {
+            console.error(err);
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong attempting to get mutual friends.",
+                identifier: "PC009"
             })
         }
     }

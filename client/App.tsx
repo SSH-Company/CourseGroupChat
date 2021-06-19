@@ -17,7 +17,9 @@ import {
   Settings, 
   FriendRequests,
   CourseGroups,
-  EditProfile
+  EditProfile,
+  CommonCourseGroups,
+  MutualFriends
 } from './src/Profile';
 import {
   GroupMembers,
@@ -40,6 +42,8 @@ export default function App() {
                   <Stack.Screen name="CourseGroups" component={CourseGroups}/>
                   <Stack.Screen name="EditProfile" component={EditProfile}/>
                   <Stack.Screen name="Profile" component={Profile}/>
+                  <Stack.Screen name="CommonCourseGroups" component={CommonCourseGroups}/>
+                  <Stack.Screen name="MutualFriends" component={MutualFriends}/>
                   <Stack.Screen name="Settings" component={Settings} options={{gestureDirection: 'horizontal-inverted'}}/>
                   <Stack.Screen name="GroupMembers" component={GroupMembers}/> 
                   <Stack.Screen name="Gallery" component={Gallery}/>
