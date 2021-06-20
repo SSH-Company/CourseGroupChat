@@ -18,13 +18,6 @@ export class Database {
         })
     }
 
-    // public static getDB(): Database {
-    //     if (!Database.instance) {
-    //         Database.instance = new Database()
-    //     }
-    //     return Database.instance;
-    // }
-
     //set refresh time to be 15 mins later
     private static refreshConnectionTime = () => {
         const currentTime = new Date();
