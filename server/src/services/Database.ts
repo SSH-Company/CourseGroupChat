@@ -36,7 +36,7 @@ export class Database {
             Database.instance = new Database();
             Database.refreshConnectionTime();
         }
-        
+
         return Database.instance;
     }
 
@@ -47,7 +47,7 @@ export class Database {
                 if (err) {
                     const error = new Exception({
                         message: "Failed to open database connection" + err.message,
-                        identifier: "DB0001",
+                        identifier: "DB001",
                         trace: err
                     });
                     console.log(error);
@@ -91,6 +91,10 @@ export class Database {
                     reject(error);
                 } finally {
                     release();
+                    this.pool.end(() => {
+                        console.log('closed db pool')
+                    })
+                    Database.instance = null;
                 }
             })
         }) 

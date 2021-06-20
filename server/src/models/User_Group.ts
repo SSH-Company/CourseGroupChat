@@ -1,3 +1,4 @@
+import { Client } from 'pg';
 import { Database } from '../services/Database';
 
 interface UserGroupInterface {
@@ -22,18 +23,18 @@ export class UserGroupModel implements UserGroupInterface {
         Object.assign(this, raw);
     }
 
-    static insert(userID: string, grpID: string, name?: string): Promise<void> {
+    static insert(userID: string, grpID: string, name?: string, db: Client | Database = Database.getDB()): Promise<void> {
         return new Promise((resolve, reject) => {
             const query = `INSERT INTO RT.USER_GROUP ("USER_ID", "GROUP_ID", "NAME", "CREATE_DATE", "IS_ACTIVE") 
                             VALUES (?, ?, ?, CURRENT_TIMESTAMP, 'Y') ; `
             
-            Database.getDB()
-                .query(query, [userID, grpID, name])
-                .then(() => resolve())
-                .catch(err => {
-                    console.log(err)
-                    reject(err)
-                })
+            db
+            .query(query, [userID, grpID, name])
+            .then(() => resolve())
+            .catch(err => {
+                console.log(err)
+                reject(err)
+            })
         })
     }
 

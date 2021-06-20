@@ -1,3 +1,4 @@
+import { Client } from 'pg';
 import { Database } from '../services/Database';
 
 interface GroupInterface {
@@ -18,18 +19,18 @@ export class GroupModel implements GroupInterface {
         Object.assign(this, raw);
     }
 
-    static insert(): Promise<GroupModel> {
+    static insert(db: Client | Database = Database.getDB()): Promise<GroupModel> {
         return new Promise((resolve, reject) => {
             const query = `INSERT INTO RT.GROUP ("CREATE_DATE", "IS_ACTIVE") VALUES (CURRENT_TIMESTAMP, 'Y') RETURNING * ;`
-            Database.getDB()
-                .query(query)
-                .then((data:GroupModel[]) => {
-                    resolve(new GroupModel(data[0]))
-                })
-                .catch(err => {
-                    console.log(err)
-                    reject(err)
-                })
+            db
+            .query(query)
+            .then((data:GroupModel[]) => {
+                resolve(new GroupModel(data[0]))
+            })
+            .catch(err => {
+                console.log(err)
+                reject(err)
+            })
         })
     }
 }
