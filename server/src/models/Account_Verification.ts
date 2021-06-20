@@ -1,3 +1,4 @@
+import { Client } from 'pg';
 import { Database } from '../services/Database';
 
 interface AccountVerificationInterface {
@@ -16,17 +17,17 @@ export class AccountVerificationModel implements AccountVerificationInterface {
         Object.assign(this, raw);
     }
 
-    static insert(account: AccountVerificationModel): Promise<void> {
+    static insert(account: AccountVerificationModel, db: Client | Database = Database.getDB()): Promise<void> {
         return new Promise((resolve, reject) => {
             const query = `INSERT INTO RT.ACCOUNT_VERIFICATION ("USER_ID", "VERIFICATION_ID", "CREATE_DATE") VALUES (?, ?, CURRENT_TIMESTAMP) ;`
             const params = [account.USER_ID, account.VERIFICATION_ID]
-            Database.getDB()
-                .query(query, params)
-                .then(() => resolve())
-                .catch(err => {
-                    console.log(err)
-                    reject(err)
-                })
+            db
+            .query(query, params)
+            .then(() => resolve())
+            .catch(err => {
+                console.log(err)
+                reject(err)
+            })
         })
     }
 
@@ -49,11 +50,10 @@ export class AccountVerificationModel implements AccountVerificationInterface {
         })
     }
 
-    static deleteByUserId(uid: string): Promise<void> {
+    static deleteByUserId(uid: string, db: Client | Database = Database.getDB()): Promise<void> {
         return new Promise((resolve, reject) => {
             const query = `DELETE FROM RT.ACCOUNT_VERIFICATION WHERE "USER_ID" = ? ;`
-            Database.getDB()
-                .query(query, [uid])
+            db.query(query, [uid])
                 .then(() => resolve())
                 .catch(err => {
                     console.log(err)

@@ -1,3 +1,4 @@
+import { Client } from 'pg';
 import { Database } from '../services/Database';
 
 interface UserInterface {
@@ -26,16 +27,16 @@ export class UserModel implements UserInterface {
         Object.assign(this, raw);
     }
 
-    static insert(user: UserInterface): Promise<UserModel> {
+    static insert(user: UserInterface, db: Client | Database = Database.getDB()): Promise<UserModel> {
         const query = `INSERT INTO RT.USER ("FIRST_NAME", "LAST_NAME", "EMAIL", "PASSWORD", "CREATE_DATE", "VERIFIED") 
         VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?) RETURNING *;`
         const params = [user.FIRST_NAME, user.LAST_NAME, user.EMAIL, user.PASSWORD, user.VERIFIED];
         
         return new Promise((resolve, reject) => {
-            Database.getDB()
-                .query(query, params)
-                .then((data: UserInterface[]) => resolve(new UserModel(data[0])))
-                .catch(err => reject(err))
+            db
+            .query(query, params)
+            .then((data: UserInterface[]) => resolve(new UserModel(data[0])))
+            .catch(err => reject(err))
         })
     }
 
@@ -150,45 +151,45 @@ export class UserModel implements UserInterface {
         })
     }
 
-    static updateAvatar(path: string, id: string): Promise<UserModel[]> {
+    static updateAvatar(path: string, id: string, db: Client | Database = Database.getDB()): Promise<UserModel[]> {
         const query = `UPDATE RT.USER SET "AVATAR" = ? WHERE "ID" = ? ;`;
         
         return new Promise((resolve, reject) => {
-            Database.getDB()
-                .query(query, [path, id])
-                .then((data:UserInterface[]) => resolve(data.map(d => new UserModel(d))))
-                .catch(err => {
-                    console.log(err)
-                    reject(err)
-                })
+            db
+            .query(query, [path, id])
+            .then((data:UserInterface[]) => resolve(data.map(d => new UserModel(d))))
+            .catch(err => {
+                console.log(err)
+                reject(err)
+            })
         })
     }
 
-    static updateVerified(verified: "Y" | "N", id: string): Promise<UserModel[]> {
+    static updateVerified(verified: "Y" | "N", id: string, db: Client | Database = Database.getDB()): Promise<UserModel[]> {
         const query = `UPDATE RT.USER SET "VERIFIED" = ? WHERE "ID" = ? ;`;
         
         return new Promise((resolve, reject) => {
-            Database.getDB()
-                .query(query, [verified, id])
-                .then((data:UserInterface[]) => resolve(data.map(d => new UserModel(d))))
-                .catch(err => {
-                    console.log(err)
-                    reject(err)
-                })
+            db
+            .query(query, [verified, id])
+            .then((data:UserInterface[]) => resolve(data.map(d => new UserModel(d))))
+            .catch(err => {
+                console.log(err)
+                reject(err)
+            })
         })
     }
 
-    static updatePassword(hash: string, id: string): Promise<UserModel[]> {
+    static updatePassword(hash: string, id: string, db: Client | Database = Database.getDB()): Promise<UserModel[]> {
         const query = `UPDATE RT.USER SET "PASSWORD" = ? WHERE "ID" = ? ;`;
         
         return new Promise((resolve, reject) => {
-            Database.getDB()
-                .query(query, [hash, id])
-                .then((data:UserInterface[]) => resolve(data.map(d => new UserModel(d))))
-                .catch(err => {
-                    console.log(err)
-                    reject(err)
-                })
+            db
+            .query(query, [hash, id])
+            .then((data:UserInterface[]) => resolve(data.map(d => new UserModel(d))))
+            .catch(err => {
+                console.log(err)
+                reject(err)
+            })
         })
     }
 }
