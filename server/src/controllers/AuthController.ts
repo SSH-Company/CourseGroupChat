@@ -6,6 +6,7 @@ import {
     Delete
 } from '@overnightjs/core';
 import { CMail } from '../services/CMail';
+import { Database } from '../services/Database';
 import { Session } from '../services/Session';
 import { UserModel } from '../models/User';
 import { Exception } from '../services/Exception';
@@ -392,24 +393,29 @@ export class AuthController {
             const timestamp = (new Date(account.CREATE_DATE)).getTime() / 1000;
             const current = (new Date()).getTime() / 1000;
 
-            await AccountVerificationModel.deleteByUserId(userId);
+            await Database.getDB().transaction(async client => {
+                await AccountVerificationModel.deleteByUserId(userId, client);
 
-            //check if the verification id match and the token has not expired (1 day limit)
-            if (account.VERIFICATION_ID === token && Math.abs(current - timestamp) < 86400) {
-                //create new password and update user pass
-                //hash the password
-                const hash = await bcrypt.hashSync(password, 8);
-                await UserModel.updatePassword(hash, account.USER_ID);
+                //check if the verification id match and the token has not expired (1 day limit)
+                if (account.VERIFICATION_ID === token && Math.abs(current - timestamp) < 86400) {
+                    //create new password and update user pass
+                    //hash the password
+                    const hash = await bcrypt.hashSync(password, 8);
+                    await UserModel.updatePassword(hash, account.USER_ID, client);
 
-                res.status(STATUS.OK).json({
-                    status: "success"
-                })
-                return;
-            } else {
-                res.status(STATUS.OK).json({
-                    status: "expired"
-                });
-            }
+                    res.status(STATUS.OK).json({
+                        status: "success"
+                    })
+                    return;
+                } else {
+                    res.status(STATUS.OK).json({
+                        status: "expired"
+                    });
+                    return;
+                }
+            })
+
+            return;
         } catch (err) {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json(
                 new Exception({

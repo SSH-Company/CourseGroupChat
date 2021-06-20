@@ -1,3 +1,4 @@
+import { Client } from 'pg';
 import { Database } from '../services/Database';
 
 interface AccountVerificationInterface {
@@ -49,11 +50,10 @@ export class AccountVerificationModel implements AccountVerificationInterface {
         })
     }
 
-    static deleteByUserId(uid: string): Promise<void> {
+    static deleteByUserId(uid: string, db: Client | Database = Database.getDB()): Promise<void> {
         return new Promise((resolve, reject) => {
             const query = `DELETE FROM RT.ACCOUNT_VERIFICATION WHERE "USER_ID" = ? ;`
-            Database.getDB()
-                .query(query, [uid])
+            db.query(query, [uid])
                 .then(() => resolve())
                 .catch(err => {
                     console.log(err)

@@ -1,0 +1,99 @@
+diff --git a/node_modules/pg/lib/client.js b/node_modules/pg/lib/client.js
+index 1e1e833..678f4bb 100644
+--- a/node_modules/pg/lib/client.js
++++ b/node_modules/pg/lib/client.js
+@@ -577,6 +577,94 @@ class Client extends EventEmitter {
+     return result
+   }
+ 
++  // this function is a copy of the function query function above,
++  // Since this library doesn't allow any overrides, 
++  // this is used in the transaction function when the original query fucntion
++  // has been overriden to avoid creating a recursive nightmare.
++  queryOverride(config, values, callback) {
++    // can take in strings, config object or query object
++    var query
++    var result
++    var readTimeout
++    var readTimeoutTimer
++    var queryCallback
++
++    if (config === null || config === undefined) {
++      throw new TypeError('Client was passed a null or undefined query')
++    } else if (typeof config.submit === 'function') {
++      readTimeout = config.query_timeout || this.connectionParameters.query_timeout
++      result = query = config
++      if (typeof values === 'function') {
++        query.callback = query.callback || values
++      }
++    } else {
++      readTimeout = this.connectionParameters.query_timeout
++      query = new Query(config, values, callback)
++      if (!query.callback) {
++        result = new this._Promise((resolve, reject) => {
++          query.callback = (err, res) => (err ? reject(err) : resolve(res))
++        })
++      }
++    }
++
++    if (readTimeout) {
++      queryCallback = query.callback
++
++      readTimeoutTimer = setTimeout(() => {
++        var error = new Error('Query read timeout')
++
++        process.nextTick(() => {
++          query.handleError(error, this.connection)
++        })
++
++        queryCallback(error)
++
++        // we already returned an error,
++        // just do nothing if query completes
++        query.callback = () => {}
++
++        // Remove from queue
++        var index = this.queryQueue.indexOf(query)
++        if (index > -1) {
++          this.queryQueue.splice(index, 1)
++        }
++
++        this._pulseQueryQueue()
++      }, readTimeout)
++
++      query.callback = (err, res) => {
++        clearTimeout(readTimeoutTimer)
++        queryCallback(err, res)
++      }
++    }
++
++    if (this.binary && !query.binary) {
++      query.binary = true
++    }
++
++    if (query._result && !query._result._types) {
++      query._result._types = this._types
++    }
++
++    if (!this._queryable) {
++      process.nextTick(() => {
++        query.handleError(new Error('Client has encountered a connection error and is not queryable'), this.connection)
++      })
++      return result
++    }
++
++    if (this._ending) {
++      process.nextTick(() => {
++        query.handleError(new Error('Client was closed and is not queryable'), this.connection)
++      })
++      return result
++    }
++
++    this.queryQueue.push(query)
++    this._pulseQueryQueue()
++    return result
++  }
++
+   end(cb) {
+     this._ending = true
+ 
