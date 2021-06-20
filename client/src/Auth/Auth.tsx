@@ -6,7 +6,8 @@ import {
     StyleSheet, 
     ImageBackground,
     TextInput,
-    SafeAreaView
+    SafeAreaView,
+    Alert
 } from 'react-native';
 import { Button } from 'react-native-elements';
 import { BASE_URL } from "../BaseUrl";
@@ -113,7 +114,11 @@ const Auth = (props: AuthProps) => {
     const handleForgotPassword = () => {
         axios.post(`${BASE_URL}/api/auth/generate-reset-link`, { email: form.email })
             .then(() => {
-                setForgotPassword(false) 
+                Alert.alert(
+                    "Check your email",
+                    `We've sent you an email at ${form.email}. Can't find it? Check you junk / spam folder.`,
+                    [{ text: "OK", onPress: () =>  setForgotPassword(false) }]
+                )
             })
             .catch(err => {
                 console.error(err)
