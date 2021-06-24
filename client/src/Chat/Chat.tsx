@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useContext, useRef } from 'react';
-import { ActivityIndicator, Text, View, Dimensions, Clipboard } from 'react-native';
+import { ActivityIndicator, Text, View, Dimensions, Clipboard, KeyboardAvoidingView, Platform } from 'react-native';
 import { Avatar, Header } from "react-native-elements";
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
@@ -298,29 +298,35 @@ const Chat = ({ route, navigation }) => {
                         centerContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
                         rightContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
                     />
-                    <GiftedChat
-                        ref={giftedChatRef}
-                        user={{
-                            _id: user._id,
-                            name: user.name,
-                            avatar: user.avatar
-                        }}
-                        messages={messages}
-                        onSend={messages => onSend(messages)}
-                        renderMessage={props => { return ( 
-                            <CustomMessage 
-                                children={props} 
-                                uploadProgress={uploadProgress} 
-                                onLongPress={(id, isCurrentUser, copyString) => handleLongPress(id, isCurrentUser, copyString)} 
-                            /> ) }}
-                        renderInputToolbar={props => { return ( 
-                            <CustomToolbar 
-                                children={props} 
-                                onSend={messages => onSend(messages)}
-                            /> ) }}
-                        loadEarlier
-                        onLoadEarlier={onLoadEarlier}
-                    />
+                    <KeyboardAvoidingView 
+                        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                        style={{ flex: 1, backgroundColor: 'white' }}
+                    >
+                        <GiftedChat
+                            ref={giftedChatRef}
+                            user={{
+                                _id: user._id,
+                                name: user.name,
+                                avatar: user.avatar
+                            }}
+                            messages={messages}
+                            onSend={messages => onSend(messages)}
+                            renderMessage={props => { return ( 
+                                <CustomMessage 
+                                    children={props} 
+                                    uploadProgress={uploadProgress} 
+                                    onLongPress={(id, isCurrentUser, copyString) => handleLongPress(id, isCurrentUser, copyString)} 
+                                /> ) }}
+                            renderInputToolbar={props => { return ( 
+                                <CustomToolbar 
+                                    children={props} 
+                                    onSend={messages => onSend(messages)}
+                                /> ) }}
+                            loadEarlier
+                            onLoadEarlier={onLoadEarlier}
+                            isKeyboardInternallyHandled={false}
+                        />
+                    </KeyboardAvoidingView>
                 </DrawerLayout>
             }
             

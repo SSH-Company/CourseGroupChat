@@ -239,7 +239,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
                                             step={1}
                                             style={{ width: 100 }}
                                         />
-                                        <Text style={{ color: 'white', alignSelf: 'center' }}>{millisToMinutesAndSeconds(soundStatus.durationMillis - position)}</Text>
+                                        <Text style={{ color: isCurrentUser ? 'white' : 'black', alignSelf: 'center' }}>{millisToMinutesAndSeconds(soundStatus.durationMillis - position)}</Text>
                                     </>
                                 }
                             </View>
