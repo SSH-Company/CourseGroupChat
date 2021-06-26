@@ -15,6 +15,7 @@ interface ChatLogViewInterface {
     LOCATION?: string;
     CREATE_DATE?: string;
     STATUS?: string;
+    MUTE_NOTIFICATION?: string;
 }
 
 export class ChatLogViewModel implements ChatLogViewInterface {
@@ -32,6 +33,7 @@ export class ChatLogViewModel implements ChatLogViewInterface {
     LOCATION?: string;
     CREATE_DATE?: string;
     STATUS?: string;
+    MUTE_NOTIFICATION?: string;
 
     constructor(raw: ChatLogViewInterface) {
         // super();
@@ -56,6 +58,7 @@ export class ChatLogViewModel implements ChatLogViewInterface {
                 "LOCATION",
                 "STATUS",
                 "CREATE_DATE",
+                "MUTE_NOTIFICATION",
                 ROW_NUMBER() OVER (PARTITION BY CV."GROUP_ID" ORDER BY CV."CREATE_DATE" DESC) AS ROW_ID
             FROM RT."CHATLOG_VIEW" CV
             WHERE "USER_ID" = ? AND "VERIFIED" IS NOT NULL

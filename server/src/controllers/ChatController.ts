@@ -37,11 +37,11 @@ const upload = multer({ storage: storage })
 @Controller('chat')
 export class ChatController {
 
-    @Get('log/:id')
+    @Get('log')
     private getLog(req: Request, res: Response) {
-        const id = req.params.id;
+        const session = Session.getSession(req);
 
-        ChatLogViewModel.getUserLog(id)
+        ChatLogViewModel.getUserLog(session.user.ID)
         .then(data => {
             const responseJson = [];
             data.forEach(row => {
@@ -56,13 +56,14 @@ export class ChatController {
                     location: row.LOCATION,
                     created_at: row.CREATE_DATE,
                     status: row.STATUS,
-                    verified: row.VERIFIED
+                    verified: row.VERIFIED,
+                    mute: row.MUTE_NOTIFICATION
                 }
                 if (row.MESSAGE_ID && row.MESSAGE_TYPE) {
                     json[row.MESSAGE_TYPE] = row.MESSAGE_BODY,
-                    json['subtitle'] = row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === id ? 'You': row.CREATOR_NAME} sent a ${row.MESSAGE_TYPE}.`                        
+                    json['subtitle'] = row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_NAME} sent a ${row.MESSAGE_TYPE}.`                        
                 } else {
-                    json['subtitle'] = `You have joined to ${json.name}!`
+                    json['subtitle'] = `You have joined ${json.name}!`
                 }
                 responseJson.push(json)
             })
@@ -71,10 +72,12 @@ export class ChatController {
         })
         .catch(err => {
             console.error(err)
-            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
-                message: "Something went wrong while fetching user chat log.",
-                identifier: "CC001"
-            })
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json(
+                new Exception({
+                    message: "Something went wrong while fetching user chat log.",
+                    identifier: "CC001"
+                })
+            )
         }) 
     }
 

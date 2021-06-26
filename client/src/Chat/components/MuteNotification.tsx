@@ -1,6 +1,7 @@
 import React, { FunctionComponent, useState } from 'react';
 import { ActivityIndicator, Text, View, Modal, StyleSheet, Button } from 'react-native';
 import { ListItem } from "react-native-elements";
+import { ChatLog } from '../../Util/ChatLog';
 import { BASE_URL } from '../../BaseUrl';
 import axios from 'axios';
 
@@ -44,7 +45,11 @@ const MuteNotification:FunctionComponent<MuteNotificationProps> = (props: MuteNo
         setSendingRequest(true);
 
         axios.post(`${BASE_URL}/api/chat/mute`, { groupID, timestamp: muteDate })
-            .then(() => onClose())
+            .then(async () => {
+                //reset the group information
+                await ChatLog.getChatLogInstance(true);
+                onClose();
+            })
             .catch(err => {
                 console.log(err)
             })
