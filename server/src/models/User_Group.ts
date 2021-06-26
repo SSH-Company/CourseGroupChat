@@ -9,6 +9,7 @@ interface UserGroupInterface {
     CREATE_DATE?: string;
     IS_ACTIVE?: "Y" | "N";
     MUTE?: string;
+    IGNORE?: "Y" | "N";
 }
 
 export class UserGroupModel implements UserGroupInterface {
@@ -19,6 +20,7 @@ export class UserGroupModel implements UserGroupInterface {
     CREATE_DATE?: string;
     IS_ACTIVE?: "Y" | "N";
     MUTE?: string;
+    IGNORE?: "Y" | "N";
 
     constructor(raw: UserGroupInterface) {
         // super();
@@ -97,6 +99,18 @@ export class UserGroupModel implements UserGroupInterface {
         return new Promise((resolve, reject) => {
             Database.getDB()
                 .query(query, params)
+                .then(() => resolve())
+                .catch(err => reject(err)) 
+        })
+    }
+
+    static ignoreGroup(userID: string, groupID: string, status: "Y" | "N"): Promise<void> {
+        const query = `UPDATE RT.USER_GROUP SET "IGNORE" = ? 
+                        WHERE "USER_ID" = ? AND "GROUP_ID" = ? `;
+
+        return new Promise((resolve, reject) => {
+            Database.getDB()
+                .query(query, [status, userID, groupID])
                 .then(() => resolve())
                 .catch(err => reject(err)) 
         })

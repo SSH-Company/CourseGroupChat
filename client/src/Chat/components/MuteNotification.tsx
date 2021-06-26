@@ -2,6 +2,7 @@ import React, { FunctionComponent, useState, useEffect } from 'react';
 import { ActivityIndicator, Text, View, Modal, StyleSheet, Button } from 'react-native';
 import { ListItem } from "react-native-elements";
 import { ChatLog } from '../../Util/ChatLog';
+import { handleError } from '../../Util/CommonFunctions';
 import { BASE_URL } from '../../BaseUrl';
 import axios from 'axios';
 
@@ -68,6 +69,7 @@ const MuteNotification:FunctionComponent<MuteNotificationProps> = (props: MuteNo
             })
             .catch(err => {
                 console.log(err)
+                handleError(err)
             })
             .finally(() => setSendingRequest(false))
     }

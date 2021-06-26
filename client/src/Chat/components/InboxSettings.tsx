@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import React from 'react';
+import { Alert, View, Text, StyleSheet, Dimensions } from 'react-native';
 import { ListItem, Image } from 'react-native-elements';
 import { User } from 'react-native-gifted-chat';
 import { AntDesign, Entypo, Ionicons, MaterialIcons } from 'react-native-vector-icons';
 import { navigate } from '../../Util/RootNavigation';
+import { handleError, handleIgnoreGroup } from '../../Util/CommonFunctions';
 import { handleLeaveGroup } from '../../Util/CommonFunctions';
-import { EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
+import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
+import axios from 'axios';
 
 type InboxSettingsProps = {
     group: User,
@@ -38,18 +40,28 @@ const InboxSettings = (props: InboxSettingsProps) => {
         }
     })
 
+    const alertUser = () => {
+        Alert.alert(
+            "Ignore this conversation?",
+            `You won't be notified when someone sends a message to this group, and the conversation will move to Spam. We won't tell other members of the group they are being ignored.`,
+            [{ text: "CANCEL", onPress: () =>  console.log('cancelled') },
+            { text: "IGNORE", onPress: () => handleIgnoreGroup(props.group._id as string, () => navigate('Main', {})) }]
+        )
+    }
+
     //Menu list components
     const iconSize = 20
 
     const list = [
         {
             title: 'Mute notifications',
-            icon: <Entypo name={"sound-mute"} size={iconSize}/>,
+            icon: <Ionicons name={"notifications-off-circle"} size={iconSize}/>,
             onPress: () => props.onMuteNotifications(true)
         },
         {
             title: 'Ignore group',
-            icon: <Entypo name={"sound-mute"} size={iconSize}/>
+            icon: <Entypo name={"sound-mute"} size={iconSize}/>,
+            onPress: alertUser
         },
         {
             title: 'Group Members',

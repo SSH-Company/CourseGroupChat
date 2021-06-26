@@ -470,4 +470,37 @@ export class ChatController {
             )
         }
     }
+
+    @Post('ignore')
+    private async ignoreGroup(req: Request, res: Response) {
+        try {
+            const session = Session.getSession(req);
+            const { groupID = '', status = '' } = req.body;
+            
+            if (groupID === '' || (status !== "Y" && status !== "N")) {
+                res.status(STATUS.BAD_REQUEST).json(
+                    new Exception({
+                        message: "Requied params include groupID & status",
+                        identifier: "CC019"
+                    })
+                );
+                return;
+            }
+
+            //mute notifications
+            await UserGroupModel.ignoreGroup(session.user.ID, groupID, status);
+
+            res.status(STATUS.OK).json({
+                message: "Successfully updated notifications"
+            });
+        } catch(err) {
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json(
+                new Exception({
+                    message: "Something went wrong attempting to mute notifications",
+                    identifier: "CC018",
+                    trace: err
+                })
+            )
+        }
+    }
 }

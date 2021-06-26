@@ -16,6 +16,7 @@ interface ChatLogViewInterface {
     CREATE_DATE?: string;
     STATUS?: string;
     MUTE_NOTIFICATION?: string;
+    IGNORE?: "Y" | "N"
 }
 
 export class ChatLogViewModel implements ChatLogViewInterface {
@@ -34,6 +35,7 @@ export class ChatLogViewModel implements ChatLogViewInterface {
     CREATE_DATE?: string;
     STATUS?: string;
     MUTE_NOTIFICATION?: string;
+    IGNORE?: "Y" | "N"
 
     constructor(raw: ChatLogViewInterface) {
         // super();

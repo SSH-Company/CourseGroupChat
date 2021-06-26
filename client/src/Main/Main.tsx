@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { View, ScrollView, Platform, RefreshControl } from "react-native";
+import { Alert, View, ScrollView, Platform, RefreshControl } from "react-native";
 import { Header, SearchBar, Image, ListItem, Button } from "react-native-elements";
 import { AntDesign, Feather, Ionicons, FontAwesome5, MaterialCommunityIcons } from "react-native-vector-icons";
 import { useIsFocused } from "@react-navigation/native";
@@ -10,7 +10,7 @@ import { RenderMessageContext } from '../Socket/WebSocket';
 import { ChatLog } from '../Util/ChatLog';
 import BaseList from '../Util/CommonComponents/BaseList';
 import { THEME_COLORS } from '../Util/CommonComponents/Colors';
-import { handleLeaveGroup } from '../Util/CommonFunctions';
+import { handleLeaveGroup, handleIgnoreGroup } from '../Util/CommonFunctions';
 import { EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import { BASE_URL } from '../BaseUrl';
 import Swipeable from 'react-native-swipeable';
@@ -85,6 +85,15 @@ const Main = ({ navigation }) => {
     return () => { mounted = false; }
   }
 
+  const alertUser = (groupID: string) => {
+      Alert.alert(
+          "Ignore this conversation?",
+          `You won't be notified when someone sends a message to this group, and the conversation will move to Spam. We won't tell other members of the group they are being ignored.`,
+          [{ text: "CANCEL", onPress: () =>  console.log('cancelled') },
+          { text: "IGNORE", onPress: () => handleIgnoreGroup(groupID, () => resetList(true)) }]
+      )
+  }
+
   const handleLongPress = (groupID: string) => {
     const options = ['Mute Notifications', 'Ignore messages', 'Leave Group'];
     const icons = [
@@ -116,10 +125,12 @@ const Main = ({ navigation }) => {
                 setMuteNotificationsModal(true);
                 break;
             case 1:
-                console.log('ignore');
+                alertUser(groupID);
                 break;
             case 2:
                 handleLeaveGroup([], groupID, true, () => resetList(true));
+                break;
+            default:
                 break;
         }
     });
