@@ -8,6 +8,7 @@ interface UserGroupInterface {
     NAME?: string;
     CREATE_DATE?: string;
     IS_ACTIVE?: "Y" | "N";
+    MUTE?: string;
 }
 
 export class UserGroupModel implements UserGroupInterface {
@@ -17,6 +18,7 @@ export class UserGroupModel implements UserGroupInterface {
     NAME?: string;
     CREATE_DATE?: string;
     IS_ACTIVE?: "Y" | "N";
+    MUTE?: string;
 
     constructor(raw: UserGroupInterface) {
         // super();
@@ -84,6 +86,17 @@ export class UserGroupModel implements UserGroupInterface {
                     console.error(err)
                     reject(err)
                 })
+        })
+    }
+
+    static muteNotifications(userID: string, groupID: string, timestamp: string): Promise<void> {
+        const query = `UPDATE RT.USER_GROUP SET "MUTE" = ? WHERE "USER_ID" = ? AND "GROUP_ID" = ? `;
+
+        return new Promise((resolve, reject) => {
+            Database.getDB()
+                .query(query, [timestamp, userID, groupID])
+                .then(() => resolve())
+                .catch(err => reject(err)) 
         })
     }
 }

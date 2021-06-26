@@ -299,11 +299,11 @@ const Chat = ({ route, navigation }) => {
                         centerContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
                         rightContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
                     />
-                    {muteNotificationsModal &&
                     <MuteNotification
+                        groupID={group.id}
                         visible={muteNotificationsModal}
                         onClose={() => setMuteNotificationsModal(false)}
-                    />}
+                    />
                     <KeyboardAvoidingView 
                         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                         style={{ flex: 1, backgroundColor: 'white' }}

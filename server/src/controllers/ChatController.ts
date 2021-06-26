@@ -14,6 +14,7 @@ import { CONNECTIONS } from '../WSServer';
 import { Session } from '../services/Session';
 import { Config } from '../services/Config';
 import { Bucket } from '../services/Bucket';
+import { Exception } from '../services/Exception';
 import { userAuthMiddleWare } from '../services/UserAuth';
 import { UserModel } from '../models/User';
 import { MessageModel } from '../models/Message';
@@ -431,6 +432,39 @@ export class ChatController {
                 message: "Something went wrong while attempting to retrieve group images/videos.",
                 identifier: "CC016"
             })
+        }
+    }
+
+    @Post('mute')
+    private async muteNotifications(req: Request, res: Response) {
+        try {
+            const session = Session.getSession(req);
+            const { groupID = '', timestamp = '' } = req.body;
+            
+            if (groupID === '' || timestamp === '') {
+                res.status(STATUS.BAD_REQUEST).json(
+                    new Exception({
+                        message: "Requied params include groupID, timestamp",
+                        identifier: "CC017"
+                    })
+                );
+                return;
+            }
+
+            //mute notifications
+            await UserGroupModel.muteNotifications(session.user.ID, groupID, timestamp);
+
+            res.status(STATUS.OK).json({
+                message: "Successfully updated notifications"
+            });
+        } catch(err) {
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json(
+                new Exception({
+                    message: "Something went wrong attempting to mute notifications",
+                    identifier: "CC018",
+                    trace: err
+                })
+            )
         }
     }
 }
