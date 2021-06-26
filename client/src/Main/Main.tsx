@@ -4,6 +4,7 @@ import { Header, SearchBar, Image, ListItem, Button } from "react-native-element
 import { AntDesign, Feather, Ionicons, FontAwesome5, MaterialCommunityIcons } from "react-native-vector-icons";
 import { useIsFocused } from "@react-navigation/native";
 import { useActionSheet } from '@expo/react-native-action-sheet';
+import { MuteNotification } from '../Chat/components';
 import { UserContext } from '../Auth/Login';
 import { RenderMessageContext } from '../Socket/WebSocket';
 import { ChatLog } from '../Util/ChatLog';
@@ -35,6 +36,8 @@ const Main = ({ navigation }) => {
   const [friendBar, setFriendBar] = useState(false);
   const isFocused = useIsFocused();
   const { showActionSheetWithOptions } = useActionSheet();
+  const [muteNotificationsModal, setMuteNotificationsModal] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState();
 
   useEffect(() => {
     if (isFocused) resetList(true);
@@ -109,7 +112,8 @@ const Main = ({ navigation }) => {
     }, async (buttonIndex) => {
         switch (buttonIndex) {
             case 0:
-                console.log('mute');
+                setSelectedGroup(groupID);
+                setMuteNotificationsModal(true);
                 break;
             case 1:
                 console.log('ignore');
@@ -159,6 +163,11 @@ const Main = ({ navigation }) => {
         leftContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
         centerContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
         rightContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
+      />
+      <MuteNotification
+          groupID={selectedGroup}
+          visible={muteNotificationsModal}
+          onClose={() => setMuteNotificationsModal(false)}
       />
       <ScrollView
         contentOffset={{ x: 0, y: 76 }}

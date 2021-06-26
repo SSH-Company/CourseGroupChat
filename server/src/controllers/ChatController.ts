@@ -442,12 +442,12 @@ export class ChatController {
     private async muteNotifications(req: Request, res: Response) {
         try {
             const session = Session.getSession(req);
-            const { groupID = '', timestamp = '' } = req.body;
+            const { groupID = '', timestamp } = req.body;
             
-            if (groupID === '' || timestamp === '') {
+            if (groupID === '') {
                 res.status(STATUS.BAD_REQUEST).json(
                     new Exception({
-                        message: "Requied params include groupID, timestamp",
+                        message: "Requied params include groupID",
                         identifier: "CC017"
                     })
                 );

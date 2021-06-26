@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useState, useEffect } from 'react';
 import { ActivityIndicator, Text, View, Modal, StyleSheet, Button } from 'react-native';
 import { ListItem } from "react-native-elements";
 import { ChatLog } from '../../Util/ChatLog';
@@ -29,17 +29,33 @@ const MuteNotification:FunctionComponent<MuteNotificationProps> = (props: MuteNo
 
     const [checkedItem, setCheckedItem] = useState(0);
     const [sendingRequest, setSendingRequest] = useState(false);
+    const [isMuted, setIsMuted] = useState(false);
+
+    useEffect(() => {
+        if (groupID) updateMuted(groupID);
+    }, [groupID])
+
+    const updateMuted = async (groupID) => {
+        const log = await ChatLog.getChatLogInstance();
+        const groupInfo = log.groupInfo[groupID];
+        setIsMuted(groupInfo.mute === 'indefinite' || (groupInfo.mute !== null && new Date() < new Date(groupInfo.mute)));
+    }
 
     const handleSubmit = () => {
         let muteDate;
 
-        if (checkedItem === 4) {
-            //max date
-            muteDate = 'indefinite';
-        } else {
-            const minutesToAdd = (15 * checkedItem) + 15;
-            muteDate = new Date();
-            muteDate.setHours(muteDate.getHours(), muteDate.getMinutes() + minutesToAdd, 0, 0);
+        switch (checkedItem) {
+            case 4:
+                muteDate = 'indefinite';
+                break;
+            case 5:
+                muteDate = null;
+                break;
+            default:
+                const minutesToAdd = (15 * checkedItem) + 15;
+                muteDate = new Date();
+                muteDate.setHours(muteDate.getHours(), muteDate.getMinutes() + minutesToAdd, 0, 0);
+                break;    
         }
 
         setSendingRequest(true);
@@ -74,6 +90,13 @@ const MuteNotification:FunctionComponent<MuteNotificationProps> = (props: MuteNo
                             <Text>{l}</Text>
                         </ListItem>
                     ))}
+                    {isMuted && <ListItem key={`mute-${5}-${checkedItem}`}>
+                        <ListItem.CheckBox 
+                            checked={checkedItem === 5}
+                            onPress={() => setCheckedItem(5)}
+                        />
+                        <Text>Unmute</Text>
+                    </ListItem>}
                     {sendingRequest ?
                         <ActivityIndicator />
                         :

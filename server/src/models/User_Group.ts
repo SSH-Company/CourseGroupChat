@@ -89,12 +89,14 @@ export class UserGroupModel implements UserGroupInterface {
         })
     }
 
-    static muteNotifications(userID: string, groupID: string, timestamp: string): Promise<void> {
-        const query = `UPDATE RT.USER_GROUP SET "MUTE" = ? WHERE "USER_ID" = ? AND "GROUP_ID" = ? `;
+    static muteNotifications(userID: string, groupID: string, timestamp: string | null): Promise<void> {
+        const query = `UPDATE RT.USER_GROUP SET "MUTE" = ${timestamp?.length > 0 ? '?' : 'NULL'} 
+                        WHERE "USER_ID" = ? AND "GROUP_ID" = ? `;
+        const params = timestamp?.length > 0 ? [timestamp, userID, groupID] : [userID, groupID];
 
         return new Promise((resolve, reject) => {
             Database.getDB()
-                .query(query, [timestamp, userID, groupID])
+                .query(query, params)
                 .then(() => resolve())
                 .catch(err => reject(err)) 
         })
