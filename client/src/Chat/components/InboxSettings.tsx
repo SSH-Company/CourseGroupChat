@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { ListItem, Image } from 'react-native-elements';
 import { User } from 'react-native-gifted-chat';
@@ -9,6 +9,7 @@ import { EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
 
 type InboxSettingsProps = {
     group: User,
+    onMuteNotifications: (visible: boolean) => any,
     onLeaveGroup: () => any
 }
 
@@ -37,22 +38,15 @@ const InboxSettings = (props: InboxSettingsProps) => {
         }
     })
 
-    const handleViewMembers = () => {
-        navigate('GroupMembers', { id: props.group._id, name: props.group.name });
-    }
-
-    const handleViewGallery = () => {
-        navigate('Gallery', props.group._id);
-    }
-
-    const leaveGroupWrapper = () => {
-        handleLeaveGroup([], props.group._id as string, true, props.onLeaveGroup);
-    }
-
     //Menu list components
     const iconSize = 20
 
     const list = [
+        {
+            title: 'Mute notifications',
+            icon: <Entypo name={"sound-mute"} size={iconSize}/>,
+            onPress: () => props.onMuteNotifications(true)
+        },
         {
             title: 'Ignore group',
             icon: <Entypo name={"sound-mute"} size={iconSize}/>
@@ -60,21 +54,17 @@ const InboxSettings = (props: InboxSettingsProps) => {
         {
             title: 'Group Members',
             icon: <MaterialIcons name={"groups"} size={iconSize}/>,
-            onPress: handleViewMembers
+            onPress: () => navigate('GroupMembers', { id: props.group._id, name: props.group.name })
         },
         {
             title: 'View photos and videos',
             icon: <AntDesign name={"picture"} size={iconSize}/>,
-            onPress: handleViewGallery
-        },
-        {
-            title: 'Search messages',
-            icon: <Entypo name={"magnifying-glass"} size={iconSize}/>
+            onPress: () => navigate('Gallery', props.group._id)
         },
         {
             title: 'Leave Group',
             icon: <Ionicons name={"exit-outline"} size={iconSize}/>,
-            onPress: leaveGroupWrapper
+            onPress: () => handleLeaveGroup([], props.group._id as string, true, props.onLeaveGroup)
         }
     ]
     

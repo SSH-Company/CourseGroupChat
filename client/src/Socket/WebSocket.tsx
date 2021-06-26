@@ -49,8 +49,6 @@ const Socket = ({ children }) => {
     const websocketConnect = () => {
         const url = BASE_URL.split('//')[1]
         const socket = new WebSocket(`ws://${url}`)
-        //check current view the user is in
-        const currentRoute = navigationRef.current.getCurrentRoute(); 
 
         socket.onopen = () => {
             console.log('socket connected');
@@ -60,6 +58,8 @@ const Socket = ({ children }) => {
         socket.onmessage = async (e: any) => {
             const data = JSON.parse(e.data)
             var log: any;
+            //check current view the user is in
+            const currentRoute = navigationRef.current?.getCurrentRoute(); 
 
             switch (data.command) {
                 case 'refresh':
@@ -90,7 +90,7 @@ const Socket = ({ children }) => {
                     //notify the user
                     const notificationBody = newMessage[0].subtitle || newMessage[0].text
                     console.log(notificationBody)
-
+        
                     //only notify if this groups view is not open
                     if (currentRoute.name === 'Chat') {
                         if (data.groupID.id !== currentRoute.params.groupID) {
@@ -102,12 +102,9 @@ const Socket = ({ children }) => {
                 default:
                     break;
             }
-            console.log(currentRoute.name)
-            if (currentRoute.name === 'Chat') {
-                if (data.groupID.id === currentRoute.params.groupID) {
-                    console.log('re rendering...')
-                    setRenderFlag(prevFlag => !prevFlag)
-                }
+            if (currentRoute.name === 'Chat' && data.groupID.id === currentRoute.params.groupID) {
+                console.log('re rendering...')
+                setRenderFlag(prevFlag => !prevFlag)
             } else {  
                 console.log('re rendering...')
                 setRenderFlag(prevFlag => !prevFlag)
@@ -129,3 +126,5 @@ const Socket = ({ children }) => {
 }
 
 export default Socket
+
+

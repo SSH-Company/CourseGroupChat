@@ -5,7 +5,7 @@ import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import { useActionSheet } from '@expo/react-native-action-sheet';
 import { Ionicons, AntDesign } from "react-native-vector-icons";
-import { CustomMessage, CustomToolbar, InboxSettings } from './components';
+import { CustomMessage, CustomToolbar, InboxSettings, MuteNotification } from './components';
 import { UserContext } from '../Auth/Login';
 import { RenderMessageContext } from '../Socket/WebSocket';
 import { ChatLog, MessageStatus } from '../Util/ChatLog';
@@ -14,7 +14,6 @@ import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import { handleError } from '../Util/CommonFunctions';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
-
 
 const Chat = ({ route, navigation }) => {
     const { user } = useContext(UserContext)
@@ -34,6 +33,7 @@ const Chat = ({ route, navigation }) => {
     const giftedChatRef = useRef(null);
     const avatarSize = 25;
     const [uploadProgress, setUploadProgress] = useState<number>(0);
+    const [muteNotificationsModal, setMuteNotificationsModal] = useState(false);
 
     useEffect(() => {
         resetMessages();
@@ -76,7 +76,7 @@ const Chat = ({ route, navigation }) => {
         //retrieve last message in this group and append to messages
         try {
             const log = (await ChatLog.getChatLogInstance()).chatLog;
-            if (group.id && group.id in log) {
+            if (group.id && group.id in log && log[group.id].length > messages.length) {
                 const lastMessage = log[group.id][0];
                 if (Object.keys(lastMessage).length > 0) {
                     setMessages(previousMessages => {
@@ -255,6 +255,7 @@ const Chat = ({ route, navigation }) => {
                     renderNavigationView={() => 
                         InboxSettings({
                             group: { _id: group.id, name: group.name, avatar: group.avatar },
+                            onMuteNotifications: visible => setMuteNotificationsModal(visible),
                             onLeaveGroup: () => navigation.navigate('Main')
                         })}
                     contentContainerStyle={{}}
@@ -298,6 +299,11 @@ const Chat = ({ route, navigation }) => {
                         centerContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
                         rightContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
                     />
+                    {muteNotificationsModal &&
+                    <MuteNotification
+                        visible={muteNotificationsModal}
+                        onClose={() => setMuteNotificationsModal(false)}
+                    />}
                     <KeyboardAvoidingView 
                         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                         style={{ flex: 1, backgroundColor: 'white' }}
