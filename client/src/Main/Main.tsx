@@ -113,9 +113,11 @@ const Main = ({ navigation }) => {
           size={20}
       />
     ];
+    const cancelButtonIndex = 3;
     showActionSheetWithOptions({
         options,
-        icons
+        icons,
+        cancelButtonIndex
     }, async (buttonIndex) => {
         switch (buttonIndex) {
             case 0:

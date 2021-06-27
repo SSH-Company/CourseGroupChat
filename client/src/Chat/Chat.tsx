@@ -195,7 +195,7 @@ const Chat = ({ route, navigation }) => {
         const options = ['Forward Message'];
         if (copyString) options.push('Copy Text');
         if (isCurrentUser) options.push('Delete Message');
-        const cancelButtonIndex = options.length - 1;
+        const cancelButtonIndex = 3;
         showActionSheetWithOptions({
             options,
             cancelButtonIndex
