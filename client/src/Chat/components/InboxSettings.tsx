@@ -4,10 +4,9 @@ import { ListItem, Image } from 'react-native-elements';
 import { User } from 'react-native-gifted-chat';
 import { AntDesign, Entypo, Ionicons, MaterialIcons } from 'react-native-vector-icons';
 import { navigate } from '../../Util/RootNavigation';
-import { handleError, handleIgnoreGroup } from '../../Util/CommonFunctions';
+import { handleIgnoreGroup } from '../../Util/CommonFunctions';
 import { handleLeaveGroup } from '../../Util/CommonFunctions';
-import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
-import axios from 'axios';
+import { EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
 
 type InboxSettingsProps = {
     group: User,

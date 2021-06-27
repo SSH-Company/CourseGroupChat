@@ -12,6 +12,7 @@ import fs from 'fs';
 import multer from 'multer';
 import * as STATUS from 'http-status-codes';
 import { userAuthMiddleWare } from '../services/UserAuth';
+import { Exception } from '../services/Exception';
 import { Session } from '../services/Session';
 import { Config } from '../services/Config';
 import { Bucket } from '../services/Bucket';
@@ -276,5 +277,28 @@ export class ProfileController {
             })
         }
     }
+
+    @Get('ignored-groups')
+    private async getIgnoredGroups(req: Request, res: Response) {
+        try {
+            const session = Session.getSession(req);
+            const ignoredGroups = (await UserGroupModel.getIgnoredGroups(session.user.ID)).map(d => ({
+                id: d.GROUP_ID,
+                name: d.NAME,
+                avatar: d.AVATAR
+            }));
+            
+            res.status(STATUS.OK).json(ignoredGroups)
+        } catch (err) {
+            console.error(err);
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json(
+                new Exception({
+                    message: "Something went wrong attempting to get ignored course groups.",
+                    identifier: "PC010"
+                })
+            )
+        }
+    }
 }
+
 

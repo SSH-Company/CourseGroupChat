@@ -161,7 +161,15 @@ export class ChatController {
             //send a message to each recipients queue
             for (const id of groupRecipients) {
                 const queueName = `message-queue-${id}`
-                const queueData = { ...message, command: "append", groupID: groupID, senderID: senderID }
+                const groupInformation = (await ChatLogViewModel.getGroupByUser(id, groupID.id)).map(d => ({
+                    id: d.GROUP_ID,
+                    name: d.NAME,
+                    avatar: d.AVATAR,
+                    verified: d.VERIFIED,
+                    mute: d.MUTE_NOTIFICATION,
+                    entered: false
+                }))[0];
+                const queueData = { ...message, command: "append", group: groupInformation, senderID: senderID }
                 const queue = CONNECTIONS[user.ID];
                 await queue.publishToQueue(queueName, JSON.stringify(queueData));
             }   
@@ -487,8 +495,14 @@ export class ChatController {
                 return;
             }
 
-            //mute notifications
             await UserGroupModel.ignoreGroup(session.user.ID, groupID, status);
+
+            if (status === 'Y') {
+                //mute notifications
+                await UserGroupModel.muteNotifications(session.user.ID, groupID, 'indefinite');
+            } else {
+                await UserGroupModel.muteNotifications(session.user.ID, groupID, null);
+            }
 
             res.status(STATUS.OK).json({
                 message: "Successfully updated notifications"

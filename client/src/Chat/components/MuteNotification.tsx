@@ -39,7 +39,9 @@ const MuteNotification:FunctionComponent<MuteNotificationProps> = (props: MuteNo
     const updateMuted = async (groupID) => {
         const log = await ChatLog.getChatLogInstance();
         const groupInfo = log.groupInfo[groupID];
-        setIsMuted(groupInfo.mute === 'indefinite' || (groupInfo.mute !== null && new Date() < new Date(groupInfo.mute)));
+        if (groupInfo && groupInfo.hasOwnProperty('mute')) {
+            setIsMuted(groupInfo?.mute === 'indefinite' || (groupInfo?.mute !== null && new Date() < new Date(groupInfo?.mute)));
+        } else setIsMuted(true);
     }
 
     const handleSubmit = () => {
