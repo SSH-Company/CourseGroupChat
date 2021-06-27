@@ -53,4 +53,14 @@ export const handleError = (error: any) => {
     }
 }
 
+export const handleIgnoreGroup = (groupID: string, onSuccess: () => any) => {
+    axios.post(`${BASE_URL}/api/chat/ignore`, { groupID, status: "Y" })
+        .then(() => onSuccess())
+        .catch(err => {
+            console.log(err)
+            handleError(err)
+        })
+}
+
+
 

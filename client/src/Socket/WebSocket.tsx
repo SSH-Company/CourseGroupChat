@@ -49,8 +49,6 @@ const Socket = ({ children }) => {
     const websocketConnect = () => {
         const url = BASE_URL.split('//')[1]
         const socket = new WebSocket(`ws://${url}`)
-        //check current view the user is in
-        const currentRoute = navigationRef.current.getCurrentRoute(); 
 
         socket.onopen = () => {
             console.log('socket connected');
@@ -60,11 +58,14 @@ const Socket = ({ children }) => {
         socket.onmessage = async (e: any) => {
             const data = JSON.parse(e.data)
             var log: any;
+            console.log(data)
+            //check current view the user is in
+            const currentRoute = navigationRef.current?.getCurrentRoute(); 
 
             switch (data.command) {
                 case 'refresh':
                     log = await ChatLog.getChatLogInstance();
-                    await log.refreshGroup(data.groupID);
+                    await log.refreshGroup(data.group);
                     break;
                 case 'append':
                     log = await ChatLog.getChatLogInstance()
@@ -81,33 +82,32 @@ const Socket = ({ children }) => {
                     
                     if (mediaType !== '') {
                         newMessage[0][mediaType] = data[mediaType];
-                        newMessage[0].subtitle = `${data.groupID.name} sent a ${mediaType}.`;
+                        newMessage[0].subtitle = `${data.group.name} sent a ${mediaType}.`;
                     }
-
-                    log.appendLog(data.groupID, newMessage)  
-                    setPostStatus(true); 
 
                     //notify the user
                     const notificationBody = newMessage[0].subtitle || newMessage[0].text
                     console.log(notificationBody)
-
-                    //only notify if this groups view is not open
-                    if (currentRoute.name === 'Chat') {
-                        if (data.groupID.id !== currentRoute.params.groupID) {
-                            await triggerNotification(data.groupID, notificationBody);
-                        }
-                    } else await triggerNotification(data.groupID, notificationBody);
-
+                    
+                    const groupInfo = data.group;
+                    //only notify if this groups view is not open, and the group notification is not muted
+                    if (groupInfo?.mute === null || (groupInfo?.mute !== 'indefinite' && new Date() > new Date(groupInfo?.mute))) {
+                        log.appendLog(data.group, newMessage);
+                        setPostStatus(true); 
+                        if (currentRoute.name === 'Chat') {
+                            if (data.group.id !== currentRoute.params.groupID) {
+                                await triggerNotification(data.group, notificationBody);
+                            }
+                        } else await triggerNotification(data.group, notificationBody);
+                    }
+                    
                     break;
                 default:
                     break;
             }
-            console.log(currentRoute.name)
-            if (currentRoute.name === 'Chat') {
-                if (data.groupID.id === currentRoute.params.groupID) {
-                    console.log('re rendering...')
-                    setRenderFlag(prevFlag => !prevFlag)
-                }
+            if (currentRoute.name === 'Chat' && data.group.id === currentRoute.params.groupID) {
+                console.log('re rendering...')
+                setRenderFlag(prevFlag => !prevFlag)
             } else {  
                 console.log('re rendering...')
                 setRenderFlag(prevFlag => !prevFlag)
@@ -129,3 +129,5 @@ const Socket = ({ children }) => {
 }
 
 export default Socket
+
+

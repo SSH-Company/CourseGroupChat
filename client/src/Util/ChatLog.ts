@@ -3,7 +3,6 @@ import { handleError } from '../Util/CommonFunctions';
 import { BASE_URL } from '../BaseUrl';
 import axios from 'axios';
 
-
 type RecipientMessageMapType = {
     [key: string]: IMessage[]
 }
@@ -13,7 +12,8 @@ type GroupInfoMapType = {
         name: string,
         avatar: string,
         verified: 'Y' | 'N',
-        entered: boolean
+        entered: boolean,
+        mute: string | null
     }
 }
 
@@ -81,7 +81,8 @@ export class ChatLog {
                     name: row.name,
                     avatar: row.avatar_url,
                     verified: row.verified,
-                    entered: false
+                    entered: false,
+                    mute: row.mute || null
                 }
             }
         })
@@ -96,7 +97,7 @@ export class ChatLog {
             const id = userID ? userID : this.instance.userID;
             //retrieve log
             try {
-                const res = await axios.get(`${BASE_URL}/api/chat/log/${id}`)
+                const res = await axios.get(`${BASE_URL}/api/chat/log`)
                 this.instance = new ChatLog(res.data, id);
                 return this.instance;    
             } catch (err) {
@@ -107,7 +108,7 @@ export class ChatLog {
         }
     }
 
-    public appendLog(group: { id: string, name?: string, avatar?: string, verified: 'Y' | 'N' }, message: IMessage[]) {
+    public appendLog(group: any, message: IMessage[]) {
         if (group.id in this.chatLog) this.chatLog[group.id] = message.concat(this.chatLog[group.id])
         else { 
             //new group has been created/joined
@@ -116,7 +117,8 @@ export class ChatLog {
                 name: group.name,
                 avatar: group.avatar,
                 verified: group.verified,
-                entered: false
+                entered: false,
+                mute: group.mute || null
             }
         }
     }
@@ -157,3 +159,5 @@ export class ChatLog {
         return;
     }
 }
+
+

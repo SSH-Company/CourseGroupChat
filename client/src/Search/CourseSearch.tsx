@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ActivityIndicator, View, ScrollView, Platform, Alert, Button } from "react-native";
+import { ActivityIndicator, View, ScrollView, Alert, Button } from "react-native";
 import { SearchBar, Header } from "react-native-elements";
 import { Ionicons, AntDesign } from "react-native-vector-icons";
 import { THEME_COLORS } from '../Util/CommonComponents/Colors';
@@ -7,7 +7,6 @@ import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
 import { handleError } from '../Util/CommonFunctions';
 import { BASE_URL } from '../BaseUrl';
 import axios from 'axios';
-
 
 const CourseSearch = ({ route, navigation }) => {
     const { enrolledGroups } = route.params;
@@ -136,3 +135,5 @@ const CourseSearch = ({ route, navigation }) => {
 }
 
 export default CourseSearch
+
+

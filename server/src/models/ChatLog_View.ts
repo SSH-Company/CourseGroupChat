@@ -15,6 +15,8 @@ interface ChatLogViewInterface {
     LOCATION?: string;
     CREATE_DATE?: string;
     STATUS?: string;
+    MUTE_NOTIFICATION?: string;
+    IGNORE?: "Y" | "N"
 }
 
 export class ChatLogViewModel implements ChatLogViewInterface {
@@ -32,6 +34,8 @@ export class ChatLogViewModel implements ChatLogViewInterface {
     LOCATION?: string;
     CREATE_DATE?: string;
     STATUS?: string;
+    MUTE_NOTIFICATION?: string;
+    IGNORE?: "Y" | "N"
 
     constructor(raw: ChatLogViewInterface) {
         // super();
@@ -56,9 +60,10 @@ export class ChatLogViewModel implements ChatLogViewInterface {
                 "LOCATION",
                 "STATUS",
                 "CREATE_DATE",
+                "MUTE_NOTIFICATION",
                 ROW_NUMBER() OVER (PARTITION BY CV."GROUP_ID" ORDER BY CV."CREATE_DATE" DESC) AS ROW_ID
             FROM RT."CHATLOG_VIEW" CV
-            WHERE "USER_ID" = ? AND "VERIFIED" IS NOT NULL
+            WHERE "USER_ID" = ? AND "VERIFIED" IS NOT NULL AND "IGNORE" = 'N'
         ) CHATLOG WHERE ROW_ID < 21;`
 
         return new Promise((resolve, reject) => {
@@ -97,6 +102,20 @@ export class ChatLogViewModel implements ChatLogViewInterface {
                             WHERE "USER_ID" = ?;`
             Database.getDB()
                 .query(query, [userID])
+                .then((data: ChatLogViewInterface[]) => resolve(data.map(d => new ChatLogViewModel(d))))
+                .catch(err => {
+                    console.log(err)
+                    reject(err)
+                })
+        })
+    }
+
+    static getGroupByUser(userID: string, groupID: string): Promise<ChatLogViewModel[]> {
+        return new Promise((resolve, reject) => {
+            const query = `SELECT DISTINCT "GROUP_ID", "NAME", "AVATAR", "VERIFIED", "MUTE_NOTIFICATION" FROM RT."CHATLOG_VIEW" CV
+                            WHERE "USER_ID" = ? AND "GROUP_ID" = ?;`
+            Database.getDB()
+                .query(query, [userID, groupID])
                 .then((data: ChatLogViewInterface[]) => resolve(data.map(d => new ChatLogViewModel(d))))
                 .catch(err => {
                     console.log(err)
