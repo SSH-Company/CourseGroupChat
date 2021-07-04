@@ -331,6 +331,7 @@ const Chat = ({ route, navigation }) => {
                             loadEarlier
                             onLoadEarlier={onLoadEarlier}
                             isKeyboardInternallyHandled={false}
+                            keyboardShouldPersistTaps='never'
                         />
                     </KeyboardAvoidingView>
                 </DrawerLayout>
