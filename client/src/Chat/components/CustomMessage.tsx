@@ -1,5 +1,6 @@
 import React, { FunctionComponent, useContext, useState, useEffect } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, Slider, Alert } from 'react-native';
+import { Avatar } from 'react-native-elements';
 import { Message, MessageImage } from 'react-native-gifted-chat';
 import { AntDesign, Feather } from "react-native-vector-icons";
 import * as Linking from 'expo-linking';
@@ -7,6 +8,7 @@ import { Audio, Video } from 'expo-av';
 import { UserContext } from '../../Auth/Login';
 import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
 import { millisToMinutesAndSeconds } from '../../Util/CommonFunctions';
+import { EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
 
 //style sheet
 const styles = StyleSheet.create({
@@ -128,7 +130,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
     const timeSincePreviousMessage = (curr: string, prev: string | null, time: number) => {
         if (prev?.trim()) {
             //create a seperate block if last time message sent was more than 'time' minutes ago
-            return (new Date(curr).getTime() - new Date(prev).getTime()) > time 
+            return Math.abs(new Date(curr).getTime() - new Date(prev).getTime()) > time 
         } else {
             return true
         }
@@ -145,17 +147,34 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
         return strTime;
     }
 
+    //variables for bubble and avatar
+    const currentMessage = children['currentMessage']
+    const isCurrentUser = currentMessage.user._id === user._id
+    const seperateMessageBlock = timeSincePreviousMessage(currentMessage.created_at, children['previousMessage'].created_at, 5 * 60 * 1000);
+    const newDay = timeSincePreviousMessage(currentMessage.created_at, children['previousMessage'].created_at, 24 * 60 * 60 * 1000);
+    const displayUsername = (children['previousMessage'].user?._id === user._id || seperateMessageBlock) && !isCurrentUser
+    const shouldRenderAvatar = timeSincePreviousMessage(currentMessage.created_at, children['nextMessage'].created_at, 5 * 60 * 1000) && !isCurrentUser
+
     return (
         <Message 
             {...children}
+            currentMessage={{
+                ...children.currentMessage,
+                user: {
+                   ...children.currentMessage.user,
+                   avatar: children.currentMessage.user.avatar || EMPTY_IMAGE_DIRECTORY 
+                }
+            }}
             key={`${children['currentMessage']['_id']}-${messagePressed}-${uploadProgress}-${isPlaying}-${refreshSound}-${position}`}
+            renderAvatar={() => {
+                return (
+                    <Avatar
+                        rounded 
+                        source={{ uri: shouldRenderAvatar ? children.currentMessage.user.avatar || EMPTY_IMAGE_DIRECTORY : null }} 
+                    />
+                )
+            }}
             renderBubble={() => {
-                const currentMessage = children['currentMessage']
-                const isCurrentUser = currentMessage.user._id === user._id
-                const seperateMessageBlock = timeSincePreviousMessage(currentMessage.created_at, children['previousMessage'].created_at, 5 * 60 * 1000);
-                const newDay = timeSincePreviousMessage(currentMessage.created_at, children['previousMessage'].created_at, 24 * 60 * 60 * 1000);
-                const displayUsername = (children['previousMessage'].user?._id === user._id || seperateMessageBlock) && !isCurrentUser
-                
                 return (
                     <View style={{ flexDirection: 'column', paddingTop: seperateMessageBlock ? 15 : 0, width: isCurrentUser ? '92%' : '80%' }}>
                         {(newDay || messagePressed) && 
