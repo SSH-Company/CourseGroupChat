@@ -1,6 +1,6 @@
 import { IMessage } from 'react-native-gifted-chat';
 import { handleError } from '../Util/CommonFunctions';
-import { BASE_URL } from '../BaseUrl';
+import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
 
 type RecipientMessageMapType = {
@@ -69,11 +69,11 @@ export class ChatLog {
                 user: {
                     _id: row.creator_id,
                     name: row.creator_name,
-                    avatar: row.creator_avatar
+                    avatar: row.creator_avatar ? row.creator_avatar : EMPTY_IMAGE_DIRECTORY
                 },
                 status: row.status,
                 displayStatus: false
-            }
+            } as IMessage
             if (row.id in map) map[row.id].push(newMessage)
             else {
                 map[row.id] = [newMessage]

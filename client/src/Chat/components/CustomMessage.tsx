@@ -1,5 +1,6 @@
 import React, { FunctionComponent, useContext, useState, useEffect } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, Slider, Alert } from 'react-native';
+import { Avatar } from 'react-native-elements';
 import { Message, MessageImage } from 'react-native-gifted-chat';
 import { AntDesign, Feather } from "react-native-vector-icons";
 import * as Linking from 'expo-linking';
@@ -7,20 +8,14 @@ import { Audio, Video } from 'expo-av';
 import { UserContext } from '../../Auth/Login';
 import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
 import { millisToMinutesAndSeconds } from '../../Util/CommonFunctions';
+import { EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
 
 //style sheet
 const styles = StyleSheet.create({
-    item: {
-        display: 'flex',
-        flexDirection: 'column'
-    },
-    itemIn: {
-        alignSelf: 'flex-start',
-        marginLeft: 10
-    },
-    itemOut: {
-        alignSelf: 'flex-end',
-        marginRight: 10
+    date: {
+        fontSize: 12,
+        color: 'grey',
+        padding: 4
     },
     balloon: {
         maxWidth: 250,
@@ -132,118 +127,165 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
         }
     }
 
+    const timeSincePreviousMessage = (curr: string, prev: string | null, time: number) => {
+        if (prev?.trim()) {
+            //create a seperate block if last time message sent was more than 'time' minutes ago
+            return Math.abs(new Date(curr).getTime() - new Date(prev).getTime()) > time 
+        } else {
+            return true
+        }
+    }
+
+    const formatAMPM = (date) => {
+        var hours = date.getHours();
+        var minutes = date.getMinutes();
+        var ampm = hours >= 12 ? 'pm' : 'am';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        var strTime = date.toLocaleString('default', { month: 'narrow' }).slice(0, 10) + " at " + hours + ':' + minutes + ' ' + ampm;
+        return strTime;
+    }
+
+    //variables for bubble and avatar
+    const currentMessage = children['currentMessage']
+    const isCurrentUser = currentMessage.user._id === user._id
+    const seperateMessageBlock = timeSincePreviousMessage(currentMessage.created_at, children['previousMessage'].created_at, 5 * 60 * 1000);
+    const newDay = timeSincePreviousMessage(currentMessage.created_at, children['previousMessage'].created_at, 24 * 60 * 60 * 1000);
+    const displayUsername = (children['previousMessage'].user?._id === user._id || seperateMessageBlock) && !isCurrentUser
+    const shouldRenderAvatar = timeSincePreviousMessage(currentMessage.created_at, children['nextMessage'].created_at, 5 * 60 * 1000) && !isCurrentUser
+
     return (
         <Message 
             {...children}
+            currentMessage={{
+                ...children.currentMessage,
+                user: {
+                   ...children.currentMessage.user,
+                   avatar: children.currentMessage.user.avatar || EMPTY_IMAGE_DIRECTORY 
+                }
+            }}
             key={`${children['currentMessage']['_id']}-${messagePressed}-${uploadProgress}-${isPlaying}-${refreshSound}-${position}`}
-            renderBubble={() => {
-                const currentMessage = children['currentMessage']
-                const isCurrentUser = currentMessage.user._id === user._id
-                
+            renderAvatar={() => {
                 return (
-                    <View style={[styles.item]}>
-
-                        {/* handle texts */}
-                        {currentMessage.hasOwnProperty('text') && currentMessage?.text?.length > 0 &&
-                        <>
-                            <TouchableOpacity 
-                                onPress={() => setMessagePressed(!messagePressed)}
-                                onLongPress={() => onLongPress(currentMessage._id, isCurrentUser, currentMessage.text)}
-                            >     
-                            <View style={[styles.balloon, {backgroundColor: isCurrentUser ? '#1F4E45' : 'white'}, { borderWidth: isCurrentUser ? null : 1 }]}>
-                                <Text style={{paddingTop: 5, color:  isCurrentUser ? 'white' : 'black'}}>{currentMessage.text}</Text>
+                    <Avatar
+                        rounded 
+                        source={{ uri: shouldRenderAvatar ? children.currentMessage.user.avatar || EMPTY_IMAGE_DIRECTORY : null }} 
+                    />
+                )
+            }}
+            renderBubble={() => {
+                return (
+                    <View style={{ flexDirection: 'column', paddingTop: seperateMessageBlock ? 15 : 0, width: isCurrentUser ? '92%' : '80%' }}>
+                        {(newDay || messagePressed) && 
+                            <View style={{ flex: 1, padding: 6, alignSelf: 'center' }}>
+                                <Text style={styles.date}>{formatAMPM(new Date(currentMessage.created_at))}</Text>
                             </View>
-                            </TouchableOpacity>
+                        }
+                        {displayUsername && <Text style={{ fontSize: 10, alignSelf: 'flex-start', paddingLeft: 12 }}>{currentMessage.user.name}</Text>}
+                        <View style={{ flex: 1, flexDirection: 'column', alignSelf: isCurrentUser ? 'flex-end' : 'flex-start' }}>
+                            {/* handle texts */}
+                            {currentMessage.hasOwnProperty('text') && currentMessage?.text?.length > 0 &&
                             <>
-                            {/* {messagePressed && <Text style={{...styles.status, alignSelf: isCurrentUser ? 'flex-end' : 'flex-start'}}>
-                                {prepareStatusText(currentMessage.status)}
-                            </Text>} */}
-                        </></>}
+                                <TouchableOpacity 
+                                    onPress={() => setMessagePressed(!messagePressed)}
+                                    onLongPress={() => onLongPress(currentMessage._id, isCurrentUser, currentMessage.text)}
+                                >     
+                                    <View style={[styles.balloon, { backgroundColor: isCurrentUser ? '#1F4E45' : 'white' }, { borderWidth: isCurrentUser ? null : 1 }]}>
+                                        <Text style={{ paddingTop: 5, color:  isCurrentUser ? 'white' : 'black' }}>{currentMessage.text}</Text>
+                                    </View>
+                                </TouchableOpacity>
+                                <>
+                                {/* {messagePressed && <Text style={{...styles.status, alignSelf: isCurrentUser ? 'flex-end' : 'flex-start'}}>
+                                    {prepareStatusText(currentMessage.status)}
+                                </Text>} */}
+                            </></>}
 
-                        {/* handle images */}
-                        {currentMessage.hasOwnProperty('image') && currentMessage?.image?.length > 0 && 
-                        (<TouchableOpacity
-                            onLongPress={() => onLongPress(currentMessage._id, isCurrentUser)}
-                        >     
-                            <MessageImage currentMessage={{...currentMessage, image: currentMessage.location}} />
-                        </TouchableOpacity>)}
+                            {/* handle images */}
+                            {currentMessage.hasOwnProperty('image') && currentMessage?.image?.length > 0 && 
+                            (<TouchableOpacity
+                                onLongPress={() => onLongPress(currentMessage._id, isCurrentUser)}
+                            >     
+                                <MessageImage currentMessage={{...currentMessage, image: currentMessage.location}} />
+                            </TouchableOpacity>)}
 
-                        {/* handle videos */}
-                        {currentMessage.hasOwnProperty('video') && currentMessage?.video?.length > 0 &&
-                        (<TouchableOpacity
-                            onLongPress={() => onLongPress(currentMessage._id, isCurrentUser)}
-                        >
-                            <Video
-                                style={styles.video}
-                                source={{ uri: currentMessage.location }}
-                                //TODO: find a good way to display loading icon
-                                // usePoster
-                                // posterSource={{ uri: `${BASE_URL}/media/loading_icon.jpg` }} 
-                                useNativeControls
-                                resizeMode="cover"
-                                isLooping
-                            />
-                        </TouchableOpacity>)}
-
-                        {/* handle files */}
-                        {currentMessage.hasOwnProperty('file') && currentMessage?.file?.length > 0 &&
-                        (<TouchableOpacity
-                            onLongPress={() => onLongPress(currentMessage._id, isCurrentUser)}
-                        >
-                            <View style={[styles.balloon, 
-                                    { backgroundColor: isCurrentUser ? '#1F4E45' : 'white' }, 
-                                    { borderWidth: isCurrentUser ? null : 1 },
-                                    { display: 'flex', flexDirection: 'row' }]}>
-                                <Feather
-                                    name="download"
-                                    size={20}
-                                    color={isCurrentUser ? 'white' : THEME_COLORS.ICON_COLOR}
-                                    onPress={() => downloadFile(currentMessage.location, currentMessage.file)}
+                            {/* handle videos */}
+                            {currentMessage.hasOwnProperty('video') && currentMessage?.video?.length > 0 &&
+                            (<TouchableOpacity
+                                onLongPress={() => onLongPress(currentMessage._id, isCurrentUser)}
+                            >
+                                <Video
+                                    style={styles.video}
+                                    source={{ uri: currentMessage.location }}
+                                    //TODO: find a good way to display loading icon
+                                    // usePoster
+                                    // posterSource={{ uri: `${BASE_URL}/media/loading_icon.jpg` }} 
+                                    useNativeControls
+                                    resizeMode="cover"
+                                    isLooping
                                 />
-                                <Text style={{marginLeft: 10, paddingTop: 5, color:  isCurrentUser ? 'white' : 'black', textDecorationLine: 'underline'}}>{currentMessage.file}</Text>
-                            </View>
-                        </TouchableOpacity>)}
+                            </TouchableOpacity>)}
 
-                        {/* handle audio */}
-                        {currentMessage.hasOwnProperty('audio') && currentMessage?.audio?.length > 0 &&
-                        (<TouchableOpacity
-                            onPress={() => isPlaying ? sound?.sound.pauseAsync() : sound?.sound.playAsync()}
-                            onLongPress={() => onLongPress(currentMessage._id, isCurrentUser)}
-                        >
-                            <View style={[styles.balloon, 
-                                    { backgroundColor: isCurrentUser ? '#1F4E45' : 'white', width: 200 }, 
-                                    { borderWidth: isCurrentUser ? null : 1 },
-                                    { display: 'flex', flexDirection: 'row' }]}>
-                                {isPlaying ?
-                                    <AntDesign
-                                        name="pausecircleo"
-                                        size={30}
+                            {/* handle files */}
+                            {currentMessage.hasOwnProperty('file') && currentMessage?.file?.length > 0 &&
+                            (<TouchableOpacity
+                                onLongPress={() => onLongPress(currentMessage._id, isCurrentUser)}
+                            >
+                                <View style={[styles.balloon, 
+                                        { backgroundColor: isCurrentUser ? '#1F4E45' : 'white' }, 
+                                        { borderWidth: isCurrentUser ? null : 1 },
+                                        { display: 'flex', flexDirection: 'row' }]}>
+                                    <Feather
+                                        name="download"
+                                        size={20}
                                         color={isCurrentUser ? 'white' : THEME_COLORS.ICON_COLOR}
-                                        onPress={async () => await sound.sound.pauseAsync()}
+                                        onPress={() => downloadFile(currentMessage.location, currentMessage.file)}
                                     />
-                                    :
-                                    <AntDesign
-                                        name="play"
-                                        size={30}
-                                        color={isCurrentUser ? 'white' : THEME_COLORS.ICON_COLOR}
-                                        onPress={async () => await sound.sound.playAsync()}
-                                    />
-                                }
-                                {sound !== undefined &&
-                                    <>
-                                        <Slider
-                                            minimumValue={0}
-                                            maximumValue={Math.max(soundStatus.durationMillis, 1, position + 1)}
-                                            value={position}
-                                            onValueChange={async e => await sound.sound.setPositionAsync(e)}
-                                            step={1}
-                                            style={{ width: 100 }}
+                                    <Text style={{marginLeft: 10, paddingTop: 5, color:  isCurrentUser ? 'white' : 'black', textDecorationLine: 'underline'}}>{currentMessage.file}</Text>
+                                </View>
+                            </TouchableOpacity>)}
+
+                            {/* handle audio */}
+                            {currentMessage.hasOwnProperty('audio') && currentMessage?.audio?.length > 0 &&
+                            (<TouchableOpacity
+                                onPress={() => isPlaying ? sound?.sound.pauseAsync() : sound?.sound.playAsync()}
+                                onLongPress={() => onLongPress(currentMessage._id, isCurrentUser)}
+                            >
+                                <View style={[styles.balloon, 
+                                        { backgroundColor: isCurrentUser ? '#1F4E45' : 'white', width: 200 }, 
+                                        { borderWidth: isCurrentUser ? null : 1 },
+                                        { display: 'flex', flexDirection: 'row' }]}>
+                                    {isPlaying ?
+                                        <AntDesign
+                                            name="pausecircleo"
+                                            size={30}
+                                            color={isCurrentUser ? 'white' : THEME_COLORS.ICON_COLOR}
+                                            onPress={async () => await sound.sound.pauseAsync()}
                                         />
-                                        <Text style={{ color: isCurrentUser ? 'white' : 'black', alignSelf: 'center' }}>{millisToMinutesAndSeconds(soundStatus.durationMillis - position)}</Text>
-                                    </>
-                                }
-                            </View>
-                        </TouchableOpacity>)}
+                                        :
+                                        <AntDesign
+                                            name="play"
+                                            size={30}
+                                            color={isCurrentUser ? 'white' : THEME_COLORS.ICON_COLOR}
+                                            onPress={async () => await sound.sound.playAsync()}
+                                        />
+                                    }
+                                    {sound !== undefined &&
+                                        <>
+                                            <Slider
+                                                minimumValue={0}
+                                                maximumValue={Math.max(soundStatus.durationMillis, 1, position + 1)}
+                                                value={position}
+                                                onValueChange={async e => await sound.sound.setPositionAsync(e)}
+                                                step={1}
+                                                style={{ width: 100 }}
+                                            />
+                                            <Text style={{ color: isCurrentUser ? 'white' : 'black', alignSelf: 'center' }}>{millisToMinutesAndSeconds(soundStatus.durationMillis - position)}</Text>
+                                        </>
+                                    }
+                                </View>
+                            </TouchableOpacity>)}
+                        </View>
                     </View>
                 )
             }}
