@@ -51,6 +51,7 @@ const MutualFriends = ({ route, navigation }) => {
                 <Header
                     placement="left"
                     backgroundColor={THEME_COLORS.HEADER}
+                    statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
                     leftComponent={
                         <View style={{ display: "flex", flexDirection: "row", alignItems: 'center' }}>
                             <Ionicons 
