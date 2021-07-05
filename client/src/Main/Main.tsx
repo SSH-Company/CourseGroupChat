@@ -70,28 +70,30 @@ const Main = ({ navigation }) => {
   }, [])
 
   const resetList = async (fromSource: boolean = false) => {
-    let mounted = true;
-    if (mounted) {
-      const log = await ChatLog.getChatLogInstance(fromSource);
-      let list = [];
-      Object.keys(log.chatLog).forEach(key => {
-        const text = log.chatLog[key][0];
-        const grpInfo = log.groupInfo[key];
-        list.push({
-          id: key,
-          message_id: text._id,
-          name: grpInfo.name,
-          avatar_url: grpInfo.avatar,
-          subtitle: text.subtitle || text.text,
-          created_at: text.createdAt,
-          verified: grpInfo.verified
-        });
-      });
-      setCompleteList(list.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)));
-      setRefreshing(false);
-    }
+	let mounted = true;
+	if (mounted) {
+		const log = await ChatLog.getChatLogInstance(fromSource);
+		let list = [];
+		if (log) {
+			Object.keys(log.chatLog).forEach(key => {
+			const text = log.chatLog[key][0];
+			const grpInfo = log.groupInfo[key];
+			list.push({
+				id: key,
+				message_id: text._id,
+				name: grpInfo.name,
+				avatar_url: grpInfo.avatar,
+				subtitle: text.subtitle || text.text,
+				created_at: text.createdAt,
+				verified: grpInfo.verified
+			});
+			});
+			setCompleteList(list.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)));
+			setRefreshing(false);
+		}
+	}
 
-    return () => { mounted = false; }
+	return () => { mounted = false; }
   }
 
   const alertUser = (groupID: string) => {

@@ -92,7 +92,7 @@ const Socket = ({ children }) => {
                     const groupInfo = data.group;
                     //only notify if this groups view is not open, and the group notification is not muted
                     if (groupInfo?.mute === null || (groupInfo?.mute !== 'indefinite' && new Date() > new Date(groupInfo?.mute))) {
-                        log.appendLog(data.group, newMessage);
+                        await log.appendLog(data.group.id, newMessage);
                         setPostStatus(true); 
                         if (currentRoute.name === 'Chat') {
                             if (data.group.id !== currentRoute.params.groupID) {

@@ -22,7 +22,6 @@ import { UserGroupModel } from '../models/User_Group';
 import { CommonGroupsModel } from '../models/Common_Groups';
 import { MutualFriendsModel } from '../models/Mutual_Friends';
 import { CMail } from '../services/CMail';
-import { stringify } from 'querystring';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -338,6 +337,8 @@ export class ProfileController {
                 message: "Something went wrong attempting to delete user account.",
                 identifier: "PC011"
             })
+        }
+    }
 
     @Get('ignored-groups')
     private async getIgnoredGroups(req: Request, res: Response) {
@@ -362,5 +363,4 @@ export class ProfileController {
         }
     }
 }
-
 

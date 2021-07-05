@@ -10,7 +10,9 @@ interface UserGroupInterface {
     IS_ACTIVE?: "Y" | "N";
     MUTE?: string;
     IGNORE?: "Y" | "N";
+    MEMBER_COUNT?: number; //used to store total number of members in group
     AVATAR?: string; //used when joining with RT.GROUP
+    VERIFIED?: string; //used when joining with RT.GROUP
 }
 
 export class UserGroupModel implements UserGroupInterface {
@@ -22,7 +24,9 @@ export class UserGroupModel implements UserGroupInterface {
     IS_ACTIVE?: "Y" | "N";
     MUTE?: string;
     IGNORE?: "Y" | "N";
+    MEMBER_COUNT?: number;
     AVATAR?: string;
+    VERIFIED?: string; //used when joining with RT.GROUP
 
     constructor(raw: UserGroupInterface) {
         // super();
@@ -136,4 +140,53 @@ export class UserGroupModel implements UserGroupInterface {
                 .catch(err => reject(err)) 
         })
     }
+
+    static getGroupInformation(uid: string, groupId?: string): Promise<UserGroupModel[]> {
+        let query = `SELECT * FROM (SELECT 
+            UG."GROUP_ID",
+            CASE 
+                WHEN (SELECT COUNT(*) FROM RT.USER_GROUP WHERE "GROUP_ID" = UG."GROUP_ID") = '1' THEN UG."NAME"
+                ELSE COALESCE(UG."NAME", STRING_AGG(U."FIRST_NAME" || ' ' || U."LAST_NAME", ', '))
+            END AS "NAME",
+            (SELECT COUNT(*) FROM RT.USER_GROUP UG3 WHERE UG3."GROUP_ID" = UG."GROUP_ID") AS "MEMBER_COUNT",
+            CASE
+                WHEN (( SELECT COUNT(*) AS COUNT
+                    FROM RT."COURSE_GROUPS" CG
+                    WHERE CG."CODE"::TEXT = UG."GROUP_ID"::TEXT)) > 0 THEN 'Y'::TEXT
+                WHEN (( SELECT COUNT(*) AS COUNT
+                    FROM RT.GROUP G
+                    WHERE G."ID"::CHARACTER VARYING(10)::TEXT = UG."GROUP_ID"::TEXT)) > 0 THEN 'N'::TEXT
+                ELSE NULL::TEXT
+            END AS "VERIFIED",
+            G2."AVATAR",
+            UG."MUTE" 
+            FROM RT.USER_GROUP UG 
+            LEFT JOIN RT.USER U ON UG."USER_ID" = U."ID"
+            LEFT JOIN RT.GROUP G2 ON UG."GROUP_ID" = G2."ID"::CHARACTER VARYING(10)::TEXT 
+            WHERE (UG."GROUP_ID" IN (SELECT DISTINCT UG2."GROUP_ID" FROM RT.USER_GROUP UG2 WHERE UG2."USER_ID" = ?) AND UG."USER_ID" <> ?)
+            OR (UG."GROUP_ID" IN (SELECT DISTINCT CG."CODE" FROM RT."COURSE_GROUPS" CG) AND UG."USER_ID" = ?)
+            OR (SELECT COUNT(*) FROM RT.USER_GROUP WHERE "GROUP_ID" = UG."GROUP_ID") = '1' AND UG."USER_ID" = ?
+            GROUP BY UG."GROUP_ID", UG."NAME", G2."AVATAR", UG."MUTE"  ) GROUPINFORMATION`
+
+        const params = [uid, uid, uid, uid];
+        
+        if (groupId) {
+            query += ` WHERE GROUPINFORMATION."GROUP_ID" = ? `;
+            params.push(groupId)
+        }
+        
+        return new Promise((resolve, reject) => {
+            Database.getDB()
+                .query(query, params)
+                .then((data:UserGroupModel[]) => {
+                    resolve(data.map((d: UserGroupInterface) => new UserGroupModel(d)))
+                })
+                .catch(err => {
+                    console.error(err)
+                    reject(err)
+                })
+        })
+    }
 }
+
+

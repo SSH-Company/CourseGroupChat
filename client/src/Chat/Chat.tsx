@@ -140,7 +140,7 @@ const Chat = ({ route, navigation }) => {
                 await sendData(messages, {...group, id:data.id });
                 navigation.push('Chat', { groupID: data.id, name: data.name })
             } else {
-                instance.appendLog(group, messages);
+                await instance.appendLog(group.id, messages);
                 setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
                 await sendData(messages);
             }
