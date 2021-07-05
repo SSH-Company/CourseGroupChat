@@ -117,6 +117,11 @@ const Settings = ({ navigation }) => {
             onPress: () => navigation.navigate('CourseGroups')
         },
         {
+            title: 'Spam',
+            icon: <Ionicons name={"person-remove"} size={iconSize}/>,
+            onPress: () => navigation.navigate('IgnoredGroups')
+        },
+        {
             title: 'Notifications & Sounds',
             icon: <Ionicons name={"notifications"} size={iconSize}/>,
             onPress: setNotifications

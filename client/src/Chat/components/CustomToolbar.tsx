@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useState, useEffect, useContext } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { View, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { InputToolbar, Send } from 'react-native-gifted-chat';
 import { Audio } from 'expo-av';
 import * as DocumentPicker from 'expo-document-picker';
@@ -19,18 +19,17 @@ const style = StyleSheet.create({
         justifyContent: 'space-evenly'
     },
     innerContainer: { 
-        display: 'flex',
-        flex: 1,
         flexDirection:'row',
-        marginBottom: 8 
+        marginRight: 10,
+        marginBottom: 15
     },
     //input toolbar
     inputbar: {
         backgroundColor: '#f0f0f0',
-        alignSelf: 'flex-end',
         borderTopWidth: 0,
         borderRadius: 30,
-        marginRight: 10
+        marginRight: 10,
+        marginBottom: 5
     },
     //button icons
     actionIcon: {
@@ -59,6 +58,7 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
     const [isRecording, setIsRecording] = useState(false);
     const [recording, setRecording] = useState();
     const [timer, setTimer] = useState(0);
+
 
     useEffect(() => {
         //max duration is 3 minutes
@@ -186,37 +186,7 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
     }
 
     return (
-        <View style={[{...style.outerContainer, position: isRecording ? 'absolute' : isTyping ? 'relative' : 'absolute', bottom: isRecording ? 1 : isTyping ? null : 1 }]}>
-            <InputToolbar 
-                {...children} 
-                placeholder={isRecording ? millisToMinutesAndSeconds(timer) : 'Type a message...'}
-                containerStyle={{...style.inputbar, marginLeft: isRecording ? 40 : isTyping ? 10 : 110}}
-                renderSend={() => 
-                    isRecording ?
-                        <MaterialCommunityIcons 
-                            name={'send-circle'} 
-                            color={THEME_COLORS.ICON_COLOR} 
-                            size={40} 
-                            onPress={() => stopRecording(true)}
-                        />
-                        :
-                    isTyping ?
-                        <Send {...children}>
-                            <MaterialCommunityIcons 
-                                name={'send-circle'} 
-                                color={THEME_COLORS.ICON_COLOR} 
-                                size={40} 
-                            />
-                        </Send>
-                            :
-                        <Ionicons 
-                            name={'mic-circle'} 
-                            color={THEME_COLORS.ICON_COLOR} 
-                            size={40} 
-                            onPress={() => startRecording()}
-                        />
-                }
-            />
+        <View style={[{...style.outerContainer, position: !isRecording && isTyping ? 'relative' : 'absolute', bottom: !isRecording && isTyping ? null : 1 }]}>
             {isRecording ?
                 <View style={[style.innerContainer]}>
                     <Ionicons 
@@ -253,7 +223,38 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
                     />
                 </View>
             }
-            
+            <TouchableOpacity style={{ display: 'flex', flex: 1 }}>
+                <InputToolbar 
+                    {...children} 
+                    placeholder={isRecording ? millisToMinutesAndSeconds(timer) : 'Type a message...'}
+                    containerStyle={style.inputbar}
+                    renderSend={() => 
+                        isRecording ?
+                            <MaterialCommunityIcons 
+                                name={'send-circle'} 
+                                color={THEME_COLORS.ICON_COLOR} 
+                                size={40} 
+                                onPress={() => stopRecording(true)}
+                            />
+                            :
+                        isTyping ?
+                            <Send {...children}>
+                                <MaterialCommunityIcons 
+                                    name={'send-circle'} 
+                                    color={THEME_COLORS.ICON_COLOR} 
+                                    size={40} 
+                                />
+                            </Send>
+                                :
+                            <Ionicons 
+                                name={'mic-circle'} 
+                                color={THEME_COLORS.ICON_COLOR} 
+                                size={40} 
+                                onPress={() => startRecording()}
+                            />
+                    }
+                />
+            </TouchableOpacity>
         </View>
     )
 }

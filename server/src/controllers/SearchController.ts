@@ -73,16 +73,25 @@ export class SearchController {
                     res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                         message: "Request must contain array of [recipients], and a valid Group Name.",
                         identifier: "SC003"
-                    })
+                    });
+                    return;
                 }
 
-                const recipientIDs = recipients.map(r => r.id);
-            
+                const recipientIDs = []; 
+                
+                for (let r of recipients) {
+                    recipientIDs.push(r.id)
+                }
+
                 //create new group and retrieve group ID
                 const newGroup = await GroupModel.insert(db);
 
                 //auto-generate names based on other members
-                let otherMembers = recipients.filter(row => row.id !== session.user.ID).map(d => d.name)
+                let filteredMembers = recipients.filter(row => row.id !== session.user.ID)
+                const otherMembers = [];
+                for (const r of filteredMembers) {
+                    otherMembers.push(r.name)
+                }
                 let groupName = otherMembers.length > 2 ? 
                     `${otherMembers.slice(1).join(", ")} & ${otherMembers.length - 2} others` :
                     otherMembers.join(", ")
@@ -91,11 +100,16 @@ export class SearchController {
 
                 //insert sender into the new group
                 await UserGroupModel.insert(session.user.ID, newGroup.ID, groupName, db);
-
+                console.log(recipientIDs)
                 //insert members into new group
                 //send a message to other group members to refresh their logs
                 for(const id of recipientIDs) {
-                    let otherMembers = recipients.filter(row => row.id !== id).map(d => d.name).concat(session.user.FIRST_NAME + ' ' + session.user.LAST_NAME)
+                    let filteredMembers = recipients.filter(row => row.id !== id)
+                    const otherMembers = [];
+                    for (const r of filteredMembers) {
+                        otherMembers.push(r.name)
+                    }
+                    otherMembers.push(session.user.FIRST_NAME + ' ' + session.user.LAST_NAME)
                     let name = otherMembers.length > 2 ? 
                         `${otherMembers.slice(1).join(", ")} & ${otherMembers.length - 2} others` :
                         otherMembers.join(", ")

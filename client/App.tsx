@@ -17,6 +17,7 @@ import {
   Settings, 
   FriendRequests,
   CourseGroups,
+  IgnoredGroups,
   EditProfile,
   CommonCourseGroups,
   MutualFriends,
@@ -42,6 +43,7 @@ export default function App() {
                   <Stack.Screen name="FriendRequests" component={FriendRequests}/>
                   <Stack.Screen name="CourseGroups" component={CourseGroups}/>
                   <Stack.Screen name="ContactUs" component={ContactUs}/>
+                  <Stack.Screen name="IgnoredGroups" component={IgnoredGroups}/>
                   <Stack.Screen name="EditProfile" component={EditProfile}/>
                   <Stack.Screen name="Profile" component={Profile}/>
                   <Stack.Screen name="CommonCourseGroups" component={CommonCourseGroups}/>

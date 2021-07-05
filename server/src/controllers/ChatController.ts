@@ -14,6 +14,7 @@ import { CONNECTIONS } from '../WSServer';
 import { Session } from '../services/Session';
 import { Config } from '../services/Config';
 import { Bucket } from '../services/Bucket';
+import { Exception } from '../services/Exception';
 import { userAuthMiddleWare } from '../services/UserAuth';
 import { UserModel } from '../models/User';
 import { MessageModel } from '../models/Message';
@@ -36,11 +37,11 @@ const upload = multer({ storage: storage })
 @Controller('chat')
 export class ChatController {
 
-    @Get('log/:id')
+    @Get('log')
     private getLog(req: Request, res: Response) {
-        const id = req.params.id;
+        const session = Session.getSession(req);
 
-        ChatLogViewModel.getUserLog(id)
+        ChatLogViewModel.getUserLog(session.user.ID)
         .then(data => {
             const responseJson = [];
             data.forEach(row => {
@@ -55,13 +56,14 @@ export class ChatController {
                     location: row.LOCATION,
                     created_at: row.CREATE_DATE,
                     status: row.STATUS,
-                    verified: row.VERIFIED
+                    verified: row.VERIFIED,
+                    mute: row.MUTE_NOTIFICATION
                 }
                 if (row.MESSAGE_ID && row.MESSAGE_TYPE) {
                     json[row.MESSAGE_TYPE] = row.MESSAGE_BODY,
-                    json['subtitle'] = row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === id ? 'You': row.CREATOR_NAME} sent a ${row.MESSAGE_TYPE}.`                        
+                    json['subtitle'] = row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_NAME} sent a ${row.MESSAGE_TYPE}.`                        
                 } else {
-                    json['subtitle'] = `You have joined to ${json.name}!`
+                    json['subtitle'] = `You have joined ${json.name}!`
                 }
                 responseJson.push(json)
             })
@@ -70,10 +72,12 @@ export class ChatController {
         })
         .catch(err => {
             console.error(err)
-            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
-                message: "Something went wrong while fetching user chat log.",
-                identifier: "CC001"
-            })
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json(
+                new Exception({
+                    message: "Something went wrong while fetching user chat log.",
+                    identifier: "CC001"
+                })
+            )
         }) 
     }
 
@@ -157,7 +161,15 @@ export class ChatController {
             //send a message to each recipients queue
             for (const id of groupRecipients) {
                 const queueName = `message-queue-${id}`
-                const queueData = { ...message, command: "append", groupID: groupID, senderID: senderID }
+                const groupInformation = (await ChatLogViewModel.getGroupByUser(id, groupID.id)).map(d => ({
+                    id: d.GROUP_ID,
+                    name: d.NAME,
+                    avatar: d.AVATAR,
+                    verified: d.VERIFIED,
+                    mute: d.MUTE_NOTIFICATION,
+                    entered: false
+                }))[0];
+                const queueData = { ...message, command: "append", group: groupInformation, senderID: senderID }
                 const queue = CONNECTIONS[user.ID];
                 await queue.publishToQueue(queueName, JSON.stringify(queueData));
             }   
@@ -431,6 +443,78 @@ export class ChatController {
                 message: "Something went wrong while attempting to retrieve group images/videos.",
                 identifier: "CC016"
             })
+        }
+    }
+
+    @Post('mute')
+    private async muteNotifications(req: Request, res: Response) {
+        try {
+            const session = Session.getSession(req);
+            const { groupID = '', timestamp } = req.body;
+            
+            if (groupID === '') {
+                res.status(STATUS.BAD_REQUEST).json(
+                    new Exception({
+                        message: "Requied params include groupID",
+                        identifier: "CC017"
+                    })
+                );
+                return;
+            }
+
+            //mute notifications
+            await UserGroupModel.muteNotifications(session.user.ID, groupID, timestamp);
+
+            res.status(STATUS.OK).json({
+                message: "Successfully updated notifications"
+            });
+        } catch(err) {
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json(
+                new Exception({
+                    message: "Something went wrong attempting to mute notifications",
+                    identifier: "CC018",
+                    trace: err
+                })
+            )
+        }
+    }
+
+    @Post('ignore')
+    private async ignoreGroup(req: Request, res: Response) {
+        try {
+            const session = Session.getSession(req);
+            const { groupID = '', status = '' } = req.body;
+            
+            if (groupID === '' || (status !== "Y" && status !== "N")) {
+                res.status(STATUS.BAD_REQUEST).json(
+                    new Exception({
+                        message: "Requied params include groupID & status",
+                        identifier: "CC019"
+                    })
+                );
+                return;
+            }
+
+            await UserGroupModel.ignoreGroup(session.user.ID, groupID, status);
+
+            if (status === 'Y') {
+                //mute notifications
+                await UserGroupModel.muteNotifications(session.user.ID, groupID, 'indefinite');
+            } else {
+                await UserGroupModel.muteNotifications(session.user.ID, groupID, null);
+            }
+
+            res.status(STATUS.OK).json({
+                message: "Successfully updated notifications"
+            });
+        } catch(err) {
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json(
+                new Exception({
+                    message: "Something went wrong attempting to mute notifications",
+                    identifier: "CC018",
+                    trace: err
+                })
+            )
         }
     }
 }
