@@ -3,9 +3,16 @@ import { Button } from 'antd';
 import './index.scss';
 import 'antd/dist/antd.css';
 
-const HomePage:FunctionComponent = () => {
+const Home:FunctionComponent = () => {
     return (
-        <div className="header-background screen-center" >
+        <div></div>
+    )
+} 
+
+export default Home
+
+
+/* <div className="header-background screen-center" >
             <div className="jumbotron">
                 <div className="col-md-18" style={{ textAlign: 'center', color: 'black' }}>
                     <h1 className="display-4">Cirkle!</h1>
@@ -16,10 +23,4 @@ const HomePage:FunctionComponent = () => {
                     </p>
                 </div>
             </div>
-        </div>
-    )
-} 
-
-export default HomePage
-
-
+        </div> */
