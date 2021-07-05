@@ -59,7 +59,7 @@ const GroupSearch = ({ navigation }) => {
                     ref={searchRef}
                     platform={"android"}
                     clearIcon={{ size: 30 }}
-                    placeholder="Search for groups"
+                    placeholder="Search for chats, courses or users"
                     onChangeText={(text) => setSearch(text)}
                     onCancel={() => searchRef.current.clear()}
                     value={search}
@@ -76,7 +76,7 @@ const GroupSearch = ({ navigation }) => {
                             itemOnPress={l => onItemPress(l)}
                         />
                         <BaseList
-                            title="Verified groups"
+                            title="Verified Course Groups"
                             items={verifiedList.filter(row => row.verified === 'Y').slice(0, 10)}
                             itemOnPress={l => onItemPress(l)}
                         />

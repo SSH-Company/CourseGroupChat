@@ -40,6 +40,19 @@ export class UserModel implements UserInterface {
         })
     }
 
+    static delete(uid: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const query = `update RT.USER set "FIRST_NAME" = 'Deleted', "LAST_NAME" = 'User', "EMAIL" = null, "PASSWORD" = null, "AVATAR" = null 
+            where "ID" = ?;`;
+            const params = [uid];
+
+            Database.getDB()
+            .query(query, params)
+            .then(() => resolve())
+            .catch(err => reject(err))
+        })
+    }
+
     static getUserAccountByID(uid: string): Promise<UserModel> {
         const query = `SELECT * FROM RT.USER WHERE "ID" = ?;`
         

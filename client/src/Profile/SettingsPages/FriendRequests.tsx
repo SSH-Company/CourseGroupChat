@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView , Button } from "react-native";
+import { Dimensions, View, ScrollView , Button } from "react-native";
 import { Header } from "react-native-elements";
 import { Ionicons, AntDesign } from "react-native-vector-icons";
 import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
@@ -8,6 +8,7 @@ import { handleError } from '../../Util/CommonFunctions';
 import { BASE_URL } from '../../BaseUrl';
 import axios from 'axios';
 
+const deviceDimensions = Dimensions.get('window')
 
 const FriendRequests = ({ navigation }) => {
     const [list, setList] = useState<listtype[]>([]);
@@ -68,7 +69,7 @@ const FriendRequests = ({ navigation }) => {
                 }
                 centerComponent={{
                     text: "Friend Requests",
-                    style: { fontWeight: "bold", color: "black", fontSize: 25 }
+                    style: { fontWeight: "bold", color: "black", fontSize: deviceDimensions.fontScale*20 }
                 }}
                 leftContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
                 centerContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}

@@ -21,6 +21,7 @@ import { FriendStatusModel, FriendStatusInterface } from '../models/Friend_Statu
 import { UserGroupModel } from '../models/User_Group';
 import { CommonGroupsModel } from '../models/Common_Groups';
 import { MutualFriendsModel } from '../models/Mutual_Friends';
+import { CMail } from '../services/CMail';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -232,12 +233,18 @@ export class ProfileController {
                 id: row.CODES.split(','),
                 name: row.NAMES.split(',')
             }))
-            const id = listed[0].id
-            const name = listed[0].name
-            const result = Array.from(
-                id.map((e, i) => ({id: e, name: name[i]}))
-                    .reduce((a, b) => a.set(b.id, (a.get(b.id) || []).concat(b.name)), new Map))
-                .map(([k, v]) => ({id:k, name: v.join()}));
+
+            let result = [];
+
+            if (listed.length > 0) {
+                const id = listed[0].id
+                const name = listed[0].name
+                result = Array.from(
+                    id.map((e, i) => ({id: e, name: name[i]}))
+                        .reduce((a, b) => a.set(b.id, (a.get(b.id) || []).concat(b.name)), new Map))
+                        .map(([k, v]) => ({id:k, name: v.join()}));
+            }
+            
 
             res.status(STATUS.OK).json(result);
         } catch (err) {
@@ -260,20 +267,75 @@ export class ProfileController {
                 name: row.MUTUAL_FRIENDS_NAMES.split(','),
                 ids: row.MUTUAL_FRIEND_IDS.split(',')
             }))
-            const avatar = listed[0].avatar
-            const name = listed[0].name
-            const id = listed[0].ids
-            const result = Array.from(
-                avatar.map((e, i) => ({avatar: e, name: name[i], id: id[i]}))
-                    .reduce((a, b) => a.set(b.avatar, (a.get(b.avatar) || []).concat(b.name, b.id)), new Map))
-                .map(([k, v]) => ({avatar:k, name: v.join().split(',')[0], id:v.join().split(',')[1]}));
 
+            let result = [];
+
+            if (listed.length > 0) {
+                const avatar = listed[0].avatar
+                const name = listed[0].name
+                const id = listed[0].ids
+                result = Array.from(
+                    avatar.map((e, i) => ({avatar: e, name: name[i], id: id[i]}))
+                        .reduce((a, b) => a.set(b.avatar, (a.get(b.avatar) || []).concat(b.name, b.id)), new Map))
+                    .map(([k, v]) => ({avatar:k, name: v.join().split(',')[0], id:v.join().split(',')[1]}));
+    
+            }
             res.status(STATUS.OK).json(result);
         } catch (err) {
             console.error(err);
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong attempting to get mutual friends.",
                 identifier: "PC009"
+            })
+        }
+    }
+
+    @Post('contact-us')
+    private async contactUs(req: Request, res: Response) {
+        try {
+            const session = req.session;
+            const firstName = session.user.FIRST_NAME;
+            const message = req.body.message;
+            
+            const mailCustomer = {
+                to: session.user.EMAIL,
+                subject: "Cirkle - We have received your message",
+                html: 'Hi ' + firstName + ',<br> <br> This is a confirmation that we have received the following message from you. <br> <br>' 
+                + "'" + message + "'" + '<br> <br> We will get back to you soon! <br> <br> Take Care, <br> The Cirkle Team'
+            };
+
+            const mailCirkle = {
+                to: 'ssh.company2021@gmail.com',
+                subject: "Cirkle - Contact Us Message",
+                html: 'Hello Cirkle Devs,' + '<br> <br> We have received the following message from userID: ' 
+                + session.user.ID + ' with email: ' + session.user.EMAIL + '<br> <br>'
+                + "'" + message + "'" + '<br> <br> Get working and reply back ASAP <br> <br> With thanks, <br> Guy Sensei'
+            };
+
+            await CMail.createMail().sendMail(mailCustomer);  
+            await CMail.createMail().sendMail(mailCirkle);  
+
+        } catch(err) {
+            console.error(err);
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong attempting to send Contact-US message.",
+                identifier: "PC010"
+            })
+        }
+    }
+
+    @Delete('user')
+    private async deleteUser(req: Request, res: Response) {
+        try {
+            const session = Session.getSession(req);
+            const id = session.user.ID;
+            await UserModel.delete(id);
+            res.status(STATUS.OK).json();
+        } catch (err) {
+            console.error(err);
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong attempting to delete user account.",
+                identifier: "PC011"
             })
         }
     }
@@ -297,8 +359,8 @@ export class ProfileController {
                     identifier: "PC010"
                 })
             )
+
         }
     }
 }
-
 
