@@ -19,7 +19,8 @@ import {
   CourseGroups,
   EditProfile,
   CommonCourseGroups,
-  MutualFriends
+  MutualFriends,
+  ContactUs
 } from './src/Profile';
 import {
   GroupMembers,
@@ -40,6 +41,7 @@ export default function App() {
                   <Stack.Screen name="Chat" component={Chat}/>
                   <Stack.Screen name="FriendRequests" component={FriendRequests}/>
                   <Stack.Screen name="CourseGroups" component={CourseGroups}/>
+                  <Stack.Screen name="ContactUs" component={ContactUs}/>
                   <Stack.Screen name="EditProfile" component={EditProfile}/>
                   <Stack.Screen name="Profile" component={Profile}/>
                   <Stack.Screen name="CommonCourseGroups" component={CommonCourseGroups}/>

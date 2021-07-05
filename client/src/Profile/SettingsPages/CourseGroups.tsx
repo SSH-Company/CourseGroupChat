@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, Text, ActivityIndicator, StyleSheet } from "react-native";
+import { Dimensions, View, ScrollView, Text, ActivityIndicator, StyleSheet } from "react-native";
 import { Header, ListItem, SearchBar, Avatar, Button } from "react-native-elements";
 import { AntDesign } from "react-native-vector-icons";
 import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
@@ -7,6 +7,7 @@ import { handleLeaveGroup, handleError } from '../../Util/CommonFunctions';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
 import axios from 'axios';
 
+const deviceDimensions = Dimensions.get('window')
 
 type CourseGroups = {
     id: string,
@@ -58,7 +59,7 @@ const CourseGroups = ({ navigation }) => {
                                 color={THEME_COLORS.ICON_COLOR} 
                                 onPress={() => navigation.goBack()}
                             />
-                            <Text style={{ fontWeight: "bold", color: "black", fontSize: 25, paddingLeft: 10 }}>Course Group Chats</Text>
+                            <Text style={{ fontWeight: "bold", color: "black", fontSize: deviceDimensions.fontScale*20, paddingLeft: 10 }}>Course Group Chats</Text>
                         </View>
                     }
                 />

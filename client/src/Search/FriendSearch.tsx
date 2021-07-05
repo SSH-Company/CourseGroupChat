@@ -15,6 +15,26 @@ const FriendSearch = ({ navigation }) => {
     const [friendList, setFriendList] = useState<listtype[]>([]);
     const searchRef = useRef(null);
 
+    const cancelRequest = (id: string, index: number) => {
+        let mounted = true;
+        axios.delete(`${BASE_URL}/api/profile/friend-request`, { data: { id: id }})
+        .then(res => {
+            if (mounted) {
+                setFriendList(prevList => {
+                    const list = [...prevList];
+                    list[index] = {
+                        ...list[index],
+                        subtitle: 'Friend request cancelled',
+                        content: <Ionicons name="person-add-outline" size={25} onPress={() => sendFriendRequest(id, index)}/>
+                    }
+                    return list
+                });
+            }
+        })
+        .catch(err => console.log(err));
+        return () => { mounted = false; }
+    }
+
     useEffect(() => {
         let mounted = true;
         searchRef.current.focus();
@@ -31,8 +51,8 @@ const FriendSearch = ({ navigation }) => {
                                     content = <Ionicons name="checkmark" size={35} color="green"/>
                                     break;
                                 case 'PENDING':
-                                    subtitle = 'Request status is pending',
-                                    content = <Button title="Cancel" color="blue" onPress={() => {}}/>
+                                    subtitle = 'Friend request pending',
+                                    content = <Button title="Cancel" onPress={() => {cancelRequest(row.id, index)}}/>
                                     break;
                                 default:
                                     break;
@@ -68,7 +88,7 @@ const FriendSearch = ({ navigation }) => {
                         list[index] = {
                             ...list[index],
                             subtitle: 'You have sent a friend request',
-                            content: <Button title="Cancel" color="blue" onPress={() => {}}/>
+                            content: <Button title="Cancel" onPress={() => {cancelRequest(id, index)}}/>
                         }
                         return list
                     });
