@@ -45,11 +45,11 @@ export class SearchController {
     private allGroupsList(req: Request, res: Response) {
         const session = Session.getSession(req);
         const user = session.user as UserModel;
-        ChatLogViewModel.getAllGroups(user.ID)
+        UserGroupModel.getGroupInformation(user.ID)
             .then(list => {
                 res.status(STATUS.OK).json(list.map(row => ({
                     id: row.GROUP_ID,
-                    name: row.VERIFIED === "Y" ? row.GROUP_ID : row.NAME,
+                    name: row.NAME || 'Just You',
                     avatar_url: row.AVATAR,
                     verified: row.VERIFIED
                 })))
@@ -96,27 +96,12 @@ export class SearchController {
                     `${otherMembers.slice(1).join(", ")} & ${otherMembers.length - 2} others` :
                     otherMembers.join(", ")
 
-                console.log(groupName);
-
                 //insert sender into the new group
-                await UserGroupModel.insert(session.user.ID, newGroup.ID, groupName, db);
-                console.log(recipientIDs)
+                await UserGroupModel.insert(session.user.ID, newGroup.ID, null, db);
                 //insert members into new group
                 //send a message to other group members to refresh their logs
                 for(const id of recipientIDs) {
-                    let filteredMembers = recipients.filter(row => row.id !== id)
-                    const otherMembers = [];
-                    for (const r of filteredMembers) {
-                        otherMembers.push(r.name)
-                    }
-                    otherMembers.push(session.user.FIRST_NAME + ' ' + session.user.LAST_NAME)
-                    let name = otherMembers.length > 2 ? 
-                        `${otherMembers.slice(1).join(", ")} & ${otherMembers.length - 2} others` :
-                        otherMembers.join(", ")
-
-                    console.log(otherMembers, name);
-        
-                    await UserGroupModel.insert(id, newGroup.ID, name, db);
+                    await UserGroupModel.insert(id, newGroup.ID, null, db);
                     const queueName = `message-queue-${id}`
                     const queueData = { command: "refresh" }
                     const queue = CONNECTIONS[session.user.ID];
@@ -161,7 +146,7 @@ export class SearchController {
                 //insert members into new group
                 //send a message to other group members to refresh their logs
                 for(const id of recipients) {
-                    await UserGroupModel.insert(id, groupID, groupName, db);
+                    await UserGroupModel.insert(id, groupID, null, db);
                     const queueName = `message-queue-${id}`
                     const queueData = { command: "refresh" }
                     const queue = CONNECTIONS[session.user.ID];

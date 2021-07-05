@@ -13,7 +13,8 @@ type GroupInfoMapType = {
         avatar: string,
         verified: 'Y' | 'N',
         entered: boolean,
-        mute: string | null
+        mute: string | null,
+        member_count: number
     }
 }
 
@@ -52,10 +53,10 @@ export class ChatLog {
     public chatLog = {} as RecipientMessageMapType;
     public groupInfo = {} as GroupInfoMapType;
 
-    constructor(list: any, userID: number) {
+    constructor(list: any, groupInfo: any, userID: number) {
         let map = {} as RecipientMessageMapType
         let grpInfo = {} as GroupInfoMapType
-        list.map(row => {
+        for (const row of list) {
             const newMessage = {
                 _id: row.message_id || revisedRandId(),
                 text: row.text || '',
@@ -73,19 +74,23 @@ export class ChatLog {
                 },
                 status: row.status,
                 displayStatus: false
-            } as IMessage
-            if (row.id in map) map[row.id].push(newMessage)
+            }
+            if (row.id in map) { map[row.id].push(newMessage) }
             else {
-                map[row.id] = [newMessage]
-                grpInfo[row.id] = {
-                    name: row.name,
-                    avatar: row.avatar_url,
-                    verified: row.verified,
-                    entered: false,
-                    mute: row.mute || null
+                const info = groupInfo.filter(r => r.id === row.id)[0];
+                if (info) {
+                    map[row.id] = [newMessage]
+                    grpInfo[row.id] = {
+                        name: info?.name || row.name,
+                        avatar: info?.avatar_url || EMPTY_IMAGE_DIRECTORY,
+                        verified: info?.verified || row.verified,
+                        entered: false,
+                        mute: info?.mute || null,
+                        member_count: info?.member_count
+                    }
                 }
             }
-        })
+        }
 
         this.chatLog = map
         this.groupInfo = grpInfo
@@ -94,11 +99,11 @@ export class ChatLog {
 
     public static async getChatLogInstance(refreshLog: boolean = false, userID?: any) {
         if ((!this.instance && userID) || refreshLog) {
-            const id = userID ? userID : this.instance.userID;
             //retrieve log
             try {
+                const id = userID ? userID : this.instance.userID;
                 const res = await axios.get(`${BASE_URL}/api/chat/log`)
-                this.instance = new ChatLog(res.data, id);
+                this.instance = new ChatLog(res.data.parsedLog, res.data.groupInfo, id);
                 return this.instance;    
             } catch (err) {
                 handleError(err)
@@ -108,17 +113,20 @@ export class ChatLog {
         }
     }
 
-    public appendLog(group: any, message: IMessage[]) {
-        if (group.id in this.chatLog) this.chatLog[group.id] = message.concat(this.chatLog[group.id])
+    public async appendLog(groupID: string, message: IMessage[]) {
+        if (groupID in this.chatLog) this.chatLog[groupID] = message.concat(this.chatLog[groupID])
         else { 
             //new group has been created/joined
-            this.chatLog[group.id] = message
-            this.groupInfo[group.id] = {
-                name: group.name,
-                avatar: group.avatar,
-                verified: group.verified,
+            this.chatLog[groupID] = message
+            const res = await axios.get(`${BASE_URL}/api/chat/log`)
+            const info = res.data.groupInfo.filter(r => r.id === groupID)[0];
+            this.groupInfo[groupID] = {
+                name: info.name,
+                avatar: info.avatar,
+                verified: info.verified,
                 entered: false,
-                mute: group.mute || null
+                mute: info.mute || null,
+                member_count: info.member_count
             }
         }
     }

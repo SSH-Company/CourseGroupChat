@@ -28,8 +28,9 @@ const GroupSearch = ({ navigation }) => {
     }, []);
 
     const filteredList = useMemo<listtype[]>(() => {
-        const filteredVerifiedList = verifiedList.filter(item => item.name.toLowerCase().includes(search.toLowerCase())).slice(0, 20);
-        const filteredUserList = userList.filter(item => item.name.toLowerCase().includes(search.toLowerCase())).slice(0, 20);
+        let filteredVerifiedList = [], filteredUserList = [];
+        if (verifiedList.length > 0) filteredVerifiedList = verifiedList.filter(item => item?.name?.toLowerCase()?.includes(search.toLowerCase())).slice(0, 20);
+        if (userList.length > 0) filteredUserList = userList.filter(item => item?.name?.toLowerCase()?.includes(search.toLowerCase())).slice(0, 20);
         return filteredVerifiedList.concat(filteredUserList).sort();
     }, [verifiedList, userList, search])
 
@@ -102,3 +103,5 @@ const GroupSearch = ({ navigation }) => {
 }
 
 export default GroupSearch
+
+

@@ -84,9 +84,9 @@ export class UserModel implements UserInterface {
         const params = Array(excludeIds.length).fill("?").join(",");
         let query = '';
         if (params.length > 0) {
-            query = `SELECT * FROM RT.USER WHERE "ID" NOT IN (${params}) ORDER BY "FIRST_NAME" `;
+            query = `SELECT * FROM RT.USER WHERE "ID" NOT IN (${params}) AND "EMAIL" IS NOT NULL ORDER BY "FIRST_NAME" `;
         } else {
-            query = `SELECT * FROM RT.USER ORDER BY "FIRST_NAME" `;
+            query = `SELECT * FROM RT.USER WHERE "EMAIL" IS NOT NULL ORDER BY "FIRST_NAME" `;
         }
 
         return new Promise((resolve, reject) => {

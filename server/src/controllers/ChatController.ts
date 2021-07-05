@@ -38,13 +38,14 @@ const upload = multer({ storage: storage })
 export class ChatController {
 
     @Get('log')
-    private getLog(req: Request, res: Response) {
-        const session = Session.getSession(req);
+    private async getLog(req: Request, res: Response) {
+        try{
+            const session = Session.getSession(req);
 
-        ChatLogViewModel.getUserLog(session.user.ID)
-        .then(data => {
-            const responseJson = [];
-            data.forEach(row => {
+            const [chatLog, groupinfo] = await Promise.all([ChatLogViewModel.getUserLog(session.user.ID), UserGroupModel.getGroupInformation(session.user.ID)]);
+            
+            const parsedLog = [];
+            chatLog.forEach(row => {
                 const json = {
                     id: row.GROUP_ID,
                     creator_id: row.CREATOR_ID,
@@ -65,12 +66,23 @@ export class ChatController {
                 } else {
                     json['subtitle'] = `You have joined ${json.name}!`
                 }
-                responseJson.push(json)
+                parsedLog.push(json)
             })
             
-            res.status(STATUS.OK).json(responseJson)
-        })
-        .catch(err => {
+            const groupInfo = groupinfo.map(row => ({
+                id: row.GROUP_ID,
+                name: row.NAME || 'Just You',
+                member_count: row.MEMBER_COUNT,
+                mute: row.MUTE,
+                verified: row.VERIFIED,
+                avatar: row.AVATAR
+            }))
+        
+            res.status(STATUS.OK).json({
+                parsedLog,
+                groupInfo
+            })
+        } catch (err) {
             console.error(err)
             res.status(STATUS.INTERNAL_SERVER_ERROR).json(
                 new Exception({
@@ -78,7 +90,7 @@ export class ChatController {
                     identifier: "CC001"
                 })
             )
-        }) 
+        }
     }
 
     
@@ -161,15 +173,7 @@ export class ChatController {
             //send a message to each recipients queue
             for (const id of groupRecipients) {
                 const queueName = `message-queue-${id}`
-                const groupInformation = (await ChatLogViewModel.getGroupByUser(id, groupID.id)).map(d => ({
-                    id: d.GROUP_ID,
-                    name: d.NAME,
-                    avatar: d.AVATAR,
-                    verified: d.VERIFIED,
-                    mute: d.MUTE_NOTIFICATION,
-                    entered: false
-                }))[0];
-                const queueData = { ...message, command: "append", group: groupInformation, senderID: senderID }
+                const queueData = { ...message, command: "append", group: groupID.id, senderID: senderID }
                 const queue = CONNECTIONS[user.ID];
                 await queue.publishToQueue(queueName, JSON.stringify(queueData));
             }   

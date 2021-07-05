@@ -150,10 +150,10 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
     //variables for bubble and avatar
     const currentMessage = children['currentMessage']
     const isCurrentUser = currentMessage.user._id === user._id
-    const seperateMessageBlock = timeSincePreviousMessage(currentMessage.created_at, children['previousMessage'].created_at, 5 * 60 * 1000);
+    const seperateMessageBlock = timeSincePreviousMessage(currentMessage.created_at, children['previousMessage'].created_at, 15 * 1000);
     const newDay = timeSincePreviousMessage(currentMessage.created_at, children['previousMessage'].created_at, 24 * 60 * 60 * 1000);
     const displayUsername = (children['previousMessage'].user?._id === user._id || seperateMessageBlock) && !isCurrentUser
-    const shouldRenderAvatar = timeSincePreviousMessage(currentMessage.created_at, children['nextMessage'].created_at, 5 * 60 * 1000) && !isCurrentUser
+    const shouldRenderAvatar = timeSincePreviousMessage(currentMessage.created_at, children['nextMessage'].created_at, 15 * 1000) && !isCurrentUser
 
     return (
         <Message 

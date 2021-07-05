@@ -94,7 +94,6 @@ const Search = ({ route, navigation }) => {
         } else if (searchType === "add") {
             const reqBody = {
                 groupID: groupID,
-                groupName: groupName,
                 recipients: recipients.map(d => d.id)
             }
 
