@@ -82,7 +82,7 @@ export class ChatLog {
                     map[row.id] = [newMessage]
                     grpInfo[row.id] = {
                         name: info?.name || row.name,
-                        avatar: info?.avatar_url || EMPTY_IMAGE_DIRECTORY,
+                        avatar: info?.avatar ? info.avatar : info.custom_avatar || EMPTY_IMAGE_DIRECTORY,
                         verified: info?.verified || row.verified,
                         entered: false,
                         mute: info?.mute || null,

@@ -9,6 +9,7 @@ import { CustomMessage, CustomToolbar, InboxSettings, MuteNotification } from '.
 import { UserContext } from '../Auth/Login';
 import { RenderMessageContext } from '../Socket/WebSocket';
 import { ChatLog, MessageStatus } from '../Util/ChatLog';
+import GroupAvatar from '../Util/CommonComponents/GroupAvatar';
 import VerifiedIcon from '../Util/CommonComponents/VerifiedIcon';
 import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import { handleError } from '../Util/CommonFunctions';
@@ -255,6 +256,7 @@ const Chat = ({ route, navigation }) => {
                     renderNavigationView={() => 
                         InboxSettings({
                             group: { _id: group.id, name: group.name, avatar: group.avatar },
+                            verified: group.verified,
                             onMuteNotifications: visible => setMuteNotificationsModal(visible),
                             onLeaveGroup: () => navigation.navigate('Main')
                         })}
@@ -272,13 +274,23 @@ const Chat = ({ route, navigation }) => {
                                     color={THEME_COLORS.ICON_COLOR}
                                     onPress={() => navigation.navigate('Main')}
                                 />
-                                <Avatar 
-                                    source={{ uri: group.avatar || EMPTY_IMAGE_DIRECTORY }} 
-                                    rounded 
-                                    size={avatarSize} 
-                                    containerStyle={{ marginLeft: 10, borderColor: "white", borderWidth: 1 }}
-                                    onPress={() => drawerRef.current.openDrawer()}
-                                />        
+                                {group.verified === "Y" ?
+                                    <GroupAvatar
+                                        name={group.name}
+                                        verified={"Y"}
+                                        size={avatarSize}
+                                        style={{ marginLeft: 10 }}
+                                        onPress={() => drawerRef.current.openDrawer()}
+                                    />
+                                    :
+                                    <Avatar 
+                                        source={{ uri: group.avatar || EMPTY_IMAGE_DIRECTORY }} 
+                                        rounded 
+                                        size={avatarSize} 
+                                        containerStyle={{ marginLeft: 10, borderColor: "white", borderWidth: 1 }}
+                                        onPress={() => drawerRef.current.openDrawer()}
+                                    /> 
+                                }       
                             </View>
                         }
                         centerComponent={

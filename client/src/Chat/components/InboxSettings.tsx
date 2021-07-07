@@ -3,6 +3,7 @@ import { Alert, View, Text, StyleSheet, Dimensions } from 'react-native';
 import { ListItem, Image } from 'react-native-elements';
 import { User } from 'react-native-gifted-chat';
 import { AntDesign, Entypo, Ionicons, MaterialIcons } from 'react-native-vector-icons';
+import GroupAvatar from '../../Util/CommonComponents/GroupAvatar';
 import { navigate } from '../../Util/RootNavigation';
 import { handleIgnoreGroup } from '../../Util/CommonFunctions';
 import { handleLeaveGroup } from '../../Util/CommonFunctions';
@@ -10,6 +11,7 @@ import { EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
 
 type InboxSettingsProps = {
     group: User,
+    verified: "Y" | "N",
     onMuteNotifications: (visible: boolean) => any,
     onLeaveGroup: () => any
 }
@@ -31,8 +33,6 @@ const InboxSettings = (props: InboxSettingsProps) => {
             alignItems: 'center'
         },
         imageStyle: {
-            width: 100,
-            height: 100,
             marginTop: 50,
             marginBottom: 25,
             borderRadius: 200
@@ -82,10 +82,19 @@ const InboxSettings = (props: InboxSettingsProps) => {
     return (
         <View style={styles.drawerContainer}>
             <View style={styles.imageContainer}>
-                <Image 
-                    source={{ uri: props.group.avatar as string || EMPTY_IMAGE_DIRECTORY }}
-                    style={styles.imageStyle}
-                />
+                {props.verified === "Y" ?
+                    <GroupAvatar
+                        name={props.group.name}
+                        verified={"Y"}
+                        size={100}
+                        style={styles.imageStyle}
+                    />
+                    :
+                    <Image 
+                        source={{ uri: props.group.avatar as string || EMPTY_IMAGE_DIRECTORY }}
+                        style={[styles.imageStyle, { width: 100, height: 100 }]}
+                    />
+                }
                 <Text style={{paddingBottom: 10, fontSize: 25}}>{props.group.name}</Text>
             </View>
             {list.map((item, i) => (
