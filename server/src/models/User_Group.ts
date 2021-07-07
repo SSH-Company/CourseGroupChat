@@ -12,6 +12,7 @@ interface UserGroupInterface {
     IGNORE?: "Y" | "N";
     MEMBER_COUNT?: number; //used to store total number of members in group
     AVATAR?: string; //used when joining with RT.GROUP
+    CUSTOM_AVATAR?: string; //used when querying for group information
     VERIFIED?: string; //used when joining with RT.GROUP
 }
 
@@ -26,6 +27,7 @@ export class UserGroupModel implements UserGroupInterface {
     IGNORE?: "Y" | "N";
     MEMBER_COUNT?: number;
     AVATAR?: string;
+    CUSTOM_AVATAR?: string; //used when querying for group information
     VERIFIED?: string; //used when joining with RT.GROUP
 
     constructor(raw: UserGroupInterface) {
@@ -159,6 +161,7 @@ export class UserGroupModel implements UserGroupInterface {
                 ELSE NULL::TEXT
             END AS "VERIFIED",
             G2."AVATAR",
+            STRING_AGG(U."AVATAR", ', ') AS "CUSTOM_AVATAR",
             UG."MUTE" 
             FROM RT.USER_GROUP UG 
             LEFT JOIN RT.USER U ON UG."USER_ID" = U."ID"

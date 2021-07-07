@@ -85,7 +85,8 @@ const Main = ({ navigation }) => {
 				avatar_url: grpInfo.avatar,
 				subtitle: text.subtitle || text.text,
 				created_at: text.createdAt,
-				verified: grpInfo.verified
+        verified: grpInfo.verified,
+        member_count: grpInfo.member_count
 			});
 			});
 			setCompleteList(list.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)));
@@ -174,11 +175,17 @@ const Main = ({ navigation }) => {
         }
         rightComponent={
           <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingRight: 5 }}>
-            <Ionicons 
+            {/* <Ionicons 
               name={"person-add"} 
               color={THEME_COLORS.ICON_COLOR} 
               size={20} 
               onPress={() => navigation.navigate("FriendSearch")}
+            /> */}
+            <Feather 
+                name={"edit"} 
+                color={THEME_COLORS.ICON_COLOR} 
+                size={20}
+                onPress={() => navigation.navigate("Search", { groupName: "New group", searchType: "create" })} 
             />
           </View>
         }
@@ -248,9 +255,9 @@ const Main = ({ navigation }) => {
               }}
               itemOnLongPress={(l, i) => handleLongPress(l.id)}
               topDivider
-            />
+          />
       </ScrollView>
-      <View style={styles.sendMessageStyle}>
+      {/* <View style={styles.sendMessageStyle}>
             <Button
               icon={
                 <Feather 
@@ -269,7 +276,7 @@ const Main = ({ navigation }) => {
               }}
               onPress={() => navigation.navigate("Search", { groupName: "New group", searchType: "create" })}
             />
-      </View>
+      </View> */}
     </View>
   );
 };

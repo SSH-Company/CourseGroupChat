@@ -51,7 +51,9 @@ export class SearchController {
                     id: row.GROUP_ID,
                     name: row.NAME || 'Just You',
                     avatar_url: row.AVATAR,
-                    verified: row.VERIFIED
+                    custom_avatar: row.CUSTOM_AVATAR ? row.CUSTOM_AVATAR.split(',')[0] : null,
+                    verified: row.VERIFIED,
+                    member_count: row.MEMBER_COUNT
                 })))
             })
             .catch(err => {
