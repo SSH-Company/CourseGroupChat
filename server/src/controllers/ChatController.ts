@@ -75,8 +75,7 @@ export class ChatController {
                 member_count: row.MEMBER_COUNT,
                 mute: row.MUTE,
                 verified: row.VERIFIED,
-                avatar: row.AVATAR,
-                custom_avatar: row.CUSTOM_AVATAR ? row.CUSTOM_AVATAR.split(',')[0] : null
+                avatar: row.AVATAR ? row.AVATAR : row.CUSTOM_AVATAR?.split(',')[0] || null
             }))
         
             res.status(STATUS.OK).json({

@@ -5,7 +5,7 @@ import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import { useActionSheet } from '@expo/react-native-action-sheet';
 import { Ionicons, AntDesign } from "react-native-vector-icons";
-import { CustomMessage, CustomToolbar, InboxSettings, MuteNotification } from './components';
+import { CustomMessage, CustomToolbar, MuteNotification } from './components';
 import { UserContext } from '../Auth/Login';
 import { RenderMessageContext } from '../Socket/WebSocket';
 import { ChatLog, MessageStatus } from '../Util/ChatLog';
@@ -13,6 +13,7 @@ import GroupAvatar from '../Util/CommonComponents/GroupAvatar';
 import VerifiedIcon from '../Util/CommonComponents/VerifiedIcon';
 import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import { handleError } from '../Util/CommonFunctions';
+import InboxSettings from '../Util/CommonComponents/InboxSettings';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
 
@@ -257,6 +258,7 @@ const Chat = ({ route, navigation }) => {
                         InboxSettings({
                             group: { _id: group.id, name: group.name, avatar: group.avatar },
                             verified: group.verified,
+                            newToGroup: false,
                             onMuteNotifications: visible => setMuteNotificationsModal(visible),
                             onLeaveGroup: () => navigation.navigate('Main')
                         })}

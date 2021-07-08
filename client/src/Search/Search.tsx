@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { Text, View, ScrollView, Platform, StyleSheet, Dimensions } from "react-native";
+import { Text, View, ScrollView, StyleSheet, Dimensions } from "react-native";
 import { Avatar, Header, SearchBar, Button } from "react-native-elements";
 import Feather from "react-native-vector-icons/Feather";
 import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
@@ -7,7 +7,6 @@ import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import { handleError } from "../Util/CommonFunctions";
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
-
 
 //style sheet
 const style = StyleSheet.create({
