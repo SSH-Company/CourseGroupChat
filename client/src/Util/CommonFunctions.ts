@@ -62,5 +62,31 @@ export const handleIgnoreGroup = (groupID: string, onSuccess: () => any) => {
         })
 }
 
+export const handleJoinCourseGroup = (id: string, onSuccess: () => any) => { 
+    let mounted = true;
+    axios.post(`${BASE_URL}/api/chat/join-group`, { id: id, name: id, verified: 'Y' })
+        .then(res => {
+            const status = res.data.status;
+            if (status === 'success') {
+                if (mounted) {
+                    onSuccess();
+                }
+            } else {
+                Alert.alert(
+                    `Failed to join ${id}`,
+                    'You are already enrolled in the maximum(8) number of courses. Please leave a group to join a new one.',
+                    [{ text: "OK", style: "cancel" }]
+                )
+                return;
+            }
+        })
+        .catch(err => {
+            console.log('unable to join group');
+            handleError(err);
+        })
+    
+    return () => { mounted = false; }
+}
+
 
 
