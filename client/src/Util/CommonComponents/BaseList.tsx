@@ -1,10 +1,9 @@
 import React, { FunctionComponent } from 'react';
 import { View, Text, StyleSheet } from "react-native";
-import { ListItem, Avatar } from "react-native-elements";
+import { ListItem } from "react-native-elements";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import GroupAvatar from './GroupAvatar';
 import VerifiedIcon from './VerifiedIcon';
-import { EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
 import { THEME_COLORS } from './Colors';
 
 //style sheet

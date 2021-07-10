@@ -9,14 +9,13 @@ import * as STATUS from 'http-status-codes';
 import { userAuthMiddleWare } from '../services/UserAuth';
 import { Database } from '../services/Database';
 import { Session } from '../services/Session';
+import { Exception } from '../services/Exception';
 import { UserModel } from '../models/User';
 import { GroupModel } from '../models/Group';
 import { UserGroupModel } from '../models/User_Group';
-import { ChatLogViewModel } from '../models/ChatLog_View';
 import { UserRelationModel } from '../models/User_Relation';
 import { CourseGroupsModel } from '../models/Course_Groups';
 import { CONNECTIONS } from '../WSServer';
-
 @ClassMiddleware([userAuthMiddleWare])
 @Controller('search')
 export class SearchController {
@@ -84,18 +83,19 @@ export class SearchController {
                     recipientIDs.push(r.id)
                 }
 
-                //create new group and retrieve group ID
-                const newGroup = await GroupModel.insert(db);
-
                 //auto-generate names based on other members
                 let filteredMembers = recipients.filter(row => row.id !== session.user.ID)
+                
+                //generate group id from member ids
+                const newGroupId = `${recipientIDs.sort().join('').trim()}-${Math.floor(Math.random() * 999)}`;
+
+                //create new group and retrieve group ID
+                const newGroup = await GroupModel.insert(newGroupId, db);
+
                 const otherMembers = [];
                 for (const r of filteredMembers) {
                     otherMembers.push(r.name)
                 }
-                let groupName = otherMembers.length > 2 ? 
-                    `${otherMembers.slice(1).join(", ")} & ${otherMembers.length - 2} others` :
-                    otherMembers.join(", ")
 
                 //insert sender into the new group
                 await UserGroupModel.insert(session.user.ID, newGroup.ID, null, db);
@@ -110,8 +110,7 @@ export class SearchController {
                 }
                 
                 res.status(STATUS.OK).json({
-                    id: newGroup.ID,
-                    name: groupName
+                    id: newGroup.ID
                 });
             })
 
@@ -226,6 +225,48 @@ export class SearchController {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong while attempting to get verified groups list.",
                 identifier: "SC009"
+            })
+        }
+    }
+
+    @Get('existing-groups')
+    private async checkIfGroupExists(req: Request, res: Response) {
+        try {
+            const session = Session.getSession(req);
+            const { recipients = [] } = req.query;
+
+            if (recipients === '') {
+                res.status(STATUS.BAD_REQUEST).json(
+                    new Exception({
+                        message: "Request must contain recipients.",
+                        identifier: "SC010"
+                    })
+                )
+            }
+
+            //generate group id from member ids
+            const newGroupId = `${recipients.sort().join('').trim()}-`;
+            const existingGroups = await UserGroupModel.getGroupInformation(session.user.ID, newGroupId); 
+            
+            if (existingGroups.length > 0) {
+                res.status(STATUS.OK).json(existingGroups.map(d => ({
+                    id: d.GROUP_ID,
+                    avatar_url: d.AVATAR ? d.AVATAR : d.CUSTOM_AVATAR?.split(',')[0] || null,
+                    name: d.NAME,
+                    verified: d.VERIFIED,
+                    member_count: d.MEMBER_COUNT
+                })));
+            } else {
+                res.status(STATUS.OK).json([]);
+            }
+
+            return;
+            
+        } catch (err) {
+            console.error(err)
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong while attempting to check if this group exists.",
+                identifier: "SC011"
             })
         }
     }
