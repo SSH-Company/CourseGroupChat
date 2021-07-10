@@ -140,7 +140,7 @@ const Chat = ({ route, navigation }) => {
                 //refresh log since new group has been created, and navigate to it
                 await ChatLog.getChatLogInstance(true);
                 await sendData(messages, {...group, id:data.id });
-                navigation.push('Chat', { groupID: data.id, name: data.name })
+                navigation.push('Chat', { groupID: data.id })
             } else {
                 await instance.appendLog(group.id, messages);
                 setMessages(previousMessages => GiftedChat.append(previousMessages, messages));

@@ -174,8 +174,7 @@ export class UserGroupModel implements UserGroupInterface {
         const params = [uid, uid, uid, uid];
         
         if (groupId) {
-            query += ` WHERE GROUPINFORMATION."GROUP_ID" = ? `;
-            params.push(groupId)
+            query += ` WHERE GROUPINFORMATION."GROUP_ID" LIKE '${groupId.toUpperCase()}%' `;
         }
         
         return new Promise((resolve, reject) => {
