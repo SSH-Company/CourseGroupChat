@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dimensions, View, ScrollView , Button } from "react-native";
+import { Dimensions, View, ScrollView , Button, Text } from "react-native";
 import { Header } from "react-native-elements";
 import { Ionicons, AntDesign } from "react-native-vector-icons";
 import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
@@ -52,7 +52,7 @@ const FriendRequests = ({ navigation }) => {
     }, [])
 
     return (
-        <View>
+        <View style={{ flex: 1 }}>
             <Header
                 placement="left"
                 backgroundColor={THEME_COLORS.HEADER}
@@ -75,11 +75,17 @@ const FriendRequests = ({ navigation }) => {
                 centerContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
                 rightContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
             />
+            {list.length === 0 ?
+                    <View style={{ flex: 1, justifyContent: 'center' }}>
+                        <Text style={{ color: "black", fontSize: 20, padding: 40, textAlign: 'center' }}>No pending requests.</Text>
+                    </View>
+                    :
             <ScrollView keyboardShouldPersistTaps="handled">
                 <BaseList
                     items={list}
                 />
             </ScrollView>
+            }
         </View>
     )
 

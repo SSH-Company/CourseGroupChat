@@ -13,6 +13,7 @@ import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import { handleError } from '../Util/CommonFunctions';
 import axios from 'axios';
 import * as Linking from 'expo-linking';
+import { FontAwesome5 } from '@expo/vector-icons';
 
 const deviceDimensions = Dimensions.get('window')
 
@@ -106,6 +107,11 @@ const Settings = ({ navigation }) => {
     );
 
     const sectionOne = [
+        {
+            title: 'My Friends',
+            icon: <FontAwesome5 name="user-friends" size={iconSize-1}/>,
+            onPress: () => navigation.navigate('Friends')
+        },
         {
             title: 'Friend Requests',
             icon: <Ionicons name={"person-add"} size={iconSize}/>,
