@@ -1,12 +1,13 @@
 import React, { FunctionComponent, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { notification } from 'antd';
 import { BASE_URL } from '../BaseUrl';
 import axios from 'axios';
 import './index.scss';
 
 const VerifyAccount:FunctionComponent = () => {
     const props: any = useParams()
-    const [status, setStatus] = useState('')
+    const [status, setStatus] = useState()
     const [message, setMessage] = useState('')
     const [showResend, setShowResend] = useState(false);
 
@@ -30,7 +31,12 @@ const VerifyAccount:FunctionComponent = () => {
                 })
                 .catch(err => {
                     console.error(err);
-                    setStatus('failed');
+                    setShowResend(true);
+                    notification.open({
+                        message: 'Error',
+                        description: 'Unable to find this verification id. Please try resending the verification link.',
+                        type: 'error'
+                    });
                 })
         }
     }, [props])
@@ -45,7 +51,12 @@ const VerifyAccount:FunctionComponent = () => {
                 })
                 .catch(err => {
                     console.error(err);
-                    setStatus('failed');
+                    setShowResend(true);
+                    notification.open({
+                        message: 'Error',
+                        description: 'Unable to send verification link. Please try contacting an admin.',
+                        type: 'error'
+                    });
                 })
         }
     }
@@ -54,15 +65,8 @@ const VerifyAccount:FunctionComponent = () => {
         <div className="header-background screen-center">
             <div className="col-md-18" style={{ textAlign: 'center', color: 'black' }}>
                 <h1 className="display-3">
-                    {status === "success" && message}
-                    {status === "expired" && 
-                    <>
-                        {message}
-                        <br/>
-                        {showResend && <a onClick={handleResend}>Click here to re-send verification email</a>}
-                    </>
-                    }
-                    {status === "failed" && <>Looks like something is wrong on our end. Please try again later.</>}
+                    {status && message}
+                    {showResend && <a onClick={handleResend}>Click here to re-send verification email</a>}
                 </h1>
             </div>
         </div>
