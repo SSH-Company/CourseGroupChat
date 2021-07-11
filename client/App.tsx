@@ -21,7 +21,8 @@ import {
   EditProfile,
   CommonCourseGroups,
   MutualFriends,
-  ContactUs
+  ContactUs,
+  Friends
 } from './src/Profile';
 import {
   GroupMembers,
@@ -40,6 +41,7 @@ export default function App() {
               <Stack.Navigator initialRouteName="Main" screenOptions={{headerShown: false, cardStyle: { backgroundColor: 'white' }}}>
                   <Stack.Screen name="Main" component={Main}/>
                   <Stack.Screen name="Chat" component={Chat}/>
+                  <Stack.Screen name="Friends" component={Friends}/>
                   <Stack.Screen name="FriendRequests" component={FriendRequests}/>
                   <Stack.Screen name="CourseGroups" component={CourseGroups}/>
                   <Stack.Screen name="ContactUs" component={ContactUs}/>

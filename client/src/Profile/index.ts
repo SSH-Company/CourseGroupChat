@@ -8,6 +8,7 @@ import ContactUs from './SettingsPages/ContactUS';
 import NotificationSettings from './NotificationSettings';
 import CommonCourseGroups from './FriendSettingsPages/CommonCourseGroups';
 import MutualFriends from './FriendSettingsPages/MutualFriends';
+import Friends from './SettingsPages/Friends';
 
 export {
     Profile,
@@ -19,5 +20,6 @@ export {
     NotificationSettings,
     CommonCourseGroups,
     MutualFriends,
-    ContactUs
+    ContactUs,
+    Friends
 }

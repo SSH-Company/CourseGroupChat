@@ -21,6 +21,7 @@ import { FriendStatusModel, FriendStatusInterface } from '../models/Friend_Statu
 import { UserGroupModel } from '../models/User_Group';
 import { CommonGroupsModel } from '../models/Common_Groups';
 import { MutualFriendsModel } from '../models/Mutual_Friends';
+import { FriendsModel } from '../models/Friends';
 import { CMail } from '../services/CMail';
 
 let storage = multer.diskStorage({
@@ -275,9 +276,9 @@ export class ProfileController {
                 const name = listed[0].name
                 const id = listed[0].ids
                 result = Array.from(
-                    avatar.map((e, i) => ({avatar: e, name: name[i], id: id[i]}))
-                        .reduce((a, b) => a.set(b.avatar, (a.get(b.avatar) || []).concat(b.name, b.id)), new Map))
-                    .map(([k, v]) => ({avatar:k, name: v.join().split(',')[0], id:v.join().split(',')[1]}));
+                    id.map((e, i) => ({id: e, name: name[i], avatar: avatar[i]}))
+                        .reduce((a, b) => a.set(b.id, (a.get(b.id) || []).concat(b.name, b.avatar)), new Map))
+                    .map(([k, v]) => ({id:k, name: v.join().split(',')[0], avatar:v.join().split(',')[1]}));
     
             }
             res.status(STATUS.OK).json(result);
@@ -360,6 +361,39 @@ export class ProfileController {
                 })
             )
 
+        }
+    }
+
+    @Get('friends')
+    private async getFriends(req: Request, res: Response) {
+        try {
+            const session = req.session;
+            const Friends = await FriendsModel.getFriends(session.user.ID);
+            const listed = Friends.map(row => ({
+                avatar: row.FRIEND_AVATARS.split(','),
+                name: row.FRIENDS_NAMES.split(','),
+                ids: row.FRIEND_IDS.split(',')
+            }))
+
+            let result = [];
+
+            if (listed.length > 0) {
+                const avatar = listed[0].avatar
+                const name = listed[0].name
+                const id = listed[0].ids
+                result = Array.from(
+                    id.map((e, i) => ({id: e, name: name[i], avatar: avatar[i]}))
+                        .reduce((a, b) => a.set(b.id, (a.get(b.id) || []).concat(b.name, b.avatar)), new Map))
+                    .map(([k, v]) => ({id:k, name: v.join().split(',')[0], avatar:v.join().split(',')[1]}));
+    
+            }
+            res.status(STATUS.OK).json(result);
+        } catch (err) {
+            console.error(err);
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong attempting to get user friends list.",
+                identifier: "PC011"
+            })
         }
     }
 }
