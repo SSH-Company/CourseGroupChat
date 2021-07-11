@@ -78,6 +78,7 @@ const Chat = ({ route, navigation }) => {
         //retrieve last message in this group and append to messages
         try {
             const log = (await ChatLog.getChatLogInstance()).chatLog;
+            console.log(log[group.id].length, messages.length)
             if (group.id && group.id in log && log[group.id].length > messages.length) {
                 const lastMessage = log[group.id][0];
                 if (Object.keys(lastMessage).length > 0) {
@@ -155,12 +156,14 @@ const Chat = ({ route, navigation }) => {
     const sendData = async (messages = [], newGroup = group) => {
         //here we are assuming only one message is posted at a time
         try {
+            const instance = await ChatLog.getChatLogInstance();
+            const groupInfo = instance.groupInfo[newGroup.id];
             const fileType = messages[0].hasOwnProperty('fileData') || messages[0].hasOwnProperty('imageData');
             let formData: any;
             if (fileType) {
                 formData = new FormData();
                 formData.append('media', {...messages[0].fileData});
-                formData.append('message', JSON.stringify({ messages, groupID: newGroup }))
+                formData.append('message', JSON.stringify({ messages, group: {...groupInfo, id: newGroup.id} }))
                 await axios.post(`${BASE_URL}/api/chat`, 
                     formData, 
                     {   headers: { 
@@ -170,10 +173,9 @@ const Chat = ({ route, navigation }) => {
                     }
                 )
             } else {
-                formData = { message: JSON.stringify({ messages, groupID: newGroup })}
+                formData = { message: JSON.stringify({ messages, group: {...groupInfo, id: newGroup.id} })}
                 await axios.post(`${BASE_URL}/api/chat`, formData)
             }
-            const instance = await ChatLog.getChatLogInstance();
             // instance.updateMessageStatus(groupID, "Sent", messages[0]);
             //update the messages
             setMessages(filterOutEmptyMessages(instance.chatLog[newGroup.id]));

@@ -127,12 +127,12 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
         }
     }
 
-    const timeSincePreviousMessage = (curr: string, prev: string | null, time: number) => {
-        if (prev?.trim()) {
+    const timeSincePreviousMessage = (curr: string | null, prev: string | null, time: number) => {
+        if (prev?.trim() && curr?.trim()) {
             //create a seperate block if last time message sent was more than 'time' minutes ago
             return Math.abs(new Date(curr).getTime() - new Date(prev).getTime()) > time 
         } else {
-            return true
+            return prev?.trim() || curr?.trim()
         }
     }
 
@@ -143,8 +143,10 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
         hours = hours % 12;
         hours = hours ? hours : 12; // the hour '0' should be '12'
         minutes = minutes < 10 ? '0' + minutes : minutes;
-        var strTime = date.toLocaleString('default', { month: 'narrow' }).slice(0, 10) + " at " + hours + ':' + minutes + ' ' + ampm;
-        return strTime;
+        const localeString = date.toLocaleString('default', { month: 'narrow' }).slice(0, 10);
+        var strTime = localeString + " at " + hours + ':' + minutes + ' ' + ampm;
+        if (!strTime.includes('Invalid')) return strTime 
+        else return null;
     }
 
     //variables for bubble and avatar
@@ -177,7 +179,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
             renderBubble={() => {
                 return (
                     <View style={{ flexDirection: 'column', paddingTop: seperateMessageBlock ? 15 : 0, width: isCurrentUser ? '92%' : '80%' }}>
-                        {(newDay || messagePressed) && 
+                        {(newDay || messagePressed) && formatAMPM(new Date(currentMessage.created_at)) &&
                             <View style={{ flex: 1, padding: 6, alignSelf: 'center' }}>
                                 <Text style={styles.date}>{formatAMPM(new Date(currentMessage.created_at))}</Text>
                             </View>

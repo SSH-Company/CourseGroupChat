@@ -157,7 +157,8 @@ const Settings = ({ navigation }) => {
         {
             title: 'Delete Account',
             icon: <AntDesign name={"deleteuser"} size={iconSize}/>,
-            onPress: () => TwoButtonAlert()
+            onPress: () => TwoButtonAlert(),
+            color: 'red'
         }
     ]
 
@@ -216,7 +217,7 @@ const Settings = ({ navigation }) => {
                         {item.icon}
                         <ListItem.Content style = {{}}>
                             <ListItem.Title style={{ fontSize: 14 * deviceDimensions.fontScale, textAlignVertical: 'center'}}>{item.title}</ListItem.Title>
-                            {item.title === "Contact Us" ? (<ListItem.Subtitle style={{ fontSize: 12 * deviceDimensions.fontScale}}>{item.subtitle} </ListItem.Subtitle>): null}
+                            {item.subtitle && <ListItem.Subtitle style={{ fontSize: 12 * deviceDimensions.fontScale}}>{item.subtitle} </ListItem.Subtitle>}
                         </ListItem.Content>
                     </ListItem>
                 ))}
@@ -227,7 +228,7 @@ const Settings = ({ navigation }) => {
                     <ListItem key={`${i}-${item}`} onPress={item.onPress} style={{ marginLeft: deviceDimensions.scale*3}} bottomDivider>
                         {item.icon}
                         <ListItem.Content>
-                            <ListItem.Title style={{ fontSize: 14 * deviceDimensions.fontScale, textAlignVertical: 'center', color: i===(sectionThree.length - 1)? 'red': 'black'}}>{item.title}</ListItem.Title>
+                            <ListItem.Title style={{ fontSize: 14 * deviceDimensions.fontScale, textAlignVertical: 'center', color: item.color || 'black'}}>{item.title}</ListItem.Title>
                         </ListItem.Content>
                     </ListItem>
                 ))}
