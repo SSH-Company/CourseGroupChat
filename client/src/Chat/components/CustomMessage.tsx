@@ -128,11 +128,11 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
     }
 
     const timeSincePreviousMessage = (curr: string | null, prev: string | null, time: number) => {
-        if (prev?.trim() && curr?.trim()) {
+        if (prev && curr) {
             //create a seperate block if last time message sent was more than 'time' minutes ago
             return Math.abs(new Date(curr).getTime() - new Date(prev).getTime()) > time 
         } else {
-            return null
+            return false
         }
     }
 
@@ -152,11 +152,11 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
     //variables for bubble and avatar
     const currentMessage = children['currentMessage']
     const isCurrentUser = currentMessage.user._id === user._id
-    const seperateMessageBlock = timeSincePreviousMessage(currentMessage.created_at, children['previousMessage'].created_at, 30 * 1000);
-    const newDay = timeSincePreviousMessage(currentMessage.created_at, children['previousMessage'].created_at, 24 * 60 * 60 * 1000) || !children['previousMessage']?.hasOwnProperty('created_at');
+    const seperateMessageBlock = timeSincePreviousMessage(currentMessage.createdAt, children['previousMessage'].createdAt, 30 * 1000);
+    const newDay = timeSincePreviousMessage(currentMessage.createdAt, children['previousMessage'].createdAt, 24 * 60 * 60 * 1000) || !children['previousMessage']?.hasOwnProperty('createdAt');
     const displayUsername = (children['previousMessage'].user?._id === user._id || seperateMessageBlock) && !isCurrentUser
-    const shouldRenderAvatar = (timeSincePreviousMessage(currentMessage.created_at, children['nextMessage'].created_at, 30 * 1000) || !children['nextMessage']?.hasOwnProperty('created_at')) && !isCurrentUser
-
+    const shouldRenderAvatar = (timeSincePreviousMessage(currentMessage.createdAt, children['nextMessage'].createdAt, 30 * 1000) || !children['nextMessage']?.hasOwnProperty('createdAt')) && !isCurrentUser
+    
     return (
         <Message 
             {...children}
@@ -178,10 +178,10 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
             }}
             renderBubble={() => {
                 return (
-                    <View style={{ flexDirection: 'column', paddingTop: seperateMessageBlock ? 15 : 0, width: isCurrentUser ? '92%' : '80%' }}>
-                        {(newDay || messagePressed) &&
+                    <View style={{ flexDirection: 'column', paddingTop: seperateMessageBlock === true ? 15 : 0, width: isCurrentUser ? '92%' : '80%' }}>
+                        {(newDay || messagePressed) && currentMessage.createdAt &&
                             <View style={{ flex: 1, padding: 6, alignSelf: 'center' }}>
-                                <Text style={styles.date}>{formatAMPM(new Date(currentMessage.created_at))}</Text>
+                                <Text style={styles.date}>{formatAMPM(new Date(currentMessage.createdAt))}</Text>
                             </View>
                         }
                         {displayUsername && <Text style={{ fontSize: 10, alignSelf: 'flex-start', paddingLeft: 12 }}>{currentMessage.user.name}</Text>}

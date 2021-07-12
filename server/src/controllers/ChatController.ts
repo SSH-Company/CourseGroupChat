@@ -55,7 +55,7 @@ export class ChatController {
                     name: row.VERIFIED === "Y" ? row.GROUP_ID : row.NAME,
                     avatar_url: row.AVATAR,
                     location: row.LOCATION,
-                    created_at: row.CREATE_DATE,
+                    createdAt: row.CREATE_DATE,
                     status: row.STATUS,
                     verified: row.VERIFIED,
                     mute: row.MUTE_NOTIFICATION
@@ -398,7 +398,7 @@ export class ChatController {
                     } else subtitle = `You have joined ${row.NAME}!`
                     const json = {
                         _id: row.MESSAGE_ID,
-                        created_at: row.CREATE_DATE,
+                        createdAt: row.CREATE_DATE,
                         [row.MESSAGE_TYPE]: row.MESSAGE_BODY,
                         subtitle: subtitle,
                         user: {

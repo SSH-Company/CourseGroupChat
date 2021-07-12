@@ -66,7 +66,7 @@ export class ChatLog {
                 audio: row.audio || '',
                 location: row.location || '',
                 subtitle: row.subtitle || '',
-                createdAt: row.created_at,
+                createdAt: row.createdAt,
                 user: {
                     _id: row.creator_id,
                     name: row.creator_name,

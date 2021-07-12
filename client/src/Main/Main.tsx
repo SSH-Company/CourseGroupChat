@@ -6,7 +6,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { useActionSheet } from '@expo/react-native-action-sheet';
 import { MuteNotification } from '../Chat/components';
 import { UserContext } from '../Auth/Login';
-import { RenderMessageContext } from '../Socket/WebSocket';
+import { RenderMessageContext } from '../Util/WebSocket';
 import { ChatLog } from '../Util/ChatLog';
 import BaseList from '../Util/CommonComponents/BaseList';
 import { THEME_COLORS } from '../Util/CommonComponents/Colors';
@@ -23,7 +23,7 @@ export type listtype = {
   name: string;
   avatar_url: string;
   subtitle: string;
-  created_at?: Date,
+  createdAt?: Date,
   verified: 'Y' | 'N';
 };
 
@@ -63,12 +63,12 @@ const Main = ({ navigation }) => {
                     name: grpInfo.name,
                     avatar_url: grpInfo.avatar,
                     subtitle: text.subtitle || text.text,
-                    created_at: text.createdAt,
+                    createdAt: text.createdAt,
                     verified: grpInfo.verified,
                     member_count: grpInfo.member_count
                 });
             });
-            setCompleteList(list.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)));
+            setCompleteList(list.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)));
             setRefreshing(false);
 		}
 	}

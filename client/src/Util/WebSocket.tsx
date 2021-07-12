@@ -2,8 +2,8 @@ import React, { useState, useEffect, useContext, useRef, createContext } from "r
 import { User } from 'react-native-gifted-chat';
 import * as Notifications from 'expo-notifications';
 import { UserContext } from '../Auth/Login';
-import { ChatLog } from '../Util/ChatLog';
-import { navigationRef, navigate } from '../Util/RootNavigation';
+import { ChatLog } from './ChatLog';
+import { navigationRef, navigate } from './RootNavigation';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 
 export const RenderMessageContext = createContext({

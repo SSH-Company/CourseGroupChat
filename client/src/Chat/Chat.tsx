@@ -7,7 +7,7 @@ import { useActionSheet } from '@expo/react-native-action-sheet';
 import { Ionicons, AntDesign } from "react-native-vector-icons";
 import { CustomMessage, CustomToolbar, MuteNotification } from './components';
 import { UserContext } from '../Auth/Login';
-import { RenderMessageContext } from '../Socket/WebSocket';
+import { RenderMessageContext } from '../Util/WebSocket';
 import { ChatLog, MessageStatus } from '../Util/ChatLog';
 import GroupAvatar from '../Util/CommonComponents/GroupAvatar';
 import VerifiedIcon from '../Util/CommonComponents/VerifiedIcon';
