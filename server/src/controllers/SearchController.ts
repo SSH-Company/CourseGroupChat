@@ -104,7 +104,7 @@ export class SearchController {
                 for(const id of recipientIDs) {
                     await UserGroupModel.insert(id, newGroup.ID, null, db);
                     const queueName = `message-queue-${id}`
-                    const queueData = { command: "refresh" }
+                    const queueData = { command: "refresh", groupId: newGroup.ID }
                     const queue = CONNECTIONS[session.user.ID];
                     await queue.publishToQueue(queueName, JSON.stringify(queueData))
                 }
@@ -148,7 +148,7 @@ export class SearchController {
                 for(const id of recipients) {
                     await UserGroupModel.insert(id, groupID, null, db);
                     const queueName = `message-queue-${id}`
-                    const queueData = { command: "refresh" }
+                    const queueData = { command: "refresh", groupId: groupID }
                     const queue = CONNECTIONS[session.user.ID];
                     await queue.publishToQueue(queueName, JSON.stringify(queueData))
                 }

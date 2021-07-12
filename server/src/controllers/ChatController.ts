@@ -114,19 +114,19 @@ export class ChatController {
 
             const messages = JSON.parse(req.body.message);
             const message = messages.messages[0]
-            const group = messages.group
+            const groupId = messages.groupId
             const senderID = {
                 _id: user.ID,
                 name: user.FIRST_NAME + ' ' + user.LAST_NAME,
                 avatar: user.AVATAR
             }
-
+            
             let messageType: "text" | "image" | "video" | "file" | "audio" = "text";
 
             const newMessage = {
                 ID: message._id,
                 CREATOR_ID: senderID._id, 
-                RECIPIENT_GROUP_ID: group.id,  
+                RECIPIENT_GROUP_ID: groupId,  
                 STATUS: ''
             } as MessageModel
             
@@ -168,13 +168,14 @@ export class ChatController {
             }
 
             //find all recipients of this group chat, exclude senderID from the list
-            const groupRecipients = (await UserGroupModel.getMembers(group.id)).map(row => row.USER_ID).filter(id => id != senderID._id);    
+            const groupRecipients = (await UserGroupModel.getMembers(groupId)).map(row => row.USER_ID).filter(id => id != senderID._id);    
 
             //send a message to each recipients queue
             for (const id of groupRecipients) {
                 const queueName = `message-queue-${id}`
-                const queueData = { ...message, command: "append", group, senderID: senderID }
+                const queueData = { ...message, command: "append", groupId, senderID: senderID }
                 const queue = CONNECTIONS[user.ID];
+                console.log(queue.hasOwnProperty('publishToQueue'))
                 await queue.publishToQueue(queueName, JSON.stringify(queueData));
             }   
             
@@ -213,7 +214,7 @@ export class ChatController {
             
             for (const id of groupRecipients) {
                 const queueName = `message-queue-${id}`
-                const queueData = { command: "refresh", groupID: groupID }
+                const queueData = { command: "refresh", groupId: groupID }
                 const queue = CONNECTIONS[user.ID];
                 await queue.publishToQueue(queueName, JSON.stringify(queueData))
             }

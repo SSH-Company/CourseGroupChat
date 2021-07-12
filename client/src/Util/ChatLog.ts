@@ -119,14 +119,16 @@ export class ChatLog {
             //new group has been created/joined
             this.chatLog[groupID] = message
             const res = await axios.get(`${BASE_URL}/api/chat/log`)
-            const info = res.data.groupInfo.filter(r => r.id === groupID)[0];
-            this.groupInfo[groupID] = {
-                name: info.name,
-                avatar: info.avatar,
-                verified: info.verified,
-                entered: false,
-                mute: info.mute || null,
-                member_count: info.member_count
+            const info = res.data.groupInfo.filter(r => r.id.trim() === groupID.trim())[0];
+            if (info) {
+                this.groupInfo[groupID] = {
+                    name: info.name,
+                    avatar: info.avatar,
+                    verified: info.verified,
+                    entered: false,
+                    mute: info.mute || null,
+                    member_count: info.member_count
+                }
             }
         }
     }

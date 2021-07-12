@@ -132,7 +132,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
             //create a seperate block if last time message sent was more than 'time' minutes ago
             return Math.abs(new Date(curr).getTime() - new Date(prev).getTime()) > time 
         } else {
-            return prev?.trim() || curr?.trim()
+            return null
         }
     }
 
@@ -153,9 +153,9 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
     const currentMessage = children['currentMessage']
     const isCurrentUser = currentMessage.user._id === user._id
     const seperateMessageBlock = timeSincePreviousMessage(currentMessage.created_at, children['previousMessage'].created_at, 30 * 1000);
-    const newDay = timeSincePreviousMessage(currentMessage.created_at, children['previousMessage'].created_at, 24 * 60 * 60 * 1000);
+    const newDay = timeSincePreviousMessage(currentMessage.created_at, children['previousMessage'].created_at, 24 * 60 * 60 * 1000) || !children['previousMessage']?.hasOwnProperty('created_at');
     const displayUsername = (children['previousMessage'].user?._id === user._id || seperateMessageBlock) && !isCurrentUser
-    const shouldRenderAvatar = timeSincePreviousMessage(currentMessage.created_at, children['nextMessage'].created_at, 30 * 1000) && !isCurrentUser
+    const shouldRenderAvatar = (timeSincePreviousMessage(currentMessage.created_at, children['nextMessage'].created_at, 30 * 1000) || !children['nextMessage']?.hasOwnProperty('created_at')) && !isCurrentUser
 
     return (
         <Message 
@@ -179,7 +179,7 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
             renderBubble={() => {
                 return (
                     <View style={{ flexDirection: 'column', paddingTop: seperateMessageBlock ? 15 : 0, width: isCurrentUser ? '92%' : '80%' }}>
-                        {(newDay || messagePressed) && formatAMPM(new Date(currentMessage.created_at)) &&
+                        {(newDay || messagePressed) &&
                             <View style={{ flex: 1, padding: 6, alignSelf: 'center' }}>
                                 <Text style={styles.date}>{formatAMPM(new Date(currentMessage.created_at))}</Text>
                             </View>
