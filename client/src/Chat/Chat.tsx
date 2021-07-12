@@ -7,7 +7,7 @@ import { useActionSheet } from '@expo/react-native-action-sheet';
 import { Ionicons, AntDesign } from "react-native-vector-icons";
 import { CustomMessage, CustomToolbar, MuteNotification } from './components';
 import { UserContext } from '../Auth/Login';
-import { RenderMessageContext } from '../Socket/WebSocket';
+import { RenderMessageContext } from '../Util/WebSocket';
 import { ChatLog, MessageStatus } from '../Util/ChatLog';
 import GroupAvatar from '../Util/CommonComponents/GroupAvatar';
 import VerifiedIcon from '../Util/CommonComponents/VerifiedIcon';
@@ -155,25 +155,18 @@ const Chat = ({ route, navigation }) => {
     const sendData = async (messages = [], newGroup = group) => {
         //here we are assuming only one message is posted at a time
         try {
+            const instance = await ChatLog.getChatLogInstance();
             const fileType = messages[0].hasOwnProperty('fileData') || messages[0].hasOwnProperty('imageData');
             let formData: any;
             if (fileType) {
                 formData = new FormData();
                 formData.append('media', {...messages[0].fileData});
-                formData.append('message', JSON.stringify({ messages, groupID: newGroup }))
-                await axios.post(`${BASE_URL}/api/chat`, 
-                    formData, 
-                    {   headers: { 
-                            accept: "application/json",
-                            'Content-Type': 'multipart/form-data' 
-                        }
-                    }
-                )
+                formData.append('message', JSON.stringify({ messages, groupId: newGroup.id }))
+                await axios.post(`${BASE_URL}/api/chat`, formData, {headers: { accept: "application/json", 'Content-Type': 'multipart/form-data' }})
             } else {
-                formData = { message: JSON.stringify({ messages, groupID: newGroup })}
+                formData = { message: JSON.stringify({ messages, groupId: newGroup.id })}
                 await axios.post(`${BASE_URL}/api/chat`, formData)
             }
-            const instance = await ChatLog.getChatLogInstance();
             // instance.updateMessageStatus(groupID, "Sent", messages[0]);
             //update the messages
             setMessages(filterOutEmptyMessages(instance.chatLog[newGroup.id]));

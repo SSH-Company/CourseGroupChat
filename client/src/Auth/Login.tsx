@@ -62,7 +62,7 @@ Notifications.setNotificationHandler({
       shouldPlaySound: true,
       shouldSetBadge: false,
     }),
-  });  
+});  
 
 const LogIn = ({ children }) => {
     const [loading, setLoading] = useState(true)
@@ -152,7 +152,7 @@ const LogIn = ({ children }) => {
             } else {
                 //return unverified page
                 return (
-                    <Unverified userId={user.ID} handleLogout={handleLogout}/>
+                    <Unverified userId={user._id} handleLogout={handleLogout}/>
                 )
             }
         }

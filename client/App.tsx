@@ -1,8 +1,8 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator, TransitionSpecs } from '@react-navigation/stack';
+import { createStackNavigator } from '@react-navigation/stack';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet'
-import Socket from './src/Socket/WebSocket';
+import Socket from './src/Util/WebSocket';
 import Main from './src/Main/Main';
 import Chat from './src/Chat/Chat';
 import { LogIn } from './src/Auth';

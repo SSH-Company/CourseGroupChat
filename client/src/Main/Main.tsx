@@ -1,28 +1,20 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Alert, View, ScrollView, Platform, RefreshControl, StyleSheet } from "react-native";
-import { Header, SearchBar, Image, ListItem, Button } from "react-native-elements";
-import { AntDesign, Feather, Ionicons, FontAwesome5, MaterialCommunityIcons } from "react-native-vector-icons";
+import { Alert, Text, View, ScrollView, Platform, RefreshControl, TouchableOpacity, StyleSheet } from "react-native";
+import { Header, SearchBar, Image } from "react-native-elements";
+import { Feather, Ionicons, FontAwesome5, MaterialCommunityIcons } from "react-native-vector-icons";
 import { useIsFocused } from "@react-navigation/native";
 import { useActionSheet } from '@expo/react-native-action-sheet';
 import { MuteNotification } from '../Chat/components';
 import { UserContext } from '../Auth/Login';
-import { RenderMessageContext } from '../Socket/WebSocket';
+import { RenderMessageContext } from '../Util/WebSocket';
 import { ChatLog } from '../Util/ChatLog';
 import BaseList from '../Util/CommonComponents/BaseList';
 import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import { handleLeaveGroup, handleIgnoreGroup } from '../Util/CommonFunctions';
 import { EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
-import { BASE_URL } from '../BaseUrl';
-import Swipeable from 'react-native-swipeable';
-import axios from 'axios';
 
 const styles = StyleSheet.create({
-	sendMessageStyle: {
-		position: 'absolute', 
-		bottom: 35,
-		alignSelf: 'flex-end', 
-		paddingRight: 35, 
-	}
+    touchable: {}
 })
 
 export type listtype = {
@@ -31,7 +23,7 @@ export type listtype = {
   name: string;
   avatar_url: string;
   subtitle: string;
-  created_at?: Date,
+  createdAt?: Date,
   verified: 'Y' | 'N';
 };
 
@@ -42,7 +34,6 @@ const Main = ({ navigation }) => {
   const { renderFlag } = useContext(RenderMessageContext);
   const [completeList, setCompleteList] = useState<listtype[]>([]);
   const [refreshing, setRefreshing] = useState(false); 
-  const [friendBar, setFriendBar] = useState(false);
   const isFocused = useIsFocused();
   const { showActionSheetWithOptions } = useActionSheet();
   const [muteNotificationsModal, setMuteNotificationsModal] = useState(false);
@@ -57,18 +48,6 @@ const Main = ({ navigation }) => {
     resetList();
   }, [renderFlag]) 
 
-  useEffect(() => {
-    axios.get(`${BASE_URL}/api/profile/friend-request`)
-      .then(res => {
-        if (res.data.length > 0) {
-          setFriendBar(true);
-        }
-        else {
-          setFriendBar(false);
-        }
-      })
-  }, [])
-
   const resetList = async (fromSource: boolean = false) => {
 	let mounted = true;
 	if (mounted) {
@@ -76,21 +55,21 @@ const Main = ({ navigation }) => {
 		let list = [];
 		if (log) {
 			Object.keys(log.chatLog).forEach(key => {
-			const text = log.chatLog[key][0];
-			const grpInfo = log.groupInfo[key];
-			list.push({
-				id: key,
-				message_id: text._id,
-				name: grpInfo.name,
-				avatar_url: grpInfo.avatar,
-				subtitle: text.subtitle || text.text,
-				created_at: text.createdAt,
-        verified: grpInfo.verified,
-        member_count: grpInfo.member_count
-			});
-			});
-			setCompleteList(list.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)));
-			setRefreshing(false);
+                const text = log.chatLog[key][0];
+                const grpInfo = log.groupInfo[key];
+                list.push({
+                    id: key,
+                    message_id: text._id,
+                    name: grpInfo.name,
+                    avatar_url: grpInfo.avatar,
+                    subtitle: text.subtitle || text.text,
+                    createdAt: text.createdAt,
+                    verified: grpInfo.verified,
+                    member_count: grpInfo.member_count
+                });
+            });
+            setCompleteList(list.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)));
+            setRefreshing(false);
 		}
 	}
 
@@ -151,112 +130,84 @@ const Main = ({ navigation }) => {
   // renders header | searchbar | chat list
   return ( 
     <View style={{ flex: 1 }}>
-      <Header
-        placement="left"
-        backgroundColor={THEME_COLORS.HEADER}
-        statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
-        containerStyle={{ minHeight: 100 }}
-        leftComponent={
-          <View>
-            <Image
-              source={{ uri: user.avatar as string || EMPTY_IMAGE_DIRECTORY }}
-              style={{ width: 40, height: 40, borderRadius: 200 }}
-              onPress={() => navigation.navigate("Settings")}
+        <Header
+            placement="left"
+            backgroundColor={THEME_COLORS.HEADER}
+            statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
+            containerStyle={{ minHeight: 100 }}
+            leftComponent={
+                <TouchableOpacity 
+                    activeOpacity={1}
+                    style={styles.touchable}
+                    hitSlop={{top: 50, bottom: 50, left: 50, right: 50}}
+                >
+                    <Image
+                        source={{ uri: user.avatar as string || EMPTY_IMAGE_DIRECTORY }}
+                        style={{ width: 40, height: 40, borderRadius: 200 }}
+                        onPress={() => navigation.navigate("Settings")}
+                    />
+                </TouchableOpacity>
+            }
+            centerComponent={
+            <SearchBar
+                platform={"android"}
+                placeholder="Search"
+                onFocus={() => navigation.navigate("GroupSearch")}
+                containerStyle={{ borderRadius: 50, height: 35, justifyContent: 'center', backgroundColor: 'white' }}
             />
-          </View>
-        }
-        centerComponent={
-          <SearchBar
-            platform={"android"}
-            placeholder="Search"
-            onFocus={() => navigation.navigate("GroupSearch")}
-            containerStyle={{ borderRadius: 50, height: 35, justifyContent: 'center', backgroundColor: 'white' }}
-          />
-        }
-        rightComponent={
-          <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingRight: 5 }}>
-            {/* <Ionicons 
-              name={"person-add"} 
-              color={THEME_COLORS.ICON_COLOR} 
-              size={20} 
-              onPress={() => navigation.navigate("FriendSearch")}
-            /> */}
-            <Feather 
-                name={"edit"} 
-                color={THEME_COLORS.ICON_COLOR} 
-                size={20}
-                onPress={() => navigation.navigate("Search", { groupName: "New group", searchType: "create" })} 
-            />
-          </View>
-        }
-        leftContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
-        centerContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
-        rightContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
-      />
-      <MuteNotification
-          groupID={selectedGroup}
-          visible={muteNotificationsModal}
-          onClose={() => setMuteNotificationsModal(false)}
-      />
-      <ScrollView
-        contentOffset={{ x: 0, y: 76 }}
-        keyboardShouldPersistTaps="handled"
-        refreshControl={
-          <RefreshControl 
-            tintColor={Platform.OS === "ios" ? 'transparent' : null}
-            refreshing={refreshing} 
-            onRefresh={() => {
-              setRefreshing(true);
-              resetList(true);
-            }}
-          />
-        }
-      >
-          {friendBar &&
-          <Swipeable
-            key={`swipeable-${friendBar}`}
-            rightContent = {
-              <Button
-                icon={
-                  <AntDesign
-                    name="delete"
-                    size={35}
-                    color="white"
-                  />
+            }
+            rightComponent={
+                <TouchableOpacity 
+                    hitSlop={{top: 50, bottom: 50, left: 50, right: 50}}
+                    style={[styles.touchable, { display: 'flex', flexDirection: 'row', justifyContent: 'center', paddingRight: 5 }]}
+                >
+                    <Feather 
+                        name={"edit"} 
+                        color={THEME_COLORS.ICON_COLOR} 
+                        size={20}
+                        onPress={() => navigation.navigate("Search", { groupName: "New group", searchType: "create" })} 
+                    />
+                </TouchableOpacity>
+            }
+            leftContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
+            centerContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
+            rightContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
+        />
+        <MuteNotification
+            groupID={selectedGroup}
+            visible={muteNotificationsModal}
+            onClose={() => setMuteNotificationsModal(false)}
+        />
+        {completeList.length > 0 ?
+            <ScrollView
+                contentOffset={{ x: 0, y: 76 }}
+                keyboardShouldPersistTaps="handled"
+                refreshControl={
+                    <RefreshControl 
+                        tintColor={Platform.OS === "ios" ? 'transparent' : null}
+                        refreshing={refreshing} 
+                        onRefresh={() => {
+                            setRefreshing(true);
+                            resetList(true);
+                        }}
+                    />
                 }
-                iconRight
-                // title="Button with icon component"
-              />}  
-            onRightActionRelease = {() => setFriendBar(false)}
-            rightActionActivationDistance = {275}
-          >
-            <ListItem
-              key={`friendBar-${friendBar}`}
-              onPress={() => navigation.navigate("FriendRequests")}
-              topDivider={false}
             >
-              <AntDesign
-                name={"exclamationcircleo"} 
-                color={THEME_COLORS.ICON_COLOR} 
-                size={20}
-              />
-              <ListItem.Content>
-                  <View style={{ display:'flex', flexDirection: "row", justifyContent: "space-between" }}>
-                      <ListItem.Title>You have a new friend request!</ListItem.Title>
-                  </View>
-              </ListItem.Content>
-              <ListItem.Chevron size={25}/>
-            </ListItem>
-          </Swipeable>}
-          <BaseList
-              items={completeList}
-              itemOnPress={(l, i) => {
-                  navigation.navigate("Chat", { groupID: l.id })
-              }}
-              itemOnLongPress={(l, i) => handleLongPress(l.id)}
-              topDivider
-          />
-      </ScrollView>
+                <BaseList
+                    items={completeList}
+                    itemOnPress={(l, i) => {
+                        navigation.navigate("Chat", { groupID: l.id })
+                    }}
+                    itemOnLongPress={(l, i) => handleLongPress(l.id)}
+                    topDivider
+                />
+            </ScrollView>
+            :
+            <View style={{ flex: 1, justifyContent: 'center' }}>
+                <Text style={{ color: "black", fontSize: 25, padding: 10, textAlign: 'center' }}>No Messages</Text>
+                <Text style={{ color: "black", fontSize: 18, padding: 10, textAlign: 'center' }}>New messages will appear here</Text>
+            </View>
+        }
       {/* <View style={styles.sendMessageStyle}>
             <Button
               icon={
