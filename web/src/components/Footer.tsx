@@ -16,7 +16,7 @@ const Foot:FunctionComponent = () => {
                 Download
             </div>
             <div>
-                Help
+                Privacy
             </div>
         </Footer>
     )

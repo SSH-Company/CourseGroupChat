@@ -8,6 +8,8 @@ import Contact from './home/Contact';
 import VerifyAccount from './home/VerifyAccount';
 import ResetPassword from './home/ResetPassword';
 import NoMatch from './home/NoMatch';
+import Privacy from './home/Privacy';
+import TnC from './home/TnC';
 import NavBar from './components/NavBar';
 import Foot from './components/Footer';
 
@@ -20,7 +22,18 @@ function App() {
         <React.Fragment>
             <Layout className="layout">
                 <NavBar />
-                <Content>Content</Content>
+                <Router>
+                    <Switch>
+                        <Route exact path="/" component={Home}/>
+                        <Route exact path="/about" component={About} />
+                        <Route exact path="/contact" component={Contact} />
+                        <Route exact path="/privacy" component={Privacy} />
+                        <Route exact path="/terms-and-conditions" component={TnC} />
+                        <Route component={NoMatch} />
+                        <Route exact path="/verify/:userId/:token" component={VerifyAccount}/>
+                        <Route exact path="/resetPassword/:userId/:token" component={ResetPassword}/>
+                    </Switch>
+                </Router>
                 <Foot />
             </Layout>
         </React.Fragment>
