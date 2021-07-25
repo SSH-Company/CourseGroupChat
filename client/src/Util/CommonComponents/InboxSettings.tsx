@@ -1,17 +1,21 @@
 import React from 'react';
 import { Alert, View, Text, StyleSheet, Dimensions } from 'react-native';
-import { ListItem, Image } from 'react-native-elements';
+import { ListItem, Image, Button } from 'react-native-elements';
 import { User } from 'react-native-gifted-chat';
 import { AntDesign, Entypo, Ionicons, MaterialIcons } from 'react-native-vector-icons';
-import { navigate } from '../../Util/RootNavigation';
-import { handleIgnoreGroup } from '../../Util/CommonFunctions';
-import { handleLeaveGroup } from '../../Util/CommonFunctions';
+import GroupAvatar from './GroupAvatar';
+import { navigate } from '../RootNavigation';
+import { handleIgnoreGroup, handleJoinCourseGroup } from '../CommonFunctions';
+import { handleLeaveGroup } from '../CommonFunctions';
 import { EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
+import { ChatLog } from '../ChatLog';
 
 type InboxSettingsProps = {
     group: User,
-    onMuteNotifications: (visible: boolean) => any,
-    onLeaveGroup: () => any
+    verified: "Y" | "N",
+    newToGroup: boolean,
+    onMuteNotifications?: (visible: boolean) => any,
+    onLeaveGroup?: () => any
 }
 
 const InboxSettings = (props: InboxSettingsProps) => {
@@ -31,8 +35,6 @@ const InboxSettings = (props: InboxSettingsProps) => {
             alignItems: 'center'
         },
         imageStyle: {
-            width: 100,
-            height: 100,
             marginTop: 50,
             marginBottom: 25,
             borderRadius: 200
@@ -78,25 +80,60 @@ const InboxSettings = (props: InboxSettingsProps) => {
             onPress: () => handleLeaveGroup([], props.group._id as string, true, props.onLeaveGroup)
         }
     ]
+
+    const newToGroupOptions = [
+        {
+            title: 'Group Members',
+            icon: <MaterialIcons name={"groups"} size={iconSize}/>,
+            onPress: () => navigate('GroupMembers', { id: props.group._id, name: props.group.name })
+        }
+    ]
     
     return (
         <View style={styles.drawerContainer}>
             <View style={styles.imageContainer}>
-                <Image 
-                    source={{ uri: props.group.avatar as string || EMPTY_IMAGE_DIRECTORY }}
-                    style={styles.imageStyle}
-                />
+                {props.verified === "Y" ?
+                    <GroupAvatar
+                        name={props.group.name}
+                        verified={"Y"}
+                        size={100}
+                        style={styles.imageStyle}
+                    />
+                    :
+                    <Image 
+                        source={{ uri: props.group.avatar as string || EMPTY_IMAGE_DIRECTORY }}
+                        style={[styles.imageStyle, { width: 100, height: 100 }]}
+                    />
+                }
                 <Text style={{paddingBottom: 10, fontSize: 25}}>{props.group.name}</Text>
             </View>
-            {list.map((item, i) => (
-                <ListItem key={i} onPress={item.onPress}>
-                    {item.icon}
-                    <ListItem.Content>
-                    <ListItem.Title>{item.title}</ListItem.Title>
-                    </ListItem.Content>
-                    <ListItem.Chevron />
-                </ListItem>
-            ))}
+            {props.newToGroup ?
+                <View style={{ alignContent: 'center', justifyContent: 'center' }}>
+                    <Button title="Join Group" containerStyle={{ alignSelf: 'center', justifyContent: 'center', padding: 10 }} onPress={() => handleJoinCourseGroup(props.group._id as string, async () => {
+                        await ChatLog.getChatLogInstance(true);
+                        navigate('Main', {})
+                    })}/>
+                    {newToGroupOptions.map((item, i) => (
+                        <ListItem key={i} onPress={item.onPress}>
+                            {item.icon}
+                            <ListItem.Content>
+                            <ListItem.Title>{item.title}</ListItem.Title>
+                            </ListItem.Content>
+                            <ListItem.Chevron />
+                        </ListItem>
+                    ))}
+                </View>
+                :
+                list.map((item, i) => (
+                    <ListItem key={i} onPress={item.onPress}>
+                        {item.icon}
+                        <ListItem.Content>
+                        <ListItem.Title>{item.title}</ListItem.Title>
+                        </ListItem.Content>
+                        <ListItem.Chevron />
+                    </ListItem>
+                ))
+            }
         </View>
     );
 }

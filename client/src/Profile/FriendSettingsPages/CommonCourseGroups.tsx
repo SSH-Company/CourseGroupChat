@@ -56,6 +56,7 @@ const CommonCourseGroups = ({ route, navigation }) => {
             <Header
                 placement="left"
                 backgroundColor={THEME_COLORS.HEADER}
+                statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
                 leftComponent={<View style={{ display: "flex", flexDirection: "row", alignItems: 'center' }}>
                     <Ionicons
                         name="arrow-back-sharp"
@@ -64,7 +65,11 @@ const CommonCourseGroups = ({ route, navigation }) => {
                         onPress={() => navigation.goBack()} />
                     <Text style={{ fontWeight: "bold", color: "black", fontSize: 20 * deviceDimensions.fontScale }}> Common Course Groups</Text>
                 </View>} />
-
+                {groups.length === 0 ?
+                    <View style={{ flex: 1, justifyContent: 'center' }}>
+                        <Text style={{ color: "black", fontSize: 20, padding: 40, textAlign: 'center' }}>No common course groups found.</Text>
+                    </View>
+                    :
                 <>
                 <ScrollView keyboardShouldPersistTaps="handled" style={styles.item}>
                     {groups.map((group, index) => (
@@ -77,6 +82,7 @@ const CommonCourseGroups = ({ route, navigation }) => {
                     ))}
                 </ScrollView>
             </>  
+                }
         </View>
 
             

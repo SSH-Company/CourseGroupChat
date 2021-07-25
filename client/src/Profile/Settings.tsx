@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react'
-import { Dimensions, View, StyleSheet } from 'react-native';
+import { Dimensions, View, StyleSheet, Alert } from 'react-native';
 import { Header, ListItem, Image, Text } from 'react-native-elements';
 import { Entypo, Ionicons, MaterialIcons, Feather, AntDesign } from 'react-native-vector-icons';
 import LightBox from 'react-native-lightbox';
@@ -12,7 +12,10 @@ import { EMPTY_IMAGE_DIRECTORY, BASE_URL } from '../BaseUrl';
 import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import { handleError } from '../Util/CommonFunctions';
 import axios from 'axios';
+import * as Linking from 'expo-linking';
+import { FontAwesome5 } from '@expo/vector-icons';
 
+const deviceDimensions = Dimensions.get('window')
 
 const cache = new Cache ({
     namespace: "cirkle",
@@ -44,7 +47,7 @@ const Settings = ({ navigation }) => {
     })
 
     // settingsList props.
-    const iconSize = 15;
+    const iconSize = deviceDimensions.fontScale*15;
 
     const setNotifications = () => {
         if (!notification) {
@@ -82,7 +85,33 @@ const Settings = ({ navigation }) => {
             })
     }
 
+    const deleteAccount = () => {
+        axios.delete(`${BASE_URL}/api/profile/user`)
+        .then(handleLogout)
+        .catch(err => console.log(err));
+    }
+
+    const TwoButtonAlert = () =>
+    Alert.alert(
+      "Delete Account",
+      "Your account data will be deleted and cannot be restored. Are you sure you want to continue?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        { text: "OK",
+        onPress: () => (deleteAccount())}
+      ],
+      { cancelable: false }
+    );
+
     const sectionOne = [
+        {
+            title: 'My Friends',
+            icon: <FontAwesome5 name="user-friends" size={iconSize-1}/>,
+            onPress: () => navigation.navigate('Friends')
+        },
         {
             title: 'Friend Requests',
             icon: <Ionicons name={"person-add"} size={iconSize}/>,
@@ -105,26 +134,37 @@ const Settings = ({ navigation }) => {
         }
     ]
 
-    const sectionTwo = [
+    const sectionTwo = [        
         {
-            title: 'Account settings',
-            icon: <Feather name={"settings"} size={iconSize}/>,
-            onPress: () => console.log('account settings')
-        },
-        {
-            title: 'Report a problem',
-            icon: <MaterialIcons name={"report"} size={iconSize}/>,
-            onPress: () => console.log('report problem')
-        },
-        {
-            title: 'Help',
+            title: 'FAQ',
             icon: <Entypo name={"help-with-circle"} size={iconSize}/>,
-            onPress: () => console.log('help')
+            onPress: () => Linking.openURL('https://cirkle.ca/faq')
         },
         {
-            title: 'Policies',
+            title: 'Contact Us',
+            subtitle: 'Problem or questions? Let us know.',
+            icon: <MaterialIcons name={"report"} size={iconSize}/>,
+            onPress: () => navigation.navigate('ContactUs') 
+        },        
+        {
+            title: 'Terms and Privacy Policy',
             icon: <MaterialIcons name={"policy"} size={iconSize}/>,
-            onPress: () => console.log('policies')
+            onPress: () => Linking.openURL('https://cirkle.ca/legal')
+        }
+    ]
+
+    const sectionThree = [        
+        {
+            title: 'Logout',
+            icon: <MaterialIcons name={"logout"} size={iconSize}/>,
+            key: `0-logout`,
+            onPress: () => handleLogout()
+        },
+        {
+            title: 'Delete Account',
+            icon: <AntDesign name={"deleteuser"} size={iconSize}/>,
+            onPress: () => TwoButtonAlert(),
+            color: 'red'
         }
     ]
 
@@ -153,7 +193,7 @@ const Settings = ({ navigation }) => {
                     </View>
                 }
                 centerComponent={
-                    <Text style={[styles.componentStyle, { fontWeight: 'bold', fontSize: 20 }]}>{user.name}</Text>
+                    <Text style={[styles.componentStyle, { fontWeight: 'bold', fontSize: deviceDimensions.fontScale*18 }]}>{user.name}</Text>
                 }
                 rightComponent={
                     <MaterialIcons 
@@ -166,37 +206,38 @@ const Settings = ({ navigation }) => {
                 }
             />
             <View style={{ marginBottom: 50 }}>
-                <Text style={{ marginLeft: 5, fontWeight: 'bold', fontSize: 18 }}>Manage your Cirkle</Text>
+                <Text style={{ marginLeft: deviceDimensions.scale*6, fontWeight: 'bold', fontSize: 16 * deviceDimensions.fontScale }}>Manage your Cirkle</Text>
                 {sectionOne.map((item, i) => (
-                    <ListItem key={`${i}-${item.title}`} onPress={item.onPress} bottomDivider>
+                    <ListItem key={`${i}-${item.title}`} onPress={item.onPress} style={{ marginLeft: deviceDimensions.scale*3}} bottomDivider>
                         {item.icon}
                         <ListItem.Content>
-                            <ListItem.Title style={{ fontSize: 15 }}>{item.title}</ListItem.Title>
+                            <ListItem.Title style={{ fontSize: 14 * deviceDimensions.fontScale }}>{item.title}</ListItem.Title>
                         </ListItem.Content>
                     </ListItem>
                 ))}
             </View>
             <View style={{ marginBottom: 50 }}>
-                <Text style={{ marginLeft: 5, fontWeight: 'bold', fontSize: 18 }}>Account and Support</Text>
+                <Text style={{ marginLeft: deviceDimensions.scale*6, fontWeight: 'bold', fontSize: 16 * deviceDimensions.fontScale }}>Help and Support</Text>
                 {sectionTwo.map((item, i) => (
-                    <ListItem key={`${i}-${item.title}`} onPress={item.onPress} bottomDivider>
+                    <ListItem key={`${i}-${item}`} onPress={item.onPress} style={{ marginLeft: deviceDimensions.scale*3}} bottomDivider>
                         {item.icon}
-                        <ListItem.Content>
-                            <ListItem.Title style={{ fontSize: 15 }}>{item.title}</ListItem.Title>
+                        <ListItem.Content style = {{}}>
+                            <ListItem.Title style={{ fontSize: 14 * deviceDimensions.fontScale, textAlignVertical: 'center'}}>{item.title}</ListItem.Title>
+                            {item.subtitle && <ListItem.Subtitle style={{ fontSize: 12 * deviceDimensions.fontScale}}>{item.subtitle} </ListItem.Subtitle>}
                         </ListItem.Content>
                     </ListItem>
                 ))}
             </View>
-            <View>
-                <ListItem key={`0-logout`} onPress={handleLogout} bottomDivider>
-                    <MaterialIcons 
-                        name="logout" 
-                        size={20}
-                    />
-                    <ListItem.Content>
-                        <ListItem.Title style={{ fontSize: 15 }}>Logout</ListItem.Title>
-                    </ListItem.Content>
-                </ListItem>
+            <View style={{ marginBottom: 50 }}>
+                <Text style={{ marginLeft: deviceDimensions.scale*6, fontWeight: 'bold', fontSize: 16 * deviceDimensions.fontScale }}>Account</Text>
+                {sectionThree.map((item, i) => (
+                    <ListItem key={`${i}-${item}`} onPress={item.onPress} style={{ marginLeft: deviceDimensions.scale*3}} bottomDivider>
+                        {item.icon}
+                        <ListItem.Content>
+                            <ListItem.Title style={{ fontSize: 14 * deviceDimensions.fontScale, textAlignVertical: 'center', color: item.color || 'black'}}>{item.title}</ListItem.Title>
+                        </ListItem.Content>
+                    </ListItem>
+                ))}
             </View>
         </View>
     );

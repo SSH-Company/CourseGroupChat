@@ -5,13 +5,15 @@ import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import { useActionSheet } from '@expo/react-native-action-sheet';
 import { Ionicons, AntDesign } from "react-native-vector-icons";
-import { CustomMessage, CustomToolbar, InboxSettings, MuteNotification } from './components';
+import { CustomMessage, CustomToolbar, MuteNotification } from './components';
 import { UserContext } from '../Auth/Login';
-import { RenderMessageContext } from '../Socket/WebSocket';
+import { RenderMessageContext } from '../Util/WebSocket';
 import { ChatLog, MessageStatus } from '../Util/ChatLog';
+import GroupAvatar from '../Util/CommonComponents/GroupAvatar';
 import VerifiedIcon from '../Util/CommonComponents/VerifiedIcon';
 import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import { handleError } from '../Util/CommonFunctions';
+import InboxSettings from '../Util/CommonComponents/InboxSettings';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
 
@@ -138,9 +140,9 @@ const Chat = ({ route, navigation }) => {
                 //refresh log since new group has been created, and navigate to it
                 await ChatLog.getChatLogInstance(true);
                 await sendData(messages, {...group, id:data.id });
-                navigation.push('Chat', { groupID: data.id, name: data.name })
+                navigation.push('Chat', { groupID: data.id })
             } else {
-                instance.appendLog(group, messages);
+                await instance.appendLog(group.id, messages);
                 setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
                 await sendData(messages);
             }
@@ -153,25 +155,18 @@ const Chat = ({ route, navigation }) => {
     const sendData = async (messages = [], newGroup = group) => {
         //here we are assuming only one message is posted at a time
         try {
+            const instance = await ChatLog.getChatLogInstance();
             const fileType = messages[0].hasOwnProperty('fileData') || messages[0].hasOwnProperty('imageData');
             let formData: any;
             if (fileType) {
                 formData = new FormData();
                 formData.append('media', {...messages[0].fileData});
-                formData.append('message', JSON.stringify({ messages, groupID: newGroup }))
-                await axios.post(`${BASE_URL}/api/chat`, 
-                    formData, 
-                    {   headers: { 
-                            accept: "application/json",
-                            'Content-Type': 'multipart/form-data' 
-                        }
-                    }
-                )
+                formData.append('message', JSON.stringify({ messages, groupId: newGroup.id }))
+                await axios.post(`${BASE_URL}/api/chat`, formData, {headers: { accept: "application/json", 'Content-Type': 'multipart/form-data' }})
             } else {
-                formData = { message: JSON.stringify({ messages, groupID: newGroup })}
+                formData = { message: JSON.stringify({ messages, groupId: newGroup.id })}
                 await axios.post(`${BASE_URL}/api/chat`, formData)
             }
-            const instance = await ChatLog.getChatLogInstance();
             // instance.updateMessageStatus(groupID, "Sent", messages[0]);
             //update the messages
             setMessages(filterOutEmptyMessages(instance.chatLog[newGroup.id]));
@@ -255,6 +250,8 @@ const Chat = ({ route, navigation }) => {
                     renderNavigationView={() => 
                         InboxSettings({
                             group: { _id: group.id, name: group.name, avatar: group.avatar },
+                            verified: group.verified,
+                            newToGroup: false,
                             onMuteNotifications: visible => setMuteNotificationsModal(visible),
                             onLeaveGroup: () => navigation.navigate('Main')
                         })}
@@ -272,13 +269,23 @@ const Chat = ({ route, navigation }) => {
                                     color={THEME_COLORS.ICON_COLOR}
                                     onPress={() => navigation.navigate('Main')}
                                 />
-                                <Avatar 
-                                    source={{ uri: group.avatar || EMPTY_IMAGE_DIRECTORY }} 
-                                    rounded 
-                                    size={avatarSize} 
-                                    containerStyle={{ marginLeft: 10, borderColor: "white", borderWidth: 1 }}
-                                    onPress={() => drawerRef.current.openDrawer()}
-                                />        
+                                {group.verified === "Y" ?
+                                    <GroupAvatar
+                                        name={group.name}
+                                        verified={"Y"}
+                                        size={avatarSize}
+                                        style={{ marginLeft: 10 }}
+                                        onPress={() => drawerRef.current.openDrawer()}
+                                    />
+                                    :
+                                    <Avatar 
+                                        source={{ uri: group.avatar || EMPTY_IMAGE_DIRECTORY }} 
+                                        rounded 
+                                        size={avatarSize} 
+                                        containerStyle={{ marginLeft: 10, borderColor: "white", borderWidth: 1 }}
+                                        onPress={() => drawerRef.current.openDrawer()}
+                                    /> 
+                                }       
                             </View>
                         }
                         centerComponent={
@@ -331,6 +338,7 @@ const Chat = ({ route, navigation }) => {
                             loadEarlier
                             onLoadEarlier={onLoadEarlier}
                             isKeyboardInternallyHandled={false}
+                            keyboardShouldPersistTaps='never'
                         />
                     </KeyboardAvoidingView>
                 </DrawerLayout>

@@ -3,10 +3,8 @@ import { StyleSheet, Dimensions, ScrollView, View, Text} from "react-native";
 import { Header, ListItem, Avatar } from "react-native-elements";
 import { Ionicons} from "react-native-vector-icons";
 import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
-import { handleLeaveGroup } from '../../Util/CommonFunctions';
 import { BASE_URL } from '../../BaseUrl';
 import axios from 'axios';
-import { BackHandler } from 'react-native';
 axios.defaults.headers = { withCredentials: true };
 
 const styles = StyleSheet.create ({
@@ -17,21 +15,20 @@ const styles = StyleSheet.create ({
  
 const deviceDimensions = Dimensions.get('window')
 
-type MutualFriends = {
+type Friends = {
     avatar: string,
     name: string,
     id: string
 }
 
-const MutualFriends = ({ route, navigation }) => {
+const Friends = ({ navigation }) => {
 
-    const { id } = route.params;
     const [loading, setLoading] = useState(true);
-    const [friends, setFriends] = useState<MutualFriends[]>([]);
+    const [friends, setFriends] = useState<Friends[]>([]);
 
     useEffect(() => {
         let mounted = true;
-        axios.get(`${BASE_URL}/api/profile/mutual-friends`, { params: { id } })
+        axios.get(`${BASE_URL}/api/profile/friends`)
             .then(res => {
                 // console.log(res.data)
                 if (mounted) {                                                         
@@ -60,13 +57,13 @@ const MutualFriends = ({ route, navigation }) => {
                                 color={THEME_COLORS.ICON_COLOR} 
                                 onPress={() => navigation.goBack()}
                             />
-                            <Text style={{ fontWeight: "bold", color: "black", fontSize: 20*deviceDimensions.fontScale }}> Mutual Friends</Text>
+                            <Text style={{ fontWeight: "bold", color: "black", fontSize: 20*deviceDimensions.fontScale }}> My Friends</Text>
                         </View>
                     }
                 /> 
                 {friends.length === 0 ?
                     <View style={{ flex: 1, justifyContent: 'center' }}>
-                        <Text style={{ color: "black", fontSize: 20, padding: 40, textAlign: 'center' }}>No mutual friends found.</Text>
+                        <Text style={{ color: "black", fontSize: 20, padding: 40, textAlign: 'center' }}>This list is empty.</Text>
                     </View>
                     :
                 <>
@@ -85,11 +82,11 @@ const MutualFriends = ({ route, navigation }) => {
                         </ListItem>
                     ))}
                 </ScrollView>
-            </>
-            }                 
+            </> 
+            }                   
             </View>
         )
     }
 
 
-export default MutualFriends
+export default Friends

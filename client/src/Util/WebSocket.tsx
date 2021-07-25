@@ -2,8 +2,8 @@ import React, { useState, useEffect, useContext, useRef, createContext } from "r
 import { User } from 'react-native-gifted-chat';
 import * as Notifications from 'expo-notifications';
 import { UserContext } from '../Auth/Login';
-import { ChatLog } from '../Util/ChatLog';
-import { navigationRef, navigate } from '../Util/RootNavigation';
+import { ChatLog } from './ChatLog';
+import { navigationRef, navigate } from './RootNavigation';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 
 export const RenderMessageContext = createContext({
@@ -58,23 +58,33 @@ const Socket = ({ children }) => {
         socket.onmessage = async (e: any) => {
             const data = JSON.parse(e.data)
             var log: any;
-            console.log(data)
+            
+            if (!(data.hasOwnProperty('groupId') && data.groupId.length > 0)) return;
+
             //check current view the user is in
             const currentRoute = navigationRef.current?.getCurrentRoute(); 
 
+            log = await ChatLog.getChatLogInstance()
+
+            let groupInfo = {} as any;
+            //retrieve group information
+            if (!(data.groupId in log.groupInfo)) {
+                log = await ChatLog.getChatLogInstance(true);   
+            }
+            groupInfo = {...log.groupInfo[data.groupId], id: data.groupId};
+            
             switch (data.command) {
                 case 'refresh':
-                    log = await ChatLog.getChatLogInstance();
-                    await log.refreshGroup(data.group);
+                    await log.refreshGroup(groupInfo.id);
                     break;
                 case 'append':
-                    log = await ChatLog.getChatLogInstance()
                     const newMessage:any = [{
                         _id: data._id,
                         text: data.text || '',
                         createdAt: data.createdAt || Date.now(),
                         user: {...data.senderID, avatar: data.senderID.avatar || EMPTY_IMAGE_DIRECTORY }
                     }]
+                    
                     //check if message contains image/video
                     let mediaType = ''
                     if (data.hasOwnProperty('image') && data.image !== '') mediaType = "image"
@@ -82,30 +92,29 @@ const Socket = ({ children }) => {
                     
                     if (mediaType !== '') {
                         newMessage[0][mediaType] = data[mediaType];
-                        newMessage[0].subtitle = `${data.group.name} sent a ${mediaType}.`;
+                        newMessage[0].subtitle = `${groupInfo.name} sent a ${mediaType}.`;
                     }
 
                     //notify the user
                     const notificationBody = newMessage[0].subtitle || newMessage[0].text
                     console.log(notificationBody)
                     
-                    const groupInfo = data.group;
                     //only notify if this groups view is not open, and the group notification is not muted
                     if (groupInfo?.mute === null || (groupInfo?.mute !== 'indefinite' && new Date() > new Date(groupInfo?.mute))) {
-                        log.appendLog(data.group, newMessage);
+                        await log.appendLog(groupInfo.id, newMessage);
                         setPostStatus(true); 
                         if (currentRoute.name === 'Chat') {
-                            if (data.group.id !== currentRoute.params.groupID) {
-                                await triggerNotification(data.group, notificationBody);
+                            if (groupInfo.id !== currentRoute.params.groupID) {
+                                await triggerNotification(groupInfo, notificationBody);
                             }
-                        } else await triggerNotification(data.group, notificationBody);
+                        } else await triggerNotification(groupInfo, notificationBody);
                     }
                     
                     break;
                 default:
                     break;
             }
-            if (currentRoute.name === 'Chat' && data.group.id === currentRoute.params.groupID) {
+            if (currentRoute.name === 'Chat' && groupInfo.id === currentRoute.params.groupID) {
                 console.log('re rendering...')
                 setRenderFlag(prevFlag => !prevFlag)
             } else {  

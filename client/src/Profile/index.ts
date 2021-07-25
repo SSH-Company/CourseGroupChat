@@ -4,9 +4,11 @@ import FriendRequests from './SettingsPages/FriendRequests';
 import CourseGroups from './SettingsPages/CourseGroups';
 import IgnoredGroups from './SettingsPages/IgnoredGroups';
 import EditProfile from './SettingsPages/EditProfile';
+import ContactUs from './SettingsPages/ContactUS';
 import NotificationSettings from './NotificationSettings';
 import CommonCourseGroups from './FriendSettingsPages/CommonCourseGroups';
 import MutualFriends from './FriendSettingsPages/MutualFriends';
+import Friends from './SettingsPages/Friends';
 
 export {
     Profile,
@@ -17,5 +19,7 @@ export {
     EditProfile,
     NotificationSettings,
     CommonCourseGroups,
-    MutualFriends
+    MutualFriends,
+    ContactUs,
+    Friends
 }

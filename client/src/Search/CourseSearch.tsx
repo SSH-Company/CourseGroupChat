@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { ActivityIndicator, View, ScrollView, Alert, Button } from "react-native";
+import { ActivityIndicator, View, ScrollView, Button } from "react-native";
 import { SearchBar, Header } from "react-native-elements";
 import { Ionicons, AntDesign } from "react-native-vector-icons";
 import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
-import { handleError } from '../Util/CommonFunctions';
+import { handleError, handleJoinCourseGroup } from '../Util/CommonFunctions';
 import { BASE_URL } from '../BaseUrl';
 import axios from 'axios';
 
@@ -28,7 +28,16 @@ const CourseSearch = ({ route, navigation }) => {
                             content: inGroup ?
                             <Ionicons name="checkmark" size={35} color="green"/>
                             :
-                            <Button title="Join" onPress={() => handleJoinGroup(row.id, index)}/>     
+                            <Button title="Join" onPress={() => handleJoinCourseGroup(row.id, () => {
+                                setVerifiedList(prevList => {
+                                    const list = [...prevList];
+                                    list[index] = {
+                                        ...list[index],
+                                        content: <Ionicons name="checkmark" size={35} color="green"/>
+                                    }
+                                    return list
+                                });
+                            })}/>     
                         }
                         return temp
                     }));
@@ -44,39 +53,6 @@ const CourseSearch = ({ route, navigation }) => {
         const filteredVerifiedList = verifiedList.filter(item => item.name.toLowerCase().includes(search.toLowerCase())).slice(0, 20);
         return filteredVerifiedList.sort();
     }, [verifiedList, search])
-
-    const handleJoinGroup = (id: string, index: number) => { 
-        let mounted = true;
-        axios.post(`${BASE_URL}/api/chat/join-group`, { id: id, name: id, verified: 'Y' })
-            .then(res => {
-                const status = res.data.status;
-                if (status === 'success') {
-                    if (mounted) {
-                        setVerifiedList(prevList => {
-                            const list = [...prevList];
-                            list[index] = {
-                                ...list[index],
-                                content: <Ionicons name="checkmark" size={35} color="green"/>
-                            }
-                            return list
-                        });
-                    }
-                } else {
-                    Alert.alert(
-                        `Failed to join ${id}`,
-                        'You are already enrolled in the maximum(8) number of courses. Please leave a group to join a new one.',
-                        [{ text: "OK", style: "cancel" }]
-                    )
-                    return;
-                }
-            })
-            .catch(err => {
-                console.log('unable to join group');
-                handleError(err);
-            })
-        
-        return () => { mounted = false; }
-    }
 
     return (
         <View style={{ flex: 1 }}>

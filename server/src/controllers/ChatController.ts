@@ -38,13 +38,14 @@ const upload = multer({ storage: storage })
 export class ChatController {
 
     @Get('log')
-    private getLog(req: Request, res: Response) {
-        const session = Session.getSession(req);
+    private async getLog(req: Request, res: Response) {
+        try{
+            const session = Session.getSession(req);
 
-        ChatLogViewModel.getUserLog(session.user.ID)
-        .then(data => {
-            const responseJson = [];
-            data.forEach(row => {
+            const [chatLog, groupinfo] = await Promise.all([ChatLogViewModel.getUserLog(session.user.ID), UserGroupModel.getGroupInformation(session.user.ID)]);
+            
+            const parsedLog = [];
+            chatLog.forEach(row => {
                 const json = {
                     id: row.GROUP_ID,
                     creator_id: row.CREATOR_ID,
@@ -54,7 +55,7 @@ export class ChatController {
                     name: row.VERIFIED === "Y" ? row.GROUP_ID : row.NAME,
                     avatar_url: row.AVATAR,
                     location: row.LOCATION,
-                    created_at: row.CREATE_DATE,
+                    createdAt: row.CREATE_DATE,
                     status: row.STATUS,
                     verified: row.VERIFIED,
                     mute: row.MUTE_NOTIFICATION
@@ -65,12 +66,23 @@ export class ChatController {
                 } else {
                     json['subtitle'] = `You have joined ${json.name}!`
                 }
-                responseJson.push(json)
+                parsedLog.push(json)
             })
             
-            res.status(STATUS.OK).json(responseJson)
-        })
-        .catch(err => {
+            const groupInfo = groupinfo.map(row => ({
+                id: row.GROUP_ID,
+                name: row.NAME || 'Just You',
+                member_count: row.MEMBER_COUNT,
+                mute: row.MUTE,
+                verified: row.VERIFIED,
+                avatar: row.AVATAR ? row.AVATAR : row.CUSTOM_AVATAR?.split(',')[0] || null
+            }))
+        
+            res.status(STATUS.OK).json({
+                parsedLog,
+                groupInfo
+            })
+        } catch (err) {
             console.error(err)
             res.status(STATUS.INTERNAL_SERVER_ERROR).json(
                 new Exception({
@@ -78,7 +90,7 @@ export class ChatController {
                     identifier: "CC001"
                 })
             )
-        }) 
+        }
     }
 
     
@@ -102,19 +114,19 @@ export class ChatController {
 
             const messages = JSON.parse(req.body.message);
             const message = messages.messages[0]
-            const groupID = messages.groupID
+            const groupId = messages.groupId
             const senderID = {
                 _id: user.ID,
                 name: user.FIRST_NAME + ' ' + user.LAST_NAME,
                 avatar: user.AVATAR
             }
-
+            
             let messageType: "text" | "image" | "video" | "file" | "audio" = "text";
 
             const newMessage = {
                 ID: message._id,
                 CREATOR_ID: senderID._id, 
-                RECIPIENT_GROUP_ID: groupID.id,  
+                RECIPIENT_GROUP_ID: groupId,  
                 STATUS: ''
             } as MessageModel
             
@@ -156,21 +168,14 @@ export class ChatController {
             }
 
             //find all recipients of this group chat, exclude senderID from the list
-            const groupRecipients = (await UserGroupModel.getMembers(groupID.id)).map(row => row.USER_ID).filter(id => id != senderID._id);    
+            const groupRecipients = (await UserGroupModel.getMembers(groupId)).map(row => row.USER_ID).filter(id => id != senderID._id);    
 
             //send a message to each recipients queue
             for (const id of groupRecipients) {
                 const queueName = `message-queue-${id}`
-                const groupInformation = (await ChatLogViewModel.getGroupByUser(id, groupID.id)).map(d => ({
-                    id: d.GROUP_ID,
-                    name: d.NAME,
-                    avatar: d.AVATAR,
-                    verified: d.VERIFIED,
-                    mute: d.MUTE_NOTIFICATION,
-                    entered: false
-                }))[0];
-                const queueData = { ...message, command: "append", group: groupInformation, senderID: senderID }
+                const queueData = { ...message, command: "append", groupId, senderID: senderID }
                 const queue = CONNECTIONS[user.ID];
+                console.log(queue.hasOwnProperty('publishToQueue'))
                 await queue.publishToQueue(queueName, JSON.stringify(queueData));
             }   
             
@@ -209,7 +214,7 @@ export class ChatController {
             
             for (const id of groupRecipients) {
                 const queueName = `message-queue-${id}`
-                const queueData = { command: "refresh", groupID: groupID }
+                const queueData = { command: "refresh", groupId: groupID }
                 const queue = CONNECTIONS[user.ID];
                 await queue.publishToQueue(queueName, JSON.stringify(queueData))
             }
@@ -393,7 +398,7 @@ export class ChatController {
                     } else subtitle = `You have joined ${row.NAME}!`
                     const json = {
                         _id: row.MESSAGE_ID,
-                        created_at: row.CREATE_DATE,
+                        createdAt: row.CREATE_DATE,
                         [row.MESSAGE_TYPE]: row.MESSAGE_BODY,
                         subtitle: subtitle,
                         user: {

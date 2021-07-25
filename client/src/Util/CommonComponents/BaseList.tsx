@@ -1,9 +1,9 @@
 import React, { FunctionComponent } from 'react';
 import { View, Text, StyleSheet } from "react-native";
-import { ListItem, Avatar } from "react-native-elements";
+import { ListItem } from "react-native-elements";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import GroupAvatar from './GroupAvatar';
 import VerifiedIcon from './VerifiedIcon';
-import { EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
 import { THEME_COLORS } from './Colors';
 
 //style sheet
@@ -25,6 +25,7 @@ export type listtype = {
     subtitle?: string;
     checked?: boolean;
     content?: React.ReactNode;
+    member_count?: number;
 }
 
 type BaseListProps = {
@@ -61,10 +62,11 @@ const BaseList:FunctionComponent<BaseListProps> = (props) => {
               onLongPress={e => itemOnLongPress(l, i)}
               topDivider={topDivider}
             >
-                <Avatar 
-                    rounded 
-                    size="medium" 
-                    source={{ uri: l.avatar_url || EMPTY_IMAGE_DIRECTORY }}
+                <GroupAvatar
+                    avatar={l.avatar_url}
+                    member_count={l.member_count}
+                    verified={l.verified}
+                    name={l.name}
                     onPress={() => onAvatarClick(l.id)}
                 />
                 <ListItem.Content>

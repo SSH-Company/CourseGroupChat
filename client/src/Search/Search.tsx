@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { Text, View, ScrollView, Platform, StyleSheet, Dimensions } from "react-native";
+import { Text, View, ScrollView, StyleSheet, Dimensions, Switch } from "react-native";
 import { Avatar, Header, SearchBar, Button } from "react-native-elements";
 import Feather from "react-native-vector-icons/Feather";
 import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
@@ -7,7 +7,6 @@ import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import { handleError } from "../Util/CommonFunctions";
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 import axios from 'axios';
-
 
 //style sheet
 const style = StyleSheet.create({
@@ -42,7 +41,6 @@ type SearchProp = {
 
 const Search = ({ route, navigation }) => {
     const { 
-        groupName, 
         groupID = '', 
         searchType,
         existingMembers = []
@@ -50,6 +48,9 @@ const Search = ({ route, navigation }) => {
     const [search, setSearch] = useState("");
     const [displaySubmit, setDisplaySubmit] = useState(false);
     const [suggestions, setSuggestions] = useState<listtype[]>([]);
+    const [showExistingGroups, setShowExistingGroups] = useState(false);
+    const [existingGroups, setExistingGroups] = useState<listtype[]>([]);
+    const [createNewGroup, setCreateNewGroup] = useState(false);
     const dimesions = Dimensions.get('window');
     const renderLimit = 20;
 
@@ -83,18 +84,41 @@ const Search = ({ route, navigation }) => {
     }
 
     const handleSubmit = () => {
+        setShowExistingGroups(false);
         const recipients = suggestions.filter(row => row.checked).map(row => ({
             id: row.id,
-            name: row.name
+            name: row.name,
+            avatar: row.avatar_url
         }))
         
         if (searchType === "create") {
-            const name = suggestions.filter(row => row.checked).map(row => row.name).join(", ");
-            navigation.navigate('Chat', { groupID: null, name: name, members: recipients })
+            //if create group button is false (that means the button has been pressed), no need to check if there are existing groups with these members
+            if (createNewGroup) {
+                const name = suggestions.filter(row => row.checked).map(row => row.name).join(", ");            
+                navigation.navigate('Chat', { groupID: null, name: name, avatar: recipients[0].avatar, members: recipients })            
+                return;
+            }
+
+            //else, check if a group consisting of these members already exist
+            axios.get(`${BASE_URL}/api/search/existing-groups`, { params: { recipients: recipients.map(r => r.id) } })
+                .then(res => {
+                    const data = res.data;
+                    if (data.length > 1) {
+                        setShowExistingGroups(true);
+                        setExistingGroups(data);
+                    } else if (data.length > 0) {
+                        navigation.navigate('Chat', { groupID: data[0].id, name: data[0].name, avatar: data[0].avatar, verified: data[0].verified })                
+                    } else {
+                        const name = suggestions.filter(row => row.checked).map(row => row.name).join(", ");            
+                        navigation.navigate('Chat', { groupID: null, name: name, avatar: recipients[0].avatar, members: recipients })            
+                    }
+                })
+                .catch(err => {
+                    handleError(err)
+                })
         } else if (searchType === "add") {
             const reqBody = {
                 groupID: groupID,
-                groupName: groupName,
                 recipients: recipients.map(d => d.id)
             }
 
@@ -115,12 +139,21 @@ const Search = ({ route, navigation }) => {
                 statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
                 leftComponent={<Feather name="arrow-left" color={THEME_COLORS.ICON_COLOR} size={25} onPress={() => navigation.navigate("Main")}/>}
                 centerComponent={{
-                    text: "Send Message",
+                    text: createNewGroup ? "Create a new group" : "Send Message",
                     style: { color: THEME_COLORS.ICON_COLOR, fontSize: 20, fontWeight: "bold" },
                 }}
-                rightComponent={displaySubmit && 
-                    <View>
-                        <Button title="OK" onPress={() => handleSubmit()} />
+                rightComponent={
+                    <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                        {searchType === "create" && <Switch
+                            trackColor={{ false: "#767577", true: "#81b0ff" }}
+                            thumbColor={createNewGroup ? "#f5dd4b" : "#f4f3f4"}
+                            onValueChange={() => {
+                                setShowExistingGroups(false)
+                                setCreateNewGroup(prev => !prev)
+                            }}
+                            value={createNewGroup}
+                        />}
+                        {displaySubmit && <Button title="OK" onPress={() => handleSubmit()} />}
                     </View>
                 }
             />
@@ -153,17 +186,24 @@ const Search = ({ route, navigation }) => {
                     ))}
                     </ScrollView>
                 </View>}
-            {filteredTable.length > 0 ?
+            {showExistingGroups ?
                 <BaseList
                     title="Suggested"
-                    items={filteredTable}
-                    itemOnPress={(l, i) => toggleCheckbox(i)}
-                    checkBoxes
+                    items={existingGroups}
+                    itemOnPress={(l, i) => navigation.navigate('Chat', { groupID: l.id, name: l.name, avatar: l.avatar_url, verified: l.verified })}
                 />
                 :
-                <View style={{ paddingTop: dimesions.height / 3, alignSelf: 'center' }}>
-                    <Text style={{ color: 'grey' }}>Add people to your friend list to add them to groups!</Text>
-                </View>
+                filteredTable.length > 0 ?
+                    <BaseList
+                        title="Suggested"
+                        items={filteredTable}
+                        itemOnPress={(l, i) => toggleCheckbox(i)}
+                        checkBoxes
+                    />
+                    :
+                    <View style={{ paddingTop: dimesions.height / 3, alignSelf: 'center' }}>
+                        <Text style={{ color: 'grey' }}>Add people to your friend list to add them to groups!</Text>
+                    </View>
             }
             </ScrollView>
         </View>

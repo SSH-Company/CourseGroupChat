@@ -1,8 +1,8 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator, TransitionSpecs } from '@react-navigation/stack';
+import { createStackNavigator } from '@react-navigation/stack';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet'
-import Socket from './src/Socket/WebSocket';
+import Socket from './src/Util/WebSocket';
 import Main from './src/Main/Main';
 import Chat from './src/Chat/Chat';
 import { LogIn } from './src/Auth';
@@ -20,7 +20,9 @@ import {
   IgnoredGroups,
   EditProfile,
   CommonCourseGroups,
-  MutualFriends
+  MutualFriends,
+  ContactUs,
+  Friends
 } from './src/Profile';
 import {
   GroupMembers,
@@ -39,8 +41,10 @@ export default function App() {
               <Stack.Navigator initialRouteName="Main" screenOptions={{headerShown: false, cardStyle: { backgroundColor: 'white' }}}>
                   <Stack.Screen name="Main" component={Main}/>
                   <Stack.Screen name="Chat" component={Chat}/>
+                  <Stack.Screen name="Friends" component={Friends}/>
                   <Stack.Screen name="FriendRequests" component={FriendRequests}/>
                   <Stack.Screen name="CourseGroups" component={CourseGroups}/>
+                  <Stack.Screen name="ContactUs" component={ContactUs}/>
                   <Stack.Screen name="IgnoredGroups" component={IgnoredGroups}/>
                   <Stack.Screen name="EditProfile" component={EditProfile}/>
                   <Stack.Screen name="Profile" component={Profile}/>

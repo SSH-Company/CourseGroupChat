@@ -1,3 +1,4 @@
+// This is profile for other people (not user)
 import React, { useState, useEffect, useContext } from 'react';
 import { Dimensions, View, StyleSheet } from 'react-native';
 import { ListItem, Image, Text, Button } from 'react-native-elements';

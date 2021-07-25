@@ -28,10 +28,12 @@ const styles = StyleSheet.create({
 
 const Unverified = ({ userId, handleLogout }) => {
 
-    const [message, setMessage] = useState('')
+    const [message, setMessage] = useState('Please verify your email to continue');
+    const [loadingResend, setLoadingResend] = useState(false);
 
     const handleResend = () => {
-        if (userId?.length > 0) {
+        setLoadingResend(true);
+        if (userId > 0) {
             axios.post(`${BASE_URL}/api/auth/resend-verification`, { userId })
                 .then(res => {
                     const email = res.data.email;
@@ -39,20 +41,22 @@ const Unverified = ({ userId, handleLogout }) => {
                 })
                 .catch(err => {
                     console.error(err);
+                    setMessage('Looks like something is wrong on our end. Please check back later and try again.');
+                })
+                .finally(() => {
+                    setLoadingResend(false);
                 })
         }
     }
 
     return (
-        <SafeAreaView style={styles.container} key={message}>
+        <SafeAreaView style={styles.container} key={`${message}-${loadingResend}`}>
             <ImageBackground source={require('../../assets/website.png')} style={styles.background}>
-                {message.length > 0 && 
-                <Text style={[styles.text, { fontWeight: 'bold' } ]}>{message}{"\n"}</Text>}
-                <Text style={[styles.text, { fontWeight: 'bold' } ]}>Please verify your email to continue{"\n"}</Text>
+                <Text style={[styles.text, { fontWeight: 'bold' } ]}>{message}{"\n"}</Text>
                 <Text style={[styles.text, { fontSize: 15 }]}>Can't find the verification email?</Text>
                 <Text style={[styles.text, { fontSize: 15 }]}>Check your junk/spam folder.{"\n"}</Text>
-                <Text style={[styles.text, { color: 'green', textDecorationLine: 'underline' }]} onPress={handleResend}>Click here to resend verification email{"\n"}</Text>
-                <Text style={[styles.text, { color: 'blue', textDecorationLine: 'underline' }]} onPress={handleLogout}>Click here to log out of this account{"\n"}</Text>
+                {!loadingResend && <Text style={[styles.text, { fontSize: 16, color: 'green', textDecorationLine: 'underline' }]} onPress={handleResend}>Click here to resend verification email{"\n"}</Text>}
+                <Text style={[styles.text, { fontSize: 16, color: 'blue', textDecorationLine: 'underline' }]} onPress={handleLogout}>Already verified? Click here to reload the app!{"\n"}</Text>
             </ImageBackground>
         </SafeAreaView>
     )

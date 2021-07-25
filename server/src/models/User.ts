@@ -40,6 +40,19 @@ export class UserModel implements UserInterface {
         })
     }
 
+    static delete(uid: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const query = `update RT.USER set "FIRST_NAME" = 'Deleted', "LAST_NAME" = 'User', "EMAIL" = null, "PASSWORD" = null, "AVATAR" = null 
+            where "ID" = ?;`;
+            const params = [uid];
+
+            Database.getDB()
+            .query(query, params)
+            .then(() => resolve())
+            .catch(err => reject(err))
+        })
+    }
+
     static getUserAccountByID(uid: string): Promise<UserModel> {
         const query = `SELECT * FROM RT.USER WHERE "ID" = ?;`
         
@@ -84,9 +97,10 @@ export class UserModel implements UserInterface {
         const params = Array(excludeIds.length).fill("?").join(",");
         let query = '';
         if (params.length > 0) {
-            query = `SELECT * FROM RT.USER WHERE "ID" NOT IN (${params}) ORDER BY "FIRST_NAME" `;
+            query = `SELECT * FROM RT.USER WHERE "ID" NOT IN (${params}) AND "EMAIL" IS NOT NULL 
+            AND "VERIFIED" = 'Y' ORDER BY "FIRST_NAME" `;
         } else {
-            query = `SELECT * FROM RT.USER ORDER BY "FIRST_NAME" `;
+            query = `SELECT * FROM RT.USER WHERE "EMAIL" IS NOT NULL AND "VERIFIED" = 'Y' ORDER BY "FIRST_NAME" `;
         }
 
         return new Promise((resolve, reject) => {

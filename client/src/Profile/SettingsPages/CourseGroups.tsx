@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, Text, ActivityIndicator, StyleSheet } from "react-native";
-import { Header, ListItem, SearchBar, Avatar, Button } from "react-native-elements";
+import { Dimensions, View, ScrollView, Text, ActivityIndicator, StyleSheet } from "react-native";
+import { Header, ListItem, SearchBar, Button } from "react-native-elements";
 import { AntDesign } from "react-native-vector-icons";
+import GroupAvatar from '../../Util/CommonComponents/GroupAvatar';
 import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
 import { handleLeaveGroup, handleError } from '../../Util/CommonFunctions';
-import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
+import { BASE_URL } from '../../BaseUrl';
 import axios from 'axios';
+
+const deviceDimensions = Dimensions.get('window')
 
 type CourseGroups = {
     id: string,
@@ -57,7 +60,7 @@ const CourseGroups = ({ navigation }) => {
                                 color={THEME_COLORS.ICON_COLOR} 
                                 onPress={() => navigation.goBack()}
                             />
-                            <Text style={{ fontWeight: "bold", color: "black", fontSize: 25, paddingLeft: 10 }}>Course Group Chats</Text>
+                            <Text style={{ fontWeight: "bold", color: "black", fontSize: deviceDimensions.fontScale*20, paddingLeft: 10 }}>Course Group Chats</Text>
                         </View>
                     }
                 />
@@ -71,10 +74,9 @@ const CourseGroups = ({ navigation }) => {
                         <ScrollView keyboardShouldPersistTaps="handled">
                             {groups.map((group, index) => (
                                 <ListItem key={`${group.id}`} topDivider={index > 0}>
-                                    <Avatar
-                                        source={{ uri: EMPTY_IMAGE_DIRECTORY }}
-                                        rounded
-                                        size={50}
+                                    <GroupAvatar
+                                        name={group.id}
+                                        verified={"Y"}
                                     />
                                     <ListItem.Content>
                                         <ListItem.Title style={{ fontSize: 15 }}>{group.id}</ListItem.Title>
