@@ -1,29 +1,14 @@
 import React, {FunctionComponent} from 'react';
 import { Layout, Menu } from 'antd';
-import styled from 'styled-components';
+import './NavBar.css';
 
 const { Header } = Layout;
 
-const Styles = styled.div`
-    .navbar {
-        background-color: #EAA082;
-    }
-
-    .navbar-brand .navbar-nav .nav-link {
-        color: #4C7972;
-
-        &:hover {
-            color: #265C52;
-        }
-    }
-
-`;
-
 const NavBar:FunctionComponent = () => {
     return (
-        <Header>
-            <div className="logo" />
-            <Menu theme="dark" mode="horizontal">
+        <Header className="header" style={{backgroundColor: '#F5B398'}}>
+            <div className="logo" style={{backgroundColor: '#F5B398'}}/>
+            <Menu className="navbar" mode="horizontal" style={{backgroundColor: '#F5B398'}}>
                 <Menu.Item key="Features">
                     Features
                 </Menu.Item>

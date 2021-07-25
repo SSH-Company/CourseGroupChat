@@ -5,7 +5,7 @@ const { Footer } = Layout;
 
 const Foot:FunctionComponent = () => {
     return (
-        <Footer >
+        <Footer style={{backgroundColor: '#6CA79E'}}>
             <div>
                 Cirkle
             </div>
