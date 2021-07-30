@@ -72,10 +72,10 @@ class CGCServer extends Server {
         // const server = https.createServer(
         //     {
         //         key: fs.readFileSync(
-        //             path.join(__dirname, "../config/pem/key.pem")
+        //             path.join(__dirname, "../config/pem/key.key")
         //         ),
         //         cert: fs.readFileSync(
-        //             path.join(__dirname, "../config/pem/cert.pem")
+        //             path.join(__dirname, "../config/pem/cert.crt")
         //         )
         //     },
         //     this.app
