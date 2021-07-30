@@ -48,10 +48,10 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
     
     //States for controlling audio
     const [refreshSound, setRefreshSound] = useState(false);
-    const [sound, setSound] = useState();
+    const [sound, setSound] = useState<any>();
     const [isPlaying, setIsPlaying] = useState(false);
     const [position, setPosition] = useState(0);
-    const [soundStatus, setSoundStatus] = useState();
+    const [soundStatus, setSoundStatus] = useState<any>();
 
     const onPlayBackStatusUpdate = (playbackStatus) => {
         if (!playbackStatus.isLoaded) {
