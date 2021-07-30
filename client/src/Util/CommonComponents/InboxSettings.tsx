@@ -53,6 +53,14 @@ const InboxSettings = (props: InboxSettingsProps) => {
     //Menu list components
     const iconSize = 20
 
+    const verifiedGroupOptions = [
+        {
+            title: 'Course Feedback',
+            icon: <MaterialIcons name={"feedback"} size={iconSize}/>,
+            onPress: () => navigate('Feedback', { course: props.group.name })
+        }
+    ];
+
     const list = [
         {
             title: 'Mute notifications',
@@ -88,6 +96,8 @@ const InboxSettings = (props: InboxSettingsProps) => {
             onPress: () => navigate('GroupMembers', { id: props.group._id, name: props.group.name })
         }
     ]
+
+    const allOptions = props.verified === "Y" ? verifiedGroupOptions.concat(list) : list;
     
     return (
         <View style={styles.drawerContainer}>
@@ -124,7 +134,7 @@ const InboxSettings = (props: InboxSettingsProps) => {
                     ))}
                 </View>
                 :
-                list.map((item, i) => (
+                allOptions.map((item, i) => (
                     <ListItem key={i} onPress={item.onPress}>
                         {item.icon}
                         <ListItem.Content>
