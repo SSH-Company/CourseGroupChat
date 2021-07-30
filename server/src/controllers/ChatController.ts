@@ -348,6 +348,7 @@ export class ChatController {
     private async getGroupMembers(req: Request, res: Response) {
         try {
             const grpId = req.params.grpId;
+            console.log(grpId.length)
 
             if (!grpId) {
                 res.status(STATUS.BAD_REQUEST).json({
