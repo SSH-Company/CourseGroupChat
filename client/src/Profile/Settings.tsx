@@ -126,12 +126,12 @@ const Settings = ({ navigation }) => {
             title: 'Spam',
             icon: <Ionicons name={"person-remove"} size={iconSize}/>,
             onPress: () => navigation.navigate('IgnoredGroups')
-        },
-        {
-            title: 'Notifications & Sounds',
-            icon: <Ionicons name={"notifications"} size={iconSize}/>,
-            onPress: setNotifications
         }
+        // {
+        //     title: 'Notifications & Sounds',
+        //     icon: <Ionicons name={"notifications"} size={iconSize}/>,
+        //     onPress: setNotifications
+        // }
     ]
 
     const sectionTwo = [        
@@ -174,7 +174,7 @@ const Settings = ({ navigation }) => {
                 placement="left"
                 backgroundColor={"white"}
                 statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
-                containerStyle={{ minHeight: 150 }}
+                containerStyle={{ minHeight: 120 }}
                 leftComponent={
                     <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
                         <AntDesign 
@@ -205,7 +205,7 @@ const Settings = ({ navigation }) => {
                     />
                 }
             />
-            <View style={{ marginBottom: 50 }}>
+            <View style={{ marginBottom: 30 }}>
                 <Text style={{ marginLeft: deviceDimensions.scale*6, fontWeight: 'bold', fontSize: 16 * deviceDimensions.fontScale }}>Manage your Cirkle</Text>
                 {sectionOne.map((item, i) => (
                     <ListItem key={`${i}-${item.title}`} onPress={item.onPress} style={{ marginLeft: deviceDimensions.scale*3}} bottomDivider>
@@ -216,7 +216,7 @@ const Settings = ({ navigation }) => {
                     </ListItem>
                 ))}
             </View>
-            <View style={{ marginBottom: 50 }}>
+            <View style={{ marginBottom: 30 }}>
                 <Text style={{ marginLeft: deviceDimensions.scale*6, fontWeight: 'bold', fontSize: 16 * deviceDimensions.fontScale }}>Help and Support</Text>
                 {sectionTwo.map((item, i) => (
                     <ListItem key={`${i}-${item}`} onPress={item.onPress} style={{ marginLeft: deviceDimensions.scale*3}} bottomDivider>

@@ -167,6 +167,8 @@ export class AuthController {
             //check token against user id
             const account = await AccountVerificationModel.getUserAccountByID(userId);
 
+            console.log(account)
+
             if (!account) {
                 res.status(STATUS.BAD_REQUEST).json({
                     message: "Unable to find token related to this user ID."
@@ -262,7 +264,11 @@ export class AuthController {
                 )
             }
 
-            await this.sendVerificationMail(user.ID, user.EMAIL);           
+            await Database.getDB().transaction(async db => {
+                //delete current row from Account Verification table
+                await AccountVerificationModel.deleteByUserId(user.ID, db);
+                await this.sendVerificationMail(user.ID, user.EMAIL, db); 
+            })
 
             res.status(STATUS.OK).json({
                 email: user.EMAIL,

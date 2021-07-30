@@ -1,13 +1,14 @@
 import * as express from 'express';
 import * as path from 'path';
+import fs from "fs";
 import cors from 'cors';
 import * as bodyParser from 'body-parser';
 import session from 'express-session';
 import { ApiController } from './controllers/ApiController';
 import { Server } from '@overnightjs/core';
 import { Logger } from '@overnightjs/logger';
-import passport from 'passport';
-import * as saml from 'passport-saml';
+import * as http from "http";
+import * as https from "https";
 // import sessionFileStore from 'session-file-store';
 // const FileStore = sessionFileStore(session);
 
@@ -25,6 +26,8 @@ class CGCServer extends Server {
                 cookie: { secure: false },
                 resave: true,
                 saveUninitialized: true,
+                httpOnly: true,
+                secure: true
                 // store: null 
                 // new FileStore({ reapInterval: 60 })
             })
@@ -53,20 +56,38 @@ class CGCServer extends Server {
         // this.app.use(passport.session({}));
     
         this.setupControllers();
+
+        this.app.use('/api', (req, res) => {
+            res.json({ message: `backend started but unable to find api ${req.url}`})
+        });
+        this.app.use(express.static(path.join(__dirname, 'public/client')))
+        this.app.get('*', (req, res) => { res.sendFile(path.join(__dirname, '/public/client/index.html')) })
     }
 
     private setupControllers(): void {
         super.addControllers(new ApiController());
     }
 
-    public start(port: number): void {
-        this.app.use('/api', (req, res) => {
-            res.json({ message: `backend started but unable to find api ${req.url}`})
+    public start(port: number) {  
+        // const server = https.createServer(
+        //     {
+        //         key: fs.readFileSync(
+        //             path.join(__dirname, "../config/pem/key.pem")
+        //         ),
+        //         cert: fs.readFileSync(
+        //             path.join(__dirname, "../config/pem/cert.pem")
+        //         )
+        //     },
+        //     this.app
+        // )
+        // const server = http.createServer(this.app);
+
+        return this.app.listen(port, () => {
+            Logger.Imp(this.SERVER_STARTED + port)
         });
-        this.app.use(express.static(path.join(__dirname, 'public/client')))
-        this.app.get('*', (req, res) => { res.sendFile(path.join(__dirname, '/public/client/index.html')) })
-        return this.app.listen(port, () => { Logger.Imp(this.SERVER_STARTED + port) });
     }
 }
 
 export default CGCServer
+
+

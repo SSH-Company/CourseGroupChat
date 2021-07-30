@@ -26,7 +26,7 @@ import { CMail } from '../services/CMail';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'src/public/client/media/profiles/')
+        cb(null, 'src/media/profiles/')
     },
     filename: function (req, file, cb) {
         const extension = file.mimetype.split('/')[1];

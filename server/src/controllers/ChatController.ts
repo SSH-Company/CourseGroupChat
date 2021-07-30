@@ -23,7 +23,7 @@ import { ChatLogViewModel } from '../models/ChatLog_View';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'src/public/client/media/messages/')
+        cb(null, 'src/media/messages/')
     },
     filename: function (req, file, cb) {
         const extension = file.mimetype.split('/')[1];
