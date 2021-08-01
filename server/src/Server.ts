@@ -6,10 +6,6 @@ import session from 'express-session';
 import { ApiController } from './controllers/ApiController';
 import { Server } from '@overnightjs/core';
 import { Logger } from '@overnightjs/logger';
-import passport from 'passport';
-import * as saml from 'passport-saml';
-// import sessionFileStore from 'session-file-store';
-// const FileStore = sessionFileStore(session);
 
 class CGCServer extends Server {
     private readonly SERVER_STARTED = process.env.NODE_ENV + ' Server started on port: ';
@@ -25,48 +21,34 @@ class CGCServer extends Server {
                 cookie: { secure: false },
                 resave: true,
                 saveUninitialized: true,
+                httpOnly: true,
+                secure: true
                 // store: null 
                 // new FileStore({ reapInterval: 60 })
             })
         );
-
-        // passport.serializeUser((user, done) => {
-        //     done(null, user);
-        // });
-        
-        // passport.deserializeUser((user, done) => {
-        //     done(null, user);
-        // });
-        
-        // const samlStrategy = new saml.Strategy({
-        //     callbackUrl: '/api/login/callback',
-        //     entryPoint: 'https://konnect1-dev.onelogin.com/trust/saml2/http-post/sso/fabacdc2-986a-4db1-a806-c9b61701ae89',
-        //     issuer: 'dev-app-konnect'
-        // }, 
-        // (profile, done) => {
-        //     console.log(profile);
-        //     return done(null, profile);
-        // })
-
-        // passport.use('saml', samlStrategy);
-        // this.app.use(passport.initialize({}));
-        // this.app.use(passport.session({}));
     
         this.setupControllers();
+
+        this.app.use('/api', (req, res) => {
+            res.json({ message: `backend started but unable to find api ${req.url}`})
+        });
+        this.app.use(express.static(path.join(__dirname, 'public/client')))
+        this.app.get('*', (req, res) => { res.sendFile(path.join(__dirname, '/public/client/index.html')) })
     }
 
     private setupControllers(): void {
         super.addControllers(new ApiController());
     }
 
-    public start(port: number): void {
-        this.app.use('/api', (req, res) => {
-            res.json({ message: `backend started but unable to find api ${req.url}`})
+    public start(port: number) {  
+
+        return this.app.listen(port, () => {
+            Logger.Imp(this.SERVER_STARTED + port)
         });
-        this.app.use(express.static(path.join(__dirname, 'public/client')))
-        this.app.get('*', (req, res) => { res.sendFile(path.join(__dirname, '/public/client/index.html')) })
-        return this.app.listen(port, () => { Logger.Imp(this.SERVER_STARTED + port) });
     }
 }
 
 export default CGCServer
+
+

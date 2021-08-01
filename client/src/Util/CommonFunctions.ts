@@ -29,6 +29,7 @@ export const millisToMinutesAndSeconds = (millis) => {
 
 export const handleError = (error: any) => {
     const response = error.response;
+    console.log(error)
     if (response) {
         switch(response.status) {
             case 400:
@@ -47,7 +48,7 @@ export const handleError = (error: any) => {
                 )
                 break;
             default: 
-                console.error(response.data)
+                console.error(response.data);
                 break;
         }
     }

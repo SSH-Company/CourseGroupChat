@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { notification } from 'antd';
+import { Button, notification } from 'antd';
 import { BASE_URL } from '../BaseUrl';
 import axios from 'axios';
 import './index.scss';
@@ -66,7 +66,7 @@ const VerifyAccount:FunctionComponent = () => {
             <div className="col-md-18" style={{ textAlign: 'center', color: 'black' }}>
                 <h1 className="display-3">
                     {status && message}
-                    {showResend && <a onClick={handleResend}>Click here to re-send verification email</a>}
+                    {showResend && <Button size="large" onClick={handleResend}>Click here to re-send verification email</Button>}
                 </h1>
             </div>
         </div>
