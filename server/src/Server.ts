@@ -1,16 +1,11 @@
 import * as express from 'express';
 import * as path from 'path';
-import fs from "fs";
 import cors from 'cors';
 import * as bodyParser from 'body-parser';
 import session from 'express-session';
 import { ApiController } from './controllers/ApiController';
 import { Server } from '@overnightjs/core';
 import { Logger } from '@overnightjs/logger';
-import * as http from "http";
-import * as https from "https";
-// import sessionFileStore from 'session-file-store';
-// const FileStore = sessionFileStore(session);
 
 class CGCServer extends Server {
     private readonly SERVER_STARTED = process.env.NODE_ENV + ' Server started on port: ';
@@ -32,28 +27,6 @@ class CGCServer extends Server {
                 // new FileStore({ reapInterval: 60 })
             })
         );
-
-        // passport.serializeUser((user, done) => {
-        //     done(null, user);
-        // });
-        
-        // passport.deserializeUser((user, done) => {
-        //     done(null, user);
-        // });
-        
-        // const samlStrategy = new saml.Strategy({
-        //     callbackUrl: '/api/login/callback',
-        //     entryPoint: 'https://konnect1-dev.onelogin.com/trust/saml2/http-post/sso/fabacdc2-986a-4db1-a806-c9b61701ae89',
-        //     issuer: 'dev-app-konnect'
-        // }, 
-        // (profile, done) => {
-        //     console.log(profile);
-        //     return done(null, profile);
-        // })
-
-        // passport.use('saml', samlStrategy);
-        // this.app.use(passport.initialize({}));
-        // this.app.use(passport.session({}));
     
         this.setupControllers();
 
@@ -69,18 +42,6 @@ class CGCServer extends Server {
     }
 
     public start(port: number) {  
-        // const server = https.createServer(
-        //     {
-        //         key: fs.readFileSync(
-        //             path.join(__dirname, "../config/pem/key.key")
-        //         ),
-        //         cert: fs.readFileSync(
-        //             path.join(__dirname, "../config/pem/cert.crt")
-        //         )
-        //     },
-        //     this.app
-        // )
-        // const server = http.createServer(this.app);
 
         return this.app.listen(port, () => {
             Logger.Imp(this.SERVER_STARTED + port)
