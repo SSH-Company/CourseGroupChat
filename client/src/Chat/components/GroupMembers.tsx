@@ -47,6 +47,7 @@ const GroupMembers = ({ route, navigation }) => {
             .then(res => {
                 setMembers(res.data.map(row => ({ ...row, checked: false })));
                 setLoading(false);
+                console.log(id.length)
             })
             .catch(err => handleError(err));
     }, [id, refresh])

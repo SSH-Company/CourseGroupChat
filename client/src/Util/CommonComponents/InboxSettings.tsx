@@ -53,6 +53,18 @@ const InboxSettings = (props: InboxSettingsProps) => {
     //Menu list components
     const iconSize = 20
 
+    const verifiedGroupOptions = [
+        {
+            title: 'Course Feedback',
+            icon: <MaterialIcons name={"feedback"} size={iconSize}/>,
+            onPress: () => navigate('Feedback', { course: props.group.name })
+        },
+        {
+            title: 'Connect with a mentor',
+            icon: <Entypo name={"graduation-cap"} size={iconSize}/>
+        }
+    ];
+
     const list = [
         {
             title: 'Mute notifications',
@@ -83,11 +95,22 @@ const InboxSettings = (props: InboxSettingsProps) => {
 
     const newToGroupOptions = [
         {
+            title: 'Course Feedback',
+            icon: <MaterialIcons name={"feedback"} size={iconSize}/>,
+            onPress: () => navigate('Feedback', { course: props.group.name })
+        },
+        {
+            title: 'Connect with a mentor',
+            icon: <Entypo name={"graduation-cap"} size={iconSize}/>
+        },
+        {
             title: 'Group Members',
             icon: <MaterialIcons name={"groups"} size={iconSize}/>,
             onPress: () => navigate('GroupMembers', { id: props.group._id, name: props.group.name })
         }
     ]
+
+    const allOptions = props.verified === "Y" ? verifiedGroupOptions.concat(list) : list;
     
     return (
         <View style={styles.drawerContainer}>
@@ -124,7 +147,7 @@ const InboxSettings = (props: InboxSettingsProps) => {
                     ))}
                 </View>
                 :
-                list.map((item, i) => (
+                allOptions.map((item, i) => (
                     <ListItem key={i} onPress={item.onPress}>
                         {item.icon}
                         <ListItem.Content>
