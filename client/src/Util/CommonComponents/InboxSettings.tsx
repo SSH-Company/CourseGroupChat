@@ -61,7 +61,8 @@ const InboxSettings = (props: InboxSettingsProps) => {
         },
         {
             title: 'Connect with a mentor',
-            icon: <Entypo name={"graduation-cap"} size={iconSize}/>
+            icon: <Entypo name={"graduation-cap"} size={iconSize}/>,
+            onPress: () => navigate('Mentor', { course: props.group.name })
         }
     ];
 
@@ -101,7 +102,8 @@ const InboxSettings = (props: InboxSettingsProps) => {
         },
         {
             title: 'Connect with a mentor',
-            icon: <Entypo name={"graduation-cap"} size={iconSize}/>
+            icon: <Entypo name={"graduation-cap"} size={iconSize}/>,
+            onPress: () => navigate('Mentor', { course: props.group.name })
         },
         {
             title: 'Group Members',

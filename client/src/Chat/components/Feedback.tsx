@@ -132,7 +132,7 @@ const Feedback = ({ route, navigation }) => {
                         <Button
                             title="Give feedback"
                             onPress={() => {}}
-                            buttonStyle={{ backgroundColor: '#1f4e46' }}
+                            buttonStyle={{ backgroundColor: THEME_COLORS.GREEN }}
                         />
                     </View>
                     <Text style={{ fontSize: 12, paddingTop: 5 }}>Did you take this course? Provide feedback to get Cirkle points!</Text>

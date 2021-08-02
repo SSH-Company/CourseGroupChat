@@ -4,6 +4,7 @@ import GroupMembers from './GroupMembers';
 import Gallery from './Gallery';
 import MuteNotification from './MuteNotification';
 import Feedback from './Feedback';
+import Mentor from './Mentor';
 
 export {
     CustomMessage,
@@ -11,7 +12,8 @@ export {
     GroupMembers,
     Gallery,
     MuteNotification,
-    Feedback
+    Feedback,
+    Mentor
 }
 
 

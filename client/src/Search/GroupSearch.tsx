@@ -21,13 +21,13 @@ const GroupSearch = ({ navigation }) => {
     const searchRef = useRef(null);
 
     useEffect(() => {
-        searchRef.current.focus();
         Promise.all([axios.get(`${BASE_URL}/api/search/all-groups`), axios.get(`${BASE_URL}/api/search/users`), axios.get(`${BASE_URL}/api/search/verified-groups`)])
             .then(res => {
                 setGroupList(res[0].data);
                 setUserList(res[1].data);
                 setCourseList(res[2].data);
                 setLoading(false);
+                searchRef.current.focus();
             })
             .catch(err => handleError(err))
     }, []);

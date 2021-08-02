@@ -335,7 +335,6 @@ const Chat = ({ route, navigation }) => {
                                     children={props} 
                                     onSend={messages => onSend(messages)}
                                 /> ) }}
-                            loadEarlier
                             onLoadEarlier={onLoadEarlier}
                             isKeyboardInternallyHandled={false}
                             keyboardShouldPersistTaps='never'
