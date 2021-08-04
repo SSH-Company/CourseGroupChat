@@ -58,7 +58,7 @@ const Main = ({ navigation }) => {
 
     const resetList = async () => {
         try {
-            const res = await axios.get(`${BASE_URL}/api/chat/main-log`);
+            const res = await axios.get(`${BASE_URL}/api/chat/main`);
             setCompleteList(res.data.parsedLog);
             setRefreshing(false);
         } catch (err) {

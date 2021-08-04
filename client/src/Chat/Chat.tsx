@@ -21,14 +21,13 @@ const Chat = ({ route, navigation }) => {
     const { user } = useContext(UserContext)
     const { renderFlag } = useContext(RenderMessageContext);
     const [group, setGroup] = useState<any>({
-        id: route.params.groupID,
+        id: route.params.groupID || null,
         name: route.params.name || '',
         avatar: route.params.avatar || EMPTY_IMAGE_DIRECTORY,
         verified: route.params.verified || 'N',
         members: route.params.members || []
     });
     const [messages, setMessages] = useState<IMessage[]>([]);
-    const [newGroup, setNewGroup] = useState<boolean>();
     const [loading, setLoading] = useState(true);
     const { showActionSheetWithOptions } = useActionSheet();
     const drawerRef = useRef(null);
@@ -92,38 +91,21 @@ const Chat = ({ route, navigation }) => {
         }
     }
 
-    const resetMessages = async () => {
-        try{
+    const resetMessages = () => {
+        if (group.id) {
             setLoading(true);
-
-            const instance = await ChatLog.getChatLogInstance();
-            if (group.id) await instance.refreshGroup(group.id, false, group.name, group.avatar); 
-            const log = instance.chatLog;
-            
-            if (group.id in log) {
-                const groupInfo = instance.groupInfo[group.id];
-                setGroup({
-                    ...group,
-                    name: groupInfo.name,
-                    avatar: groupInfo.avatar,
-                    verified: groupInfo.verified
-                });
-
-                //we're filtering here to ensure we can retrieve empty group chats from ChatLog_View, but not render any empty messages
-                setMessages(previousMessages => {
-                    const messageIds = previousMessages.map(m => m._id);
-                    const filteredMessages = filterOutEmptyMessages(log[group.id]).filter(m => !messageIds.includes(m._id));
-                    return GiftedChat.append(previousMessages, filteredMessages)
-                });
-                setNewGroup(false);   
-            } else {
-                setNewGroup(true);
-                setMessages([]);
-            };
-        
-            setLoading(false); 
-        } catch (err) {
-            return;
+            axios.get(`${BASE_URL}/api/chat/log/${group.id}`)
+                .then(res => {
+                    const { messages, groupDetails } = res.data;
+                    setMessages(previousMessages => {
+                        const messageIds = previousMessages.map(m => m._id);
+                        const filteredMessages = filterOutEmptyMessages(messages).filter(m => !messageIds.includes(m._id));
+                        return GiftedChat.append(previousMessages, filteredMessages)
+                    });
+                    setGroup({...groupDetails});    
+                })
+                .catch(err => handleError(err))
+                .finally(() => setLoading(false))
         }
     }
     
@@ -139,7 +121,7 @@ const Chat = ({ route, navigation }) => {
                 const data = res.data;
                 //refresh log since new group has been created, and navigate to it
                 await ChatLog.getChatLogInstance(true);
-                await sendData(messages, {...group, id:data.id });
+                await sendData(messages, {...group, id: data.id });
                 navigation.push('Chat', { groupID: data.id })
             } else {
                 await instance.appendLog(group.id, messages);
@@ -295,7 +277,7 @@ const Chat = ({ route, navigation }) => {
                             </View>
                         }
                         rightComponent={
-                            !newGroup && <Ionicons 
+                            group.id && <Ionicons 
                                 name="information-circle-outline" 
                                 size={avatarSize} 
                                 color={THEME_COLORS.ICON_COLOR} 
