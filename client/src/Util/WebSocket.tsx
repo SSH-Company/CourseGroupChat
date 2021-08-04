@@ -114,10 +114,8 @@ const Socket = ({ children }) => {
                     break;
             }
             if (currentRoute.name === 'Chat' && groupInfo.id === currentRoute.params.groupID) {
-                console.log('re rendering...')
                 setRenderFlag(prevFlag => !prevFlag)
             } else {  
-                console.log('re rendering...')
                 setRenderFlag(prevFlag => !prevFlag)
             }
 

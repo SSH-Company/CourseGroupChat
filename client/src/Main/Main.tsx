@@ -58,31 +58,8 @@ const Main = ({ navigation }) => {
 
     const resetList = async () => {
         try {
-            const res = await Promise.all([ axios.get(`${BASE_URL}/api/chat/main-log`), axios.get(`${BASE_URL}/api/chat/group-info`) ]);
-            const list = [];
-            const [ chatLog, grpInfo ] = [ res[0].data.parsedLog, res[1].data.groupInfo ];
-            
-            if (chatLog?.length > 0 && grpInfo?.length > 0) {
-                chatLog.map(row => {
-                    //find the group id in grpInfo
-                    const group = grpInfo.filter(r => r.id === row.id)[0];
-                    if (group) {
-                        //create list item
-                        list.push({
-                            id: row.id,
-                            message_id: row.message_id,
-                            name: group.name,
-                            avatar_url: group.avatar,
-                            subtitle: row.hasOwnProperty('subtitle') ? row.subtitle : `You have joined ${group.name}!`,
-                            createdAt: row.createdAt,
-                            verified: group.verified,
-                            member_count: group.member_count
-                        })
-                    }
-                });
-            }
-
-            setCompleteList(list);
+            const res = await axios.get(`${BASE_URL}/api/chat/main-log`);
+            setCompleteList(res.data.parsedLog);
             setRefreshing(false);
         } catch (err) {
             handleError(err);

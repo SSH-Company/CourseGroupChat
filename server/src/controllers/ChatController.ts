@@ -98,26 +98,32 @@ export class ChatController {
         try {
             const session = Session.getSession(req);
 
-            const chatLog = await ChatLogViewModel.getMainPageList(session.user.ID);
+            const [chatLog, groupInfo] = await Promise.all([ChatLogViewModel.getMainPageList(session.user.ID), UserGroupModel.getGroupInformation(session.user.ID)]);
             
             const parsedLog = [];
             chatLog.forEach(row => {
-                const json = {
+                //find group ID in groupInfo
+                const group = groupInfo.filter(r => r.GROUP_ID === row.GROUP_ID)[0]; 
+
+                //this shouldn't happen, added as a fail safe
+                if (!group) throw new Exception({
+                    message: `Unable to find group id ${row.GROUP_ID} information.`
+                })
+                
+                const json: any = {
                     id: row.GROUP_ID,
-                    creator_id: row.CREATOR_ID,
-                    creator_name: row.CREATOR_NAME,
-                    creator_avatar: row.CREATOR_AVATAR,
                     message_id: row.MESSAGE_ID,
-                    avatar_url: row.AVATAR,
-                    location: row.LOCATION,
+                    name: group.NAME || 'Just You',
+                    avatar_url: group.AVATAR ? group.AVATAR : group.CUSTOM_AVATAR?.split(',')[0] || null,
                     createdAt: row.CREATE_DATE,
-                    status: row.STATUS,
-                    verified: row.VERIFIED,
-                    mute: row.MUTE_NOTIFICATION
+                    verified: group.VERIFIED,
+                    member_count: group.MEMBER_COUNT
                 }
                 if (row.MESSAGE_ID && row.MESSAGE_TYPE) {
                     json[row.MESSAGE_TYPE] = row.MESSAGE_BODY,
-                    json['subtitle'] = row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_NAME} sent a ${row.MESSAGE_TYPE}.`                        
+                    json.subtitle = row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_NAME} sent a ${row.MESSAGE_TYPE}.`                        
+                } else {
+                    json.subtitle = `You have joined ${group.NAME}!`
                 }
                 parsedLog.push(json)
             })
@@ -130,38 +136,7 @@ export class ChatController {
             console.error(err)
             res.status(STATUS.INTERNAL_SERVER_ERROR).json(
                 new Exception({
-                    message: "Something went wrong while fetching user group information.",
-                    identifier: "CC002"
-                })
-            )
-        }
-    }
-
-    @Get('group-info')
-    private async getGroupInformation(req: Request, res: Response) {
-        try {
-            const session = Session.getSession(req);
-
-            const groupinfo = await UserGroupModel.getGroupInformation(session.user.ID);
-            
-            const groupInfo = groupinfo.map(row => ({
-                id: row.GROUP_ID,
-                name: row.NAME || 'Just You',
-                member_count: row.MEMBER_COUNT,
-                mute: row.MUTE,
-                verified: row.VERIFIED,
-                avatar: row.AVATAR ? row.AVATAR : row.CUSTOM_AVATAR?.split(',')[0] || null
-            }))
-
-            res.status(STATUS.OK).json({
-                groupInfo
-            });
-
-        } catch (err) {
-            console.error(err)
-            res.status(STATUS.INTERNAL_SERVER_ERROR).json(
-                new Exception({
-                    message: "Something went wrong while fetching user group information.",
+                    message: "Something went wrong while fetching user group main chat log.",
                     identifier: "CC002"
                 })
             )
