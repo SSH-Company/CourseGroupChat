@@ -27,7 +27,8 @@ import {
 import {
   GroupMembers,
   Gallery,
-  Feedback
+  Feedback,
+  Mentor
 } from './src/Chat/components';
 import { navigationRef } from './src/Util/RootNavigation';
 
@@ -55,6 +56,7 @@ export default function App() {
                   <Stack.Screen name="GroupMembers" component={GroupMembers}/> 
                   <Stack.Screen name="Gallery" component={Gallery}/>
                   <Stack.Screen name="Feedback" component={Feedback}/>
+                  <Stack.Screen name="Mentor" component={Mentor}/>
                   <Stack.Screen name="Search" component={Search}/>
                   <Stack.Screen name="GroupSearch" component={GroupSearch}/>
                   <Stack.Screen name="CourseSearch" component={CourseSearch}/>

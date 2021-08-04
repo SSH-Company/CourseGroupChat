@@ -179,11 +179,11 @@ const CustomMessage:FunctionComponent<CustomMessageProps> = (props) => {
             renderBubble={() => {
                 return (
                     <View style={{ flexDirection: 'column', paddingTop: seperateMessageBlock === true ? 15 : 0, width: isCurrentUser ? '92%' : '80%' }}>
-                        {(newDay || messagePressed) && currentMessage.createdAt &&
+                        {/* {(newDay || messagePressed) && currentMessage.createdAt &&
                             <View style={{ flex: 1, padding: 6, alignSelf: 'center' }}>
                                 <Text style={styles.date}>{formatAMPM(new Date(currentMessage.createdAt))}</Text>
                             </View>
-                        }
+                        } */}
                         {displayUsername && <Text style={{ fontSize: 10, alignSelf: 'flex-start', paddingLeft: 12 }}>{currentMessage.user.name}</Text>}
                         <View style={{ flex: 1, flexDirection: 'column', alignSelf: isCurrentUser ? 'flex-end' : 'flex-start' }}>
                             {/* handle texts */}

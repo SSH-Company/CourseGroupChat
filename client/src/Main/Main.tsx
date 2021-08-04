@@ -37,7 +37,7 @@ const Main = ({ navigation }) => {
   const isFocused = useIsFocused();
   const { showActionSheetWithOptions } = useActionSheet();
   const [muteNotificationsModal, setMuteNotificationsModal] = useState(false);
-  const [selectedGroup, setSelectedGroup] = useState();
+  const [selectedGroup, setSelectedGroup] = useState<string>();
 
   useEffect(() => {
     if (isFocused) resetList(true);
