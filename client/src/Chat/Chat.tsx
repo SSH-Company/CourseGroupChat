@@ -19,7 +19,7 @@ import axios from 'axios';
 
 const Chat = ({ route, navigation }) => {
     const { user } = useContext(UserContext)
-    const { postStatus, renderFlag, setPostStatus } = useContext(RenderMessageContext);
+    const { renderFlag } = useContext(RenderMessageContext);
     const [group, setGroup] = useState<any>({
         id: route.params.groupID,
         name: route.params.name || '',

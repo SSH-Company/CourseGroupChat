@@ -7,17 +7,16 @@ import { navigationRef, navigate } from './RootNavigation';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 
 export const RenderMessageContext = createContext({
-    postStatus: false,
     renderFlag: false,
-    setPostStatus: (flag: boolean) => {},
-    setRenderFlag: (flag: boolean) => {}
+    setRenderFlag: (flag: boolean) => {},
+    socketData: {} as any
 });
 
 const Socket = ({ children }) => {
     const { user } = useContext(UserContext);
-    const [postStatus, setPostStatus] = useState(true);
-    const [renderFlag, setRenderFlag] = useState(false)
-    const value = { postStatus, renderFlag, setPostStatus, setRenderFlag } as any
+    const [renderFlag, setRenderFlag] = useState(false);
+    const [socketData, setSocketData] = useState({} as any);
+    const value = { renderFlag, setRenderFlag, socketData } as any
     const notificationListener = useRef<any>(null);
 
     useEffect(() => {
@@ -56,7 +55,7 @@ const Socket = ({ children }) => {
         }
 
         socket.onmessage = async (e: any) => {
-            const data = JSON.parse(e.data)
+            let data = JSON.parse(e.data)
             var log: any;
             
             if (!(data.hasOwnProperty('groupId') && data.groupId.length > 0)) return;
@@ -93,6 +92,7 @@ const Socket = ({ children }) => {
                     if (mediaType !== '') {
                         newMessage[0][mediaType] = data[mediaType];
                         newMessage[0].subtitle = `${groupInfo.name} sent a ${mediaType}.`;
+                        data.subtitle = newMessage[0].subtitle;
                     }
 
                     //notify the user
@@ -102,7 +102,6 @@ const Socket = ({ children }) => {
                     //only notify if this groups view is not open, and the group notification is not muted
                     if (groupInfo?.mute === null || (groupInfo?.mute !== 'indefinite' && new Date() > new Date(groupInfo?.mute))) {
                         await log.appendLog(groupInfo.id, newMessage);
-                        setPostStatus(true); 
                         if (currentRoute.name === 'Chat') {
                             if (groupInfo.id !== currentRoute.params.groupID) {
                                 await triggerNotification(groupInfo, notificationBody);
@@ -121,6 +120,8 @@ const Socket = ({ children }) => {
                 console.log('re rendering...')
                 setRenderFlag(prevFlag => !prevFlag)
             }
+
+            setSocketData({...data});
         }
 
         socket.onclose = (e: any) => {

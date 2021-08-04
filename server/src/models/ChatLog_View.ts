@@ -123,6 +123,39 @@ export class ChatLogViewModel implements ChatLogViewInterface {
                 })
         })
     }
+
+    static getMainPageList(userID: string): Promise<ChatLogViewModel[]> {
+        return new Promise((resolve, reject) => {
+            const query = `SELECT * FROM
+                    (SELECT
+                        "USER_ID",
+                        "GROUP_ID",
+                        "VERIFIED",
+                        "AVATAR",
+                        "CREATOR_ID",
+                        "CREATOR_NAME",
+                        "CREATOR_AVATAR",
+                        "NAME",
+                        "MESSAGE_ID",
+                        "MESSAGE_BODY",
+                        "MESSAGE_TYPE",
+                        "LOCATION",
+                        "STATUS",
+                        "CREATE_DATE",
+                        "MUTE_NOTIFICATION",
+                        ROW_NUMBER() OVER (PARTITION BY CV."GROUP_ID" ORDER BY CV."CREATE_DATE" DESC) AS ROW_ID
+                    FROM RT."CHATLOG_VIEW" CV
+                    WHERE "USER_ID" = ?) CHATLOG
+                    WHERE ROW_ID = '1' ORDER BY "CREATE_DATE" DESC`
+            Database.getDB()
+                .query(query, [userID])
+                .then((data: ChatLogViewInterface[]) => resolve(data.map(d => new ChatLogViewModel(d))))
+                .catch(err => {
+                    console.log(err)
+                    reject(err)
+                })
+        })
+    }
 }
 
 

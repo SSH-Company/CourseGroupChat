@@ -93,6 +93,80 @@ export class ChatController {
         }
     }
 
+    @Get('main-log')
+    private async getMainPageLog(req: Request, res: Response) {
+        try {
+            const session = Session.getSession(req);
+
+            const chatLog = await ChatLogViewModel.getMainPageList(session.user.ID);
+            
+            const parsedLog = [];
+            chatLog.forEach(row => {
+                const json = {
+                    id: row.GROUP_ID,
+                    creator_id: row.CREATOR_ID,
+                    creator_name: row.CREATOR_NAME,
+                    creator_avatar: row.CREATOR_AVATAR,
+                    message_id: row.MESSAGE_ID,
+                    avatar_url: row.AVATAR,
+                    location: row.LOCATION,
+                    createdAt: row.CREATE_DATE,
+                    status: row.STATUS,
+                    verified: row.VERIFIED,
+                    mute: row.MUTE_NOTIFICATION
+                }
+                if (row.MESSAGE_ID && row.MESSAGE_TYPE) {
+                    json[row.MESSAGE_TYPE] = row.MESSAGE_BODY,
+                    json['subtitle'] = row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_NAME} sent a ${row.MESSAGE_TYPE}.`                        
+                }
+                parsedLog.push(json)
+            })
+
+            res.status(STATUS.OK).json({
+                parsedLog
+            });
+
+        } catch (err) {
+            console.error(err)
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json(
+                new Exception({
+                    message: "Something went wrong while fetching user group information.",
+                    identifier: "CC002"
+                })
+            )
+        }
+    }
+
+    @Get('group-info')
+    private async getGroupInformation(req: Request, res: Response) {
+        try {
+            const session = Session.getSession(req);
+
+            const groupinfo = await UserGroupModel.getGroupInformation(session.user.ID);
+            
+            const groupInfo = groupinfo.map(row => ({
+                id: row.GROUP_ID,
+                name: row.NAME || 'Just You',
+                member_count: row.MEMBER_COUNT,
+                mute: row.MUTE,
+                verified: row.VERIFIED,
+                avatar: row.AVATAR ? row.AVATAR : row.CUSTOM_AVATAR?.split(',')[0] || null
+            }))
+
+            res.status(STATUS.OK).json({
+                groupInfo
+            });
+
+        } catch (err) {
+            console.error(err)
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json(
+                new Exception({
+                    message: "Something went wrong while fetching user group information.",
+                    identifier: "CC002"
+                })
+            )
+        }
+    }
     
     /*
         Expected body type
