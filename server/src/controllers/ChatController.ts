@@ -48,11 +48,22 @@ export class ChatController {
                         message: "Request params must contain [groupID]"
                     })
                 )
+                return;
             }
 
             const session = Session.getSession(req);
 
             const [chatLog, groupInfo] = await Promise.all([ ChatLogViewModel.getEarlierMessages(session.user.ID, groupID), UserGroupModel.getGroupInformation(session.user.ID, groupID) ])
+
+            if (groupInfo.length === 0) {
+                //this user does not have access to this group
+                res.status(STATUS.BAD_REQUEST).json(
+                    new Exception({
+                        message: "User has not joined this group."
+                    })
+                )
+                return;
+            }
 
             const messages = [];
             chatLog.forEach(row => {
@@ -238,7 +249,7 @@ export class ChatController {
                     senderID: senderID 
                 }
                 const queue = CONNECTIONS[user.ID];
-                await queue.publishToQueue(queueName, JSON.stringify(queueData));
+                if (queue) await queue.publishToQueue(queueName, JSON.stringify(queueData));
             }   
             
             res.status(STATUS.OK).json();
@@ -278,7 +289,7 @@ export class ChatController {
                 const queueName = `message-queue-${id}`
                 const queueData = { command: "refresh", groupId: groupID }
                 const queue = CONNECTIONS[user.ID];
-                await queue.publishToQueue(queueName, JSON.stringify(queueData))
+                if (queue) await queue.publishToQueue(queueName, JSON.stringify(queueData))
             }
             
             res.status(STATUS.OK).json()
@@ -295,6 +306,7 @@ export class ChatController {
     @Delete('')
     private async deleteMessage(req: Request, res: Response) {
         try{
+            const session = Session.getSession(req);
             const { groupID, messageID } = req.body;
             const config = Config.getConfig().s3;
 
@@ -326,6 +338,17 @@ export class ChatController {
             }
 
             await MessageModel.delete(groupID, messageID);
+
+            //find all recipients of this group chat, exclude senderID from the list
+            const groupRecipients = (await UserGroupModel.getMembers(groupID)).map(row => row.USER_ID).filter(id => id != session.user.ID);    
+            
+            for (const id of groupRecipients) {
+                const queueName = `message-queue-${id}`
+                const queueData = { command: "delete", groupID, messageID }
+                const queue = CONNECTIONS[session.user.ID];
+                if (queue) await queue.publishToQueue(queueName, JSON.stringify(queueData))
+            }
+
             res.status(STATUS.OK).json({ message: "successfully deleted message!" });
         
         } catch (err) {

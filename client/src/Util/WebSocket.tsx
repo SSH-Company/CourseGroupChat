@@ -68,30 +68,21 @@ const Socket = ({ children }) => {
                     // await log.refreshGroup(groupInfo.id);
                     break;
                 case 'append':
-                    const newMessage:any = [{
-                        _id: data._id,
-                        text: data.text || '',
-                        createdAt: data.createdAt || Date.now(),
-                        user: {...data.senderID, avatar: data.senderID.avatar || EMPTY_IMAGE_DIRECTORY }
-                    }]
-                    
                     //check if message contains image/video
-                    let mediaType = ''
+                    let mediaType = '', subtitle = '';
                     if (data.hasOwnProperty('image') && data.image !== '') mediaType = "image"
                     if (data.hasOwnProperty('video') && data.video !== '') mediaType = "video"
                     
                     if (mediaType !== '') {
-                        newMessage[0][mediaType] = data[mediaType];
-                        newMessage[0].subtitle = `${groupInfo.name} sent a ${mediaType}.`;
-                        data.subtitle = newMessage[0].subtitle;
+                        subtitle = `${groupInfo.name} sent a ${mediaType}.`;
+                        data.subtitle = subtitle;
                     }
 
                     //notify the user
-                    const notificationBody = newMessage[0].subtitle || newMessage[0].text
+                    const notificationBody = subtitle || data.text
                     
                     //only notify if this groups view is not open, and the group notification is not muted
                     if (groupInfo?.mute === null || (groupInfo?.mute !== 'indefinite' && new Date() > new Date(groupInfo?.mute))) {
-                        // await log.appendLog(groupInfo.id, newMessage);
                         if (currentRoute.name === 'Chat') {
                             if (groupInfo.id !== currentRoute.params.groupID) {
                                 await triggerNotification(groupInfo, notificationBody);

@@ -53,6 +53,10 @@ const Chat = ({ route, navigation }) => {
                         });
                     }
                     break;
+                case 'delete':
+                    //we are currently viewing the same group, remove the message
+                    if (group.id === socketData.groupID) deleteMessage(socketData.messageID); 
+                    break;
                 default:
                     break;
             }
@@ -121,16 +125,6 @@ const Chat = ({ route, navigation }) => {
         }
     }
 
-    // const handleJoinGroup = async () => {
-    //     try {
-    //         await axios.post(`${BASE_URL}/api/chat/join-group`, { id: groupID, name: group.name })
-    //         resetMessages(true);
-    //     } catch (err) {
-    //         console.log('unable to join group');
-    //         console.error(err);
-    //     }
-    // }
-
     const handleLongPress = (id: string, isCurrentUser: boolean, copyString: string | null) => {
         const options = [];
         if (copyString) options.push('Copy Text');
@@ -146,25 +140,23 @@ const Chat = ({ route, navigation }) => {
                 //     break;
                 case 0:
                     if (copyString) Clipboard.setString(copyString) 
-                    else if (isCurrentUser) deleteMessage(id)
+                    else if (isCurrentUser) handleDeleteMessage(id)
                     break;
                 case 1:
-                    deleteMessage(id);
+                    handleDeleteMessage(id);
                     break;
             }
         });
     }
 
-    const deleteMessage = async (id: string) => {
+    const handleDeleteMessage = async (id: string) => {
         try {
             const reqBody = {
                 groupID: group.id,
                 messageID: id
             }
             await axios.delete(`${BASE_URL}/api/chat`, { data: reqBody });
-            const instance = await ChatLog.getChatLogInstance();
-            await instance.refreshGroup(group.id, false, group.name, group.avatar);
-            setMessages(filterOutEmptyMessages(instance.chatLog[group.id]));
+            deleteMessage(id);
             return;
         } catch (err) {
             handleError(err)
@@ -179,6 +171,13 @@ const Chat = ({ route, navigation }) => {
             const filteredMessages = filterOutEmptyMessages(log.chatLog[group.id]).filter(m => !messageIds.includes(m._id));
             return GiftedChat.prepend(previousMessages, filteredMessages)
         });
+    }
+
+    const deleteMessage = (id: string) => {
+        setMessages(prevMessages => { 
+            const filter = prevMessages.filter(m => m._id !== id);
+            return GiftedChat.append([], filterOutEmptyMessages(filter)) 
+        }); 
     }
 
     return (

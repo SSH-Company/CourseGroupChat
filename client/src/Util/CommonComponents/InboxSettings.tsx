@@ -135,7 +135,6 @@ const InboxSettings = (props: InboxSettingsProps) => {
             {props.newToGroup ?
                 <View style={{ alignContent: 'center', justifyContent: 'center' }}>
                     <Button title="Join Group" containerStyle={{ alignSelf: 'center', justifyContent: 'center', padding: 10 }} onPress={() => handleJoinCourseGroup(props.group._id as string, async () => {
-                        await ChatLog.getChatLogInstance(true);
                         navigate('Main', {})
                     })}/>
                     {newToGroupOptions.map((item, i) => (

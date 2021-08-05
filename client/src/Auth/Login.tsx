@@ -75,7 +75,6 @@ const LogIn = ({ children }) => {
                 });
                 await cache.set('email', res.data.email);
                 await cache.set('password', res.data.password);
-                // if (pageType === "login") await ChatLog.getChatLogInstance(true, res.data._id);
                 setVerifiedUser(res.data.verified);
                 setNewUser(false);
             })
