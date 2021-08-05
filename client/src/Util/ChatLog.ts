@@ -112,62 +112,6 @@ export class ChatLog {
             return this.instance
         }
     }
-
-    public async appendLog(groupID: string, message: IMessage[]) {
-        if (groupID in this.chatLog) this.chatLog[groupID] = message.concat(this.chatLog[groupID])
-        else { 
-            //new group has been created/joined
-            this.chatLog[groupID] = message
-            const res = await axios.get(`${BASE_URL}/api/chat/test-log`)
-            const info = res.data.groupInfo.filter(r => r.id.trim() === groupID.trim())[0];
-            if (info) {
-                this.groupInfo[groupID] = {
-                    name: info.name,
-                    avatar: info.avatar,
-                    verified: info.verified,
-                    entered: false,
-                    mute: info.mute || null,
-                    member_count: info.member_count
-                }
-            }
-        }
-    }
-
-    public updateMessageStatus(groupID: string, status: MessageStatus, message: IMessage) {
-        const messages = this.chatLog[groupID]
-        if (messages) {
-            for (const msg of messages) {
-                if (msg._id === message._id) {
-                    msg['status'] = status;
-                    msg['displayStatus'] = true;
-                }
-            }
-            this.chatLog[groupID] = messages;
-        }
-    }
-
-    public async refreshGroup(groupID: string, loadEarlier: boolean = false, name?: string, avatar?: string) {
-        //new group has been created/joined
-        if (!(groupID in this.chatLog)) {
-            //reset entire list to see new group
-            await ChatLog.getChatLogInstance(true)
-            return;
-        };
-
-        try {
-            const currMessages = this.chatLog[groupID];
-            const rowCount = loadEarlier ? currMessages.length + 20 : currMessages.length;
-            const response = await axios.get(`${BASE_URL}/api/chat/load-earlier-messages`, { params: { groupID, rowCount } });
-            this.chatLog[groupID] = response.data;
-        } catch (err) {
-            handleError(err)
-        }
-    }
-
-    public updateGroupEntered(groupID: string, value: boolean) {
-        this.groupInfo[groupID] = {...this.groupInfo[groupID], entered: value};
-        return;
-    }
 }
 
 

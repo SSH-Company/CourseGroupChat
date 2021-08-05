@@ -65,7 +65,6 @@ const Socket = ({ children }) => {
 
             switch (data.command) {
                 case 'refresh':
-                    // await log.refreshGroup(groupInfo.id);
                     break;
                 case 'append':
                     //check if message contains image/video

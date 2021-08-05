@@ -165,7 +165,6 @@ const Chat = ({ route, navigation }) => {
 
     const onLoadEarlier = async () => {
         const log = await ChatLog.getChatLogInstance();
-        await log.refreshGroup(group.id, true);
         setMessages(previousMessages => {
             const messageIds = previousMessages.map(m => m._id);
             const filteredMessages = filterOutEmptyMessages(log.chatLog[group.id]).filter(m => !messageIds.includes(m._id));

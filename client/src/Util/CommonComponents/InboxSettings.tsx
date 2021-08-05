@@ -8,7 +8,6 @@ import { navigate } from '../RootNavigation';
 import { handleIgnoreGroup, handleJoinCourseGroup } from '../CommonFunctions';
 import { handleLeaveGroup } from '../CommonFunctions';
 import { EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
-import { ChatLog } from '../ChatLog';
 
 type InboxSettingsProps = {
     group: User,
