@@ -102,7 +102,7 @@ export class ChatLog {
             //retrieve log
             try {
                 const id = userID ? userID : this.instance.userID;
-                const res = await axios.get(`${BASE_URL}/api/chat/log`)
+                const res = await axios.get(`${BASE_URL}/api/chat/test-log`)
                 this.instance = new ChatLog(res.data.parsedLog, res.data.groupInfo, id);
                 return this.instance;    
             } catch (err) {
@@ -118,7 +118,7 @@ export class ChatLog {
         else { 
             //new group has been created/joined
             this.chatLog[groupID] = message
-            const res = await axios.get(`${BASE_URL}/api/chat/log`)
+            const res = await axios.get(`${BASE_URL}/api/chat/test-log`)
             const info = res.data.groupInfo.filter(r => r.id.trim() === groupID.trim())[0];
             if (info) {
                 this.groupInfo[groupID] = {

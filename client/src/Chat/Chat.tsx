@@ -19,7 +19,7 @@ import axios from 'axios';
 
 const Chat = ({ route, navigation }) => {
     const { user } = useContext(UserContext)
-    const { renderFlag } = useContext(RenderMessageContext);
+    const { socketData } = useContext(RenderMessageContext);
     const [group, setGroup] = useState<any>({
         id: route.params.groupID || null,
         name: route.params.name || '',
@@ -38,57 +38,29 @@ const Chat = ({ route, navigation }) => {
 
     useEffect(() => {
         resetMessages();
-        // updateMessageStatus();
     }, [route.params.groupID])
 
-    //re set messages everytime a new message is received from socket
-    // useEffect(() => {
-    //     resetMessages();
-    //     updateMessageStatus();
-    // }, [renderFlag]);
-
     useEffect(() => {
-        //this function is only triggered when the view is first loaded
-        if (messages.length > 0) {
-            appendReceviedMessage();
+        //check socketdata and handle the event
+        if (socketData.hasOwnProperty('command')) {
+            switch(socketData.command) {
+                case 'append':
+                    //we are currently viewing the same group, append the message
+                    if (group.id === socketData.groupInfo.id) {
+                        setMessages(previousMessages => {
+                            const filteredMessages = filterOutEmptyMessages([socketData]);
+                            return GiftedChat.append(previousMessages, filteredMessages)
+                        });
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
-    }, [renderFlag])
+    }, [socketData])
 
     const filterOutEmptyMessages = (msgs) => {
         return msgs.filter(msg => msg._id && (msg.text?.length > 0 || msg.image?.length > 0 || msg.video?.length > 0 || msg.file?.length > 0 || msg.audio?.length > 0 ));
-    }
-
-    // const updateMessageStatus = async () => {
-    //     try {
-    //         const instance = await ChatLog.getChatLogInstance();
-    //         const groupInfo = instance.groupInfo[groupID];
-    //         if (groupInfo && (!groupInfo.entered || postStatus)) {
-    //             await axios.post(`${BASE_URL}/api/chat/updateMessageStatus`, { groupID: groupID });
-    //             instance.updateGroupEntered(groupID, true);
-    //             setPostStatus(false);
-    //         }
-    //     } catch(err) {
-    //         console.log(err);
-    //     }
-    //     return;
-    // }
-
-    const appendReceviedMessage = async () => {
-        //retrieve last message in this group and append to messages
-        try {
-            const log = (await ChatLog.getChatLogInstance()).chatLog;
-            if (group.id && group.id in log && log[group.id].length > messages.length) {
-                const lastMessage = log[group.id][0];
-                if (Object.keys(lastMessage).length > 0) {
-                    setMessages(previousMessages => {
-                        const filteredMessages = filterOutEmptyMessages([lastMessage]);
-                        return GiftedChat.append(previousMessages, filteredMessages)
-                    });
-                }
-            }
-        } catch (err) {
-            console.log('Failed to refresh from last received message')
-        }
     }
 
     const resetMessages = () => {
@@ -111,47 +83,38 @@ const Chat = ({ route, navigation }) => {
     
     const onSend = useCallback(async (messages = []) => {
         try {
-            //append to Chatlog instance to save to cache
-            //store message ids, set these to pending: true
-            for (const msg of messages) msg['status'] = "Pending" as MessageStatus;
-            const instance = await ChatLog.getChatLogInstance();
-            if (!(group.id in instance.groupInfo)) {
-                //create the group in the backend
+            if (group.id === null) {
+                //the message is being sent to a new group, so we need to create the
+                //group first, and then send the message
                 const res = await axios.post(`${BASE_URL}/api/search/create-group`, { recipients: group.members });
                 const data = res.data;
-                //refresh log since new group has been created, and navigate to it
-                await ChatLog.getChatLogInstance(true);
-                await sendData(messages, {...group, id: data.id });
+                await sendData(messages, data.id);
                 navigation.push('Chat', { groupID: data.id })
             } else {
-                await instance.appendLog(group.id, messages);
-                setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
                 await sendData(messages);
+                setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
             }
+
         } catch(err) {
             handleError(err);
         }
     }, [])
 
     //helper function for sending message to queue
-    const sendData = async (messages = [], newGroup = group) => {
+    const sendData = async (messages = [], groupID = group.id) => {
         //here we are assuming only one message is posted at a time
         try {
-            const instance = await ChatLog.getChatLogInstance();
             const fileType = messages[0].hasOwnProperty('fileData') || messages[0].hasOwnProperty('imageData');
             let formData: any;
             if (fileType) {
                 formData = new FormData();
                 formData.append('media', {...messages[0].fileData});
-                formData.append('message', JSON.stringify({ messages, groupId: newGroup.id }))
+                formData.append('message', JSON.stringify({ messages, groupId: groupID }))
                 await axios.post(`${BASE_URL}/api/chat`, formData, {headers: { accept: "application/json", 'Content-Type': 'multipart/form-data' }})
             } else {
-                formData = { message: JSON.stringify({ messages, groupId: newGroup.id })}
+                formData = { message: JSON.stringify({ messages, groupId: groupID })}
                 await axios.post(`${BASE_URL}/api/chat`, formData)
             }
-            // instance.updateMessageStatus(groupID, "Sent", messages[0]);
-            //update the messages
-            setMessages(filterOutEmptyMessages(instance.chatLog[newGroup.id]));
         } catch (err) {
             //TODO: display failed notification here
             handleError(err);
@@ -169,7 +132,7 @@ const Chat = ({ route, navigation }) => {
     // }
 
     const handleLongPress = (id: string, isCurrentUser: boolean, copyString: string | null) => {
-        const options = ['Forward Message'];
+        const options = [];
         if (copyString) options.push('Copy Text');
         if (isCurrentUser) options.push('Delete Message');
         const cancelButtonIndex = 3;
@@ -178,14 +141,14 @@ const Chat = ({ route, navigation }) => {
             cancelButtonIndex
         }, async (buttonIndex) => {
             switch (buttonIndex) {
+                // case 0:
+                //     console.log('forward here');
+                //     break;
                 case 0:
-                    console.log('forward here');
-                    break;
-                case 1:
                     if (copyString) Clipboard.setString(copyString) 
                     else if (isCurrentUser) deleteMessage(id)
                     break;
-                case 2:
+                case 1:
                     deleteMessage(id);
                     break;
             }
@@ -288,11 +251,11 @@ const Chat = ({ route, navigation }) => {
                         centerContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
                         rightContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
                     />
-                    <MuteNotification
+                    {/* <MuteNotification
                         groupID={group.id}
                         visible={muteNotificationsModal}
                         onClose={() => setMuteNotificationsModal(false)}
-                    />
+                    /> */}
                     <KeyboardAvoidingView 
                         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                         style={{ flex: 1, backgroundColor: 'white' }}

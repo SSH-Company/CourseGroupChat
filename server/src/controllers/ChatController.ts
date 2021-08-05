@@ -221,12 +221,23 @@ export class ChatController {
             //find all recipients of this group chat, exclude senderID from the list
             const groupRecipients = (await UserGroupModel.getMembers(groupId)).map(row => row.USER_ID).filter(id => id != senderID._id);    
 
+            //retrieve information regarding group
+            const groupInfo = (await UserGroupModel.getGroupInformation(session.user.ID, groupId))[0];
+
             //send a message to each recipients queue
             for (const id of groupRecipients) {
                 const queueName = `message-queue-${id}`
-                const queueData = { ...message, command: "append", groupId, senderID: senderID }
+                const queueData = { ...message, 
+                    command: "append", 
+                    groupInfo: {
+                        id: groupInfo.GROUP_ID,
+                        name: groupInfo.NAME,
+                        avatar: groupInfo.AVATAR ? groupInfo.AVATAR : groupInfo.CUSTOM_AVATAR?.split(',')[0] || null,
+                        mute: groupInfo.MUTE
+                    }, 
+                    senderID: senderID 
+                }
                 const queue = CONNECTIONS[user.ID];
-                console.log(queue.hasOwnProperty('publishToQueue'))
                 await queue.publishToQueue(queueName, JSON.stringify(queueData));
             }   
             

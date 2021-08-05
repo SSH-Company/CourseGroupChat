@@ -27,7 +27,7 @@ export type listtype = {
 const Main = ({ navigation }) => {
     // data arrays.
     const { user } = useContext(UserContext);
-    const { renderFlag, socketData } = useContext(RenderMessageContext);
+    const { socketData } = useContext(RenderMessageContext);
     const [completeList, setCompleteList] = useState<listtype[]>([]);
     const [refreshing, setRefreshing] = useState(false); 
     const isFocused = useIsFocused();
@@ -54,7 +54,7 @@ const Main = ({ navigation }) => {
             //the message is from a new group, call resetList to handle it
             resetList();
         }
-    }, [renderFlag, socketData]);
+    }, [socketData]);
 
     const resetList = async () => {
         try {

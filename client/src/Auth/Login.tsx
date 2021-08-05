@@ -1,45 +1,17 @@
 import React, { useEffect, useState, createContext } from 'react';
 import { 
-    // AppState,
-    // StyleSheet,
     View,
-    // Platform,
-    // Image,
-    Text,
     ActivityIndicator,
-    Alert,
-    Button
 } from 'react-native';
-// import { User } from 'react-native-gifted-chat';
-// import { WebView } from 'react-native-webview';
 import { Cache } from 'react-native-cache';
 import * as Notifications from 'expo-notifications';
 import { Restart } from 'fiction-expo-restart';
-// import Constants from 'expo-constants';
-import { ChatLog } from '../Util/ChatLog';
 import { handleError } from '../Util/CommonFunctions';
 import Auth, { FormData } from './Auth';
 import Unverified from './Unverified';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from "../BaseUrl";
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-// const styles = StyleSheet.create({
-//     container: {
-//         flex: 1,
-//         justifyContent: "center",
-//         alignItems: 'center'
-//     },
-//     horizontal: {
-//         flexDirection: "row",
-//         justifyContent: "space-around"
-//     },
-//     image: {
-//         flex: 1,
-//         resizeMode: "contain",
-//         justifyContent: "center"
-//     }
-// });
 
 export const UserContext = createContext({
     user: {} as any,
@@ -70,13 +42,7 @@ const LogIn = ({ children }) => {
     const [user, setUser] = useState({} as any);
     const [verifiedUser, setVerifiedUser] = useState<'Y' | 'N'>('N');
     const [pageType, setPageType] = useState<"login" | "signup">("login");
-    // const [sourceHTML, setSourceHTML] = useState<any>();
-    // const appState = useRef(AppState.currentState);
-    // const [expoPushToken, setExpoPushToken] = useState('');
-    // const responseListener = useRef<any>(null);
     const userContextValue = { user, setUser };
-    // const splash_iphone = '../../assets/iphoneX.png';
-    // const splash_ipad = '../../assets/ipad.png';
 
     useEffect(() => {
         checkIfUserLoggedIn();
@@ -109,7 +75,7 @@ const LogIn = ({ children }) => {
                 });
                 await cache.set('email', res.data.email);
                 await cache.set('password', res.data.password);
-                if (pageType === "login") await ChatLog.getChatLogInstance(true, res.data._id);
+                // if (pageType === "login") await ChatLog.getChatLogInstance(true, res.data._id);
                 setVerifiedUser(res.data.verified);
                 setNewUser(false);
             })

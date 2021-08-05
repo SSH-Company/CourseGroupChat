@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext, useRef, createContext } from "r
 import { User } from 'react-native-gifted-chat';
 import * as Notifications from 'expo-notifications';
 import { UserContext } from '../Auth/Login';
-import { ChatLog } from './ChatLog';
 import { navigationRef, navigate } from './RootNavigation';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from '../BaseUrl';
 
@@ -56,25 +55,17 @@ const Socket = ({ children }) => {
 
         socket.onmessage = async (e: any) => {
             let data = JSON.parse(e.data)
-            var log: any;
             
-            if (!(data.hasOwnProperty('groupId') && data.groupId.length > 0)) return;
+            if (!(data.hasOwnProperty('groupInfo') && Object.keys(data.groupInfo).length > 0)) return;
 
             //check current view the user is in
             const currentRoute = navigationRef.current?.getCurrentRoute(); 
 
-            log = await ChatLog.getChatLogInstance()
+            let groupInfo = data.groupInfo;
 
-            let groupInfo = {} as any;
-            //retrieve group information
-            if (!(data.groupId in log.groupInfo)) {
-                log = await ChatLog.getChatLogInstance(true);   
-            }
-            groupInfo = {...log.groupInfo[data.groupId], id: data.groupId};
-            
             switch (data.command) {
                 case 'refresh':
-                    await log.refreshGroup(groupInfo.id);
+                    // await log.refreshGroup(groupInfo.id);
                     break;
                 case 'append':
                     const newMessage:any = [{
@@ -101,22 +92,16 @@ const Socket = ({ children }) => {
                     
                     //only notify if this groups view is not open, and the group notification is not muted
                     if (groupInfo?.mute === null || (groupInfo?.mute !== 'indefinite' && new Date() > new Date(groupInfo?.mute))) {
-                        await log.appendLog(groupInfo.id, newMessage);
+                        // await log.appendLog(groupInfo.id, newMessage);
                         if (currentRoute.name === 'Chat') {
                             if (groupInfo.id !== currentRoute.params.groupID) {
                                 await triggerNotification(groupInfo, notificationBody);
                             }
                         } else await triggerNotification(groupInfo, notificationBody);
-                    }
-                    
+                    }        
                     break;
                 default:
                     break;
-            }
-            if (currentRoute.name === 'Chat' && groupInfo.id === currentRoute.params.groupID) {
-                setRenderFlag(prevFlag => !prevFlag)
-            } else {  
-                setRenderFlag(prevFlag => !prevFlag)
             }
 
             setSocketData({...data});
