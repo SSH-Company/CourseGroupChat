@@ -88,7 +88,6 @@ const Socket = ({ children }) => {
 
                     //notify the user
                     const notificationBody = newMessage[0].subtitle || newMessage[0].text
-                    console.log(notificationBody)
                     
                     //only notify if this groups view is not open, and the group notification is not muted
                     if (groupInfo?.mute === null || (groupInfo?.mute !== 'indefinite' && new Date() > new Date(groupInfo?.mute))) {

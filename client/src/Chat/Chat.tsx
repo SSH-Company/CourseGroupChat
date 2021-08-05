@@ -28,7 +28,7 @@ const Chat = ({ route, navigation }) => {
         members: route.params.members || []
     });
     const [messages, setMessages] = useState<IMessage[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const { showActionSheetWithOptions } = useActionSheet();
     const drawerRef = useRef(null);
     const giftedChatRef = useRef(null);
@@ -182,7 +182,7 @@ const Chat = ({ route, navigation }) => {
     }
 
     return (
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1, justifyContent: 'center' }}>
             {loading ?
                 <ActivityIndicator />
                 :

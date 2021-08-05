@@ -130,7 +130,7 @@ const InboxSettings = (props: InboxSettingsProps) => {
                         style={[styles.imageStyle, { width: 100, height: 100 }]}
                     />
                 }
-                <Text style={{paddingBottom: 10, fontSize: 25}}>{props.group.name}</Text>
+                <Text style={{padding: 10, fontSize: 22, fontWeight: 'bold', textAlign: 'center' }}>{props.group.name}</Text>
             </View>
             {props.newToGroup ?
                 <View style={{ alignContent: 'center', justifyContent: 'center' }}>
