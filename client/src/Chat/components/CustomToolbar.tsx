@@ -5,11 +5,10 @@ import { Audio } from 'expo-av';
 import * as DocumentPicker from 'expo-document-picker';
 import * as VideoExtensions from 'video-extensions';
 import { handleImagePick, handlePermissionRequest, IMAGE_EXTENSIONS } from "../../Util/ImagePicker";
-import { revisedRandId } from '../../Util/ChatLog';
 import { UserContext } from '../../Auth/Login';
 import { Entypo, SimpleLineIcons, Ionicons, MaterialCommunityIcons } from 'react-native-vector-icons';
 import { THEME_COLORS } from '../../Util/CommonComponents/Colors';
-import { millisToMinutesAndSeconds } from '../../Util/CommonFunctions';
+import { millisToMinutesAndSeconds, revisedRandId } from '../../Util/CommonFunctions';
 
 const style = StyleSheet.create({
     outerContainer: {
@@ -56,7 +55,7 @@ const CustomToolbar:FunctionComponent<CustomToolbarProps> = (props) => {
     const { user } = useContext(UserContext);
     const [isTyping, setIsTyping] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
-    const [recording, setRecording] = useState();
+    const [recording, setRecording] = useState<any>();
     const [timer, setTimer] = useState(0);
 
 

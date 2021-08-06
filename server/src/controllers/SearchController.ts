@@ -106,7 +106,7 @@ export class SearchController {
                     const queueName = `message-queue-${id}`
                     const queueData = { command: "refresh", groupId: newGroup.ID }
                     const queue = CONNECTIONS[session.user.ID];
-                    await queue.publishToQueue(queueName, JSON.stringify(queueData))
+                    if (queue) await queue.publishToQueue(queueName, JSON.stringify(queueData))
                 }
                 
                 res.status(STATUS.OK).json({
@@ -150,7 +150,7 @@ export class SearchController {
                     const queueName = `message-queue-${id}`
                     const queueData = { command: "refresh", groupId: groupID }
                     const queue = CONNECTIONS[session.user.ID];
-                    await queue.publishToQueue(queueName, JSON.stringify(queueData))
+                    if (queue) await queue.publishToQueue(queueName, JSON.stringify(queueData))
                 }
 
                 res.status(STATUS.OK).json({

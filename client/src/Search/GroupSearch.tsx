@@ -3,7 +3,6 @@ import { ActivityIndicator, View, ScrollView } from "react-native";
 import { SearchBar, Header } from "react-native-elements";
 import { AntDesign } from "react-native-vector-icons";
 import InboxSettings from "../Util/CommonComponents/InboxSettings";
-import { ChatLog } from "../Util/ChatLog";
 import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import BaseList, { listtype } from '../Util/CommonComponents/BaseList';
 import { BASE_URL } from '../BaseUrl';
@@ -51,8 +50,9 @@ const GroupSearch = ({ navigation }) => {
     }, [userList, search]);
 
     const onItemPress = async (item: listtype) => {
-        const log = await ChatLog.getChatLogInstance();
-        if (item.id in log.groupInfo) {
+        //check if user is already in this group
+        const index = groupList.map(m => m.id).indexOf(item.id);
+        if (index > -1) {
             navigation.navigate("Chat", { groupID: item.id, name: item.name, avatar: item.avatar_url, verified: item.verified })
         } else {
             setSelectedItem(item);
