@@ -1,7 +1,6 @@
-import React, { FunctionComponent, useState, useEffect } from 'react';
+import React, { FunctionComponent, useEffect, useState } from 'react';
 import { ActivityIndicator, Text, View, Modal, StyleSheet, Button } from 'react-native';
 import { ListItem } from "react-native-elements";
-import { ChatLog } from '../../Util/ChatLog';
 import { handleError } from '../../Util/CommonFunctions';
 import { BASE_URL } from '../../BaseUrl';
 import axios from 'axios';
@@ -16,35 +15,25 @@ const styles = StyleSheet.create({
 })
 
 type MuteNotificationProps = {
+    isMuted: boolean,
     groupID: string,
     visible: boolean,
-    onClose: () => any
+    onClose: (muteDate: string) => any
 }
 
 const MuteNotification:FunctionComponent<MuteNotificationProps> = (props: MuteNotificationProps) => {
     const {
+        isMuted,
         groupID,
         visible,
-        onClose = () => {}
+        onClose = (muteDate: string) => {}
     } = props;
 
     const [checkedItem, setCheckedItem] = useState(0);
     const [sendingRequest, setSendingRequest] = useState(false);
-    const [isMuted, setIsMuted] = useState(false);
+    const [muteDate, setMuteDate] = useState<Date>();
 
     useEffect(() => {
-        if (groupID) updateMuted(groupID);
-    }, [groupID])
-
-    const updateMuted = async (groupID) => {
-        const log = await ChatLog.getChatLogInstance();
-        const groupInfo = log.groupInfo[groupID];
-        if (groupInfo && groupInfo.hasOwnProperty('mute')) {
-            setIsMuted(groupInfo?.mute === 'indefinite' || (groupInfo?.mute !== null && new Date() < new Date(groupInfo?.mute)));
-        } else setIsMuted(true);
-    }
-
-    const handleSubmit = () => {
         let muteDate;
 
         switch (checkedItem) {
@@ -61,13 +50,16 @@ const MuteNotification:FunctionComponent<MuteNotificationProps> = (props: MuteNo
                 break;    
         }
 
+        setMuteDate(muteDate);
+    }, [checkedItem])
+
+    const handleSubmit = () => {
         setSendingRequest(true);
 
         axios.post(`${BASE_URL}/api/chat/mute`, { groupID, timestamp: muteDate })
             .then(async () => {
                 //reset the group information
-                await ChatLog.getChatLogInstance(true);
-                onClose();
+                onClose(muteDate?.toString() || '');
             })
             .catch(err => {
                 console.log(err)
@@ -80,7 +72,7 @@ const MuteNotification:FunctionComponent<MuteNotificationProps> = (props: MuteNo
         <Modal
             animationType="slide"
             visible={visible}
-            onRequestClose={onClose}
+            onRequestClose={() => onClose(muteDate?.toString() || '')}
         >
             <View style={styles.centeredView}>
                 <Text style={{ fontSize: 25, fontWeight: 'bold' }}>Mute for...</Text>

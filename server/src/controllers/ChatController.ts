@@ -87,7 +87,8 @@ export class ChatController {
                 id: groupInfo[0].GROUP_ID,
                 name: groupInfo[0].NAME || 'Just You',
                 avatar: groupInfo[0].AVATAR ? groupInfo[0].AVATAR : groupInfo[0].CUSTOM_AVATAR?.split(',')[0] || null,
-                verified: groupInfo[0].VERIFIED  
+                verified: groupInfo[0].VERIFIED,
+                mute: groupInfo[0].MUTE  
             }
 
             res.status(STATUS.OK).json({

@@ -25,7 +25,8 @@ const Chat = ({ route, navigation }) => {
         name: route.params.name || '',
         avatar: route.params.avatar || EMPTY_IMAGE_DIRECTORY,
         verified: route.params.verified || 'N',
-        members: route.params.members || []
+        members: route.params.members || [],
+        mute: route.params.mute || ''
     });
     const [messages, setMessages] = useState<IMessage[]>([]);
     const [loading, setLoading] = useState(false);
@@ -249,11 +250,15 @@ const Chat = ({ route, navigation }) => {
                         centerContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
                         rightContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
                     />
-                    {/* <MuteNotification
+                    <MuteNotification
+                        isMuted={group?.mute === 'indefinite' || (group?.mute !== null && new Date() < new Date(group?.mute))}
                         groupID={group.id}
                         visible={muteNotificationsModal}
-                        onClose={() => setMuteNotificationsModal(false)}
-                    /> */}
+                        onClose={(muteDate) => {
+                            setMuteNotificationsModal(false);
+                            setGroup(prev => { return {...prev, mute: muteDate} })
+                        }}
+                    />
                     <KeyboardAvoidingView 
                         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                         style={{ flex: 1, backgroundColor: 'white' }}
