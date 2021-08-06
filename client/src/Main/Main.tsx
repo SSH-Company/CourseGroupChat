@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Alert, Text, View, ScrollView, Platform, RefreshControl, TouchableOpacity, StyleSheet } from "react-native";
+import { Alert, Text, View, ScrollView, Platform, RefreshControl, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { Header, SearchBar, Image } from "react-native-elements";
 import { Feather, Ionicons, FontAwesome5, MaterialCommunityIcons } from "react-native-vector-icons";
 import { useIsFocused } from "@react-navigation/native";
@@ -15,12 +15,13 @@ import axios from 'axios';
 
 export type listtype = {
     id: string;
-    message_id: string;
+    message_id?: string;
     name: string;
     avatar_url: string;
-    subtitle: string;
+    subtitle?: string;
     createdAt?: Date,
-    verified: 'Y' | 'N';
+    verified?: 'Y' | 'N';
+    mute?: string;
 };
 
 // landing page.
@@ -33,10 +34,15 @@ const Main = ({ navigation }) => {
     const isFocused = useIsFocused();
     const { showActionSheetWithOptions } = useActionSheet();
     const [muteNotificationsModal, setMuteNotificationsModal] = useState(false);
-    const [selectedGroup, setSelectedGroup] = useState<string>();
+    const [selectedGroup, setSelectedGroup] = useState<listtype>();
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (isFocused) resetList();
+        if (isFocused) {
+            setLoading(true);
+            resetList();
+            setLoading(false);
+        }
     }, [isFocused])
 
     useEffect(() => {
@@ -75,7 +81,7 @@ const Main = ({ navigation }) => {
         )
     }
 
-    const handleLongPress = (groupID: string) => {
+    const handleLongPress = (group: listtype) => {
         const options = ['Mute Notifications', 'Ignore messages', 'Leave Group'];
         const icons = [
         <FontAwesome5 
@@ -102,14 +108,14 @@ const Main = ({ navigation }) => {
         }, async (buttonIndex) => {
             switch (buttonIndex) {
                 case 0:
-                    setSelectedGroup(groupID);
+                    setSelectedGroup(group);
                     setMuteNotificationsModal(true);
                     break;
                 case 1:
-                    alertUser(groupID);
+                    alertUser(group.id);
                     break;
                 case 2:
-                    handleLeaveGroup([], groupID, true, () => resetList());
+                    handleLeaveGroup([], group.id, true, () => resetList());
                     break;
                 default:
                     break;
@@ -163,11 +169,17 @@ const Main = ({ navigation }) => {
                 rightContainerStyle={{ alignContent: 'center', justifyContent: 'center' }}
             />
             <MuteNotification
-                groupID={selectedGroup}
+                isMuted={selectedGroup?.mute === 'indefinite' || (selectedGroup?.mute !== null && new Date() < new Date(selectedGroup?.mute))}
+                groupID={selectedGroup?.id}
                 visible={muteNotificationsModal}
                 onClose={() => setMuteNotificationsModal(false)}
             />
-            {completeList.length > 0 ?
+            {loading ?
+                <View style={{ flex: 1, justifyContent: 'center' }}>
+                    <ActivityIndicator color="blue"/>
+                </View>
+                :
+                (completeList.length > 0 ?
                 <ScrollView
                     contentOffset={{ x: 0, y: 76 }}
                     keyboardShouldPersistTaps="handled"
@@ -187,7 +199,7 @@ const Main = ({ navigation }) => {
                         itemOnPress={(l, i) => {
                             navigation.navigate("Chat", { groupID: l.id })
                         }}
-                        itemOnLongPress={(l, i) => handleLongPress(l.id)}
+                        itemOnLongPress={(l, i) => handleLongPress(l)}
                         topDivider
                     />
                 </ScrollView>
@@ -195,7 +207,7 @@ const Main = ({ navigation }) => {
                 <View style={{ flex: 1, justifyContent: 'center' }}>
                     <Text style={{ color: "black", fontSize: 25, padding: 10, textAlign: 'center' }}>No Messages</Text>
                     <Text style={{ color: "black", fontSize: 18, padding: 10, textAlign: 'center' }}>New messages will appear here</Text>
-                </View>
+                </View>)
             }
         {/* <View style={styles.sendMessageStyle}>
                 <Button

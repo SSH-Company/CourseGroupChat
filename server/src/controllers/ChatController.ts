@@ -140,7 +140,8 @@ export class ChatController {
                     avatar_url: group.AVATAR ? group.AVATAR : group.CUSTOM_AVATAR?.split(',')[0] || null,
                     createdAt: row.CREATE_DATE,
                     verified: group.VERIFIED,
-                    member_count: group.MEMBER_COUNT
+                    member_count: group.MEMBER_COUNT,
+                    mute: group.MUTE
                 }
                 if (row.MESSAGE_ID && row.MESSAGE_TYPE) {
                     json[row.MESSAGE_TYPE] = row.MESSAGE_BODY,
