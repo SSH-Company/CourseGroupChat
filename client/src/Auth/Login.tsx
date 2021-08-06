@@ -3,6 +3,7 @@ import {
     View,
     ActivityIndicator,
 } from 'react-native';
+import { Header } from "react-native-elements";
 import { Cache } from 'react-native-cache';
 import * as Notifications from 'expo-notifications';
 import { Restart } from 'fiction-expo-restart';
@@ -10,6 +11,7 @@ import { handleError } from '../Util/CommonFunctions';
 import Auth, { FormData } from './Auth';
 import Unverified from './Unverified';
 import { BASE_URL, EMPTY_IMAGE_DIRECTORY } from "../BaseUrl";
+import { THEME_COLORS } from '../Util/CommonComponents/Colors';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -93,8 +95,16 @@ const LogIn = ({ children }) => {
 
     if (loading) {
         return (
-            <View style={{ flex: 1, alignContent: 'center', justifyContent: 'center' }}>
-                <ActivityIndicator color="blue"/>
+            <View style={{ flex: 1 }}>
+                <Header
+                    placement="left"
+                    backgroundColor={THEME_COLORS.HEADER}
+                    statusBarProps={{ backgroundColor: THEME_COLORS.STATUS_BAR }}
+                    containerStyle={{ minHeight: 100 }}
+                />
+                <View style={{ flex: 1, justifyContent: 'center' }}>
+                    <ActivityIndicator color="blue"/>
+                </View>
             </View>
         )
     } else {
