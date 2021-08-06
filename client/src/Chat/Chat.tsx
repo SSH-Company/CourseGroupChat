@@ -8,7 +8,6 @@ import { Ionicons, AntDesign } from "react-native-vector-icons";
 import { CustomMessage, CustomToolbar, MuteNotification } from './components';
 import { UserContext } from '../Auth/Login';
 import { RenderMessageContext } from '../Util/WebSocket';
-import { ChatLog, MessageStatus } from '../Util/ChatLog';
 import GroupAvatar from '../Util/CommonComponents/GroupAvatar';
 import VerifiedIcon from '../Util/CommonComponents/VerifiedIcon';
 import { THEME_COLORS } from '../Util/CommonComponents/Colors';
@@ -36,6 +35,7 @@ const Chat = ({ route, navigation }) => {
     const avatarSize = 25;
     const [uploadProgress, setUploadProgress] = useState<number>(0);
     const [muteNotificationsModal, setMuteNotificationsModal] = useState(false);
+    const [loadEarlier, setLoadEarlier] = useState(false);
 
     useEffect(() => {
         resetMessages();
@@ -73,13 +73,14 @@ const Chat = ({ route, navigation }) => {
             setLoading(true);
             axios.get(`${BASE_URL}/api/chat/log/${group.id}`)
                 .then(res => {
-                    const { messages, groupDetails } = res.data;
+                    const { messages, groupDetails, loadEarlier } = res.data;
                     setMessages(previousMessages => {
                         const messageIds = previousMessages.map(m => m._id);
                         const filteredMessages = filterOutEmptyMessages(messages).filter(m => !messageIds.includes(m._id));
                         return GiftedChat.append(previousMessages, filteredMessages)
                     });
                     setGroup({...groupDetails});    
+                    setLoadEarlier(loadEarlier);
                 })
                 .catch(err => handleError(err))
                 .finally(() => setLoading(false))
@@ -165,12 +166,20 @@ const Chat = ({ route, navigation }) => {
     }
 
     const onLoadEarlier = async () => {
-        const log = await ChatLog.getChatLogInstance();
-        setMessages(previousMessages => {
-            const messageIds = previousMessages.map(m => m._id);
-            const filteredMessages = filterOutEmptyMessages(log.chatLog[group.id]).filter(m => !messageIds.includes(m._id));
-            return GiftedChat.prepend(previousMessages, filteredMessages)
-        });
+        //calculate how many rows we need to retrieve
+        const extraRowCount = messages.length + 21;
+
+        axios.get(`${BASE_URL}/api/chat/load-earlier-messages`, { params: { groupID: group.id, rowCount: extraRowCount } })
+            .then(res => {
+                const { earlierMessages, loadEarlier } = res.data;
+                setMessages(previousMessages => {
+                    const messageIds = previousMessages.map(m => m._id);
+                    const filteredMessages = filterOutEmptyMessages(earlierMessages.slice(-21)).filter(m => !messageIds.includes(m._id));
+                    return GiftedChat.prepend(previousMessages, filteredMessages)
+                });
+                setLoadEarlier(loadEarlier);
+            })
+            .catch(err => handleError(err))
     }
 
     const deleteMessage = (id: string) => {
@@ -283,6 +292,7 @@ const Chat = ({ route, navigation }) => {
                                     children={props} 
                                     onSend={messages => onSend(messages)}
                                 /> ) }}
+                            loadEarlier={loadEarlier}
                             onLoadEarlier={onLoadEarlier}
                             isKeyboardInternallyHandled={false}
                             keyboardShouldPersistTaps='never'

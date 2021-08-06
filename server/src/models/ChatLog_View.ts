@@ -42,44 +42,7 @@ export class ChatLogViewModel implements ChatLogViewInterface {
         Object.assign(this, raw);
     }
 
-    static getUserLog(uid: number): Promise<ChatLogViewModel[]> {
-        const query = `
-        SELECT * FROM (
-            SELECT
-                "USER_ID",
-                "GROUP_ID",
-                "VERIFIED",
-                "AVATAR",
-                "CREATOR_ID",
-                "CREATOR_NAME",
-                "CREATOR_AVATAR",
-                "NAME",
-                "MESSAGE_ID",
-                "MESSAGE_BODY",
-                "MESSAGE_TYPE",
-                "LOCATION",
-                "STATUS",
-                "CREATE_DATE",
-                "MUTE_NOTIFICATION",
-                ROW_NUMBER() OVER (PARTITION BY CV."GROUP_ID" ORDER BY CV."CREATE_DATE" DESC) AS ROW_ID
-            FROM RT."CHATLOG_VIEW" CV
-            WHERE "USER_ID" = ? AND "VERIFIED" IS NOT NULL AND "IGNORE" = 'N'
-        ) CHATLOG WHERE ROW_ID < 21;`
-
-        return new Promise((resolve, reject) => {
-            Database.getDB()
-                .query(query, [uid])
-                .then((data: ChatLogViewInterface[]) => {
-                    resolve(data.map(d => new ChatLogViewModel(d)))
-                })
-                .catch(err => {
-                    console.log(err)
-                    reject(err)
-                })
-        })
-    }
-
-    static getEarlierMessages(userID: string, groupID: string, rowCount?: string): Promise<ChatLogViewModel[]> {
+    static getMessageLog(userID: string, groupID: string, rowCount?: string): Promise<ChatLogViewModel[]> {
         const query = `SELECT * FROM RT."CHATLOG_VIEW" CV
                         WHERE CV."GROUP_ID" = ? AND CV."USER_ID" = ?
                         ORDER BY CV."CREATE_DATE" DESC
@@ -89,6 +52,23 @@ export class ChatLogViewModel implements ChatLogViewInterface {
             Database.getDB()
                 .query(query, [groupID, userID, rowCount || 21])
                 .then((data: ChatLogViewInterface[]) => resolve(data.map(d => new ChatLogViewModel(d))))
+                .catch(err => {
+                    console.log(err)
+                    reject(err)
+                })
+        })
+    }
+
+    static getFirstMessageId(userID: string, groupID: string): Promise<string> {
+        const query = `SELECT "MESSAGE_ID" FROM RT."CHATLOG_VIEW" CV
+                        WHERE CV."GROUP_ID" = ? AND CV."USER_ID" = ?
+                        ORDER BY CV."CREATE_DATE"
+                        FETCH FIRST 1 ROWS ONLY;`
+
+        return new Promise((resolve, reject) => {
+            Database.getDB()
+                .query(query, [groupID, userID])
+                .then((data: ChatLogViewInterface[]) => resolve(data[0].MESSAGE_ID))
                 .catch(err => {
                     console.log(err)
                     reject(err)

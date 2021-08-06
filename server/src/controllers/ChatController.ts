@@ -53,7 +53,15 @@ export class ChatController {
 
             const session = Session.getSession(req);
 
-            const [chatLog, groupInfo] = await Promise.all([ ChatLogViewModel.getEarlierMessages(session.user.ID, groupID), UserGroupModel.getGroupInformation(session.user.ID, groupID) ])
+            const [
+                chatLog, 
+                firstMessageID, 
+                groupInfo
+            ] = await Promise.all([ 
+                ChatLogViewModel.getMessageLog(session.user.ID, groupID), 
+                ChatLogViewModel.getFirstMessageId(session.user.ID, groupID),
+                UserGroupModel.getGroupInformation(session.user.ID, groupID) 
+            ])
 
             if (groupInfo.length === 0) {
                 //this user does not have access to this group
@@ -93,7 +101,8 @@ export class ChatController {
 
             res.status(STATUS.OK).json({
                 messages,
-                groupDetails
+                groupDetails,
+                loadEarlier: chatLog[chatLog.length - 1].MESSAGE_ID !== firstMessageID 
             });
 
         } catch (err) {
@@ -259,7 +268,7 @@ export class ChatController {
             console.error(err)
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong while sending message.",
-                identifier: "CC002"
+                identifier: "CC003"
             })
         }
     }
@@ -463,51 +472,58 @@ export class ChatController {
     }
 
     @Get('load-earlier-messages')
-    private getEarlierMessages(req: Request, res: Response) {
-        const session = Session.getSession(req);
-        const { groupID, rowCount } = req.query;
+    private async getEarlierMessages(req: Request, res: Response) {
+        try {
 
-        if (!groupID || !rowCount) {
-            res.status(STATUS.BAD_REQUEST).json({
-                message: "Request parameter must contain groupID and rowCount",
-                identifier: "CC013"
+            const session = Session.getSession(req);
+            const { groupID, rowCount } = req.query;
+
+            if (!groupID || !rowCount) {
+                res.status(STATUS.BAD_REQUEST).json({
+                    message: "Request parameter must contain groupID and rowCount",
+                    identifier: "CC013"
+                });
+                return;
+            }
+
+            const [
+                chatLog,
+                firstMessageID
+            ] = await Promise.all([
+                ChatLogViewModel.getMessageLog(session.user.ID, groupID, rowCount),
+                ChatLogViewModel.getFirstMessageId(session.user.ID, groupID)
+            ]);
+
+            const earlierMessages = [];
+            chatLog.forEach(row => {
+                const json = {
+                    _id: row.MESSAGE_ID,
+                    createdAt: row.CREATE_DATE,
+                    [row.MESSAGE_TYPE]: row.MESSAGE_BODY,
+                    user: {
+                        _id: row.CREATOR_ID,
+                        name: row.CREATOR_NAME,
+                        avatar: row.CREATOR_AVATAR
+                    },
+                    location: row.LOCATION,
+                    status: row.STATUS,
+                    displayStatus: false
+                }
+                earlierMessages.push(json)
             });
-            return;
-        }
 
-        ChatLogViewModel.getEarlierMessages(session.user.ID, groupID, rowCount)
-            .then(data => {
-                const responseJson = [];
-                data.forEach(row => {
-                    let subtitle = '';
-                    if (row.MESSAGE_ID && row.MESSAGE_BODY.length > 0) {
-                        subtitle = row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_NAME} sent a ${row.MESSAGE_TYPE}.`
-                    } else subtitle = `You have joined ${row.NAME}!`
-                    const json = {
-                        _id: row.MESSAGE_ID,
-                        createdAt: row.CREATE_DATE,
-                        [row.MESSAGE_TYPE]: row.MESSAGE_BODY,
-                        subtitle: subtitle,
-                        user: {
-                            _id: row.CREATOR_ID,
-                            name: row.CREATOR_NAME,
-                            avatar: row.CREATOR_AVATAR
-                        },
-                        location: row.LOCATION,
-                        status: row.STATUS,
-                        displayStatus: false
-                    }
-                    responseJson.push(json)
-                })
-                res.status(STATUS.OK).json(responseJson)
+            res.status(STATUS.OK).json({
+                earlierMessages,
+                loadEarlier: chatLog[chatLog.length - 1].MESSAGE_ID !== firstMessageID
+            });
+
+        } catch (err) {
+            console.error(err);
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong while attempting to retrieve earlier messages.",
+                identifier: "CC014"
             })
-            .catch(err => {
-                console.error(err);
-                res.status(STATUS.INTERNAL_SERVER_ERROR).json({
-                    message: "Something went wrong while attempting to retrieve earlier messages.",
-                    identifier: "CC014"
-                })
-            })
+        }
     }
 
     @Get('gallery/:grpId')
@@ -603,7 +619,7 @@ export class ChatController {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json(
                 new Exception({
                     message: "Something went wrong attempting to mute notifications",
-                    identifier: "CC018",
+                    identifier: "CC020",
                     trace: err
                 })
             )
