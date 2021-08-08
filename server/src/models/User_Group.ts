@@ -144,34 +144,43 @@ export class UserGroupModel implements UserGroupInterface {
     }
 
     static getGroupInformation(uid: string, groupId?: string): Promise<UserGroupModel[]> {
-        let query = `SELECT * FROM (SELECT 
-            UG."GROUP_ID",
-            CASE 
-                WHEN (SELECT COUNT(*) FROM RT.USER_GROUP WHERE "GROUP_ID" = UG."GROUP_ID") = '1' THEN UG."NAME"
-                ELSE COALESCE(UG."NAME", STRING_AGG(U."FIRST_NAME" || ' ' || U."LAST_NAME", ', '))
-            END AS "NAME",
-            (SELECT COUNT(*) FROM RT.USER_GROUP UG3 WHERE UG3."GROUP_ID" = UG."GROUP_ID") AS "MEMBER_COUNT",
-            CASE
-                WHEN (( SELECT COUNT(*) AS COUNT
-                    FROM RT."COURSE_GROUPS" CG
-                    WHERE CG."CODE"::TEXT = UG."GROUP_ID"::TEXT)) > 0 THEN 'Y'::TEXT
-                WHEN (( SELECT COUNT(*) AS COUNT
-                    FROM RT.GROUP G
-                    WHERE G."ID"::CHARACTER VARYING(10)::TEXT = UG."GROUP_ID"::TEXT)) > 0 THEN 'N'::TEXT
-                ELSE NULL::TEXT
-            END AS "VERIFIED",
-            G2."AVATAR",
-            STRING_AGG(U."AVATAR", ', ') AS "CUSTOM_AVATAR",
-            UG."MUTE" 
-            FROM RT.USER_GROUP UG 
-            LEFT JOIN RT.USER U ON UG."USER_ID" = U."ID"
-            LEFT JOIN RT.GROUP G2 ON UG."GROUP_ID" = G2."ID"::CHARACTER VARYING(10)::TEXT 
-            WHERE (UG."GROUP_ID" IN (SELECT DISTINCT UG2."GROUP_ID" FROM RT.USER_GROUP UG2 WHERE UG2."USER_ID" = ?) AND UG."USER_ID" <> ?)
-            OR (UG."GROUP_ID" IN (SELECT DISTINCT CG."CODE" FROM RT."COURSE_GROUPS" CG) AND UG."USER_ID" = ?)
-            OR (SELECT COUNT(*) FROM RT.USER_GROUP WHERE "GROUP_ID" = UG."GROUP_ID") = '1' AND UG."USER_ID" = ?
-            GROUP BY UG."GROUP_ID", UG."NAME", G2."AVATAR", UG."MUTE"  ) GROUPINFORMATION`
+        let query = `
+        SELECT 
+            GROUPINFORMATION."GROUP_ID",
+            GROUPINFORMATION."NAME",
+            GROUPINFORMATION."MEMBER_COUNT",
+            GROUPINFORMATION."VERIFIED",
+            GROUPINFORMATION."AVATAR",
+            GROUPINFORMATION."CUSTOM_AVATAR",
+            ug."MUTE"
+        FROM (SELECT 
+        UG."GROUP_ID",
+        CASE 
+            WHEN (SELECT COUNT(*) FROM RT.USER_GROUP WHERE "GROUP_ID" = UG."GROUP_ID") = '1' THEN UG."NAME"
+            ELSE COALESCE(UG."NAME", STRING_AGG(U."FIRST_NAME" || ' ' || U."LAST_NAME", ', '))
+        END AS "NAME",
+        (SELECT COUNT(*) FROM RT.USER_GROUP UG3 WHERE UG3."GROUP_ID" = UG."GROUP_ID") AS "MEMBER_COUNT",
+        CASE
+            WHEN (( SELECT COUNT(*) AS COUNT
+                FROM RT."COURSE_GROUPS" CG
+                WHERE CG."CODE"::TEXT = UG."GROUP_ID"::TEXT)) > 0 THEN 'Y'::TEXT
+            WHEN (( SELECT COUNT(*) AS COUNT
+                FROM RT.GROUP G
+                WHERE G."ID"::CHARACTER VARYING(10)::TEXT = UG."GROUP_ID"::TEXT)) > 0 THEN 'N'::TEXT
+            ELSE NULL::TEXT
+        END AS "VERIFIED",
+        G2."AVATAR",
+        STRING_AGG(U."AVATAR", ', ') AS "CUSTOM_AVATAR"
+        FROM RT.USER_GROUP UG 
+        LEFT JOIN RT.USER U ON UG."USER_ID" = U."ID"
+        LEFT JOIN RT.GROUP G2 ON UG."GROUP_ID" = G2."ID"::CHARACTER VARYING(10)::TEXT 
+        WHERE (UG."GROUP_ID" IN (SELECT DISTINCT UG2."GROUP_ID" FROM RT.USER_GROUP UG2 WHERE UG2."USER_ID" = ?) AND UG."USER_ID" <> ?)
+        OR (UG."GROUP_ID" IN (SELECT DISTINCT CG."CODE" FROM RT."COURSE_GROUPS" CG) AND UG."USER_ID" = ?)
+        OR (SELECT COUNT(*) FROM RT.USER_GROUP WHERE "GROUP_ID" = UG."GROUP_ID") = '1' AND UG."USER_ID" = ?
+        GROUP BY UG."GROUP_ID", UG."NAME", G2."AVATAR"  ) GROUPINFORMATION
+        LEFT JOIN RT.USER_GROUP UG ON GROUPINFORMATION."GROUP_ID" = UG."GROUP_ID" AND UG."USER_ID" = ?`
 
-        const params = [uid, uid, uid, uid];
+        const params = [uid, uid, uid, uid, uid];
         
         if (groupId) {
             query += ` WHERE GROUPINFORMATION."GROUP_ID" LIKE '${groupId.toUpperCase()}%' `;

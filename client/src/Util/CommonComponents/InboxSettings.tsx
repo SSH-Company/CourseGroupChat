@@ -8,7 +8,6 @@ import { navigate } from '../RootNavigation';
 import { handleIgnoreGroup, handleJoinCourseGroup } from '../CommonFunctions';
 import { handleLeaveGroup } from '../CommonFunctions';
 import { EMPTY_IMAGE_DIRECTORY } from '../../BaseUrl';
-import { ChatLog } from '../ChatLog';
 
 type InboxSettingsProps = {
     group: User,
@@ -53,6 +52,19 @@ const InboxSettings = (props: InboxSettingsProps) => {
     //Menu list components
     const iconSize = 20
 
+    const verifiedGroupOptions = [
+        {
+            title: 'Course Feedback',
+            icon: <MaterialIcons name={"feedback"} size={iconSize}/>,
+            onPress: () => navigate('Feedback', { course: props.group.name })
+        },
+        {
+            title: 'Connect with a mentor',
+            icon: <Entypo name={"graduation-cap"} size={iconSize}/>,
+            onPress: () => navigate('Mentor', { course: props.group.name })
+        }
+    ];
+
     const list = [
         {
             title: 'Mute notifications',
@@ -83,11 +95,23 @@ const InboxSettings = (props: InboxSettingsProps) => {
 
     const newToGroupOptions = [
         {
+            title: 'Course Feedback',
+            icon: <MaterialIcons name={"feedback"} size={iconSize}/>,
+            onPress: () => navigate('Feedback', { course: props.group.name })
+        },
+        {
+            title: 'Connect with a mentor',
+            icon: <Entypo name={"graduation-cap"} size={iconSize}/>,
+            onPress: () => navigate('Mentor', { course: props.group.name })
+        },
+        {
             title: 'Group Members',
             icon: <MaterialIcons name={"groups"} size={iconSize}/>,
             onPress: () => navigate('GroupMembers', { id: props.group._id, name: props.group.name })
         }
     ]
+
+    const allOptions = props.verified === "Y" ? verifiedGroupOptions.concat(list) : list;
     
     return (
         <View style={styles.drawerContainer}>
@@ -105,12 +129,11 @@ const InboxSettings = (props: InboxSettingsProps) => {
                         style={[styles.imageStyle, { width: 100, height: 100 }]}
                     />
                 }
-                <Text style={{paddingBottom: 10, fontSize: 25}}>{props.group.name}</Text>
+                <Text style={{padding: 10, fontSize: 22, fontWeight: 'bold', textAlign: 'center' }}>{props.group.name}</Text>
             </View>
             {props.newToGroup ?
                 <View style={{ alignContent: 'center', justifyContent: 'center' }}>
                     <Button title="Join Group" containerStyle={{ alignSelf: 'center', justifyContent: 'center', padding: 10 }} onPress={() => handleJoinCourseGroup(props.group._id as string, async () => {
-                        await ChatLog.getChatLogInstance(true);
                         navigate('Main', {})
                     })}/>
                     {newToGroupOptions.map((item, i) => (
@@ -124,7 +147,7 @@ const InboxSettings = (props: InboxSettingsProps) => {
                     ))}
                 </View>
                 :
-                list.map((item, i) => (
+                allOptions.map((item, i) => (
                     <ListItem key={i} onPress={item.onPress}>
                         {item.icon}
                         <ListItem.Content>

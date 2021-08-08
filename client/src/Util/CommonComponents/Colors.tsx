@@ -1,5 +1,6 @@
 export const THEME_COLORS = {
     STATUS_BAR: "#D8B4A6",
     HEADER: "#E7D2C9",
-    ICON_COLOR: "black"
+    ICON_COLOR: "black",
+    GREEN: "#1f4e46"
 }

@@ -23,7 +23,7 @@ import { ChatLogViewModel } from '../models/ChatLog_View';
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'src/public/client/media/messages/')
+        cb(null, 'src/media/messages/')
     },
     filename: function (req, file, cb) {
         const extension = file.mimetype.split('/')[1];
@@ -37,51 +37,74 @@ const upload = multer({ storage: storage })
 @Controller('chat')
 export class ChatController {
 
-    @Get('log')
-    private async getLog(req: Request, res: Response) {
-        try{
+    @Get('log/:groupID')
+    private async getGroupLog(req: Request, res: Response) {
+        try {
+            const { groupID = '' } = req.params;
+
+            if (groupID === '') {
+                res.status(STATUS.BAD_REQUEST).json(
+                    new Exception({
+                        message: "Request params must contain [groupID]"
+                    })
+                )
+                return;
+            }
+
             const session = Session.getSession(req);
 
-            const [chatLog, groupinfo] = await Promise.all([ChatLogViewModel.getUserLog(session.user.ID), UserGroupModel.getGroupInformation(session.user.ID)]);
-            
-            const parsedLog = [];
+            const [
+                chatLog, 
+                firstMessageID, 
+                groupInfo
+            ] = await Promise.all([ 
+                ChatLogViewModel.getMessageLog(session.user.ID, groupID), 
+                ChatLogViewModel.getFirstMessageId(session.user.ID, groupID),
+                UserGroupModel.getGroupInformation(session.user.ID, groupID) 
+            ])
+
+            if (groupInfo.length === 0) {
+                //this user does not have access to this group
+                res.status(STATUS.BAD_REQUEST).json(
+                    new Exception({
+                        message: "User has not joined this group."
+                    })
+                )
+                return;
+            }
+
+            const messages = [];
             chatLog.forEach(row => {
                 const json = {
-                    id: row.GROUP_ID,
-                    creator_id: row.CREATOR_ID,
-                    creator_name: row.CREATOR_NAME,
-                    creator_avatar: row.CREATOR_AVATAR,
-                    message_id: row.MESSAGE_ID,
-                    name: row.VERIFIED === "Y" ? row.GROUP_ID : row.NAME,
-                    avatar_url: row.AVATAR,
-                    location: row.LOCATION,
+                    _id: row.MESSAGE_ID,
                     createdAt: row.CREATE_DATE,
+                    [row.MESSAGE_TYPE]: row.MESSAGE_BODY,
+                    user: {
+                        _id: row.CREATOR_ID,
+                        name: row.CREATOR_NAME,
+                        avatar: row.CREATOR_AVATAR
+                    },
+                    location: row.LOCATION,
                     status: row.STATUS,
-                    verified: row.VERIFIED,
-                    mute: row.MUTE_NOTIFICATION
+                    displayStatus: false
                 }
-                if (row.MESSAGE_ID && row.MESSAGE_TYPE) {
-                    json[row.MESSAGE_TYPE] = row.MESSAGE_BODY,
-                    json['subtitle'] = row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_NAME} sent a ${row.MESSAGE_TYPE}.`                        
-                } else {
-                    json['subtitle'] = `You have joined ${json.name}!`
-                }
-                parsedLog.push(json)
-            })
-            
-            const groupInfo = groupinfo.map(row => ({
-                id: row.GROUP_ID,
-                name: row.NAME || 'Just You',
-                member_count: row.MEMBER_COUNT,
-                mute: row.MUTE,
-                verified: row.VERIFIED,
-                avatar: row.AVATAR ? row.AVATAR : row.CUSTOM_AVATAR?.split(',')[0] || null
-            }))
-        
+                messages.push(json)
+            });
+
+            const groupDetails = {
+                id: groupInfo[0].GROUP_ID,
+                name: groupInfo[0].NAME || 'Just You',
+                avatar: groupInfo[0].AVATAR ? groupInfo[0].AVATAR : groupInfo[0].CUSTOM_AVATAR?.split(',')[0] || null,
+                verified: groupInfo[0].VERIFIED,
+                mute: groupInfo[0].MUTE  
+            }
+
             res.status(STATUS.OK).json({
-                parsedLog,
-                groupInfo
-            })
+                messages,
+                groupDetails,
+                loadEarlier: chatLog[chatLog.length - 1].MESSAGE_ID !== firstMessageID 
+            });
+
         } catch (err) {
             console.error(err)
             res.status(STATUS.INTERNAL_SERVER_ERROR).json(
@@ -93,6 +116,56 @@ export class ChatController {
         }
     }
 
+    @Get('main')
+    private async getMainPageLog(req: Request, res: Response) {
+        try {
+            const session = Session.getSession(req);
+
+            const [chatLog, groupInfo] = await Promise.all([ChatLogViewModel.getMainPageList(session.user.ID), UserGroupModel.getGroupInformation(session.user.ID)]);
+            
+            const parsedLog = [];
+            chatLog.forEach(row => {
+                //find group ID in groupInfo
+                const group = groupInfo.filter(r => r.GROUP_ID === row.GROUP_ID)[0]; 
+
+                //this shouldn't happen, added as a fail safe
+                if (!group) throw new Exception({
+                    message: `Unable to find group id ${row.GROUP_ID} information.`
+                })
+                
+                const json: any = {
+                    id: row.GROUP_ID,
+                    message_id: row.MESSAGE_ID,
+                    name: group.NAME || 'Just You',
+                    avatar_url: group.AVATAR ? group.AVATAR : group.CUSTOM_AVATAR?.split(',')[0] || null,
+                    createdAt: row.CREATE_DATE,
+                    verified: group.VERIFIED,
+                    member_count: group.MEMBER_COUNT,
+                    mute: group.MUTE
+                }
+                if (row.MESSAGE_ID && row.MESSAGE_TYPE) {
+                    json[row.MESSAGE_TYPE] = row.MESSAGE_BODY,
+                    json.subtitle = row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_NAME} sent a ${row.MESSAGE_TYPE}.`                        
+                } else {
+                    json.subtitle = `You have joined ${group.NAME}!`
+                }
+                parsedLog.push(json)
+            })
+
+            res.status(STATUS.OK).json({
+                parsedLog
+            });
+
+        } catch (err) {
+            console.error(err)
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json(
+                new Exception({
+                    message: "Something went wrong while fetching user group main chat log.",
+                    identifier: "CC002"
+                })
+            )
+        }
+    }
     
     /*
         Expected body type
@@ -170,13 +243,24 @@ export class ChatController {
             //find all recipients of this group chat, exclude senderID from the list
             const groupRecipients = (await UserGroupModel.getMembers(groupId)).map(row => row.USER_ID).filter(id => id != senderID._id);    
 
+            //retrieve information regarding group
+            const groupInfo = (await UserGroupModel.getGroupInformation(session.user.ID, groupId))[0];
+
             //send a message to each recipients queue
             for (const id of groupRecipients) {
                 const queueName = `message-queue-${id}`
-                const queueData = { ...message, command: "append", groupId, senderID: senderID }
+                const queueData = { ...message, 
+                    command: "append", 
+                    groupInfo: {
+                        id: groupInfo.GROUP_ID,
+                        name: groupInfo.NAME,
+                        avatar: groupInfo.AVATAR ? groupInfo.AVATAR : groupInfo.CUSTOM_AVATAR?.split(',')[0] || null,
+                        mute: groupInfo.MUTE
+                    }, 
+                    senderID: senderID 
+                }
                 const queue = CONNECTIONS[user.ID];
-                console.log(queue.hasOwnProperty('publishToQueue'))
-                await queue.publishToQueue(queueName, JSON.stringify(queueData));
+                if (queue) await queue.publishToQueue(queueName, JSON.stringify(queueData));
             }   
             
             res.status(STATUS.OK).json();
@@ -185,7 +269,7 @@ export class ChatController {
             console.error(err)
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong while sending message.",
-                identifier: "CC002"
+                identifier: "CC003"
             })
         }
     }
@@ -216,7 +300,7 @@ export class ChatController {
                 const queueName = `message-queue-${id}`
                 const queueData = { command: "refresh", groupId: groupID }
                 const queue = CONNECTIONS[user.ID];
-                await queue.publishToQueue(queueName, JSON.stringify(queueData))
+                if (queue) await queue.publishToQueue(queueName, JSON.stringify(queueData))
             }
             
             res.status(STATUS.OK).json()
@@ -233,6 +317,7 @@ export class ChatController {
     @Delete('')
     private async deleteMessage(req: Request, res: Response) {
         try{
+            const session = Session.getSession(req);
             const { groupID, messageID } = req.body;
             const config = Config.getConfig().s3;
 
@@ -264,6 +349,17 @@ export class ChatController {
             }
 
             await MessageModel.delete(groupID, messageID);
+
+            //find all recipients of this group chat, exclude senderID from the list
+            const groupRecipients = (await UserGroupModel.getMembers(groupID)).map(row => row.USER_ID).filter(id => id != session.user.ID);    
+            
+            for (const id of groupRecipients) {
+                const queueName = `message-queue-${id}`
+                const queueData = { command: "delete", groupID, messageID }
+                const queue = CONNECTIONS[session.user.ID];
+                if (queue) await queue.publishToQueue(queueName, JSON.stringify(queueData))
+            }
+
             res.status(STATUS.OK).json({ message: "successfully deleted message!" });
         
         } catch (err) {
@@ -348,6 +444,7 @@ export class ChatController {
     private async getGroupMembers(req: Request, res: Response) {
         try {
             const grpId = req.params.grpId;
+            console.log(grpId.length)
 
             if (!grpId) {
                 res.status(STATUS.BAD_REQUEST).json({
@@ -376,51 +473,58 @@ export class ChatController {
     }
 
     @Get('load-earlier-messages')
-    private getEarlierMessages(req: Request, res: Response) {
-        const session = Session.getSession(req);
-        const { groupID, rowCount } = req.query;
+    private async getEarlierMessages(req: Request, res: Response) {
+        try {
 
-        if (!groupID || !rowCount) {
-            res.status(STATUS.BAD_REQUEST).json({
-                message: "Request parameter must contain groupID and rowCount",
-                identifier: "CC013"
+            const session = Session.getSession(req);
+            const { groupID, rowCount } = req.query;
+
+            if (!groupID || !rowCount) {
+                res.status(STATUS.BAD_REQUEST).json({
+                    message: "Request parameter must contain groupID and rowCount",
+                    identifier: "CC013"
+                });
+                return;
+            }
+
+            const [
+                chatLog,
+                firstMessageID
+            ] = await Promise.all([
+                ChatLogViewModel.getMessageLog(session.user.ID, groupID, rowCount),
+                ChatLogViewModel.getFirstMessageId(session.user.ID, groupID)
+            ]);
+
+            const earlierMessages = [];
+            chatLog.forEach(row => {
+                const json = {
+                    _id: row.MESSAGE_ID,
+                    createdAt: row.CREATE_DATE,
+                    [row.MESSAGE_TYPE]: row.MESSAGE_BODY,
+                    user: {
+                        _id: row.CREATOR_ID,
+                        name: row.CREATOR_NAME,
+                        avatar: row.CREATOR_AVATAR
+                    },
+                    location: row.LOCATION,
+                    status: row.STATUS,
+                    displayStatus: false
+                }
+                earlierMessages.push(json)
             });
-            return;
-        }
 
-        ChatLogViewModel.getEarlierMessages(groupID, session.user.ID, rowCount)
-            .then(data => {
-                const responseJson = [];
-                data.forEach(row => {
-                    let subtitle = '';
-                    if (row.MESSAGE_ID && row.MESSAGE_BODY.length > 0) {
-                        subtitle = row.MESSAGE_TYPE === "text" ? row.MESSAGE_BODY : `${row.CREATOR_ID === session.user.ID ? 'You': row.CREATOR_NAME} sent a ${row.MESSAGE_TYPE}.`
-                    } else subtitle = `You have joined ${row.NAME}!`
-                    const json = {
-                        _id: row.MESSAGE_ID,
-                        createdAt: row.CREATE_DATE,
-                        [row.MESSAGE_TYPE]: row.MESSAGE_BODY,
-                        subtitle: subtitle,
-                        user: {
-                            _id: row.CREATOR_ID,
-                            name: row.CREATOR_NAME,
-                            avatar: row.CREATOR_AVATAR
-                        },
-                        location: row.LOCATION,
-                        status: row.STATUS,
-                        displayStatus: false
-                    }
-                    responseJson.push(json)
-                })
-                res.status(STATUS.OK).json(responseJson)
+            res.status(STATUS.OK).json({
+                earlierMessages,
+                loadEarlier: chatLog[chatLog.length - 1].MESSAGE_ID !== firstMessageID
+            });
+
+        } catch (err) {
+            console.error(err);
+            res.status(STATUS.INTERNAL_SERVER_ERROR).json({
+                message: "Something went wrong while attempting to retrieve earlier messages.",
+                identifier: "CC014"
             })
-            .catch(err => {
-                console.error(err);
-                res.status(STATUS.INTERNAL_SERVER_ERROR).json({
-                    message: "Something went wrong while attempting to retrieve earlier messages.",
-                    identifier: "CC014"
-                })
-            })
+        }
     }
 
     @Get('gallery/:grpId')
@@ -516,7 +620,7 @@ export class ChatController {
             res.status(STATUS.INTERNAL_SERVER_ERROR).json(
                 new Exception({
                     message: "Something went wrong attempting to mute notifications",
-                    identifier: "CC018",
+                    identifier: "CC020",
                     trace: err
                 })
             )
