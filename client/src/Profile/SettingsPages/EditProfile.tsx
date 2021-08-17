@@ -97,7 +97,7 @@ const EditProfile = ({ navigation }) => {
             <View style={{ paddingTop: 50 }}>
                 <Input
                     disabled
-                    label="University provided name"
+                    label="Full Name"
                     value={user.name}
                     inputStyle={{ fontWeight: 'bold', color: 'black' }}
                 />

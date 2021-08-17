@@ -2,12 +2,36 @@ import { Request, Response, NextFunction } from 'express'
 import { Session } from './Session';
 import { Exception } from './Exception';
 import * as STATUS from 'http-status-codes';
-
+import { UserModel } from '../models/User';
+import {Get} from '@overnightjs/core';
+import { request } from 'http';
+import { AuthController } from 'src/controllers/AuthController';
 /**
  * Middleware function, verifies user id and activity expiration time
 */
-export const userAuthMiddleWare = (req: Request, res: Response, next: NextFunction): void => {
+export const userAuthMiddleWare = async(req: Request, res: Response, next: NextFunction): Promise<any> => {
     let session = Session.getSession(req);
+    
+    async function getStatus(){
+        const requests = (await UserModel.getIsActiveByID(session.user.ID)).IS_ACTIVE;
+        return(requests);
+        }
+            
+    let activeStatus = await getStatus();
+
+    if (activeStatus === 'N') {
+        session.destroy(() => {
+            console.info(`Destroyed session as user account is deleted: ${session.user.ID}`)
+        });   
+        next(
+            new Exception({
+                status: STATUS.UNAUTHORIZED,
+                message: "User account has been deleted. Please create an account to use Cirkle",
+                identifier: "UA004"
+            })
+        );
+        return;
+    }
     
     if (!session) {
         next(

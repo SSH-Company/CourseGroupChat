@@ -9,6 +9,7 @@ interface UserInterface {
     EMAIL?: string;
     PASSWORD?: string;
     CREATE_DATE?: string;
+    IS_ACTIVE?: string;
     VERIFIED?: "Y" | "N";
 }
 
@@ -20,6 +21,7 @@ export class UserModel implements UserInterface {
     EMAIL?: string;
     PASSWORD?: string;
     CREATE_DATE?: string;
+    IS_ACTIVE?: string;
     VERIFIED?: "Y" | "N";
 
     constructor(raw: UserInterface) {
@@ -28,8 +30,8 @@ export class UserModel implements UserInterface {
     }
 
     static insert(user: UserInterface, db: Client | Database = Database.getDB()): Promise<UserModel> {
-        const query = `INSERT INTO RT.USER ("FIRST_NAME", "LAST_NAME", "EMAIL", "PASSWORD", "CREATE_DATE", "VERIFIED") 
-        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?) RETURNING *;`
+        const query = `INSERT INTO RT.USER ("FIRST_NAME", "LAST_NAME", "EMAIL", "PASSWORD", "CREATE_DATE", "VERIFIED", "IS_ACTIVE") 
+        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?, 'Y') RETURNING *;`
         const params = [user.FIRST_NAME, user.LAST_NAME, user.EMAIL, user.PASSWORD, user.VERIFIED];
         
         return new Promise((resolve, reject) => {
@@ -42,7 +44,7 @@ export class UserModel implements UserInterface {
 
     static delete(uid: string): Promise<void> {
         return new Promise((resolve, reject) => {
-            const query = `update RT.USER set "FIRST_NAME" = 'Deleted', "LAST_NAME" = 'User', "EMAIL" = null, "PASSWORD" = null, "AVATAR" = null 
+            const query = `update RT.USER set "FIRST_NAME" = 'Deleted', "LAST_NAME" = 'User', "EMAIL" = null, "IS_ACTIVE" = 'N', "PASSWORD" = null, "AVATAR" = null 
             where "ID" = ?;`;
             const params = [uid];
 
@@ -204,6 +206,27 @@ export class UserModel implements UserInterface {
                 console.log(err)
                 reject(err)
             })
+        })
+    }
+
+    static getIsActiveByID(uid: string): Promise<UserModel> {
+        const query = `SELECT u."IS_ACTIVE" from RT.USER u WHERE "ID" = ?;`
+        
+        return new Promise((resolve, reject) => {
+            Database.getDB()
+                .query(query, [uid])
+                .then((data:UserInterface[]) => {
+                    if (data.length === 0) {
+                        reject({
+                            message: 'Invalid user id.'
+                        })
+                    }
+                    resolve(new UserModel(data[0]))
+                })
+                .catch(err => {
+                    console.log(err)
+                    reject(err)
+                })
         })
     }
 }

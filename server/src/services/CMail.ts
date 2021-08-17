@@ -14,7 +14,7 @@ export class CMail {
             requireTLS: true,
             auth: {
                 user: "cirkle.app@gmail.com",
-                pass: "biriyaniKhabo123"
+                pass: "modgajanari123"
             }
         })
     }
