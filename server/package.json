@@ -43,7 +43,7 @@
     "build-both": "sudo npm run build",
     "build": "npm i && npm audit fix && rm -rf ./build/ && tsc && cp -rp ./src/public ./build",
     "build-server": "node build/start.js",
-    "start-dev": "cross-env PORT=3001 nodemon --config \"./util/nodemon.json\"/",
+    "start-dev": "cross-env PORT=3001 NODE_ENV=development nodemon --config \"./util/nodemon.json\"/",
     "postinstall": "patch-package"
   },
   "author": "Sadman Hasan",

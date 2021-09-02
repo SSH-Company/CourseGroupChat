@@ -63,4 +63,12 @@ export class Config {
         }
         return Config.instance;
     }
+
+    public static isDevEnv(): boolean {
+        return _config.util.getEnv("NODE_ENV") === "development";
+    }
+
+    public static isProdEnv(): boolean {
+        return _config.util.getEnv("NODE_ENV") === "production";
+    }
 }
