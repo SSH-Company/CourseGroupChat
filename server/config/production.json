@@ -1,24 +1,25 @@
 {
     "db": {
-        "HOST": "test-database.cn2nj08ueeqy.ca-central-1.rds.amazonaws.com",
+        "HOST": "production-database.cn2nj08ueeqy.ca-central-1.rds.amazonaws.com",
         "DB": "postgres",
         "UID": "ssh_company",
-        "PWD": "kawydIzPSaZmAdr4Kcgh",
+        "PWD": "vz45PtJbt2WfkebpXKPn",
         "PORT": 5432
-    },  
+    },
     "rabbit": {
         "protocol": "amqps",
-        "hostname": "b-aa3184ee-bda3-4b08-bcf0-cacb996dac6d.mq.ca-central-1.amazonaws.com",
+        "hostname": "b-07fc57b8-c678-4d65-a4d7-431ed325eb7b.mq.ca-central-1.amazonaws.com",
         "port": 5671,
-        "username": "test",
-        "password": "password",
+        "username": "ssh_company",
+        "password": "A7FDH462HJD@3021",
         "locale": "en_US",
         "queue": "MessageQueue"
     },
     "s3": {
         "ID": "AKIA2G22WMUY3QTHDA2W",
         "SECRET": "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",
-        "BUCKET_NAME": "konnect-bucket-dev-env-1",
+        "BUCKET_NAME": "cirkle-production",
         "REGION": "ca-central-1"
     }
 }
+

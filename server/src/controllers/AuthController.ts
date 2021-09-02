@@ -127,6 +127,7 @@ export class AuthController {
 
             return;
         } catch (err) {
+            console.log(err)
             res.status(STATUS.INTERNAL_SERVER_ERROR).json({
                 message: "Something went wrong attempting to signup.",
                 err: err

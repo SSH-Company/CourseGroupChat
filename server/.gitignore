@@ -1,7 +1,5 @@
 node_modules/**/*
 src/public/client/*
-!src/public/client/media
-src/public/apis.*
 ssh-company-*
 
 

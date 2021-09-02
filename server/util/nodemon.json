@@ -1,5 +1,5 @@
 {
     "watch": ["src"],
     "ext": "ts",
-    "exec": "cross-env NODE_ENV=development ts-node src/start.ts"
+    "exec": "cross-env ts-node src/start.ts"
 }
